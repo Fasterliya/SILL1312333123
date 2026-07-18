@@ -40,17 +40,16 @@
       return;
     }
     const map = {
-      study: ['专注学习', '你认真学习，为下一次考试积累实力。', ['智力', 2], ['心情', -2], '科学'],
-      sport: ['锻炼身体', '一次痛快的运动让身体更有力量。', ['体魄', 3], ['健康', 2], '运动'],
-      social: ['主动社交', '你和身边的人聊了很久，关系更自然。', ['魅力', 2], ['心情', 2], '社交'],
-      rest: ['好好休息', '你放慢脚步，给自己留出喘息空间。', ['心情', 5], ['健康', 1], '文学'],
+      study: ['专注学习', '你认真学习，为下一次考试积累实力。', ['智力', 2], ['心情', -2]],
+      sport: ['锻炼身体', '一次痛快的运动让身体更有力量。', ['健康', 3], ['心情', 1]],
+      social: ['主动社交', '你和身边的人聊了很久，关系更自然。', ['魅力', 2], ['心情', 2]],
+      rest: ['好好休息', '你放慢脚步，给自己留出喘息空间。', ['心情', 5], ['健康', 1]],
     };
     const item = map[type];
     if (!item) return;
     item.slice(2, 4).forEach(([name, delta]) => {
       state.stats[name] = U.clamp(state.stats[name] + delta, 0, 100);
     });
-    state.profile.interests[item[4]] = U.clamp(state.profile.interests[item[4]] + 3, 0, 100);
     if (type === 'study') state.education.study += 7;
     state.monthActionTaken = true;
     Game.lifeDirector.addLog(state, item[0], item[1], 'good');
@@ -68,17 +67,6 @@
     });
   }
 
-  function switchSubpage(event) {
-    const button = event.target.closest('[data-subtarget]');
-    if (!button) return;
-    const nav = button.closest('[data-subnav]');
-    const page = nav.closest('.page');
-    nav.querySelectorAll('button').forEach((item) => item.classList.toggle('active', item === button));
-    page.querySelectorAll(':scope > .subpage').forEach((item) => {
-      item.classList.toggle('active', item.id === button.dataset.subtarget);
-    });
-  }
-
   function contactClick(event) {
     const button = event.target.closest('[data-contact]');
     if (button) finish(Game.social.interact(state, button.dataset.contact, button.dataset.contactAction));
@@ -89,6 +77,34 @@
     const house = event.target.closest('[data-house]');
     if (stock) Game.actions.trade(stock.dataset.stock, stock.dataset.trade);
     if (house) Game.actions.buyHouse(Number(house.dataset.house));
+  }
+
+  function globalClick(event) {
+    if (Game.appearance.handleClick(event)) return;
+    const module = event.target.closest('[data-open-module]');
+    if (module) {
+      Game.navigation.openModule(module.dataset.openModule, module.dataset.moduleTitle);
+      return;
+    }
+    const selector = event.target.closest('[data-selector-field]');
+    if (selector) {
+      Game.appearance.open(selector.dataset.selectorField);
+      return;
+    }
+    const avatar = event.target.closest('[data-character-id]');
+    if (avatar) {
+      Game.navigation.openCharacter(avatar.dataset.characterId);
+      return;
+    }
+    const family = event.target.closest('[data-detail-family]');
+    if (family) {
+      Game.actions.interact(family.dataset.detailFamily);
+      return;
+    }
+    const contact = event.target.closest('[data-detail-contact]');
+    if (contact) {
+      finish(Game.social.interact(state, contact.dataset.detailContact, contact.dataset.contactAction));
+    }
   }
 
   function bind() {
@@ -114,11 +130,7 @@
       if (choice) Game.actions.decide(choice.dataset.choice);
     });
     Game.view.el.tabs.addEventListener('click', switchTabs);
-    document.querySelectorAll('[data-subnav]').forEach((nav) => nav.addEventListener('click', switchSubpage));
-    Game.view.el.profileEditor.addEventListener('change', (event) => {
-      const input = event.target.closest('[data-profile-field]');
-      if (input) Game.profile.edit(input.dataset.profileField, input.value);
-    });
+    document.addEventListener('click', globalClick);
     Game.view.el.generatePortraitBtn.addEventListener('click', Game.profile.generate);
     Game.view.el.portraitSlot.addEventListener('click', Game.profile.generate);
     Game.view.el.childPlanBtn.addEventListener('click', Game.actions.planChild);
@@ -131,6 +143,7 @@
     Game.profile.cancel();
     await Game.storage.reset();
     state = U.createState();
+    Game.navigation.closeModule();
     Game.profile.updateGrowth(state);
     refresh();
     save();
@@ -139,8 +152,11 @@
   async function boot() {
     try {
       Game.view.init();
+      Game.navigation.init();
       state = U.upgradeState(await Game.storage.load());
       Game.profile.configure({ getState: () => state, refresh, save });
+      Game.navigation.configure({ getState: () => state });
+      Game.appearance.configure({ getState: () => state });
       Game.actions.configure({ getState: () => state, refresh, save });
       Game.profile.updateGrowth(state);
       if (!['家中', '已毕业'].includes(state.education.school) && !state.contacts.length) {

@@ -17,10 +17,14 @@
 
   function ability(state, job) {
     const majorMatch = job.majors.includes(state.education.major) ? 18 : 0;
-    const interest = state.profile.interests[job.category] || 40;
+    const traitBoost = {
+      科学: ['好奇', '细心', '执着'], 文学: ['敏感', '浪漫', '幽默'],
+      艺术: ['浪漫', '敏感', '好奇'], 运动: ['勇敢', '自律', '执着'],
+      社交: ['随和', '幽默', '勇敢'], 商业: ['务实', '细心', '自律'],
+    }[job.category]?.includes(state.profile.trait) ? 12 : 0;
     const personality = job.category === '社交' && ['外向', '乐观', '热血'].includes(state.profile.personality) ? 6 : 0;
     return state.stats.智力 * 0.55 + state.stats.魅力 * 0.2
-      + state.education.study * 0.12 + interest * 0.18 + majorMatch + personality;
+      + state.education.study * 0.12 + traitBoost + majorMatch + personality;
   }
 
   function apply(state, jobId) {

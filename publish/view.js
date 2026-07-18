@@ -8,7 +8,7 @@
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
     'educationPanel', 'careerPanel', 'cityPanel', 'propertyPanel', 'stockPanel',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
-    'profileEditor', 'interestGrid', 'decision', 'decisionTitle', 'decisionText',
+    'profileEditor', 'traitGrid', 'decision', 'decisionTitle', 'decisionText',
     'decisionBody', 'monthBtn', 'yearBtn', 'actionStrip', 'toast', 'tabPages',
     'tabs', 'heroCanvas', 'resetBtn', 'childPlanBtn',
   ];
@@ -88,9 +88,10 @@
   function familyCards(state) {
     const summary = `<div class="detail-row family-wealth"><span>原生家庭资产</span><b>${money(state.familyWealth)}</b></div>`;
     return summary + state.family.map((item) => `
-      <article class="person"><div class="person-avatar">${item.name.slice(-1)}</div>
+      <article class="person"><button class="person-avatar" type="button"
+        data-character-id="${item.id}" aria-label="查看${item.name}详情">${item.name.slice(-1)}</button>
         <div class="person-main"><strong>${item.name}</strong>
-        <span>${item.relation} · ${U.personAge(state, item)}岁 · ${item.personality}${item.job ? ` · ${item.job}` : ''}</span>
+        <span>${item.relation} · ${U.personAge(state, item)}岁 · ${item.personality} · ${item.trait}${item.job ? ` · ${item.job}` : ''}</span>
         <div class="affection"><i style="width:${item.affection}%"></i></div></div>
         <button data-person="${item.id}" ${item.status === '已故' ? 'disabled' : ''}>${item.status === '已故' ? '追忆' : relationAction(item, state)}</button></article>`).join('');
   }
@@ -148,6 +149,7 @@
     el.propertyPanel.innerHTML = properties(state);
     el.stockPanel.innerHTML = stocks(state);
     Game.profile.render(state, el);
+    Game.navigation.refreshDetail();
     const partner = state.family.find((item) => item.id === state.romance.partnerId);
     el.childPlanBtn.disabled = !state.romance.married || partner?.status !== '健康' || Boolean(state.romance.pendingBirth);
     el.childPlanBtn.textContent = state.romance.pendingBirth ? `期待新生命 · ${state.romance.pendingBirth}个月` : '计划孩子';

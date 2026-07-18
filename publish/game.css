@@ -1,6 +1,6 @@
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
 
@@ -138,7 +138,7 @@
 
 .person {
   display: grid;
-  grid-template-columns: 42px 1fr auto;
+  grid-template-columns: 44px 1fr auto;
   gap: 10px;
   align-items: center;
   padding: 11px 0;
@@ -154,10 +154,14 @@
 }
 
 .person-avatar {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
   display: grid;
   place-items: center;
+  border: 0;
   border-radius: 50%;
   background: #dfb458;
   color: #263b37;
@@ -177,7 +181,7 @@
   margin: 3px 0 7px;
 }
 
-.person button,
+.person > button:not(.person-avatar),
 .stock button {
   min-height: 34px;
   padding: 0 10px;

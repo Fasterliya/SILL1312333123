@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./menus.css">
+  <link rel="stylesheet" href="./screens.css">
   <script src="./config.js" defer></script>
+  <script src="./appearance-catalog.js" defer></script>
   <script src="./content.js" defer></script>
   <script src="./sdk-adapter.js" defer></script>
   <script src="./storage.js" defer></script>
@@ -16,6 +18,8 @@
   <script src="./social.js" defer></script>
   <script src="./career.js" defer></script>
   <script src="./ai-director.js" defer></script>
+  <script src="./navigation.js" defer></script>
+  <script src="./appearance.js" defer></script>
   <script src="./view.js" defer></script>
   <script src="./actions.js" defer></script>
   <script src="./app.js" defer></script>
@@ -53,7 +57,7 @@
     <section class="tab-pages" id="tabPages">
       <div class="page active" id="timelinePage">
         <section class="panel stat-panel">
-          <div class="panel-title"><h2>当前状态</h2><span>五维状态</span></div>
+          <div class="panel-title"><h2>当前状态</h2><span>四项状态</span></div>
           <div class="stat-grid" id="statGrid"></div>
           <div class="action-strip" id="actionStrip">
             <button type="button" data-activity="study"><b>学</b><span>学习</span></button>
@@ -69,85 +73,33 @@
       </div>
 
       <div class="page" id="rolePage">
-        <nav class="subnav" data-subnav="role">
-          <button class="active" data-subtarget="roleArchive">档案</button>
-          <button data-subtarget="roleAppearance">外观</button>
-        </nav>
-        <div class="subpage active" id="roleArchive">
-          <section class="panel portrait-panel">
-            <button class="portrait-slot" id="portraitSlot" type="button" title="生成或重绘角色立绘" aria-label="生成或重绘角色立绘"></button>
-            <div class="portrait-actions"><p id="portraitStatus"></p>
-              <button id="generatePortraitBtn" type="button">生成角色立绘</button></div>
-          </section>
-          <section class="panel">
-            <div class="panel-title"><h2>角色信息</h2><span>成长档案</span></div>
-            <div class="profile-facts" id="profileFacts"></div>
-            <h3>兴趣倾向</h3>
-            <div class="interest-grid" id="interestGrid"></div>
-          </section>
-        </div>
-        <div class="subpage" id="roleAppearance">
-          <section class="panel">
-          <div class="panel-title"><h2>外观与穿着</h2><span>造型参数</span></div>
-            <div class="profile-editor" id="profileEditor"></div>
-          </section>
+        <div class="module-directory">
+          <button data-open-module="roleArchive" data-module-title="角色档案"><b>档</b><span><strong>角色档案</strong><small>立绘、成长信息、性格与特质</small></span><i>›</i></button>
+          <button data-open-module="roleAppearance" data-module-title="外观与穿着"><b>装</b><span><strong>外观与穿着</strong><small>发型、气质及三部位穿搭</small></span><i>›</i></button>
         </div>
       </div>
 
       <div class="page" id="relationsPage">
-        <nav class="subnav" data-subnav="relations">
-          <button class="active" data-subtarget="familySubpage">家庭</button>
-          <button data-subtarget="schoolSubpage">同窗</button>
-          <button data-subtarget="phoneSubpage">手机</button>
-        </nav>
-        <div class="subpage active" id="familySubpage"><section class="panel">
-          <div class="panel-title"><h2>家庭关系</h2><span>亲缘与陪伴</span></div>
-          <div id="familyList"></div>
-          <button class="wide-action" id="childPlanBtn" type="button">计划孩子</button>
-        </section></div>
-        <div class="subpage" id="schoolSubpage"><section class="panel">
-          <div class="panel-title"><h2>当前同窗</h2><span>在校关系</span></div>
-          <div id="classmatesList"></div>
-        </section></div>
-        <div class="subpage" id="phoneSubpage"><section class="panel">
-          <div class="panel-title"><h2>手机联系人</h2><span>历史同窗</span></div>
-          <div id="phoneList"></div>
-        </section></div>
+        <div class="module-directory">
+          <button data-open-module="familySubpage" data-module-title="家庭"><b>家</b><span><strong>家庭</strong><small>父母、兄弟姐妹、配偶与儿女</small></span><i>›</i></button>
+          <button data-open-module="schoolSubpage" data-module-title="同窗"><b>同</b><span><strong>同窗</strong><small>当前学校中的同学与关系</small></span><i>›</i></button>
+          <button data-open-module="phoneSubpage" data-module-title="手机联系"><b>联</b><span><strong>手机联系</strong><small>毕业后仍可联系的旧同学</small></span><i>›</i></button>
+        </div>
       </div>
 
       <div class="page" id="developmentPage">
-        <nav class="subnav" data-subnav="development">
-          <button class="active" data-subtarget="studySubpage">学习</button>
-          <button data-subtarget="careerSubpage">求职</button>
-          <button data-subtarget="citySubpage">迁居</button>
-        </nav>
-        <div class="subpage active" id="studySubpage"><section class="panel">
-          <div class="panel-title"><h2>教育经历</h2><span>学业与考试</span></div>
-          <div id="educationPanel"></div>
-        </section></div>
-        <div class="subpage" id="careerSubpage"><section class="panel">
-          <div class="panel-title"><h2>职业市场</h2><span>当前招聘</span></div>
-          <div id="careerPanel"></div>
-        </section></div>
-        <div class="subpage" id="citySubpage"><section class="panel">
-          <div class="panel-title"><h2>城市迁移</h2><span>城市列表</span></div>
-          <div id="cityPanel"></div>
-        </section></div>
+        <div class="module-directory">
+          <button data-open-module="studySubpage" data-module-title="学习"><b>学</b><span><strong>学习</strong><small>学校、考试成绩与升学进度</small></span><i>›</i></button>
+          <button data-open-module="careerSubpage" data-module-title="求职"><b>职</b><span><strong>求职</strong><small>浏览岗位并承担录取风险</small></span><i>›</i></button>
+          <button data-open-module="citySubpage" data-module-title="迁居"><b>迁</b><span><strong>迁居</strong><small>前往其他城市寻找不同机会</small></span><i>›</i></button>
+        </div>
       </div>
 
       <div class="page" id="assetsPage">
-        <nav class="subnav" data-subnav="assets">
-          <button class="active" data-subtarget="propertySubpage">房产</button>
-          <button data-subtarget="stockSubpage">股票</button>
-        </nav>
-        <div class="subpage active" id="propertySubpage"><section class="panel">
-          <div class="panel-title"><h2>房产配置</h2><span>首付与月供</span></div>
-          <div id="propertyPanel"></div>
-        </section></div>
-        <div class="subpage" id="stockSubpage"><section class="panel">
-          <div class="panel-title"><h2>股票市场</h2><span>每月价格波动</span></div>
-          <div id="stockPanel"></div>
-        </section></div>
+        <div class="module-directory">
+          <button data-open-module="propertySubpage" data-module-title="房产"><b>房</b><span><strong>房产</strong><small>查看住房、首付与月供</small></span><i>›</i></button>
+          <button data-open-module="stockSubpage" data-module-title="股票"><b>股</b><span><strong>股票</strong><small>查看行情并买卖持仓</small></span><i>›</i></button>
+        </div>
       </div>
     </section>
 
@@ -156,6 +108,75 @@
       <button id="yearBtn" type="button"><span>快进</span><strong>下一年</strong></button>
     </footer>
   </main>
+
+  <section class="screen-layer" id="moduleScreen" hidden aria-label="功能子菜单">
+    <header class="screen-header">
+      <button class="screen-back" id="moduleBackBtn" type="button" aria-label="返回主页面">‹</button>
+      <h2 id="moduleTitle">子菜单</h2>
+    </header>
+    <div class="screen-scroll" id="moduleContent">
+      <div class="module-view" id="roleArchive">
+        <section class="panel portrait-panel">
+          <button class="portrait-slot" id="portraitSlot" type="button" title="生成或重绘角色立绘" aria-label="生成或重绘角色立绘"></button>
+          <div class="portrait-actions"><p id="portraitStatus"></p>
+            <button id="generatePortraitBtn" type="button">生成角色立绘</button></div>
+        </section>
+        <section class="panel">
+          <div class="panel-title"><h2>角色信息</h2><span>成长档案</span></div>
+          <div class="profile-facts" id="profileFacts"></div>
+          <h3>性格与特质</h3>
+          <div class="trait-grid" id="traitGrid"></div>
+        </section>
+      </div>
+      <div class="module-view" id="roleAppearance">
+        <section class="panel">
+          <div class="panel-title"><h2>外观与穿着</h2><span>点击进入选择器</span></div>
+          <div class="profile-editor" id="profileEditor"></div>
+        </section>
+      </div>
+      <div class="module-view" id="familySubpage"><section class="panel">
+        <div class="panel-title"><h2>家庭关系</h2><span>点击头像查看详情</span></div>
+        <div id="familyList"></div>
+        <button class="wide-action" id="childPlanBtn" type="button">计划孩子</button>
+      </section></div>
+      <div class="module-view" id="schoolSubpage"><section class="panel">
+        <div class="panel-title"><h2>当前同窗</h2><span>点击头像查看详情</span></div>
+        <div id="classmatesList"></div>
+      </section></div>
+      <div class="module-view" id="phoneSubpage"><section class="panel">
+        <div class="panel-title"><h2>手机联系人</h2><span>历史同窗</span></div>
+        <div id="phoneList"></div>
+      </section></div>
+      <div class="module-view" id="studySubpage"><section class="panel">
+        <div class="panel-title"><h2>教育经历</h2><span>学业与考试</span></div>
+        <div id="educationPanel"></div>
+      </section></div>
+      <div class="module-view" id="careerSubpage"><section class="panel">
+        <div class="panel-title"><h2>职业市场</h2><span>当前招聘</span></div>
+        <div id="careerPanel"></div>
+      </section></div>
+      <div class="module-view" id="citySubpage"><section class="panel">
+        <div class="panel-title"><h2>城市迁移</h2><span>城市列表</span></div>
+        <div id="cityPanel"></div>
+      </section></div>
+      <div class="module-view" id="propertySubpage"><section class="panel">
+        <div class="panel-title"><h2>房产配置</h2><span>首付与月供</span></div>
+        <div id="propertyPanel"></div>
+      </section></div>
+      <div class="module-view" id="stockSubpage"><section class="panel">
+        <div class="panel-title"><h2>股票市场</h2><span>每月价格波动</span></div>
+        <div id="stockPanel"></div>
+      </section></div>
+    </div>
+  </section>
+
+  <section class="screen-layer detail-layer" id="detailScreen" hidden aria-label="详情页面">
+    <header class="screen-header">
+      <button class="screen-back" id="detailBackBtn" type="button" aria-label="返回子菜单">‹</button>
+      <h2 id="detailTitle">角色详情</h2>
+    </header>
+    <div class="screen-scroll" id="detailContent"></div>
+  </section>
 
   <div class="decision-backdrop" id="decision" hidden>
     <section class="decision-sheet" role="dialog" aria-modal="true" aria-labelledby="decisionTitle">

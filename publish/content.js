@@ -8,8 +8,17 @@
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const makeName = (surname) => (surname || random(C.surnames)) + random(C.givenNames);
 
-  function interestSet() {
-    return Object.fromEntries(C.interests.map((name) => [name, between(25, 68)]));
+  function traitFromLegacy(interests) {
+    if (!interests || typeof interests !== 'object') return random(C.traits);
+    const strongest = Object.entries(interests).sort((a, b) => b[1] - a[1])[0]?.[0];
+    return {
+      科学: '好奇', 文学: '敏感', 艺术: '浪漫',
+      运动: '勇敢', 社交: '随和', 商业: '务实',
+    }[strongest] || random(C.traits);
+  }
+
+  function clothing(top) {
+    return { top: top || '品质日常', socks: '短棉袜', shoes: '白色运动鞋' };
   }
 
   function person(relation, surname, age, gender) {
@@ -22,7 +31,12 @@
       bornAt: 0,
       affection: between(48, 78),
       personality: random(C.personalities),
-      interests: interestSet(),
+      trait: random(C.traits),
+      hairColor: random(C.appearance.hairColor.slice(0, 4)),
+      temperament: random(C.appearance.temperament.slice(4)),
+      bodyType: random(C.appearance.bodyType.slice(1)),
+      hairstyle: random(C.appearance.hairstyle.slice(2, 9)),
+      clothing: clothing(random(C.appearance.top.slice(3, 10))),
       interactions: 0,
       lastInteractionMonth: -1,
       phoneUnlocked: false,
@@ -48,9 +62,9 @@
       temperament: random(C.appearance.temperament),
       bodyType: '匀称',
       hairstyle: '胎毛短发',
-      outfit: '婴儿连体衣',
+      clothing: { top: '婴儿连体衣', socks: '婴儿袜', shoes: '婴儿软底鞋' },
       personality: random(C.personalities),
-      interests: interestSet(),
+      trait: random(C.traits),
       styleStage: -1,
       portraitUrl: null,
       portraitTaskId: null,
@@ -75,7 +89,7 @@
       family.push(person(relation, surname, between(2, 8), relation === '哥哥' ? '男' : '女'));
     }
     return {
-      version: 2,
+      version: 3,
       updatedAt: new Date().toISOString(),
       name: makeName(surname),
       surname,
@@ -86,7 +100,7 @@
       month: C.startMonth,
       totalMonths: 0,
       profile: profile(),
-      stats: { 健康: between(72, 94), 心情: between(68, 90), 智力: between(46, 66), 魅力: between(42, 68), 体魄: between(40, 64) },
+      stats: { 健康: between(72, 94), 心情: between(68, 90), 智力: between(46, 66), 魅力: between(42, 68) },
       money: between(300, 1800),
       familyWealth: between(90000, 850000),
       family,
@@ -107,7 +121,14 @@
 
   function fillPerson(item) {
     item.personality ||= random(C.personalities);
-    item.interests ||= interestSet();
+    item.trait ||= traitFromLegacy(item.interests);
+    delete item.interests;
+    item.hairColor ||= random(C.appearance.hairColor.slice(0, 4));
+    item.temperament ||= random(C.appearance.temperament.slice(4));
+    item.bodyType ||= random(C.appearance.bodyType.slice(1));
+    item.hairstyle ||= random(C.appearance.hairstyle.slice(2, 9));
+    item.clothing ||= clothing(item.outfit);
+    delete item.outfit;
     item.interactions ||= 0;
     item.lastInteractionMonth ??= -1;
     item.phoneUnlocked ??= false;
@@ -117,9 +138,17 @@
 
   function upgradeState(state) {
     if (!state) return createState();
-    state.version = 2;
+    state.version = 3;
     state.hometown ||= { ...state.location };
     state.profile ||= profile();
+    state.profile.trait ||= traitFromLegacy(state.profile.interests);
+    delete state.profile.interests;
+    state.profile.clothing ||= clothing(state.profile.outfit);
+    state.profile.clothing.top ||= state.profile.outfit || '品质日常';
+    state.profile.clothing.socks ||= '短棉袜';
+    state.profile.clothing.shoes ||= '白色运动鞋';
+    delete state.profile.outfit;
+    delete state.stats.体魄;
     state.profile.portraitUrl ??= null;
     state.profile.portraitTaskId ??= null;
     state.family = (state.family || []).map(fillPerson);
@@ -153,7 +182,7 @@
   }
 
   Game.content = Object.freeze({
-    random, between, clamp, makeName, interestSet, person, log,
+    random, between, clamp, makeName, traitFromLegacy, person, log,
     createState, upgradeState, age, stage, personAge, gradeLabel,
   });
 }(window));

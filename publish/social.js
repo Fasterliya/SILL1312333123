@@ -61,10 +61,8 @@
     person.affection = U.clamp(person.affection + gain, 0, 100);
     if (type === 'study') {
       state.education.study += 4;
-      state.profile.interests.科学 = U.clamp(state.profile.interests.科学 + 2, 0, 100);
     } else {
       state.stats.心情 = U.clamp(state.stats.心情 + 2, 0, 100);
-      state.profile.interests.社交 = U.clamp(state.profile.interests.社交 + 2, 0, 100);
     }
     if (person.affection >= 75 && person.relation === '同学') person.relation = '好友';
     Game.lifeDirector.addLog(state, `与${person.name}互动`, text, 'good');
@@ -75,9 +73,10 @@
     const buttons = actions.map(([type, label]) => (
       `<button data-contact="${person.id}" data-contact-action="${type}">${label}</button>`
     )).join('');
-    return `<article class="contact-card"><div class="person-avatar">${person.name.slice(-1)}</div>
+    return `<article class="contact-card"><button class="person-avatar" type="button"
+      data-character-id="${person.id}" aria-label="查看${person.name}详情">${person.name.slice(-1)}</button>
       <div class="contact-main"><strong>${person.name}</strong>
-      <span>${person.relation} · ${person.personality} · 好感 ${person.affection}</span>
+      <span>${person.relation} · ${person.personality} · ${person.trait} · 好感 ${person.affection}</span>
       <small>${person.school}</small></div><div class="contact-actions">${buttons}</div></article>`;
   }
 

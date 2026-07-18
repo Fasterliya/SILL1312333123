@@ -1,446 +1,175 @@
-(function initBlankGameAiDirector(root) {
+(function initLifeDirector(root) {
   'use strict';
 
-  const namespace = root.BlankGame = root.BlankGame || {};
-  const SDK = namespace.sdkAdapter;
-  const Storage = namespace.storage;
-  const memoryRecords = new Map();
-  const attemptedSignatures = new Set();
-  const LOCK_LEASE_MS = 30000;
-  const LOCK_WAIT_MS = 12000;
-  let ownerSequence = 0;
-  let inFlight = null;
+  const Game = root.LifeGame = root.LifeGame || {};
+  const C = Game.config;
+  const U = Game.content;
 
-  function isPlainObject(value) {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
-    const prototype = Object.getPrototypeOf(value);
-    return prototype === Object.prototype || prototype === null;
+  function addLog(state, title, text, tone) {
+    state.logs.unshift(U.log(title, text, tone, state.totalMonths));
+    state.logs = state.logs.slice(0, 60);
   }
 
-  function hasExactKeys(value, keys) {
-    const actual = Object.keys(value).sort();
-    const expected = keys.slice().sort();
-    return actual.length === expected.length && actual.every((key, index) => key === expected[index]);
+  function subjects(state) {
+    const years = U.age(state);
+    if (years <= 11) return C.subjectCaps.primary;
+    if (years <= 14) return C.subjectCaps.middle;
+    const selected = [state.education.track || '物理', ...(state.education.electives.length
+      ? state.education.electives : ['化学', '生物'])];
+    return Object.assign({}, C.subjectCaps.highBase,
+      Object.fromEntries(selected.map((name) => [name, 100])));
   }
 
-  function hasInvalidUnicode(value) {
-    for (let index = 0; index < value.length; index += 1) {
-      const code = value.charCodeAt(index);
-      if (code >= 0xd800 && code <= 0xdbff) {
-        const next = value.charCodeAt(index + 1);
-        if (next < 0xdc00 || next > 0xdfff) return true;
-        index += 1;
-      } else if (code >= 0xdc00 && code <= 0xdfff) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function sanitizeConfigText(value, label, minimum, maximum) {
-    if (typeof value !== 'string') throw new Error(label + '必须是字符串。');
-    const text = value.normalize('NFC').trim();
-    const length = Array.from(text).length;
-    if (length < minimum || length > maximum) throw new Error(label + '长度无效。');
-    if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(text) || hasInvalidUnicode(text)) {
-      throw new Error(label + '包含无效字符。');
-    }
-    return text;
-  }
-
-  function settings() {
-    const value = namespace.config && namespace.config.ai;
-    if (!isPlainObject(value)) throw new Error('ai 配置缺失。');
-    const model = sanitizeConfigText(value.model, 'ai.model', 1, 160);
-    const prompt = sanitizeConfigText(value.prompt, 'ai.prompt', 10, 2000);
-    const guestName = sanitizeConfigText(value.guestName, 'ai.guestName', 1, 40);
-    if (!Number.isInteger(value.cacheVersion) || value.cacheVersion < 1 || value.cacheVersion > 999999) {
-      throw new Error('ai.cacheVersion 无效。');
-    }
-    if (!prompt.includes('{playerName}')) throw new Error('ai.prompt 缺少 {playerName}。');
-    if (!Number.isInteger(value.maxTokens) || value.maxTokens < 200 || value.maxTokens > 3000) {
-      throw new Error('ai.maxTokens 无效。');
-    }
-    if (!Number.isInteger(value.outputMinCharacters) || value.outputMinCharacters < 1) {
-      throw new Error('ai.outputMinCharacters 无效。');
-    }
-    if (!Number.isInteger(value.outputMaxCharacters)
-      || value.outputMaxCharacters < value.outputMinCharacters
-      || value.outputMaxCharacters > 280) {
-      throw new Error('ai.outputMaxCharacters 无效。');
-    }
-    if (!Array.isArray(value.fallbacks) || value.fallbacks.length < 1 || value.fallbacks.length > 12) {
-      throw new Error('ai.fallbacks 无效。');
-    }
-    const fallbacks = value.fallbacks.map((item, index) => (
-      sanitizeConfigText(item, 'ai.fallbacks[' + index + ']', value.outputMinCharacters, value.outputMaxCharacters)
-    ));
-    if (!Storage
-      || typeof Storage.readAiRecordState !== 'function'
-      || typeof Storage.saveAiRecord !== 'function') {
-      throw new Error('ai-director 缺少存储模块。');
-    }
-    return {
-      cacheVersion: value.cacheVersion,
-      model,
-      prompt,
-      guestName,
-      maxTokens: value.maxTokens,
-      outputMinCharacters: value.outputMinCharacters,
-      outputMaxCharacters: value.outputMaxCharacters,
-      fallbacks,
-    };
-  }
-
-  function normalizePlayerName(value, fallback) {
-    if (typeof value !== 'string') return fallback;
-    const text = value.normalize('NFC').trim().replace(/\s+/g, ' ');
-    if (!text || Array.from(text).length > 40 || hasInvalidUnicode(text)) return fallback;
-    return text;
-  }
-
-  function normalizePreview(value, maximum) {
-    if (typeof value !== 'string') return '';
-    const text = value
-      .normalize('NFC')
-      .replace(/[\u0000-\u001f\u007f]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    return Array.from(text).slice(0, maximum).join('');
-  }
-
-  function validateAiText(value, config) {
-    if (typeof value !== 'string' || /[\r\n]/.test(value) || /\u0060{3}/.test(value)) return null;
-    const text = value.normalize('NFC').replace(/[ \t]+/g, ' ').trim();
-    const length = Array.from(text).length;
-    if (length < config.outputMinCharacters || length > config.outputMaxCharacters) return null;
-    if (/[\u0000-\u001f\u007f]/.test(text) || hasInvalidUnicode(text)) return null;
-    return text;
-  }
-
-  function stableHash(value) {
-    let hash = 2166136261;
-    for (let index = 0; index < value.length; index += 1) {
-      hash ^= value.charCodeAt(index);
-      hash = Math.imul(hash, 16777619);
-    }
-    return hash >>> 0;
-  }
-
-  function createCoordinationError(code, message) {
-    const error = new Error(message);
-    error.code = code;
-    return error;
-  }
-
-  function makeOwner() {
-    ownerSequence += 1;
-    let random;
-    if (typeof root.crypto?.randomUUID === 'function') {
-      random = root.crypto.randomUUID();
-    } else if (typeof root.crypto?.getRandomValues === 'function') {
-      const values = new Uint32Array(2);
-      root.crypto.getRandomValues(values);
-      random = `${values[0].toString(36)}-${values[1].toString(36)}`;
-    } else {
-      random = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-    }
-    return `${random}:${ownerSequence}`;
-  }
-
-  function delay(milliseconds) {
-    return new Promise((resolve) => root.setTimeout(resolve, milliseconds));
-  }
-
-  function readLease(key) {
-    const raw = root.localStorage.getItem(key);
-    if (raw === null) return null;
-    let value;
-    try {
-      value = JSON.parse(raw);
-    } catch (_) {
-      return null;
-    }
-    if (!isPlainObject(value)
-      || !hasExactKeys(value, ['owner', 'expiresAt'])
-      || typeof value.owner !== 'string'
-      || !value.owner
-      || !Number.isFinite(value.expiresAt)) return null;
-    return value;
-  }
-
-  function writeLease(key, value) {
-    root.localStorage.setItem(key, JSON.stringify(value));
-  }
-
-  function removeOwnedLease(key, owner) {
-    try {
-      if (readLease(key)?.owner === owner) root.localStorage.removeItem(key);
-    } catch (_) {
-      // 页面退出或隐私设置变化时，租约会在 expiresAt 后自然失效。
-    }
-  }
-
-  async function withLocalLease(name, operation) {
-    const key = `blank-ai-lock:${name}`;
-    const owner = makeOwner();
-    const deadline = Date.now() + LOCK_WAIT_MS;
-    try {
-      root.localStorage.getItem(key);
-    } catch (_) {
-      throw createCoordinationError('AI_LOCK_UNAVAILABLE', '同源 AI 协调存储不可用。');
-    }
-
-    while (Date.now() <= deadline) {
-      let current;
-      try {
-        current = readLease(key);
-      } catch (_) {
-        throw createCoordinationError('AI_LOCK_UNAVAILABLE', '同源 AI 协调存储不可用。');
-      }
-      const now = Date.now();
-      if (!current || current.expiresAt <= now) {
-        try {
-          writeLease(key, { owner, expiresAt: now + LOCK_LEASE_MS });
-        } catch (_) {
-          throw createCoordinationError('AI_LOCK_UNAVAILABLE', '同源 AI 协调租约无法写入。');
-        }
-        await delay(40);
-        let confirmed;
-        try {
-          confirmed = readLease(key);
-        } catch (_) {
-          throw createCoordinationError('AI_LOCK_UNAVAILABLE', '同源 AI 协调租约无法确认。');
-        }
-        if (confirmed?.owner === owner) {
-          const heartbeat = root.setInterval(() => {
-            try {
-              if (readLease(key)?.owner === owner) {
-                writeLease(key, { owner, expiresAt: Date.now() + LOCK_LEASE_MS });
-              }
-            } catch (_) {
-              // 预算预留会在 AI 调用前持久化；心跳失败时只让原租约自然到期。
-            }
-          }, Math.floor(LOCK_LEASE_MS / 3));
-          try {
-            return await operation();
-          } finally {
-            root.clearInterval(heartbeat);
-            removeOwnedLease(key, owner);
-          }
-        }
-      }
-      await delay(70);
-    }
-    throw createCoordinationError('AI_LOCK_TIMEOUT', '等待同源 AI 协调超时。');
-  }
-
-  async function withPromptLock(promptSignature, operation) {
-    const name = `blank-ai:${promptSignature}`;
-    const locks = root.navigator?.locks;
-    if (locks && typeof locks.request === 'function') {
-      let entered = false;
-      try {
-        return await locks.request(name, { mode: 'exclusive' }, async () => {
-          entered = true;
-          return operation();
-        });
-      } catch (error) {
-        if (entered) throw error;
-      }
-    }
-    return withLocalLease(name, operation);
-  }
-
-  function describe(options) {
-    const config = settings();
-    const input = isPlainObject(options) ? options : {};
-    const playerName = normalizePlayerName(input.playerName, config.guestName);
-    const prompt = config.prompt.split('{playerName}').join(JSON.stringify(playerName));
-    const canonical = JSON.stringify({
-      cacheVersion: config.cacheVersion,
-      model: config.model,
-      maxTokens: config.maxTokens,
-      outputMinCharacters: config.outputMinCharacters,
-      outputMaxCharacters: config.outputMaxCharacters,
-      prompt,
-      fallbacks: config.fallbacks,
+  function exam(state, label) {
+    const scores = {};
+    const effort = state.education.study;
+    Object.entries(subjects(state)).forEach(([name, cap]) => {
+      const rate = U.clamp(0.46 + state.stats.智力 / 190 + effort / 210 + U.between(-8, 8) / 100, 0.3, 0.98);
+      scores[name] = Math.round(cap * rate);
     });
-    const digest = stableHash(canonical).toString(16).padStart(8, '0');
-    return {
-      config,
-      playerName,
-      prompt,
-      promptSignature: `blank-greeting:v${config.cacheVersion}:${digest}:${canonical.length}`,
-      onUpdate: typeof input.onUpdate === 'function' ? input.onUpdate : null,
-    };
+    const total = Object.values(scores).reduce((sum, value) => sum + value, 0);
+    const record = { label, age: U.age(state), scores, total, date: `${state.year}.${state.month}` };
+    state.education.exams.unshift(record);
+    state.education.exams = state.education.exams.slice(0, 12);
+    state.education.study = Math.max(0, state.education.study - 12);
+    state.stats.心情 = U.clamp(state.stats.心情 + (total > 500 ? 5 : -4), 0, 100);
+    addLog(state, label, `总分 ${total}。${total > 560 ? '你的努力得到了回报。' : '这次成绩将成为下一段努力的起点。'}`, total > 560 ? 'good' : 'normal');
+    return record;
   }
 
-  function fallbackText(info) {
-    const index = stableHash(`blank-game|${info.promptSignature}|${info.playerName}`)
-      % info.config.fallbacks.length;
-    return info.config.fallbacks[index];
+  function schoolMilestones(state) {
+    const years = U.age(state);
+    if (state.month !== 6) return;
+    if (years === 6) {
+      state.education.school = '启明小学';
+      addLog(state, '小学入学', '你背上新书包，第一次走进正式课堂。', 'milestone');
+    } else if (years === 12) {
+      state.education.school = '新城初级中学';
+      addLog(state, '小学毕业', '你告别童年教室，升入初中。', 'milestone');
+    } else if (years === 15) {
+      const result = exam(state, '中考');
+      state.education.school = result.total > 520 ? '市第一中学' : '新城高级中学';
+      addLog(state, '高中录取', `你被${state.education.school}录取。`, 'milestone');
+    } else if (years === 16 && !state.education.track) {
+      state.pendingDecision = { type: 'track' };
+    } else if (years === 18 && !state.education.university) {
+      if (!state.education.track) {
+        state.education.track = '物理';
+        state.education.electives = ['化学', '生物'];
+      }
+      const result = exam(state, '高考');
+      state.pendingDecision = { type: 'volunteer', score: result.total };
+    } else if (years === 22 && state.education.university && !state.career.job) {
+      addLog(state, '大学毕业', `你从${state.education.university}毕业，获得${state.education.major}专业学历。`, 'milestone');
+      state.pendingDecision = { type: 'job' };
+    }
   }
 
-  function createRecord(info, text, source, reason) {
-    return Object.freeze({
-      promptSignature: info.promptSignature,
-      cacheVersion: info.config.cacheVersion,
-      source,
-      text,
-      reason,
-      savedAt: new Date().toISOString(),
+  function regularExam(state) {
+    const years = U.age(state);
+    if (years < 6 || years > 17 || ![1, 6].includes(state.month)) return;
+    if ((years === 15 || years === 18) && state.month === 6) return;
+    exam(state, state.month === 1 ? '期末考试' : '期中考试');
+  }
+
+  function finances(state) {
+    const years = U.age(state);
+    if (state.career.job) {
+      const taxRate = state.career.salary > 20000 ? 0.12 : 0.06;
+      const net = Math.round(state.career.salary * (1 - taxRate));
+      state.money += net;
+      state.career.exp += 1;
+      if (state.career.exp % 24 === 0) {
+        state.career.level += 1;
+        state.career.salary = Math.round(state.career.salary * 1.16);
+        addLog(state, '职场晋升', `你的月薪提升到 ¥${state.career.salary.toLocaleString()}。`, 'good');
+      }
+    } else if (years >= 6 && years < 22) {
+      state.money += years < 12 ? 30 : (years < 18 ? 120 : 500);
+    }
+    if (state.assets.mortgage > 0) {
+      state.money -= state.assets.mortgage;
+    }
+    Object.values(state.assets.stocks).forEach((stock) => {
+      stock.previous = stock.price;
+      stock.price = Math.max(2, Math.round(stock.price * (1 + U.between(-8, 9) / 100) * 100) / 100);
     });
   }
 
-  function validateRecord(value, info) {
-    if (!isPlainObject(value) || !hasExactKeys(value, [
-      'promptSignature', 'cacheVersion', 'source', 'text', 'reason', 'savedAt',
-    ])) return null;
-    if (value.promptSignature !== info.promptSignature
-      || value.cacheVersion !== info.config.cacheVersion
-      || (value.source !== 'ai' && value.source !== 'fallback')) return null;
-    const text = validateAiText(value.text, info.config);
-    if (!text) return null;
-    if (value.reason !== null && (typeof value.reason !== 'string' || !value.reason)) return null;
-    const savedAt = Date.parse(value.savedAt);
-    if (!Number.isFinite(savedAt) || new Date(savedAt).toISOString() !== value.savedAt) return null;
-    return Object.freeze({ ...value, text });
-  }
-
-  function resultFromRecord(record, cached) {
-    return Object.freeze({
-      text: record.text,
-      source: record.source,
-      reason: record.reason,
-      cached: cached === true,
-      promptSignature: record.promptSignature,
-    });
-  }
-
-  async function findCachedRecord(info) {
-    const memory = validateRecord(memoryRecords.get(info.promptSignature), info);
-    if (memory) return { record: memory, closed: false, reason: null };
-    try {
-      const snapshot = await Storage.readAiRecordState(info.promptSignature);
-      if (snapshot?.status === 'hit') {
-        const stored = validateRecord(snapshot.record, info);
-        if (!stored) return { record: null, closed: true, reason: 'invalid-cache' };
-        memoryRecords.set(info.promptSignature, stored);
-        attemptedSignatures.add(info.promptSignature);
-        return { record: stored, closed: false, reason: null };
-      }
-      if (snapshot?.status === 'invalid') {
-        return { record: null, closed: true, reason: 'invalid-cache' };
-      }
-      if (snapshot?.status === 'error' && SDK?.isOnline?.()) {
-        return { record: null, closed: true, reason: 'kv-read-failed' };
-      }
-    } catch (_) {
-      if (SDK?.isOnline?.()) return { record: null, closed: true, reason: 'kv-read-failed' };
+  function relationships(state) {
+    const years = U.age(state);
+    const hasFriend = state.family.some((person) => person.relation === '朋友');
+    const guaranteedMeeting = years === 20 && state.totalMonths % 12 === 0;
+    if (years >= 18 && !state.romance.partnerId && !hasFriend
+      && (guaranteedMeeting || Math.random() < 0.035)) {
+      const person = U.person('朋友', U.random(C.surnames), U.between(years - 2, years + 3));
+      person.affection = 52;
+      state.family.push(person);
+      addLog(state, '新的相遇', `你在一次活动中认识了${person.name}，彼此留下不错的印象。`, 'good');
     }
-    return { record: null, closed: false, reason: null };
-  }
-
-  function coordinationFallback(info, reason) {
-    attemptedSignatures.add(info.promptSignature);
-    const record = createRecord(info, fallbackText(info), 'fallback', reason);
-    memoryRecords.set(info.promptSignature, record);
-    return resultFromRecord(record, false);
-  }
-
-  async function reserveBudget(info) {
-    attemptedSignatures.add(info.promptSignature);
-    const reservation = createRecord(info, fallbackText(info), 'fallback', 'budget-reserved');
-    memoryRecords.set(info.promptSignature, reservation);
-    try {
-      const saved = await Storage.saveAiRecord(reservation);
-      if (saved?.source === 'local' || saved?.source === 'kv') return true;
-    } catch (_) {
-      // 未形成可供其他标签页读取的预留时，当前标签页也不得调用 AI。
-    }
-    return false;
-  }
-
-  async function perform(info) {
-    // 必须在跨标签页锁内重新读取缓存和预算，不能信任排队前的页面状态。
-    const cached = await findCachedRecord(info);
-    if (cached.record) return resultFromRecord(cached.record, true);
-    if (cached.closed) {
-      return coordinationFallback(info, cached.reason);
-    }
-    if (attemptedSignatures.has(info.promptSignature)) {
-      return coordinationFallback(info, 'budget-consumed');
-    }
-
-    if (!(await reserveBudget(info))) {
-      return coordinationFallback(info, 'budget-reservation-failed');
-    }
-    let text = fallbackText(info);
-    let source = 'fallback';
-    let reason = 'sdk-unavailable';
-    if (SDK && typeof SDK.completeText === 'function' && SDK.isOnline()) {
-      let streamed = '';
-      try {
-        const response = await SDK.completeText({
-          model: info.config.model,
-          maxTokens: info.config.maxTokens,
-          messages: [{ role: 'user', content: info.prompt }],
-        }, (content) => {
-          const preview = normalizePreview(content, info.config.outputMaxCharacters + 1);
-          if (!preview) return;
-          streamed = preview;
-          const validatedPreview = validateAiText(preview, info.config);
-          if (validatedPreview && info.onUpdate) info.onUpdate(validatedPreview);
-        });
-        const validated = validateAiText(response || streamed, info.config);
-        if (validated) {
-          text = validated;
-          source = 'ai';
-          reason = null;
-        } else {
-          reason = 'invalid-output';
+    if (state.month === 1) {
+      state.family.forEach((person) => {
+        const currentAge = U.personAge(state, person);
+        if (person.status !== '健康' || ['儿子', '女儿'].includes(person.relation)) return;
+        if (currentAge >= 75 && Math.random() < 0.04) {
+          person.status = '已故';
+          addLog(state, '亲人离世', `${person.name}走完了自己的人生，你会记得共同度过的时光。`, 'normal');
+        } else if (currentAge >= 60 && person.job && !person.job.includes('退休')) {
+          person.job = `退休${person.job}`;
         }
-      } catch (_) {
-        reason = 'request-failed';
+      });
+    }
+    if (state.romance.pendingBirth > 0) {
+      state.romance.pendingBirth -= 1;
+      if (state.romance.pendingBirth === 0) {
+        const relation = U.random(['儿子', '女儿']);
+        const child = U.person(relation, state.surname, 0, relation === '儿子' ? '男' : '女');
+        child.bornAt = state.totalMonths;
+        child.affection = 80;
+        state.family.push(child);
+        addLog(state, '新生命降临', `${child.name}出生了，你成为了${state.gender === '男' ? '父亲' : '母亲'}。`, 'milestone');
       }
     }
+  }
 
-    const record = createRecord(info, text, source, reason);
-    memoryRecords.set(info.promptSignature, record);
-    try {
-      await Storage.saveAiRecord(record);
-    } catch (_) {
-      // 当前页面仍复用内存结果，后续刷新只能依赖已成功的本地或 KV 写入。
+  function randomEvent(state) {
+    if (Math.random() > 0.12) return;
+    const events = [
+      ['平凡小确幸', '天气很好，你和家人一起吃了顿热腾腾的饭。', '心情', 4],
+      ['偶感风寒', '换季时你有些不舒服，休息了几天。', '健康', -5],
+      ['读到好书', '一本书让你对世界多了一层理解。', '智力', 3],
+      ['运动时刻', '你坚持活动身体，状态比以前轻盈。', '体魄', 3],
+    ];
+    const [title, text, stat, delta] = U.random(events);
+    state.stats[stat] = U.clamp(state.stats[stat] + delta, 0, 100);
+    addLog(state, title, text, delta > 0 ? 'good' : 'normal');
+  }
+
+  function tick(state) {
+    if (state.gameOver || state.pendingDecision) return;
+    state.totalMonths += 1;
+    state.month += 1;
+    if (state.month > 12) {
+      state.month = 1;
+      state.year += 1;
+      state.stats.健康 = U.clamp(state.stats.健康 - (U.age(state) > 55 ? 2 : 0), 0, 100);
     }
-    return resultFromRecord(record, false);
-  }
-
-  async function coordinate(options) {
-    const info = describe(options);
-    try {
-      return await withPromptLock(info.promptSignature, () => perform(info));
-    } catch (error) {
-      if (error?.code === 'AI_LOCK_TIMEOUT') return coordinationFallback(info, 'tab-lock-timeout');
-      if (error?.code === 'AI_LOCK_UNAVAILABLE') return coordinationFallback(info, 'tab-lock-unavailable');
-      throw error;
+    state.monthActionTaken = false;
+    finances(state);
+    relationships(state);
+    schoolMilestones(state);
+    regularExam(state);
+    randomEvent(state);
+    if (U.age(state) >= 88 && Math.random() < 0.035) {
+      state.gameOver = true;
+      addLog(state, '人生谢幕', `你走过了 ${U.age(state)} 年，留下了属于自己的故事。`, 'milestone');
     }
   }
 
-  function generateGreeting(options) {
-    if (inFlight) return inFlight;
-    inFlight = coordinate(options).finally(() => {
-      inFlight = null;
-    });
-    return inFlight;
+  function advance(state, months) {
+    for (let index = 0; index < months && !state.pendingDecision && !state.gameOver; index += 1) tick(state);
+    return state;
   }
 
-  namespace.aiDirector = Object.freeze({
-    generateGreeting,
-    isBusy: () => Boolean(inFlight),
-    validateConfig: () => {
-      settings();
-      return true;
-    },
-  });
+  Game.lifeDirector = Object.freeze({ addLog, advance, subjects });
 }(window));

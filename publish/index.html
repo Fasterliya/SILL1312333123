@@ -2,64 +2,109 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="color-scheme" content="light dark">
-  <title>Gamefy 空白起点</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content, user-scalable=no">
+  <meta name="color-scheme" content="light">
+  <title>华夏人生</title>
   <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./game.css">
   <script src="./config.js" defer></script>
   <script src="./content.js" defer></script>
   <script src="./sdk-adapter.js" defer></script>
   <script src="./storage.js" defer></script>
   <script src="./ai-director.js" defer></script>
   <script src="./view.js" defer></script>
+  <script src="./actions.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
-  <div class="app-shell" id="appShell" aria-busy="true">
-    <header class="topbar">
-      <div class="brand-lockup">
-        <p class="eyebrow" id="brandEyebrow"></p>
-        <h1 id="brandName"></h1>
+  <main class="app-shell">
+    <header class="hero">
+      <canvas id="heroCanvas" aria-hidden="true"></canvas>
+      <div class="hero-top">
+        <div class="seal">生</div>
+        <button class="icon-btn" id="resetBtn" type="button" title="重新开始" aria-label="重新开始">↻</button>
       </div>
-      <div class="connection" id="connectionState" role="status">
-        <span class="connection-dot" aria-hidden="true"></span>
-        <span id="connectionLabel"></span>
+      <div class="profile">
+        <p>华夏人生档案</p>
+        <h1 id="profileName">正在出生</h1>
+        <span id="profileMeta"></span>
       </div>
+      <time id="lifeDate"></time>
     </header>
 
-    <main>
-      <section class="stage" id="stage" aria-live="polite" aria-atomic="true">
-        <div class="stage-art" aria-hidden="true">
-          <span></span><span></span><span></span>
-        </div>
-        <div class="stage-label-row">
-          <span class="stage-label" id="stageLabel"></span>
-          <span class="spinner" id="spinner" hidden aria-hidden="true"></span>
-        </div>
-        <div class="avatar-frame" id="avatarFrame" hidden>
-          <img id="avatar" alt="">
-        </div>
-        <h2 id="stageTitle"></h2>
-        <p id="stageText"></p>
-      </section>
+    <section class="summary" aria-label="人生概况">
+      <div><span>年龄</span><strong id="ageValue">0岁</strong></div>
+      <div><span>阶段</span><strong id="stageValue">幼儿期</strong></div>
+      <div><span>现金</span><strong id="moneyValue">¥0</strong></div>
+    </section>
 
-      <section class="action-section" aria-labelledby="actionsTitle">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow" id="actionsEyebrow"></p>
-            <h2 id="actionsTitle"></h2>
+    <nav class="tabs" id="tabs" aria-label="人生页面">
+      <button type="button" class="active" data-tab="timelinePage">人生</button>
+      <button type="button" data-tab="familyPage">家庭</button>
+      <button type="button" data-tab="growthPage">成长</button>
+      <button type="button" data-tab="assetsPage">资产</button>
+    </nav>
+
+    <section class="tab-pages" id="tabPages">
+      <div class="page active" id="timelinePage">
+        <section class="panel stat-panel">
+          <div class="panel-title"><h2>当前状态</h2><span>五维状态</span></div>
+          <div class="stat-grid" id="statGrid"></div>
+          <div class="action-strip" id="actionStrip">
+            <button type="button" data-activity="study"><b>学</b><span>学习</span></button>
+            <button type="button" data-activity="sport"><b>炼</b><span>锻炼</span></button>
+            <button type="button" data-activity="social"><b>友</b><span>社交</span></button>
+            <button type="button" data-activity="rest"><b>闲</b><span>休息</span></button>
           </div>
-          <p id="actionsDescription"></p>
-        </div>
-        <div class="action-grid" id="actionGrid"></div>
-        <p class="empty-actions" id="emptyActions" hidden></p>
-      </section>
-    </main>
+        </section>
+        <section class="panel timeline-panel">
+          <div class="panel-title"><h2>人生纪事</h2><span>最近 60 条</span></div>
+          <div class="event-list" id="eventList"></div>
+        </section>
+      </div>
 
-    <footer>
-      <span id="footerText"></span>
-      <code id="footerHint"></code>
+      <div class="page" id="familyPage">
+        <section class="panel">
+          <div class="panel-title"><h2>家庭关系</h2><span>亲缘与陪伴</span></div>
+          <div class="family-list" id="familyList"></div>
+          <button class="wide-action" id="childPlanBtn" type="button">计划孩子</button>
+        </section>
+      </div>
+
+      <div class="page" id="growthPage">
+        <section class="panel">
+          <div class="panel-title"><h2>教育经历</h2><span>学业与考试</span></div>
+          <div id="educationPanel"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-title"><h2>职业生涯</h2><span>工作与晋升</span></div>
+          <div id="careerPanel"></div>
+        </section>
+      </div>
+
+      <div class="page" id="assetsPage">
+        <section class="panel">
+          <div class="panel-title"><h2>家庭资产</h2><span>房产与股票</span></div>
+          <div id="assetPanel"></div>
+        </section>
+      </div>
+    </section>
+
+    <footer class="time-controls">
+      <button id="monthBtn" type="button"><span>推进</span><strong>下个月</strong></button>
+      <button id="yearBtn" type="button"><span>快进</span><strong>下一年</strong></button>
     </footer>
+  </main>
+
+  <div class="decision-backdrop" id="decision" hidden>
+    <section class="decision-sheet" role="dialog" aria-modal="true" aria-labelledby="decisionTitle">
+      <span class="sheet-handle" aria-hidden="true"></span>
+      <p>关键人生选择</p>
+      <h2 id="decisionTitle"></h2>
+      <div class="decision-text" id="decisionText"></div>
+      <div class="decision-body" id="decisionBody"></div>
+    </section>
   </div>
+  <div class="toast" id="toast" role="status" hidden></div>
 </body>
 </html>

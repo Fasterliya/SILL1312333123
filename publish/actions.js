@@ -19,6 +19,12 @@
     const current = state();
     const person = current.family.find((item) => item.id === id);
     if (!person) return;
+    if (person.lastInteractionMonth === current.totalMonths) {
+      Game.view.showToast('本月已经和这位家人互动过', 'warning');
+      return;
+    }
+    person.lastInteractionMonth = current.totalMonths;
+    person.interactions += 1;
     const partner = current.romance.partnerId === id;
     if (person.relation === '朋友' && person.affection >= 68 && !current.romance.partnerId) {
       current.romance.partnerId = id;
@@ -101,7 +107,13 @@
     const current = state();
     const decision = current.pendingDecision;
     if (!decision) return;
-    if (decision.type === 'track') {
+    if (decision.type === 'highSchool') {
+      const school = C.highSchools.find((item) => `${current.hometown.city}${item.suffix}` === value)
+        || C.highSchools[C.highSchools.length - 1];
+      const schoolName = `${current.hometown.city}${school.suffix}`;
+      Game.social.enterSchool(current, schoolName, 'high', 5);
+      Game.lifeDirector.addLog(current, '高中录取', `你填报并被${schoolName}录取，学校类型为${school.type}。`, 'milestone');
+    } else if (decision.type === 'track') {
       const [track, electives] = value.split('|');
       current.education.track = track;
       current.education.electives = electives.split(',');
@@ -109,13 +121,12 @@
     } else if (decision.type === 'volunteer') {
       const school = C.universities.find((item) => item.name === value);
       current.education.university = school.name;
+      current.education.universityType = school.type;
       current.education.major = school.major;
-      current.education.school = school.name;
-      Game.lifeDirector.addLog(current, '大学录取', `你被${school.name}${school.major}专业录取。`, 'milestone');
-    } else {
-      const job = C.jobs.find((item) => item.name === value);
-      current.career = { job: job.name, salary: job.salary, level: 0, exp: 0 };
-      Game.lifeDirector.addLog(current, '职业起点', `你成为${job.name}，第一份月薪是 ¥${job.salary.toLocaleString()}。`, 'milestone');
+      Game.social.enterSchool(current, school.name, 'university', 6);
+      const city = C.cities.find((item) => item.city === school.city);
+      if (city) current.location = { province: city.province, city: city.city };
+      Game.lifeDirector.addLog(current, '大学录取', `你被${school.name}${school.major}专业录取，前往${school.city}求学。`, 'milestone');
     }
     current.pendingDecision = null;
     done();
@@ -127,7 +138,19 @@
     Game.view.el.decision.hidden = !d;
     if (!d) return;
     let options = [];
-    if (d.type === 'track') {
+    if (d.type === 'highSchool') {
+      Game.view.el.decisionTitle.textContent = `中考 ${d.score} 分，填报本地高中`;
+      Game.view.el.decisionText.textContent = `户籍地为${current.hometown.city}，可填报达到录取线的本地学校。`;
+      options = C.highSchools.filter((item) => d.score >= item.min)
+        .map((item) => ({
+          value: `${current.hometown.city}${item.suffix}`,
+          label: `${current.hometown.city}${item.suffix} · ${item.type} · 线${item.min}`,
+        }));
+      if (!options.length) {
+        const school = C.highSchools[C.highSchools.length - 1];
+        options = [{ value: `${current.hometown.city}${school.suffix}`, label: `${current.hometown.city}${school.suffix} · ${school.type}` }];
+      }
+    } else if (d.type === 'track') {
       Game.view.el.decisionTitle.textContent = '高考选科';
       Game.view.el.decisionText.textContent = '物理/历史二选一，再从化学、生物、地理、政治中选两门。';
       const pairs = [['化学', '生物'], ['化学', '地理'], ['化学', '政治'], ['生物', '地理'], ['生物', '政治'], ['地理', '政治']];
@@ -138,14 +161,8 @@
       Game.view.el.decisionTitle.textContent = `高考 ${d.score} 分，填报志愿`;
       Game.view.el.decisionText.textContent = '可选择达到投档线的院校与专业。';
       options = C.universities.filter((item) => d.score >= item.min)
-        .map((item) => ({ value: item.name, label: `${item.name} · ${item.major}` }));
-      if (!options.length) options = [{ value: '城市职业学院', label: '城市职业学院 · 现代服务' }];
-    } else {
-      Game.view.el.decisionTitle.textContent = '选择第一份工作';
-      Game.view.el.decisionText.textContent = '专业、能力与收入各有取舍，之后仍会获得晋升。';
-      const ability = current.stats.智力 + current.education.study / 4;
-      options = C.jobs.filter((job) => ability >= job.need || job.majors.includes(current.education.major))
-        .slice(0, 5).map((job) => ({ value: job.name, label: `${job.name} · ¥${job.salary.toLocaleString()}/月` }));
+        .map((item) => ({ value: item.name, label: `${item.name} · ${item.type} · ${item.major} · ${item.city}` }));
+      if (!options.length) options = [{ value: '城市职业学院', label: '城市职业学院 · 高职专科 · 机电技术 · 郑州' }];
     }
     Game.view.el.decisionBody.innerHTML = options.map((item) => (
       `<button data-choice="${item.value}">${item.label}</button>`

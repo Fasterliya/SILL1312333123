@@ -41,15 +41,16 @@
     const years = U.age(state);
     if (state.month !== 6) return;
     if (years === 6) {
-      state.education.school = '启明小学';
-      addLog(state, '小学入学', '你背上新书包，第一次走进正式课堂。', 'milestone');
+      const school = `${state.location.city}启明小学`;
+      Game.social.enterSchool(state, school, 'primary', 4);
+      addLog(state, '小学入学', `你背上新书包，走进${school}，班里有了新的同窗。`, 'milestone');
     } else if (years === 12) {
-      state.education.school = '新城初级中学';
-      addLog(state, '小学毕业', '你告别童年教室，升入初中。', 'milestone');
+      const school = `${state.location.city}新城初级中学`;
+      Game.social.enterSchool(state, school, 'middle', 5);
+      addLog(state, '小学毕业', `你告别童年教室，升入${school}。`, 'milestone');
     } else if (years === 15) {
       const result = exam(state, '中考');
-      state.education.school = result.total > 520 ? '市第一中学' : '新城高级中学';
-      addLog(state, '高中录取', `你被${state.education.school}录取。`, 'milestone');
+      state.pendingDecision = { type: 'highSchool', score: result.total };
     } else if (years === 16 && !state.education.track) {
       state.pendingDecision = { type: 'track' };
     } else if (years === 18 && !state.education.university) {
@@ -59,9 +60,12 @@
       }
       const result = exam(state, '高考');
       state.pendingDecision = { type: 'volunteer', score: result.total };
-    } else if (years === 22 && state.education.university && !state.career.job) {
+    } else if (years === 22 && state.education.university && !state.education.graduated) {
+      Game.social.archiveSchool(state);
       addLog(state, '大学毕业', `你从${state.education.university}毕业，获得${state.education.major}专业学历。`, 'milestone');
-      state.pendingDecision = { type: 'job' };
+      state.education.graduated = true;
+      state.education.school = '已毕业';
+      state.education.schoolStage = 'graduate';
     }
   }
 
@@ -102,7 +106,7 @@
     const guaranteedMeeting = years === 20 && state.totalMonths % 12 === 0;
     if (years >= 18 && !state.romance.partnerId && !hasFriend
       && (guaranteedMeeting || Math.random() < 0.035)) {
-      const person = U.person('朋友', U.random(C.surnames), U.between(years - 2, years + 3));
+      const person = U.person('朋友', U.random(C.surnames), U.between(-2, 3));
       person.affection = 52;
       state.family.push(person);
       addLog(state, '新的相遇', `你在一次活动中认识了${person.name}，彼此留下不错的印象。`, 'good');
@@ -155,6 +159,7 @@
       state.stats.健康 = U.clamp(state.stats.健康 - (U.age(state) > 55 ? 2 : 0), 0, 100);
     }
     state.monthActionTaken = false;
+    Game.profile.updateGrowth(state);
     finances(state);
     relationships(state);
     schoolMilestones(state);

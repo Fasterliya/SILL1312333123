@@ -7,10 +7,14 @@
   <title>华夏人生</title>
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./game.css">
+  <link rel="stylesheet" href="./menus.css">
   <script src="./config.js" defer></script>
   <script src="./content.js" defer></script>
   <script src="./sdk-adapter.js" defer></script>
   <script src="./storage.js" defer></script>
+  <script src="./profile.js" defer></script>
+  <script src="./social.js" defer></script>
+  <script src="./career.js" defer></script>
   <script src="./ai-director.js" defer></script>
   <script src="./view.js" defer></script>
   <script src="./actions.js" defer></script>
@@ -40,8 +44,9 @@
 
     <nav class="tabs" id="tabs" aria-label="人生页面">
       <button type="button" class="active" data-tab="timelinePage">人生</button>
-      <button type="button" data-tab="familyPage">家庭</button>
-      <button type="button" data-tab="growthPage">成长</button>
+      <button type="button" data-tab="rolePage">角色</button>
+      <button type="button" data-tab="relationsPage">关系</button>
+      <button type="button" data-tab="developmentPage">发展</button>
       <button type="button" data-tab="assetsPage">资产</button>
     </nav>
 
@@ -57,36 +62,92 @@
             <button type="button" data-activity="rest"><b>闲</b><span>休息</span></button>
           </div>
         </section>
-        <section class="panel timeline-panel">
+        <section class="panel">
           <div class="panel-title"><h2>人生纪事</h2><span>最近 60 条</span></div>
           <div class="event-list" id="eventList"></div>
         </section>
       </div>
 
-      <div class="page" id="familyPage">
-        <section class="panel">
-          <div class="panel-title"><h2>家庭关系</h2><span>亲缘与陪伴</span></div>
-          <div class="family-list" id="familyList"></div>
-          <button class="wide-action" id="childPlanBtn" type="button">计划孩子</button>
-        </section>
+      <div class="page" id="rolePage">
+        <nav class="subnav" data-subnav="role">
+          <button class="active" data-subtarget="roleArchive">档案</button>
+          <button data-subtarget="roleAppearance">外观</button>
+        </nav>
+        <div class="subpage active" id="roleArchive">
+          <section class="panel portrait-panel">
+            <button class="portrait-slot" id="portraitSlot" type="button" title="生成或重绘角色立绘" aria-label="生成或重绘角色立绘"></button>
+            <div class="portrait-actions"><p id="portraitStatus"></p>
+              <button id="generatePortraitBtn" type="button">生成角色立绘</button></div>
+          </section>
+          <section class="panel">
+            <div class="panel-title"><h2>角色信息</h2><span>成长档案</span></div>
+            <div class="profile-facts" id="profileFacts"></div>
+            <h3>兴趣倾向</h3>
+            <div class="interest-grid" id="interestGrid"></div>
+          </section>
+        </div>
+        <div class="subpage" id="roleAppearance">
+          <section class="panel">
+          <div class="panel-title"><h2>外观与穿着</h2><span>造型参数</span></div>
+            <div class="profile-editor" id="profileEditor"></div>
+          </section>
+        </div>
       </div>
 
-      <div class="page" id="growthPage">
-        <section class="panel">
+      <div class="page" id="relationsPage">
+        <nav class="subnav" data-subnav="relations">
+          <button class="active" data-subtarget="familySubpage">家庭</button>
+          <button data-subtarget="schoolSubpage">同窗</button>
+          <button data-subtarget="phoneSubpage">手机</button>
+        </nav>
+        <div class="subpage active" id="familySubpage"><section class="panel">
+          <div class="panel-title"><h2>家庭关系</h2><span>亲缘与陪伴</span></div>
+          <div id="familyList"></div>
+          <button class="wide-action" id="childPlanBtn" type="button">计划孩子</button>
+        </section></div>
+        <div class="subpage" id="schoolSubpage"><section class="panel">
+          <div class="panel-title"><h2>当前同窗</h2><span>在校关系</span></div>
+          <div id="classmatesList"></div>
+        </section></div>
+        <div class="subpage" id="phoneSubpage"><section class="panel">
+          <div class="panel-title"><h2>手机联系人</h2><span>历史同窗</span></div>
+          <div id="phoneList"></div>
+        </section></div>
+      </div>
+
+      <div class="page" id="developmentPage">
+        <nav class="subnav" data-subnav="development">
+          <button class="active" data-subtarget="studySubpage">学习</button>
+          <button data-subtarget="careerSubpage">求职</button>
+          <button data-subtarget="citySubpage">迁居</button>
+        </nav>
+        <div class="subpage active" id="studySubpage"><section class="panel">
           <div class="panel-title"><h2>教育经历</h2><span>学业与考试</span></div>
           <div id="educationPanel"></div>
-        </section>
-        <section class="panel">
-          <div class="panel-title"><h2>职业生涯</h2><span>工作与晋升</span></div>
+        </section></div>
+        <div class="subpage" id="careerSubpage"><section class="panel">
+          <div class="panel-title"><h2>职业市场</h2><span>当前招聘</span></div>
           <div id="careerPanel"></div>
-        </section>
+        </section></div>
+        <div class="subpage" id="citySubpage"><section class="panel">
+          <div class="panel-title"><h2>城市迁移</h2><span>城市列表</span></div>
+          <div id="cityPanel"></div>
+        </section></div>
       </div>
 
       <div class="page" id="assetsPage">
-        <section class="panel">
-          <div class="panel-title"><h2>家庭资产</h2><span>房产与股票</span></div>
-          <div id="assetPanel"></div>
-        </section>
+        <nav class="subnav" data-subnav="assets">
+          <button class="active" data-subtarget="propertySubpage">房产</button>
+          <button data-subtarget="stockSubpage">股票</button>
+        </nav>
+        <div class="subpage active" id="propertySubpage"><section class="panel">
+          <div class="panel-title"><h2>房产配置</h2><span>首付与月供</span></div>
+          <div id="propertyPanel"></div>
+        </section></div>
+        <div class="subpage" id="stockSubpage"><section class="panel">
+          <div class="panel-title"><h2>股票市场</h2><span>每月价格波动</span></div>
+          <div id="stockPanel"></div>
+        </section></div>
       </div>
     </section>
 

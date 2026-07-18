@@ -20,6 +20,12 @@
     Game.actions.renderDecision();
   }
 
+  function finish(result) {
+    Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
+    refresh();
+    save();
+  }
+
   function advance(months) {
     if (busy || state.pendingDecision || state.gameOver) return;
     busy = true;
@@ -34,16 +40,17 @@
       return;
     }
     const map = {
-      study: ['专注学习', '你认真学习，为下一次考试积累实力。', ['智力', 2], ['心情', -2]],
-      sport: ['锻炼身体', '一次痛快的运动让身体更有力量。', ['体魄', 3], ['健康', 2]],
-      social: ['主动社交', '你和身边的人聊了很久，关系更自然。', ['魅力', 2], ['心情', 2]],
-      rest: ['好好休息', '你放慢脚步，给自己留出喘息空间。', ['心情', 5], ['健康', 1]],
+      study: ['专注学习', '你认真学习，为下一次考试积累实力。', ['智力', 2], ['心情', -2], '科学'],
+      sport: ['锻炼身体', '一次痛快的运动让身体更有力量。', ['体魄', 3], ['健康', 2], '运动'],
+      social: ['主动社交', '你和身边的人聊了很久，关系更自然。', ['魅力', 2], ['心情', 2], '社交'],
+      rest: ['好好休息', '你放慢脚步，给自己留出喘息空间。', ['心情', 5], ['健康', 1], '文学'],
     };
     const item = map[type];
     if (!item) return;
-    item.slice(2).forEach(([name, delta]) => {
+    item.slice(2, 4).forEach(([name, delta]) => {
       state.stats[name] = U.clamp(state.stats[name] + delta, 0, 100);
     });
+    state.profile.interests[item[4]] = U.clamp(state.profile.interests[item[4]] + 3, 0, 100);
     if (type === 'study') state.education.study += 7;
     state.monthActionTaken = true;
     Game.lifeDirector.addLog(state, item[0], item[1], 'good');
@@ -52,42 +59,79 @@
     save();
   }
 
+  function switchTabs(event) {
+    const tab = event.target.closest('[data-tab]');
+    if (!tab) return;
+    Game.view.el.tabs.querySelectorAll('button').forEach((item) => item.classList.toggle('active', item === tab));
+    Game.view.el.tabPages.querySelectorAll('.page').forEach((page) => {
+      page.classList.toggle('active', page.id === tab.dataset.tab);
+    });
+  }
+
+  function switchSubpage(event) {
+    const button = event.target.closest('[data-subtarget]');
+    if (!button) return;
+    const nav = button.closest('[data-subnav]');
+    const page = nav.closest('.page');
+    nav.querySelectorAll('button').forEach((item) => item.classList.toggle('active', item === button));
+    page.querySelectorAll(':scope > .subpage').forEach((item) => {
+      item.classList.toggle('active', item.id === button.dataset.subtarget);
+    });
+  }
+
+  function contactClick(event) {
+    const button = event.target.closest('[data-contact]');
+    if (button) finish(Game.social.interact(state, button.dataset.contact, button.dataset.contactAction));
+  }
+
+  function assetClick(event) {
+    const stock = event.target.closest('[data-stock]');
+    const house = event.target.closest('[data-house]');
+    if (stock) Game.actions.trade(stock.dataset.stock, stock.dataset.trade);
+    if (house) Game.actions.buyHouse(Number(house.dataset.house));
+  }
+
   function bind() {
     Game.view.el.monthBtn.addEventListener('click', () => advance(1));
     Game.view.el.yearBtn.addEventListener('click', () => advance(12));
-    Game.view.el.actionStrip.addEventListener('click', (event) => {
-      activity(event.target.closest('[data-activity]')?.dataset.activity);
+    Game.view.el.actionStrip.addEventListener('click', (event) => activity(event.target.closest('[data-activity]')?.dataset.activity));
+    Game.view.el.familyList.addEventListener('click', (event) => Game.actions.interact(event.target.closest('[data-person]')?.dataset.person));
+    Game.view.el.classmatesList.addEventListener('click', contactClick);
+    Game.view.el.phoneList.addEventListener('click', contactClick);
+    Game.view.el.propertyPanel.addEventListener('click', assetClick);
+    Game.view.el.stockPanel.addEventListener('click', assetClick);
+    Game.view.el.careerPanel.addEventListener('click', (event) => {
+      const job = event.target.closest('[data-job]');
+      if (job) finish(Game.careerSystem.apply(state, job.dataset.job));
     });
-    Game.view.el.familyList.addEventListener('click', (event) => {
-      Game.actions.interact(event.target.closest('[data-person]')?.dataset.person);
-    });
-    Game.view.el.assetPanel.addEventListener('click', (event) => {
-      const stock = event.target.closest('[data-stock]');
-      const house = event.target.closest('[data-house]');
-      if (stock) Game.actions.trade(stock.dataset.stock, stock.dataset.trade);
-      if (house) Game.actions.buyHouse(Number(house.dataset.house));
+    Game.view.el.cityPanel.addEventListener('click', (event) => {
+      const city = event.target.closest('[data-city]');
+      if (!city || !root.confirm(`确定迁居${city.dataset.city}吗？当前非自由职业会结束。`)) return;
+      finish(Game.careerSystem.move(state, city.dataset.city));
     });
     Game.view.el.decisionBody.addEventListener('click', (event) => {
       const choice = event.target.closest('[data-choice]');
       if (choice) Game.actions.decide(choice.dataset.choice);
     });
-    Game.view.el.tabs.addEventListener('click', (event) => {
-      const tab = event.target.closest('[data-tab]');
-      if (!tab) return;
-      Game.view.el.tabs.querySelectorAll('button').forEach((item) => item.classList.toggle('active', item === tab));
-      Game.view.el.tabPages.querySelectorAll('.page').forEach((page) => {
-        page.classList.toggle('active', page.id === tab.dataset.tab);
-      });
+    Game.view.el.tabs.addEventListener('click', switchTabs);
+    document.querySelectorAll('[data-subnav]').forEach((nav) => nav.addEventListener('click', switchSubpage));
+    Game.view.el.profileEditor.addEventListener('change', (event) => {
+      const input = event.target.closest('[data-profile-field]');
+      if (input) Game.profile.edit(input.dataset.profileField, input.value);
     });
-    root.addEventListener('resize', Game.view.drawHero);
+    Game.view.el.generatePortraitBtn.addEventListener('click', Game.profile.generate);
+    Game.view.el.portraitSlot.addEventListener('click', Game.profile.generate);
     Game.view.el.childPlanBtn.addEventListener('click', Game.actions.planChild);
     Game.view.el.resetBtn.addEventListener('click', reset);
+    root.addEventListener('resize', Game.view.drawHero);
   }
 
   async function reset() {
     if (!root.confirm('确定重新开始一段人生吗？当前存档会被覆盖。')) return;
+    Game.profile.cancel();
     await Game.storage.reset();
     state = U.createState();
+    Game.profile.updateGrowth(state);
     refresh();
     save();
   }
@@ -95,8 +139,13 @@
   async function boot() {
     try {
       Game.view.init();
-      state = await Game.storage.load() || U.createState();
+      state = U.upgradeState(await Game.storage.load());
+      Game.profile.configure({ getState: () => state, refresh, save });
       Game.actions.configure({ getState: () => state, refresh, save });
+      Game.profile.updateGrowth(state);
+      if (!['家中', '已毕业'].includes(state.education.school) && !state.contacts.length) {
+        Game.social.enterSchool(state, state.education.school, state.education.schoolStage, 5);
+      }
       bind();
       refresh();
       Game.sdkAdapter.progress('runtime_initializing', '人生档案已建立');
@@ -111,9 +160,6 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
-  } else {
-    boot();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 }(window));

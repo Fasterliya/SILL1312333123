@@ -5,9 +5,12 @@
   const U = Game.content;
   const ids = [
     'profileName', 'profileMeta', 'ageValue', 'stageValue', 'moneyValue', 'lifeDate',
-    'statGrid', 'eventList', 'familyList', 'educationPanel', 'assetPanel', 'careerPanel',
-    'decision', 'decisionTitle', 'decisionText', 'decisionBody', 'monthBtn', 'yearBtn',
-    'actionStrip', 'toast', 'tabPages', 'tabs', 'heroCanvas', 'resetBtn', 'childPlanBtn',
+    'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
+    'educationPanel', 'careerPanel', 'cityPanel', 'propertyPanel', 'stockPanel',
+    'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
+    'profileEditor', 'interestGrid', 'decision', 'decisionTitle', 'decisionText',
+    'decisionBody', 'monthBtn', 'yearBtn', 'actionStrip', 'toast', 'tabPages',
+    'tabs', 'heroCanvas', 'resetBtn', 'childPlanBtn',
   ];
   const el = {};
   let toastTimer = 0;
@@ -33,7 +36,6 @@
     canvas.height = height * ratio;
     const ctx = canvas.getContext('2d');
     ctx.scale(ratio, ratio);
-    ctx.clearRect(0, 0, width, height);
     ctx.fillStyle = '#f5d28c';
     ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = '#cf3f32';
@@ -70,8 +72,7 @@
   function logCards(state) {
     return state.logs.map((item) => {
       const years = Math.floor(item.month / 12);
-      const months = item.month % 12;
-      return `<article class="event ${item.tone}"><time>${years}岁${months}月</time>
+      return `<article class="event ${item.tone}"><time>${years}岁${item.month % 12}月</time>
         <div><strong>${item.title}</strong><p>${item.text}</p></div></article>`;
     }).join('');
   }
@@ -85,52 +86,47 @@
   }
 
   function familyCards(state) {
-    const summary = `<div class="detail-row family-wealth"><span>原生家庭资产</span>
-      <b>${money(state.familyWealth)}</b></div>`;
-    const people = state.family.map((item) => `
+    const summary = `<div class="detail-row family-wealth"><span>原生家庭资产</span><b>${money(state.familyWealth)}</b></div>`;
+    return summary + state.family.map((item) => `
       <article class="person"><div class="person-avatar">${item.name.slice(-1)}</div>
         <div class="person-main"><strong>${item.name}</strong>
-        <span>${item.relation} · ${U.personAge(state, item)}岁${item.job ? ` · ${item.job}` : ''} · ${item.status}</span>
+        <span>${item.relation} · ${U.personAge(state, item)}岁 · ${item.personality}${item.job ? ` · ${item.job}` : ''}</span>
         <div class="affection"><i style="width:${item.affection}%"></i></div></div>
         <button data-person="${item.id}" ${item.status === '已故' ? 'disabled' : ''}>${item.status === '已故' ? '追忆' : relationAction(item, state)}</button></article>`).join('');
-    return summary + people;
   }
 
   function education(state) {
     const latest = state.education.exams[0];
     const scores = latest ? Object.entries(latest.scores).map(([name, score]) => (
       `<span>${name}<b>${score}</b></span>`
-    )).join('') : '<p class="empty">还没有考试记录。</p>';
+    )).join('') : '<p class="empty-state">还没有考试记录。</p>';
     const track = state.education.track
       ? `${state.education.track} + ${state.education.electives.join('、')}` : '尚未选科';
     return `<div class="detail-row"><span>当前阶段</span><b>${U.gradeLabel(state)}</b></div>
       <div class="detail-row"><span>学校</span><b>${state.education.school}</b></div>
-      <div class="detail-row"><span>选科</span><b>${track}</b></div>
+      <div class="detail-row"><span>学校类型</span><b>${state.education.universityType || '-'}</b></div>
+      <div class="detail-row"><span>专业/选科</span><b>${state.education.major || track}</b></div>
       <div class="detail-row"><span>学习积累</span><b>${state.education.study}</b></div>
       <h3>${latest ? `${latest.label} · ${latest.total}分` : '考试成绩'}</h3>
       <div class="score-grid">${scores}</div>`;
   }
 
-  function career(state) {
-    const c = state.career;
-    return `<div class="career-head"><div><span>当前职业</span>
-      <strong>${c.job || '尚未步入职场'}</strong></div><b>${c.job ? `${money(c.salary)}/月` : '在校'}</b></div>
-      <div class="detail-row"><span>职级</span><b>${c.job ? `L${c.level + 1}` : '-'}</b></div>
-      <div class="detail-row"><span>工作经验</span><b>${c.exp}个月</b></div>`;
+  function properties(state) {
+    const house = state.assets.house ? state.assets.house.name : '暂无房产';
+    return `<div class="detail-row"><span>当前城市</span><b>${state.location.city}</b></div>
+      <div class="detail-row"><span>住房</span><b>${house}</b></div>
+      <div class="detail-row"><span>月供</span><b>${money(state.assets.mortgage)}</b></div>
+      <div class="house-actions" id="houseActions"></div>`;
   }
 
-  function assets(state) {
-    const house = state.assets.house ? state.assets.house.name : '暂无房产';
-    const stocks = Object.entries(state.assets.stocks).map(([name, item]) => {
+  function stocks(state) {
+    return Object.entries(state.assets.stocks).map(([name, item]) => {
       const delta = item.price - item.previous;
       return `<article class="stock"><div><strong>${name}</strong><span>${item.shares}股</span></div>
         <b class="${delta >= 0 ? 'up' : 'down'}">¥${item.price.toFixed(2)}</b>
         <button data-stock="${name}" data-trade="buy">买100</button>
         <button data-stock="${name}" data-trade="sell">卖100</button></article>`;
     }).join('');
-    return `<div class="detail-row"><span>住房</span><b>${house}</b></div>
-      <div class="detail-row"><span>月供</span><b>${money(state.assets.mortgage)}</b></div>
-      <div class="house-actions" id="houseActions"></div><h3>股票市场</h3>${stocks}`;
   }
 
   function render(state) {
@@ -144,15 +140,17 @@
     el.statGrid.innerHTML = statCards(state);
     el.eventList.innerHTML = logCards(state);
     el.familyList.innerHTML = familyCards(state);
+    el.classmatesList.innerHTML = Game.social.renderSchool(state);
+    el.phoneList.innerHTML = Game.social.renderPhone(state);
     el.educationPanel.innerHTML = education(state);
-    el.careerPanel.innerHTML = career(state);
-    el.assetPanel.innerHTML = assets(state);
+    el.careerPanel.innerHTML = Game.careerSystem.renderCareer(state, money);
+    el.cityPanel.innerHTML = Game.careerSystem.renderCities(state);
+    el.propertyPanel.innerHTML = properties(state);
+    el.stockPanel.innerHTML = stocks(state);
+    Game.profile.render(state, el);
     const partner = state.family.find((item) => item.id === state.romance.partnerId);
-    const canPlanChild = state.romance.married && partner?.status === '健康';
-    el.childPlanBtn.disabled = !canPlanChild || Boolean(state.romance.pendingBirth);
-    el.childPlanBtn.textContent = state.romance.pendingBirth
-      ? `期待新生命 · ${state.romance.pendingBirth}个月`
-      : '计划孩子';
+    el.childPlanBtn.disabled = !state.romance.married || partner?.status !== '健康' || Boolean(state.romance.pendingBirth);
+    el.childPlanBtn.textContent = state.romance.pendingBirth ? `期待新生命 · ${state.romance.pendingBirth}个月` : '计划孩子';
     el.monthBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
     el.yearBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
   }
@@ -162,7 +160,7 @@
     el.toast.textContent = message;
     el.toast.dataset.tone = tone || 'normal';
     el.toast.hidden = false;
-    toastTimer = root.setTimeout(() => { el.toast.hidden = true; }, 2200);
+    toastTimer = root.setTimeout(() => { el.toast.hidden = true; }, 2400);
   }
 
   Game.view = Object.freeze({ el, init, render, showToast, money, drawHero });

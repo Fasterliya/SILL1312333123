@@ -3,21 +3,13 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const C = Game.config;
+  const random = (list) => list[Math.floor(Math.random() * list.length)];
+  const between = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const makeName = (surname) => (surname || random(C.surnames)) + random(C.givenNames);
 
-  function random(list) {
-    return list[Math.floor(Math.random() * list.length)];
-  }
-
-  function between(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-  }
-
-  function makeName(surname) {
-    return (surname || random(C.surnames)) + random(C.givenNames);
+  function interestSet() {
+    return Object.fromEntries(C.interests.map((name) => [name, between(25, 68)]));
   }
 
   function person(relation, surname, age, gender) {
@@ -29,7 +21,13 @@
       baseAge: age,
       bornAt: 0,
       affection: between(48, 78),
-      job: relation === '父亲' || relation === '母亲' ? random(C.parentJobs) : '',
+      personality: random(C.personalities),
+      interests: interestSet(),
+      interactions: 0,
+      lastInteractionMonth: -1,
+      phoneUnlocked: false,
+      school: '',
+      job: ['父亲', '母亲'].includes(relation) ? random(C.parentJobs) : '',
       status: '健康',
     };
   }
@@ -37,11 +35,32 @@
   function log(title, text, tone, month) {
     return {
       id: `e-${month}-${Math.random().toString(36).slice(2, 6)}`,
-      title,
-      text,
-      tone: tone || 'normal',
-      month,
+      title, text, tone: tone || 'normal', month,
     };
+  }
+
+  function profile() {
+    return {
+      height: 50,
+      weight: 3.4,
+      growthSeed: between(-4, 4),
+      hairColor: '黑色',
+      temperament: random(C.appearance.temperament),
+      bodyType: '匀称',
+      hairstyle: '胎毛短发',
+      outfit: '婴儿连体衣',
+      personality: random(C.personalities),
+      interests: interestSet(),
+      styleStage: -1,
+      portraitUrl: null,
+      portraitTaskId: null,
+    };
+  }
+
+  function stockState() {
+    return Object.fromEntries(Object.entries(C.stocks).map(([name, price]) => (
+      [name, { price, shares: 0, previous: price }]
+    )));
   }
 
   function createState() {
@@ -53,60 +72,72 @@
     const family = [father, mother];
     if (Math.random() < 0.28) {
       const relation = random(['哥哥', '姐姐']);
-      const sibling = person(relation, surname, between(2, 8), relation === '哥哥' ? '男' : '女');
-      family.push(sibling);
+      family.push(person(relation, surname, between(2, 8), relation === '哥哥' ? '男' : '女'));
     }
     return {
-      version: 1,
+      version: 2,
       updatedAt: new Date().toISOString(),
       name: makeName(surname),
       surname,
       gender,
       location: { province: location[0], city: location[1] },
+      hometown: { province: location[0], city: location[1] },
       year: C.startYear,
-      month: between(1, 12),
+      month: C.startMonth,
       totalMonths: 0,
-      stats: {
-        健康: between(72, 94),
-        心情: between(68, 90),
-        智力: between(46, 66),
-        魅力: between(42, 68),
-        体魄: between(40, 64),
-      },
+      profile: profile(),
+      stats: { 健康: between(72, 94), 心情: between(68, 90), 智力: between(46, 66), 魅力: between(42, 68), 体魄: between(40, 64) },
       money: between(300, 1800),
       familyWealth: between(90000, 850000),
       family,
+      contacts: [],
       education: {
-        study: 0, track: null, electives: [], school: '家中',
-        university: null, major: null, exams: [],
+        study: 0, track: null, electives: [], school: '家中', schoolStage: 'home',
+        university: null, universityType: null, major: null, graduated: false, exams: [],
       },
-      career: { job: null, salary: 0, level: 0, exp: 0 },
+      career: { job: null, jobId: null, salary: 0, level: 0, exp: 0, applications: [] },
       romance: { partnerId: null, married: false, pendingBirth: 0 },
-      assets: {
-        house: null, mortgage: 0,
-        stocks: Object.fromEntries(Object.entries(C.stocks).map(([name, price]) => (
-          [name, { price, shares: 0, previous: price }]
-        ))),
-      },
+      assets: { house: null, mortgage: 0, stocks: stockState() },
       pendingDecision: null,
       monthActionTaken: false,
       gameOver: false,
-      logs: [
-        log('呱呱坠地', `你出生在${location[0]}${location[1]}，父母为你取名${surname}家新生命。`, 'milestone', 0),
-      ],
+      logs: [log('呱呱坠地', `你出生在${location[0]}${location[1]}，父母为你取名${surname}家新生命。`, 'milestone', 0)],
     };
   }
 
-  function age(state) {
-    return Math.floor(state.totalMonths / 12);
+  function fillPerson(item) {
+    item.personality ||= random(C.personalities);
+    item.interests ||= interestSet();
+    item.interactions ||= 0;
+    item.lastInteractionMonth ??= -1;
+    item.phoneUnlocked ??= false;
+    item.school ||= '';
+    return item;
   }
 
-  function stage(ageYears) {
-    return C.stages.find((item) => ageYears <= item.max) || C.stages[C.stages.length - 1];
+  function upgradeState(state) {
+    if (!state) return createState();
+    state.version = 2;
+    state.hometown ||= { ...state.location };
+    state.profile ||= profile();
+    state.profile.portraitUrl ??= null;
+    state.profile.portraitTaskId ??= null;
+    state.family = (state.family || []).map(fillPerson);
+    state.contacts = (state.contacts || []).map(fillPerson);
+    state.education.schoolStage ||= 'home';
+    state.education.universityType ??= null;
+    state.education.graduated ??= false;
+    state.career.jobId ??= null;
+    state.career.applications ||= [];
+    state.assets.stocks ||= stockState();
+    return state;
   }
+
+  const age = (state) => Math.floor(state.totalMonths / 12);
+  const stage = (years) => C.stages.find((item) => years <= item.max) || C.stages.at(-1);
 
   function personAge(state, item) {
-    if (item.relation === '儿子' || item.relation === '女儿') {
+    if (['儿子', '女儿'].includes(item.relation)) {
       return Math.max(0, Math.floor((state.totalMonths - item.bornAt) / 12));
     }
     return item.baseAge + age(state);
@@ -122,6 +153,7 @@
   }
 
   Game.content = Object.freeze({
-    random, between, clamp, person, log, createState, age, stage, personAge, gradeLabel,
+    random, between, clamp, makeName, interestSet, person, log,
+    createState, upgradeState, age, stage, personAge, gradeLabel,
   });
 }(window));

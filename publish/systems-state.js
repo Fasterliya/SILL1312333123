@@ -79,6 +79,11 @@
     state.career.skills ||= {};
     state.career.projects = Array.isArray(state.career.projects) ? state.career.projects.slice(-12) : [];
     state.career.burnout = Math.max(0, Math.min(100, Number(state.career.burnout) || 0));
+    state.career.management = Boolean(state.career.management);
+    state.workplace = state.workplace && typeof state.workplace === 'object' ? state.workplace
+      : { companyId: null, departmentId: null, leaderId: null, rosterIds: [], reportIds: [] };
+    state.workplace.rosterIds = Array.isArray(state.workplace.rosterIds) ? state.workplace.rosterIds : [];
+    state.workplace.reportIds = Array.isArray(state.workplace.reportIds) ? state.workplace.reportIds : [];
     Game.educationSystem.ensure(state);
     const university = Game.config.universities.find((item) => (
       item.id === state.education.universityId || item.name === state.education.university

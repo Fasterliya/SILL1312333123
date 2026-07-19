@@ -143,6 +143,7 @@
       ${section('遗传信息', 'DNA 与成长倾向', inherited, false)}
       ${section('人生状态', '学业、职业与家庭', life, false)}
       ${Game.familyLinks.render(state, person)}
+      ${Game.workplace.personSection(state, person)}
       ${Game.relationshipMemory.render(person)}</div>
       <details class="record-section npc-editor"><summary><span>编辑角色外观</span>
       <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}</div></details>

@@ -70,6 +70,8 @@
   }
 
   function handleCareer(event, state) {
+    const workplace = event.target.closest('[data-workplace-action]');
+    if (workplace) return finish(Game.workplace.act(state, workplace.dataset.workplaceAction)), true;
     const specialty = event.target.closest('[data-career-specialty]');
     if (specialty) return finish(Game.careerSpecialties.choose(state, specialty.dataset.careerSpecialty)), true;
     const careerAction = event.target.closest('[data-career-action]');

@@ -29,9 +29,9 @@
   function currentJob(state, money) {
     if (!state.career.job) return '<p class="empty-state">当前没有工作。先筛选方向，再打开职位详情确认应聘。</p>';
     return `<section class="career-current"><span>${state.career.company || '当前单位'}</span>
-      <strong>${state.career.job} · L${state.career.level + 1}</strong><b>${money(state.career.salary)}/月</b>
+      <strong>${state.career.job} · L${state.career.level + 1}${state.career.management ? ' · 管理岗' : ''}</strong><b>${money(state.career.salary)}/月</b>
       <small>绩效 ${state.career.performance} · 经验 ${state.career.exp}</small></section>${workActions(state)}
-      ${Game.careerSpecialties.render(state)}`;
+      ${Game.workplace.render(state)}${Game.careerSpecialties.render(state)}`;
   }
 
   function companyDirectory(state) {

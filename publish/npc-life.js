@@ -87,6 +87,10 @@
     if (!job) return;
     person.job = job.name;
     person.company = job.company || '城市企业';
+    person.companyId = job.companyId || '';
+    person.departmentId = Game.workplace.departmentId(job);
+    person.departmentName = Game.workplace.departmentName(job);
+    person.careerRank = age >= 35 ? 2 : (age >= 27 ? 1 : 0);
     person.careerCity = job.cities?.length ? U.random(job.cities) : (person.metCity || state.location.city);
   }
 

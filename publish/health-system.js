@@ -82,7 +82,10 @@
     const salary = state.career.salary || 0;
     state.health.retired = true;
     state.health.pension = Math.max(1800, Math.round(salary * 0.34 + state.health.retirementFund / 240));
-    Object.assign(state.career, { job: null, jobId: null, company: null, salary: 0, performance: 0 });
+    Object.assign(state.career, {
+      job: null, jobId: null, company: null, salary: 0, performance: 0, management: false,
+    });
+    Game.workplace.leave(state);
     Game.lifeDirector.addLog(state, '正式退休', `你开始领取每月 ¥${state.health.pension.toLocaleString()} 的养老金。`, 'milestone');
     return { ok: true, message: `退休完成，每月养老金 ¥${state.health.pension.toLocaleString()}` };
   }

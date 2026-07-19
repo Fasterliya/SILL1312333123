@@ -59,25 +59,30 @@
     if (!eligible(state, job)) return { ok: false, message: `该职位要求${requirementLabel(job.education || 0)}` };
     const chance = U.clamp(0.18 + (ability(state, job) - job.need) / 105, 0.08, 0.92);
     const accepted = Math.random() < chance;
+    const employer = job.company || `${state.location.city}${job.industry || '城市'}企业`;
     state.career.applications.push({
-      jobId, name: job.name, company: job.company, city: state.location.city,
+      jobId, name: job.name, company: employer, city: state.location.city,
       month: state.totalMonths, accepted,
     });
     state.career.applications = state.career.applications.slice(-30);
     if (!accepted) {
-      Game.lifeDirector.addLog(state, '求职未录取', `${job.company}婉拒了${job.name}申请。`, 'normal');
-      return { ok: false, message: `${job.company}未录取，参考概率 ${Math.round(chance * 100)}%` };
+      Game.lifeDirector.addLog(state, '求职未录取', `${employer}婉拒了${job.name}申请。`, 'normal');
+      return { ok: false, message: `${employer}未录取，参考概率 ${Math.round(chance * 100)}%` };
     }
     state.career.job = job.name;
     state.career.jobId = job.id;
-    state.career.company = job.company;
+    state.career.company = employer;
     state.career.salary = Math.round(job.salary * Game.cityLife.salaryFactor(state));
     state.career.level = 0;
     state.career.exp = 0;
     state.career.performance = 10;
     state.career.lastPromotionMonth = state.totalMonths - 6;
-    Game.lifeDirector.addLog(state, '获得工作', `你加入${job.company}担任${job.name}。`, 'milestone');
-    return { ok: true, message: `${job.company}录取了你` };
+    state.career.management = false;
+    const employerJob = { ...job, company: employer, companyId: job.companyId || `local-${state.location.city}-${job.id}` };
+    if (job.freelance) Game.workplace.leave(state);
+    else Game.workplace.join(state, employerJob);
+    Game.lifeDirector.addLog(state, '获得工作', `你加入${employer}担任${job.name}。`, 'milestone');
+    return { ok: true, message: `${employer}录取了你` };
   }
 
   function work(state, type) {
@@ -119,6 +124,7 @@
     state.career.level += 1;
     state.career.salary = Math.round(state.career.salary * 1.18);
     state.career.performance = Math.max(10, state.career.performance - 28);
+    Game.workplace.onPromotion(state);
     Game.lifeDirector.addLog(state, '申请晋升成功', `你升至L${state.career.level + 1}，月薪提高。`, 'milestone');
     return { ok: true, message: `晋升成功，月薪 ¥${state.career.salary.toLocaleString()}` };
   }
@@ -133,8 +139,9 @@
       Game.lifeDirector.addLog(state, '离开原岗位', `迁居让你结束了${state.career.company || ''}${state.career.job}的工作。`, 'normal');
       Object.assign(state.career, {
         job: null, jobId: null, company: null, salary: 0, exp: 0,
-        performance: 0, lastPromotionMonth: -12,
+        performance: 0, lastPromotionMonth: -12, management: false,
       });
+      Game.workplace.leave(state);
     }
     state.location = { province: city.province, city: city.city, country: city.country };
     Game.cityLife.onMove(state);

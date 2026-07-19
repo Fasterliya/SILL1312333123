@@ -65,7 +65,13 @@
     item.educationName ||= item.school || '';
     item.educationStage ||= 'home';
     item.company ||= '';
+    item.companyId ||= '';
+    item.departmentId ||= '';
+    item.departmentName ||= '';
     item.careerCity ||= '';
+    item.careerRank = Math.max(0, Number(item.careerRank) || 0);
+    item.managerId = typeof item.managerId === 'string' ? item.managerId : null;
+    item.reportIds = Array.isArray(item.reportIds) ? item.reportIds.slice(0, 12) : [];
     item.npcMarried ??= ['父亲', '母亲', '配偶'].includes(item.relation);
     item.npcMarriedAtAge ??= null;
     item.spouseName ||= '';
@@ -159,6 +165,7 @@
     state.career.performance ??= 0;
     state.career.lastPromotionMonth ??= -12;
     state.career.applications ||= [];
+    state.career.management = Boolean(state.career.management);
     state.assets ||= { house: null, mortgage: 0, stocks: {} };
     state.assets.businesses ||= [];
     state.assets.vehicles ||= [];

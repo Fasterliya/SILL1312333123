@@ -74,7 +74,8 @@
 
   function reachable(state, person) {
     return person.school === state.education.school || person.phoneUnlocked
-      || Game.people.isExternal(state, person) || person.relation === '恋人';
+      || Game.people.isExternal(state, person) || person.relation === '恋人'
+      || (person.companyId && person.companyId === state.workplace?.companyId);
   }
 
   function reconnect(state, person) {

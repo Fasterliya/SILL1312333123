@@ -14,7 +14,8 @@
     const locale = Game.worldCulture?.profile(cultureOf(person, country)).locale || 'zh-CN';
     const name = String(person.name || '');
     const found = Game.nameSystem.surnames(locale).find((surname) => (
-      western.has(locale) ? name === surname || name.endsWith(` ${surname}`) : name.startsWith(surname)
+      western.has(locale) ? name === surname || name.endsWith(`·${surname}`)
+        || name.endsWith(` ${surname}`) : name.startsWith(surname)
     ));
     return found || fallback || '';
   }

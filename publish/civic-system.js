@@ -14,9 +14,23 @@
     state.civic.household ||= { ...(state.hometown || state.location) };
     state.civic.household.country ||= '华夏';
     state.civic.identityCulture ||= state.civic.household.country;
-    state.civic.birthName ||= state.name;
+    const normalizedName = Game.nameSystem.normalizeName(
+      state.name, state.gender, state.civic.identityCulture,
+    );
+    if (normalizedName !== state.name) {
+      state.name = normalizedName;
+      state.profile.name = normalizedName;
+      state.surname = Game.nameSystem.normalizeSurname(state.surname, state.civic.identityCulture);
+    }
+    state.civic.birthName = Game.nameSystem.normalizeName(
+      state.civic.birthName || state.name, state.gender, state.civic.identityCulture,
+    );
     state.civic.nameHistory = Array.isArray(state.civic.nameHistory)
-      ? state.civic.nameHistory.slice(-12) : [];
+      ? state.civic.nameHistory.slice(-12).map((item) => ({
+        ...item,
+        from: Game.nameSystem.normalizeName(item.from, state.gender, item.country),
+        to: Game.nameSystem.normalizeName(item.to, state.gender, item.country),
+      })) : [];
   }
 
   function transferCost(state, city) {
@@ -41,7 +55,7 @@
 
   function surnameOptions(state) {
     ensure(state);
-    const locale = Game.worldCulture.profile(state.civic.household.country).locale;
+    const locale = Game.worldCulture.profile(state.location.country).locale;
     const source = Game.nameSystem.surnames(locale);
     const offset = Math.abs([...`${state.name}${state.civic.household.city}`]
       .reduce((sum, char) => sum + char.charCodeAt(0), 0)) % source.length;
@@ -51,10 +65,10 @@
   function changeSurname(state, nextSurname) {
     ensure(state);
     if (U.age(state) < 18) return { ok: false, message: '18岁后才能办理姓名变更' };
-    const country = state.civic.household.country;
+    const country = state.location.country;
     const locale = Game.worldCulture.profile(country).locale;
     if (!Game.nameSystem.surnames(locale).includes(nextSurname)) {
-      return { ok: false, message: '该姓氏不属于当前户口地的登记名录' };
+      return { ok: false, message: '该姓氏不属于当前居住地的登记名录' };
     }
     if (state.surname === nextSurname && state.civic.identityCulture === country) {
       return { ok: false, message: '当前已经使用这个文化姓氏' };
@@ -104,7 +118,7 @@
       `<button data-civic-surname="${surname}" ${adult ? '' : 'disabled'}>${surname}</button>`
     )).join('');
     return `<section class="list-guide"><strong>${state.location.country}${state.location.city}市政府</strong>
-      <span>居住地与户口地分别记录。迁居不会自动迁户口，改姓按户口地姓名文化登记。</span></section>
+      <span>居住地与户口地分别记录。迁居不会自动迁户口，改姓可采用当前居住地姓名文化。</span></section>
       <div class="civic-summary">
         <div><span>当前居住</span><strong>${state.location.country} · ${state.location.city}</strong></div>
         <div><span>户口所在地</span><strong>${household.country} · ${household.city}</strong></div>
@@ -118,7 +132,7 @@
         <div class="civic-city-list">${adult ? cityRows(state) : '<p class="empty-state">成年后可独立办理。</p>'}</div>
       </details>
       <details class="record-section"><summary><span>采用当地姓氏</span>
-        <small>${household.country}姓名文化</small></summary>
+        <small>${state.location.country}姓名文化</small></summary>
         <div class="surname-grid">${surnames}</div>
         <p class="civic-note">改姓会按当地姓名顺序重新登记全名，并保留历史姓名记录。</p>
       </details>`;

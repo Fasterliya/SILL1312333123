@@ -123,7 +123,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 21,
+      version: 22,
       updatedAt: new Date().toISOString(),
       name: makeName(surname, gender),
       surname,

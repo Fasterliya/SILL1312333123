@@ -33,7 +33,7 @@
     Game.educationSystem.ensurePerson(person);
     if (age >= 18 && age < 22 && person.educationStage === 'workforce') return;
     if (person.educationStage === stage && person.educationName) return;
-    const city = person.metCity || state.hometown.city;
+    const city = person.currentCity || person.metCity || state.location.city || state.hometown.city;
     const variation = U.between(-10, 10) + U.between(-10, 10);
     const score = U.clamp(person.academicAbility * 0.58 + person.studyHabit * 0.32 + variation, 0, 100);
     person.academicScore = Math.round(score);

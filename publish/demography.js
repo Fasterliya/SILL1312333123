@@ -169,6 +169,7 @@
       Game.familyNaming.assign(state, child, identity);
       Object.assign(child, {
         bornAt: state.totalMonths, birthMonth: state.totalMonths, affection: 80,
+        metCity: state.location.city, currentCity: state.location.city, homeCity: state.location.city,
         temperament: '懵懂', bodyType: '幼小', hairstyle: '胎毛短发',
         clothing: { top: '婴儿连体衣', socks: '婴儿袜', shoes: '婴儿软底鞋' },
         parentIds: [state.profile.id, partner?.id].filter(Boolean),
@@ -191,7 +192,6 @@
     Game.lifeDirector.addLog(state, babies === 2 ? '双胞胎降临' : '新生命降临',
       `${names}出生了，你成为了${state.gender === '男' ? '父亲' : '母亲'}。`, 'milestone');
   }
-
   Game.demography = Object.freeze({
     ensureWoman, ensureState, baseFertility, fertility, fertilityAt, fertilityContext, conceptionStats,
     proposalDecision, proposalScore, residentPairScore, npcMarriageChance,

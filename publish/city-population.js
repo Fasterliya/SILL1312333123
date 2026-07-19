@@ -22,7 +22,12 @@
     const rank = Math.floor(index / 2) + cityIndex * 3;
     const family = data.surnames[rank % data.surnames.length];
     const given = names[Math.floor(rank / data.surnames.length) % names.length];
-    return ['en-US', 'en-GB', 'fr-FR'].includes(locale) ? `${given} ${family}` : family + given;
+    return ['en-US', 'en-GB', 'fr-FR'].includes(locale) ? `${given}·${family}` : family + given;
+  }
+  function normalizeRecord(record) {
+    record.n = Game.nameSystem.normalizeName(record.n, record.g, record.c);
+    if (record.o) record.o = Game.nameSystem.normalizeName(record.o, record.g, record.c);
+    return record;
   }
   function jobFor(cityName, index, age) {
     if (age < 22 || age > 64) return null;
@@ -71,7 +76,8 @@
     state.socialWorld.cityArchives ||= {};
     Game.config.cities.forEach((city, cityIndex) => {
       const records = Array.isArray(state.socialWorld.cityArchives[city.city])
-        ? state.socialWorld.cityArchives[city.city].slice(0, POPULATION_SIZE).map(compactRecord).filter(Boolean) : [];
+        ? state.socialWorld.cityArchives[city.city].slice(0, POPULATION_SIZE)
+          .map(compactRecord).filter(Boolean).map(normalizeRecord) : [];
       for (let index = records.length; index < POPULATION_SIZE; index += 1) {
         records.push(createRecord(state, city, index, cityIndex));
       }
@@ -98,7 +104,6 @@
     person.educationLevel = Math.max(person.educationLevel || 0, job.education || 0);
     person.educationName ||= `${cityName}城市学院毕业`;
   }
-
   function materialize(state, record, records, cityName) {
     const age = Math.max(0, Math.floor((state.totalMonths - record.b) / 12));
     const person = U.person('当地角色', '', age, record.g, state.totalMonths);
@@ -135,7 +140,6 @@
     if (person.gender === '女') record.f = person.fertilityBase;
     record.n = person.name; record.x = person.namePreference || null; record.o = person.birthName || null;
   }
-
   function compact(state, activeCity) {
     state.worldPeople.forEach((person) => {
       if (person.populationResident) syncRecord(state, person);
@@ -145,7 +149,6 @@
       || person.interactions > 0 || person.portraitUrl || person.familyMaterialized
     ));
   }
-
   function linkWorkplaces(state, city) {
     const groups = {};
     state.worldPeople.filter((person) => (
@@ -163,7 +166,6 @@
       people.slice(1).forEach((person) => { person.managerId = leader.id; });
     });
   }
-
   function activate(state, cityName) {
     const archives = ensure(state);
     const records = archives[cityName] || [];
@@ -176,7 +178,6 @@
     linkWorkplaces(state, cityName);
     return records;
   }
-
   function refreshActive(state) {
     const records = ensure(state)[state.location.city] || [];
     const byId = new Map(records.map((record) => [record.i, record]));
@@ -194,7 +195,6 @@
     linkWorkplaces(state, state.location.city);
   }
   Game.cityPopulation = Object.freeze({
-    ensure, activate, refreshActive, syncRecord, jobFor,
-    populationSize: POPULATION_SIZE,
+    ensure, activate, refreshActive, syncRecord, jobFor, populationSize: POPULATION_SIZE,
   });
 }(window));

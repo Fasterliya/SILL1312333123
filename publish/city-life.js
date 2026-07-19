@@ -36,11 +36,39 @@
     return city.tier === 1 ? 1.14 : (city.tier === 2 ? 1.05 : 0.96);
   }
 
+  function syncDependents(state) {
+    state.family.filter((person) => (
+      ['儿子', '女儿'].includes(person.relation) && person.status === '健康'
+      && U.personAge(state, person) < 18
+    )).forEach((person) => {
+      const previousCity = person.currentCity || person.homeCity || person.metCity;
+      const schoolCity = Game.config.cities.find((city) => (
+        person.educationName?.startsWith(city.city)
+      ))?.city;
+      person.currentCity = state.location.city;
+      person.homeCity = state.location.city;
+      if (((previousCity && previousCity !== state.location.city)
+        || (schoolCity && schoolCity !== state.location.city))
+        && ['kindergarten', 'primary', 'middle', 'high'].includes(person.educationStage)) {
+        person.schoolHistory ||= [];
+        if (person.educationName) person.schoolHistory.push({
+          school: person.educationName, city: previousCity || schoolCity, endedAt: state.totalMonths,
+        });
+        person.schoolHistory = person.schoolHistory.slice(-8);
+        person.school = '';
+        person.educationName = '';
+        person.lastLifeUpdateAge = null;
+      }
+      Game.npcLife?.updatePerson(state, person);
+    });
+  }
+
   function onMove(state) {
     state.cityLife.lastCity = state.location.city;
     state.cityLife.residenceMonths = 0;
     state.cityLife.familiarity[state.location.city] ||= 0;
     state.cityLife.reputation = Math.round(state.cityLife.reputation * 0.65);
+    syncDependents(state);
     Game.socialWorld.ensure(state);
   }
 
@@ -76,5 +104,7 @@
       <dd>${Math.round(state.cityLife.reputation)}</dd></div></dl></section>`;
   }
 
-  Game.cityLife = Object.freeze({ info, monthlyCost, salaryFactor, onMove, monthly, render });
+  Game.cityLife = Object.freeze({
+    info, monthlyCost, salaryFactor, syncDependents, onMove, monthly, render,
+  });
 }(window));

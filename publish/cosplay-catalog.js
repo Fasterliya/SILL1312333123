@@ -31,7 +31,7 @@
       .replace(/爆竹元素/g, '节庆彩带元素').replace(/核能手臂元素/g, '发光机械臂元素')
       .replace(/、(?:与|和)/g, '、').replace(/(?:、|，){2,}/g, '、')
       .replace(/[、，](?:与|和)?$/g, '').replace(/(?:与|和)$/g, '')
-      .replace(/^(?:与|和)[、，]?/g, '').trim();
+      .replace(/^(?:与|和)[、，]?/g, '').replace(/^[、，。；;:：\s]+|[、，；;:：\s]+$/g, '');
   }
   function enhance(series, character, prompt) {
     const [material, accessory, legwear, shoes] = details[series] || details.鸣潮;

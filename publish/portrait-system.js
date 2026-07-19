@@ -6,7 +6,7 @@
   const latest = new Map();
   const errors = new Map();
   const irohaNegative = [
-    'multiple people, two people, 2girls, 2boys, group, crowd, twins, clone, duplicate character',
+    'multiple people, two people, multiple characters, group, crowd, twins, clone, duplicate character',
     'extra person, extra face, extra body, split screen, collage',
     'lowres, worst quality, low quality, blurry, bad anatomy, bad hands, text, watermark',
   ].join(', ');

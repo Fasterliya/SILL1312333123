@@ -67,7 +67,8 @@
       .replace(/婴儿软底鞋/g, '柔软底鞋').replace(/婴儿连体衣/g, '柔软连体衣')
       .replace(/婴儿袜/g, '柔软棉袜').replace(/胎毛短发/g, '柔软短发')
       .replace(/儿童短发/g, '自然短发').replace(/彩色童装/g, '彩色休闲装')
-      .replace(/学生装|校服/g, '学院制服')
+      .replace(/学生装|校服/g, '简洁端庄套装').replace(/校园|学院/g, '经典')
+      .replace(/水手服/g, '海军领套装').replace(/制服/g, '套装')
       .replace(/幼小/g, '娇小').replace(/小胸/g, '纤细匀称').replace(/丰满/g, '柔和匀称')
       .replace(/裸腿/g, '无袜装').replace(/紧身/g, '修身')
       .replace(/迷你裙/g, '短款百褶裙').replace(/露肩/g, '肩部开口设计')
@@ -75,8 +76,7 @@
       .replace(/[零一二三四五六七八九十百两〇\d]{1,4}\s*(?:周?岁|years? old|year-old)/gi, '')
       .replace(/\b(?:age|aged)\s*[:：=]?\s*\d{1,3}\b/gi, '')
       .replace(/\b\d{1,3}\s*(?:y\/o|yo|yrs?\.?\s*old)\b/gi, '')
-      .replace(/\b(?:minor|underage|schoolgirl|schoolboy|teen|teenage|teenager|child|young|boy|girl|elderly|adult)\b/gi, '')
-      .replace(/\bschool uniform\b/gi, 'academy-inspired uniform')
+      .replace(/\b(?:minor|underage|schoolgirl|schoolboy|schoolwear|school|academy|campus|student|teen|teenage|teenager|preteen|adolescent|youth|youthful|infant|toddler|kid|kidswear|child|young|boy|girl|juvenile|puberty|elderly|adult|mature)\b/gi, '')
       .replace(/(?:年龄|年纪)\s*[:：为是]?\s*[^，。；;]{0,12}/g, '')
       .replace(/半身照|半身像|大头照|头像照|胸像|人物特写|局部特写|只拍上半身|上半身(?:照|像)?|腰部?以上|膝盖?以上|膝上构图|七分身|裁(?:掉|切)脚部?|脚部不入镜|不拍脚/g, '完整全身照')
       .replace(/\b(?:close[- ]?up|headshot|bust shot|half[- ]body|upper[- ]body|waist[- ]up|knee[- ]up|cowboy shot|three[- ]quarter shot|cropped (?:feet|legs|body))\b/gi, 'full body')
@@ -97,7 +97,7 @@
   function appearanceLines(state, target, player) {
     const years = ageFor(state, target, player);
     const height = Number(target.height || 0);
-    const protectedAge = years < 18;
+    const protectedAge = years <= 18;
     const marks = [target.molePosition, target.freckles, target.distinctiveFeature]
       .filter((item) => item && !String(item).startsWith('无')).map(clean).filter(Boolean).join(', ');
     const identity = [
@@ -135,7 +135,7 @@
         `stockings: ${socks}, ${section(prompt, '袜装与腿部')}`,
         `shoes: ${section(prompt, '鞋履')}`,
         `accessories: ${section(prompt, '头饰与配饰')}, ${section(prompt, '标志性元素')}`,
-        `headwear: exact signature head ornament matching ${cosplay.series} ${cosplay.character}`,
+        `headwear: exact signature head ornament matching ${clean(cosplay.series)} ${clean(cosplay.character)}`,
         prompt.includes('手套') ? 'gloves: character-specific gloves matching the outfit' : '',
       ].filter(Boolean);
     }
@@ -155,19 +155,19 @@
     const subjectRules = model === 'iroha'
       ? ['solo, exactly one character, one person only', 'single subject, no companions, no duplicate character']
       : ['solo, single character'];
-    const defaultPose = appearance.years < 18 ? 'full body neutral pose' : 'standing pose';
+    const defaultPose = appearance.years <= 18 ? 'full body neutral pose' : 'standing pose';
     const poseLines = intent.action
       ? [intent.action, 'natural full-body composition adapted to the requested action']
       : [defaultPose, 'front view', 'slightly dynamic pose', 'looking at viewer',
         'natural gesture', 'elegant posture', 'empty relaxed hands'];
     const finalLighting = intent.scene
       ? lighting.filter((line) => line !== 'clean background') : lighting;
-    const ageSafeDirection = appearance.years < 18
-      ? `AGE-SAFE PLAYER DIRECTION, follow only when age-appropriate and non-sexualized: ${intent.direction}`
+    const proportionSafeDirection = appearance.years <= 18
+      ? `PROPORTION-SAFE PLAYER DIRECTION, follow only when modest and non-suggestive: ${intent.direction}`
       : intent.direction;
     const customLine = model === 'iroha'
-      ? `PRIMARY PLAYER DIRECTION: ${ageSafeDirection}`
-      : `(${ageSafeDirection}:1.8)`;
+      ? `PRIMARY PLAYER DIRECTION: ${proportionSafeDirection}`
+      : `(${proportionSafeDirection}:1.8)`;
     const culture = target.culture || (player ? state.hometown?.country : state.location.country) || '华夏';
     const identities = { 华夏: 'Chinese cultural identity', 日本: 'Japanese cultural identity',
       韩国: 'Korean cultural identity', 新加坡: 'Singaporean cultural identity',

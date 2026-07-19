@@ -79,26 +79,21 @@
     }).join('');
   }
 
-  function relationAction(item, state) {
-    if (['儿子', '女儿'].includes(item.relation)) return '陪伴';
-    if (state.romance.partnerId === item.id && state.romance.married) return '相伴';
-    if (state.romance.partnerId === item.id) return item.affection >= 80 ? '求婚' : '约会';
-    if (item.relation === '朋友' && item.affection >= 68 && !state.romance.partnerId) return '告白';
-    return '互动';
-  }
-
   function familyCards(state) {
     const summary = `<div class="detail-row family-wealth"><span>原生家庭资产</span><b>${money(state.familyWealth)}</b></div>`;
     return summary + state.family.map((item) => {
-      const label = relationAction(item, state);
-      const type = { 告白: 'confess', 求婚: 'propose', 约会: 'date' }[label] || 'chat';
+      const actions = item.status === '已故' ? '<button disabled>追忆</button>'
+        : Game.familySystem.detailActions(state, item).map(([type, label]) => (
+          `<button data-detail-family="${item.id}" data-family-action="${type}">${label}</button>`
+        )).join('');
       return `
       <article class="person"><button class="person-avatar" type="button"
         data-character-id="${item.id}" aria-label="查看${item.name}详情">${Game.portraitSystem.avatar(item)}</button>
         <div class="person-main"><strong>${item.name}</strong>
         <span>${item.relation} · ${U.personAge(state, item)}岁 · ${item.personality} · ${item.trait}${item.job ? ` · ${item.job}` : ''}</span>
         <div class="affection"><i style="width:${item.affection}%"></i></div></div>
-        <button data-person="${item.id}" data-person-action="${type}" ${item.status === '已故' ? 'disabled' : ''}>${item.status === '已故' ? '追忆' : label}</button></article>`;
+        <details class="interaction-menu"><summary>互动选项</summary>
+        <div class="interaction-options">${actions}</div></details></article>`;
     }).join('');
   }
 

@@ -5,7 +5,7 @@
   const catalog = Game.appearanceCatalog;
   const filters = ['适龄', '全部', '校园', '休闲', '运动', '正式', '文艺', '保暖', '和风', '传统', '短发', '长发', '旅行'];
   const labels = {
-    hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
+    cosplay: 'COS服', hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
     'clothing.top': '身穿', 'clothing.socks': '袜子', 'clothing.shoes': '鞋',
   };
   let api = null;
@@ -15,6 +15,10 @@
 
   function keyFor(field) {
     return field.startsWith('clothing.') ? field.split('.')[1] : field;
+  }
+
+  function optionsFor(key) {
+    return key === 'cosplay' ? Game.cosplayCatalog.items : catalog[key];
   }
 
   function currentValue(profile, field) {
@@ -50,12 +54,13 @@
     const years = activeTargetId ? Game.content.personAge(state, profile) : Game.content.age(state);
     const key = keyFor(activeField);
     const selected = currentValue(profile, activeField);
-    const items = (catalog[key] || []).filter((entry) => visible(entry, years) && bodyMatches(entry, {
+    const items = (optionsFor(key) || []).filter((entry) => visible(entry, years) && bodyMatches(entry, {
       ...profile,
       gender: activeTargetId ? profile.gender : state.gender,
     }))
       .sort((a, b) => Number(recommended(b, profile, years)) - Number(recommended(a, profile, years)));
-    const chips = filters.map((filter) => (
+    const availableFilters = activeField === 'cosplay' ? ['全部', '东方Project', '星穹铁道'] : filters;
+    const chips = availableFilters.map((filter) => (
       `<button class="${filter === activeFilter ? 'active' : ''}" data-style-filter="${filter}">${filter}</button>`
     )).join('');
     const list = items.length ? items.map((entry) => {
@@ -67,17 +72,17 @@
         ${isRecommended ? '<b>推荐</b>' : ''}<i>${entry.name === selected ? '已选' : '选择'}</i></button>`;
     }).join('') : '<p class="empty-state">当前筛选下没有适龄选项。</p>';
     Game.navigation.openDetail(`选择${labels[activeField]}`, `
-      <section class="selector-guide"><strong>${profile.personality}性格 · ${profile.trait}特质</strong>
-      <span>推荐项会结合年龄、性格、特质与气质排序。</span></section>
+      <section class="selector-guide"><strong>${activeField === 'cosplay' ? 'COS模式会覆盖绘图造型提示' : `${profile.personality}性格 · ${profile.trait}特质`}</strong>
+      <span>${activeField === 'cosplay' ? '选择无可恢复角色原本的发型与三部位服装提示。' : '推荐项会结合年龄、性格、特质与气质排序。'}</span></section>
       <nav class="filter-chips" aria-label="造型筛选">${chips}</nav>
       <section class="style-options">${list}</section>`, 'selector');
   }
 
   function open(field, targetId) {
-    if (!labels[field] || !catalog[keyFor(field)]) return;
+    if (!labels[field] || !optionsFor(keyFor(field))) return;
     activeField = field;
     activeTargetId = targetId || '';
-    activeFilter = '适龄';
+    activeFilter = field === 'cosplay' ? '全部' : '适龄';
     render();
   }
 

@@ -16,6 +16,7 @@
 
   function refresh() {
     Game.view.render(state);
+    Game.lifeLoop.render(state);
     Game.actions.renderHouseActions();
     Game.actions.renderDecision();
   }
@@ -29,27 +30,17 @@
   function advance(months) {
     if (busy || state.pendingDecision || state.gameOver) return;
     busy = true;
+    const before = Game.lifeLoop.capture(state);
     Game.lifeDirector.advance(state, months);
+    Game.lifeLoop.completeAdvance(state, before);
     refresh();
     save().finally(() => { busy = false; });
   }
 
   function activity(type) {
-    if (state.gameOver) return;
-    const map = {
-      study: ['专注学习', '你认真学习，为下一次考试积累实力。', ['智力', 2], ['心情', -2]],
-      sport: ['锻炼身体', '一次痛快的运动让身体更有力量。', ['健康', 3], ['心情', 1]],
-      social: ['主动社交', '你和身边的人聊了很久，关系更自然。', ['魅力', 2], ['心情', 2]],
-      rest: ['好好休息', '你放慢脚步，给自己留出喘息空间。', ['心情', 5], ['健康', 1]],
-    };
-    const item = map[type];
-    if (!item) return;
-    item.slice(2, 4).forEach(([name, delta]) => {
-      state.stats[name] = U.clamp(state.stats[name] + delta, 0, 100);
-    });
-    if (type === 'study') state.education.study += 7;
-    Game.lifeDirector.addLog(state, item[0], item[1], 'good');
-    Game.view.showToast(item[0], 'good');
+    const result = Game.lifeLoop.performActivity(state, type);
+    if (!result) return;
+    Game.view.showToast(result.message, 'good');
     refresh();
     save();
   }
@@ -99,10 +90,12 @@
       Game.view.init();
       Game.navigation.init();
       Game.portraitGallery.init();
+      Game.lifeLoop.init();
       state = Game.stateUpgrade.upgradeState(await Game.storage.load());
       Game.profile.configure({ getState: () => state, refresh, save });
       Game.portraitGallery.configure({ getState: () => state, refresh, save });
       Game.portraitSystem.configure({ getState: () => state, refresh, save });
+      Game.lifeLoop.configure({ getState: () => state, refresh, save });
       Game.navigation.configure({ getState: () => state });
       Game.appearance.configure({ getState: () => state });
       Game.actions.configure({ getState: () => state, refresh, save });

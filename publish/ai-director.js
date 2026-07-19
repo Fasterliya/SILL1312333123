@@ -26,8 +26,10 @@
   function exam(state, label) {
     const scores = {};
     const effort = state.education.study;
+    const fatiguePenalty = Game.lifeLoop.performancePenalty(state);
     Object.entries(subjects(state)).forEach(([name, cap]) => {
-      const rate = U.clamp(0.46 + state.stats.智力 / 190 + effort / 210 + U.between(-8, 8) / 100, 0.3, 0.98);
+      const rate = U.clamp(0.46 + state.stats.智力 / 190 + effort / 210
+        + U.between(-8, 8) / 100 - fatiguePenalty, 0.3, 0.98);
       scores[name] = Math.round(cap * rate);
     });
     const total = Object.values(scores).reduce((sum, value) => sum + value, 0);

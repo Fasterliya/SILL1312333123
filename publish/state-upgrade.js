@@ -42,6 +42,7 @@
     if (item.gender === '女' && item.bodyType === '清瘦') item.bodyType = '娇小纤细';
     if (item.gender === '女' && item.bodyType === '健壮') item.bodyType = '匀称';
     item.hairstyle ||= U.random(C.appearance.hairstyle.slice(2, 9));
+    item.cosplay = Game.cosplayCatalog.find(item.cosplay).name;
     item.clothing ||= U.clothing(item.outfit);
     item.clothing.top ||= item.outfit || '品质日常';
     item.clothing.socks ||= '短棉袜';
@@ -82,6 +83,7 @@
     profile.portraitUrl ??= null;
     profile.portraitTaskId ??= null;
     profile.customPrompt ||= '';
+    profile.cosplay = Game.cosplayCatalog.find(profile.cosplay).name;
     if (profile.bodyType === '丰润') profile.bodyType = '丰满';
     if (state.gender === '女' && profile.bodyType === '清瘦') profile.bodyType = '娇小纤细';
     if (state.gender === '女' && profile.bodyType === '健壮') profile.bodyType = '匀称';
@@ -97,7 +99,7 @@
 
   function upgradeState(state) {
     if (!state) return U.createState();
-    state.version = 7;
+    state.version = 8;
     state.location.country ||= C.cities.find((city) => city.city === state.location.city)?.country || '华夏';
     state.hometown ||= { ...state.location };
     state.hometown.country ||= '华夏';
@@ -135,6 +137,11 @@
     state.assets.vehicles ||= [];
     fillStocks(state);
     state.travel ||= { activeId: null };
+    state.routine ||= {};
+    state.routine.actionMonth ??= state.totalMonths;
+    state.routine.fatigue = U.clamp(Number(state.routine.fatigue) || 0, 0, 100);
+    state.routine.actions ||= { study: 0, sport: 0, social: 0, rest: 0 };
+    state.routine.lastReport ??= null;
     return state;
   }
 

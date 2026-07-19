@@ -54,6 +54,7 @@
       temperament: random(C.appearance.temperament.slice(4)),
       bodyType: random(bodyTypes),
       hairstyle: random(C.appearance.hairstyle.slice(2, 9)),
+      cosplay: '无',
       clothing: clothing(random(C.appearance.top.slice(3, 10))),
       portraitUrl: null,
       portraitTaskId: null,
@@ -93,6 +94,7 @@
       temperament: random(C.appearance.temperament),
       bodyType: '匀称',
       hairstyle: '胎毛短发',
+      cosplay: '无',
       clothing: { top: '婴儿连体衣', socks: '婴儿袜', shoes: '婴儿软底鞋' },
       personality: random(C.personalities),
       trait: random(C.traits),
@@ -133,7 +135,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 7,
+      version: 8,
       updatedAt: new Date().toISOString(),
       name: makeName(surname),
       surname,
@@ -161,6 +163,8 @@
       romance: { partnerId: null, married: false, pendingBirth: 0 },
       assets: { house: null, mortgage: 0, stocks: stockState(), businesses: [], vehicles: [] },
       travel: { activeId: null },
+      routine: { actionMonth: 0, fatigue: 0,
+        actions: { study: 0, sport: 0, social: 0, rest: 0 }, lastReport: null },
       pendingDecision: null,
       gameOver: false,
       logs: [log('呱呱坠地', `你出生在${location[0]}${location[1]}，父母为你取名${surname}家新生命。`, 'milestone', 0)],

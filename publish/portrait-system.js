@@ -33,10 +33,16 @@
     const player = key === 'player';
     const age = player ? Game.content.age(state) : Game.content.personAge(state, target);
     const gender = player ? state.gender : target.gender;
-    const clothes = `${target.clothing.top}、${target.clothing.socks}、${target.clothing.shoes}`;
     const weighted = custom ? `，(${custom}:1.8)` : '';
     const size = `${Number(target.height || 0).toFixed(1)}cm，${Number(target.weight || 0).toFixed(1)}kg`;
-    return `仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和服装褶皱质感，重绘一个全新角色。不得复制图1的人物身份、五官、发型、服装、姿势、摄影器材、文字框、台词、标志或构图。现代人生模拟游戏角色插画，${gender}性，${age}岁，身高体重约${size}，${target.hairColor}${target.hairstyle}，${target.bodyType}身材，${target.temperament}气质，${target.personality}性格，${target.trait}特质，穿${clothes}${weighted}。动作、姿势、取景、构图与场景背景优先遵循玩家附加提示词；玩家未指定时采用自然人物构图与协调环境。符合真实年龄，健康自然，全年龄，非性感，禁止文字、水印、对话框和摄影器材。`;
+    const style = '仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和服装褶皱质感，重绘一个全新角色。不得复制图1的人物身份、五官、发型、服装、姿势、摄影器材、文字框、台词、标志或构图。';
+    const direction = '动作、姿势、取景、构图与场景背景优先遵循玩家附加提示词；玩家未指定时采用自然人物构图与协调环境。符合真实年龄，健康自然，全年龄，非性感，禁止文字、水印、对话框和摄影器材。';
+    const cosplay = Game.cosplayCatalog.find(target.cosplay);
+    if (cosplay.name !== '无') {
+      return `${style}现代同人COS写真风格角色插画，${gender}性，${age}岁，身高约${Number(target.height || 0).toFixed(1)}cm，${target.bodyType}身材，${target.temperament}气质。高还原扮演${cosplay.name}，${cosplay.prompt}，呈现角色主题假发、服装、配饰和道具的精致COS质感，不使用被绘角色原本的发色、发型、日常服装、性格或特质信息${weighted}。${direction}`;
+    }
+    const clothes = `${target.clothing.top}、${target.clothing.socks}、${target.clothing.shoes}`;
+    return `${style}现代人生模拟游戏角色插画，${gender}性，${age}岁，身高体重约${size}，${target.hairColor}${target.hairstyle}，${target.bodyType}身材，${target.temperament}气质，${target.personality}性格，${target.trait}特质，穿${clothes}${weighted}。${direction}`;
   }
 
   async function retryDraw(input) {

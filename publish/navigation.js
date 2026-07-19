@@ -76,7 +76,7 @@
   function characterHtml(state, person) {
     const clothes = person.clothing || {};
     const labels = {
-      hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
+      cosplay: 'COS服', hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
       'clothing.top': '身穿', 'clothing.socks': '袜子', 'clothing.shoes': '鞋',
     };
     const rows = [
@@ -89,6 +89,7 @@
       ['工作城市', person.careerCity || '-'],
       ['婚姻', person.npcMarried ? `已婚 · ${person.spouseName || '伴侣'}` : '未婚'],
       ['子女', `${person.childrenCount || 0}人`],
+      ['COS服', person.cosplay || '无'],
       ['发色', person.hairColor], ['发型', person.hairstyle], ['气质', person.temperament],
       ['身材', person.bodyType], ['身穿', clothes.top || '-'], ['袜子', clothes.socks || '-'],
       ['鞋', clothes.shoes || '-'], ['好感', person.affection], ['互动次数', person.interactions],
@@ -108,7 +109,7 @@
         `<div><span>${escape(label)}</span><strong>${escape(value)}</strong></div>`
       )).join('')}</section>
       <section class="panel npc-editor"><div class="panel-title"><h3>编辑角色外观</h3>
-      <span>发型、身材与三部位穿搭</span></div><div class="profile-editor">${editor}</div></section>
+      <span>COS、发型、身材与三部位穿搭</span></div><div class="profile-editor">${editor}</div></section>
       <section class="detail-actions">${detailActions(state, person)}</section>`;
   }
 

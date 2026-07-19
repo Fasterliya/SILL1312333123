@@ -4,7 +4,7 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
   const catalog = Game.appearanceCatalog;
-  const editable = ['hairColor', 'temperament', 'bodyType', 'hairstyle', 'clothing.top', 'clothing.socks', 'clothing.shoes'];
+  const editable = ['cosplay', 'hairColor', 'temperament', 'bodyType', 'hairstyle', 'clothing.top', 'clothing.socks', 'clothing.shoes'];
   let api = null;
 
   function agePhase(years) {
@@ -74,6 +74,10 @@
     return field.startsWith('clothing.') ? profile.clothing[field.split('.')[1]] : profile[field];
   }
 
+  function optionsFor(key) {
+    return key === 'cosplay' ? Game.cosplayCatalog.items : catalog[key];
+  }
+
   function render(state, elements) {
     const p = state.profile;
     Game.portraitSystem.renderPlayer(state, elements);
@@ -84,7 +88,7 @@
     elements.traitGrid.innerHTML = [['性格', p.personality], ['特质', p.trait]]
       .map(([label, text]) => `<div><span>${label}</span><strong>${text}</strong></div>`).join('');
     const labels = {
-      hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
+      cosplay: 'COS服', hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
       'clothing.top': '身穿', 'clothing.socks': '袜子', 'clothing.shoes': '鞋',
     };
     elements.profileEditor.innerHTML = editable.map((field) => (
@@ -96,7 +100,7 @@
   function edit(field, nextValue) {
     if (!editable.includes(field)) return false;
     const key = field.startsWith('clothing.') ? field.split('.')[1] : field;
-    if (!catalog[key]?.some((item) => item.name === nextValue)) return false;
+    if (!optionsFor(key)?.some((item) => item.name === nextValue)) return false;
     const state = api.getState();
     if (field.startsWith('clothing.')) state.profile.clothing[key] = nextValue;
     else state.profile[field] = nextValue;
@@ -110,7 +114,7 @@
     if (!targetId) return edit(field, nextValue);
     if (!editable.includes(field)) return false;
     const key = field.startsWith('clothing.') ? field.split('.')[1] : field;
-    if (!catalog[key]?.some((item) => item.name === nextValue)) return false;
+    if (!optionsFor(key)?.some((item) => item.name === nextValue)) return false;
     const state = api.getState();
     const target = [...state.family, ...state.contacts].find((person) => person.id === targetId);
     if (!target) return false;

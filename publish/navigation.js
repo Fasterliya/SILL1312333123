@@ -78,9 +78,8 @@
   }
 
   function detailActions(state, person) {
+    if (person.status === '已故') return '<button disabled>追忆</button>';
     if (state.family.some((item) => item.id === person.id)) {
-      const disabled = person.status === '已故' ? 'disabled' : '';
-      if (disabled) return `<button disabled>追忆</button>`;
       return Game.familySystem.detailActions(state, person).map(([type, label]) => (
         `<button data-detail-family="${escape(person.id)}" data-family-action="${type}">${label}</button>`
       )).join('');
@@ -131,7 +130,8 @@
     ];
     const editor = Object.entries(labels).map(([field, label]) => {
       const covered = Game.cosplayCatalog.overrides(person, field);
-      return `<button class="selector-row" data-selector-field="${field}" ${covered ? 'disabled' : ''}
+      const disabled = covered || person.status === '已故';
+      return `<button class="selector-row" data-selector-field="${field}" ${disabled ? 'disabled' : ''}
         data-selector-target="${escape(person.id)}"><span>${label}</span>
         <strong>${escape(effective(field) || '-')}</strong><b aria-hidden="true">${covered ? '覆' : '›'}</b></button>`;
     }).join('');
@@ -139,8 +139,8 @@
       <summary><span>${title}</span><small>${hint}</small></summary><div class="record-grid">${rows.map(([label, value]) => (
         `<div><span>${escape(label)}</span><strong>${escape(value || '-')}</strong></div>`
       )).join('')}</div></details>`;
-    return `${Game.portraitSystem.npcHtml(state, person)}<section class="character-hero">
-      <div class="character-avatar">${escape(person.name.slice(-1))}</div>
+    return `${Game.portraitSystem.npcHtml(state, person)}<section class="character-hero ${person.status === '已故' ? 'deceased' : ''}">
+      <div class="character-avatar">${person.status === '已故' ? '故' : escape(person.name.slice(-1))}</div>
       <div><p>${escape(person.relation)}</p><h3>${escape(person.name)}</h3>
       <span>${escape(person.personality)} · ${escape(person.trait)}</span></div></section>
       <div class="record-stack">${section('基本档案', '身份与成长', identity, true)}

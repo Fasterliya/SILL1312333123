@@ -110,18 +110,6 @@
       state.family.push(person);
       addLog(state, '新的相遇', `你在一次活动中认识了${person.name}，彼此留下不错的印象。`, 'good');
     }
-    if (state.month === 1) {
-      state.family.forEach((person) => {
-        const currentAge = U.personAge(state, person);
-        if (person.status !== '健康' || ['儿子', '女儿'].includes(person.relation)) return;
-        if (currentAge >= 75 && Math.random() < 0.04) {
-          person.status = '已故';
-          addLog(state, '亲人离世', `${person.name}走完了自己的人生，你会记得共同度过的时光。`, 'normal');
-        } else if (currentAge >= 60 && person.job && !person.job.includes('退休')) {
-          person.job = `退休${person.job}`;
-        }
-      });
-    }
     if (state.romance.pendingBirth > 0) {
       state.romance.pendingBirth -= 1;
       if (state.romance.pendingBirth === 0) {
@@ -157,6 +145,7 @@
     if (state.year !== previousYear) {
       state.stats.健康 = U.clamp(state.stats.健康 - (U.age(state) > 55 ? 2 : 0), 0, 100);
     }
+    Game.mortality.monthly(state);
     Game.profile.updateGrowth(state);
     Game.npcLife.update(state);
     schoolMilestones(state);

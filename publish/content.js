@@ -174,7 +174,9 @@
   function personAge(state, item) {
     const birthMonth = Number.isFinite(item.birthMonth)
       ? item.birthMonth : (['儿子', '女儿'].includes(item.relation) ? item.bornAt : -(item.baseAge || 0) * 12);
-    return Math.max(0, Math.floor((state.totalMonths - birthMonth) / 12));
+    const referenceMonth = Number.isFinite(item.deceasedAt)
+      ? Math.min(state.totalMonths, item.deceasedAt) : state.totalMonths;
+    return Math.max(0, Math.floor((referenceMonth - birthMonth) / 12));
   }
 
   function gradeLabel(state) {

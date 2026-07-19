@@ -59,7 +59,8 @@
       gender: activeTargetId ? profile.gender : state.gender,
     }))
       .sort((a, b) => Number(recommended(b, profile, years)) - Number(recommended(a, profile, years)));
-    const availableFilters = activeField === 'cosplay' ? ['全部', '东方Project', '星穹铁道', '鸣潮'] : filters;
+    const availableFilters = activeField === 'cosplay'
+      ? ['全部', '东方Project', '星穹铁道', '鸣潮', '原神', '蔚蓝档案'] : filters;
     const chips = availableFilters.map((filter) => (
       `<button class="${filter === activeFilter ? 'active' : ''}" data-style-filter="${filter}">${filter}</button>`
     )).join('');

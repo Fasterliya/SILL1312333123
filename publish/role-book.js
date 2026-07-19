@@ -32,7 +32,8 @@
     const reachable = person.phoneUnlocked || person.school === state.education.school
       || Game.people.isExternal(state, person) || state.family.some((item) => item.id === person.id);
     const place = person.currentCity || person.careerCity || person.homeCity || '去向未明';
-    const status = reachable ? '可联系' : (local ? '同城，可尝试重逢' : '未留联系方式');
+    const status = person.status === '已故' ? '已故 · 纪念档案'
+      : (reachable ? '可联系' : (local ? '同城，可尝试重逢' : '未留联系方式'));
     return `<article class="directory-person">
       <button class="person-avatar" type="button" data-character-id="${escape(person.id)}"
         aria-label="查看${escape(person.name)}详情">${Game.portraitSystem.avatar(person)}</button>

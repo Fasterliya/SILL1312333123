@@ -82,6 +82,7 @@
     item.childIds = Array.isArray(item.childIds) ? item.childIds.slice(0, 3) : [];
     item.parentIds = Array.isArray(item.parentIds) ? item.parentIds.slice(0, 2) : [];
     item.lastLifeUpdateAge ??= null;
+    Game.mortality.ensurePerson(item);
     Game.genetics.ensure(item, item.gender, `legacy-${item.id || item.name}`, true);
     return item;
   }
@@ -181,6 +182,7 @@
     state.assets.dividends = Math.max(0, Number(state.assets.dividends) || 0);
     fillStocks(state);
     Game.socialWorld.ensure(state);
+    Game.mortality.prepare(state);
     state.routine ||= {};
     state.routine.actionMonth ??= state.totalMonths;
     state.routine.fatigue = U.clamp(Number(state.routine.fatigue) || 0, 0, 100);

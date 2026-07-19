@@ -74,6 +74,10 @@
     }
     const target = findTarget(key);
     if (!target) return;
+    if (target.status === '已故') {
+      Game.view.showToast('已故角色的纪念立绘不能重新生成', 'warning');
+      return;
+    }
     if (key !== 'player') Game.npcLife.syncGrowth(api.getState(), target);
     const custom = Game.portraitPrompt.clean(
       String(rawCustom || '').replace(/[\u0000-\u001f]/g, ' ')
@@ -113,16 +117,20 @@
   function portraitMarkup(target, key, name, npc) {
     const image = safeImage(target.portraitUrl);
     const waiting = drawing.has(key);
+    const deceased = target.status === '已故';
     const slotAttr = `data-portrait-view="${escape(key)}"`;
     const slot = image ? `<img src="${escape(image)}" alt="${escape(name)}的角色立绘">`
       : `<div class="portrait-empty"><b>${escape(name.slice(-1))}</b><span>尚未生成立绘</span></div>`;
-    return `<button class="portrait-slot ${npc ? 'npc-portrait-slot' : ''}" ${slotAttr}
-      type="button" aria-label="查看${escape(name)}的立绘大图">${slot}</button>
-      <div class="portrait-actions"><p>${waiting ? '角色立绘生成中，预计约30-60秒' : (errors.get(key) || modelNote())}</p>
+    return `<button class="portrait-slot ${npc ? 'npc-portrait-slot' : ''} ${deceased ? 'deceased' : ''}" ${slotAttr}
+      type="button" aria-label="查看${escape(name)}的立绘大图">${slot}
+      ${deceased ? '<span class="deceased-mark">已故</span>' : ''}</button>
+      <div class="portrait-actions"><p>${deceased ? '纪念档案 · 角色已故' : (waiting
+      ? '角色立绘生成中，预计约30-60秒' : (errors.get(key) || modelNote()))}</p>
       <label class="prompt-field"><span>附加提示词 · 动作与场景优先</span>
-      <input maxlength="120" value="${escape(target.customPrompt)}" ${npc ? 'data-npc-prompt' : 'id="portraitPromptInput"'}
+      <input maxlength="120" value="${escape(target.customPrompt)}" ${deceased ? 'disabled' : ''}
+        ${npc ? 'data-npc-prompt' : 'id="portraitPromptInput"'}
         placeholder="例如：躺在床上，卧室夜景"></label>
-      ${npc ? `<button data-npc-generate="${escape(key)}" ${waiting ? 'disabled' : ''}>${image ? '重新生成' : '生成立绘'}</button>` : ''}</div>`;
+      ${npc && !deceased ? `<button data-npc-generate="${escape(key)}" ${waiting ? 'disabled' : ''}>${image ? '重新生成' : '生成立绘'}</button>` : ''}</div>`;
   }
 
   function renderPlayer(state, elements) {
@@ -153,7 +161,9 @@
 
   function avatar(person) {
     const image = safeImage(person.portraitUrl);
-    return image ? `<img src="${escape(image)}" alt="">` : escape(person.name.slice(-1));
+    const content = image ? `<img src="${escape(image)}" alt="">` : escape(person.name.slice(-1));
+    return person.status === '已故'
+      ? `<span class="deceased-avatar">${content}<i>已故</i></span>` : content;
   }
 
   function configure(options) { api = options; }

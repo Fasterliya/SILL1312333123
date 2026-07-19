@@ -3,11 +3,8 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
   const POPULATION_SIZE = 100;
-  function cityInfo(name) {
-    return Game.config.cities.find((item) => item.city === name) || {
-      city: name, country: '华夏', tier: 3,
-    };
-  }
+  function cityInfo(name) { return Game.config.cities.find((item) => item.city === name)
+    || { city: name, country: '华夏', tier: 3 }; }
   function cultureFor(city, index) {
     const visitors = ['日本', '韩国', '新加坡', '法国', '英国', '美国'];
     if (city.country === '华夏') return index < 94 ? '华夏' : visitors[index % visitors.length];
@@ -27,6 +24,7 @@
   function normalizeRecord(record) {
     record.n = Game.nameSystem.normalizeName(record.n, record.g, record.c);
     if (record.o) record.o = Game.nameSystem.normalizeName(record.o, record.g, record.c);
+    record.l ||= Game.mortality.lifeMonths(record.i); record.q = Math.max(0, Number(record.q) || 0);
     return record;
   }
   function jobFor(cityName, index, age) {
@@ -37,11 +35,8 @@
     return source.length ? source[(index * 7) % source.length] : null;
   }
   function createRecord(state, city, index, cityIndex) {
-    const gender = index % 2 ? '女' : '男';
-    const age = 2 + ((index * 7 + cityIndex * 5) % 67);
-    const culture = cultureFor(city, index);
-    const job = jobFor(city.city, index, age);
-    // Short keys keep all 2,800 off-city residents compact in save data.
+    const gender = index % 2 ? '女' : '男', age = 2 + ((index * 7 + cityIndex * 5) % 67);
+    const culture = cultureFor(city, index), job = jobFor(city.city, index, age);
     return {
       i: `resident-${cityIndex}-${index}`,
       n: residentName(culture, gender, index, cityIndex),
@@ -55,8 +50,9 @@
       m: null,
       w: null,
       k: 0,
-      f: gender === '女' ? Game.demography.baseFertility(`resident-${cityIndex}-${index}`) : null,
-      x: null, o: null,
+      f: gender === '女'
+        ? Game.demography.baseFertility(`resident-${cityIndex}-${index}`) : null,
+      x: null, o: null, l: Game.mortality.lifeMonths(`resident-${cityIndex}-${index}`), q: 0,
     };
   }
   function compactRecord(record) {
@@ -69,6 +65,8 @@
       w: record.marriedAtMonth || null, k: record.childrenCount || 0,
       f: record.gender === '女' ? record.fertilityBase : null,
       x: record.namePreference || null, o: record.birthName || null,
+      l: record.lifeExpectancyMonths || Game.mortality.lifeMonths(record.id),
+      q: Math.max(0, Number(record.populationGeneration) || 0),
     };
   }
   function ensure(state) {
@@ -114,7 +112,8 @@
       affection: record.a, populationResident: true, residentKey: record.i,
       populationMonth: state.totalMonths, npcMarried: Boolean(record.m),
       spouseId: record.m, childrenCount: record.k,
-      fertilityBase: record.f ?? (record.g === '女' ? Game.demography.baseFertility(record.i) : null),
+      fertilityBase: record.f
+        ?? (record.g === '女' ? Game.demography.baseFertility(record.i) : null),
       birthName: record.o || record.n, namePreference: record.x || '',
       culturePreference: record.x ? '日本文化' : '', nameCulture: record.x ? '日本' : '',
       nameHistory: record.o && record.o !== record.n
@@ -139,6 +138,7 @@
     record.k = Math.max(record.k || 0, person.childrenCount || 0);
     if (person.gender === '女') record.f = person.fertilityBase;
     record.n = person.name; record.x = person.namePreference || null; record.o = person.birthName || null;
+    record.l = person.lifeExpectancyMonths || record.l;
   }
   function compact(state, activeCity) {
     state.worldPeople.forEach((person) => {
@@ -195,6 +195,6 @@
     linkWorkplaces(state, state.location.city);
   }
   Game.cityPopulation = Object.freeze({
-    ensure, activate, refreshActive, syncRecord, jobFor, populationSize: POPULATION_SIZE,
+    ensure, activate, refreshActive, syncRecord, createRecord, jobFor, populationSize: POPULATION_SIZE,
   });
 }(window));

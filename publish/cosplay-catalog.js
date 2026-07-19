@@ -26,12 +26,15 @@
     return String(value || '')
       .replace(/剑士/g, '武者').replace(/剑客/g, '侠客').replace(/枪手/g, '游侠')
       .replace(/战斗(?:装|服|礼装|制服)/g, '机能服装').replace(/佣兵/g, '旅者')
-      .replace(/(?:手持|携带|拿着)?(?:冰晶弓箭|黑金武器|宽刃武器|重型武器|七星剑|万宝槌|破碎剑|宽刃剑|大镰刀|龙纹长枪|青色长剑|绯红双剑|双枪|手枪|左轮|长枪|巨剑|长剑|飞剑|冰剑|双剑|双刀|飞刀|弯刀|镰刀|太刀|佩剑|盾牌|巨盾|拳套|权杖|弓箭|武器|忍具)(?:元素)?(?:与|和)?/g, '')
-      .replace(/[枪剑刀弓镰盾]/g, '')
+      .replace(/(?:手持|携带|拿着)?(?:冰晶弓箭|黑金武器|宽刃武器|重型武器|七星剑|万宝槌|破碎剑|宽刃剑|大镰刀|龙纹长枪|青色长剑|绯红双剑|双枪|手枪|左轮|长枪|巨剑|长剑|飞剑|冰剑|双剑|双刀|飞刀|弯刀|镰刀|太刀|佩剑|盾牌|巨盾|拳套|权杖|弓箭|战斧|斧头|铁锤|长矛|画戟|火炮|弩箭|武器|忍具)(?:元素)?(?:与|和)?/g, '')
+      .replace(/\b(?:holding|carrying|wielding)\s+(?:an?\s+)?(?:weapons?|guns?|pistols?|rifles?|swords?|knives?|daggers?|shields?|spears?|axes?|hammers?|scythes?|sabers?|katanas?|crossbows?|longbows?|bows?\s+and\s+arrows?)\b/gi, '')
+      .replace(/\b(?:weapons?|guns?|pistols?|rifles?|swords?|knives?|daggers?|shields?|spears?|axes?|hammers?|scythes?|sabers?|katanas?|crossbows?|longbows?|bows?\s+and\s+arrows?)\b/gi, '')
+      .replace(/[枪剑刀弓镰盾斧锤矛戟弩炮]/g, '')
       .replace(/爆竹元素/g, '节庆彩带元素').replace(/核能手臂元素/g, '发光机械臂元素')
       .replace(/、(?:与|和)/g, '、').replace(/(?:、|，){2,}/g, '、')
       .replace(/[、，](?:与|和)?$/g, '').replace(/(?:与|和)$/g, '')
-      .replace(/^(?:与|和)[、，]?/g, '').replace(/^[、，。；;:：\s]+|[、，；;:：\s]+$/g, '');
+      .replace(/^(?:与|和)[、，,]+/g, '').replace(/^[、，,。；;:：\s]+|[、，,；;:：\s]+$/g, '')
+      .replace(/,\s*,+/g, ',');
   }
   function enhance(series, character, prompt) {
     const [material, accessory, legwear, shoes] = details[series] || details.鸣潮;

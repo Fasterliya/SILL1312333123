@@ -57,21 +57,6 @@
     return result;
   }
 
-  async function drawEdit(options) {
-    if (!sdk()?.draw?.edit) throw Object.assign(new Error('当前环境不支持立绘生成'), {
-      code: 'SDK_UNAVAILABLE',
-      retryable: false,
-    });
-    const result = await sdk().draw.edit(options);
-    if (!result || !Array.isArray(result.images) || typeof result.images[0] !== 'string') {
-      throw Object.assign(new Error('图片服务没有返回有效立绘'), {
-        code: 'NO_OUTPUT_IMAGES',
-        retryable: true,
-      });
-    }
-    return result;
-  }
-
   Game.sdkAdapter = Object.freeze({
     isOnline: () => Boolean(sdk()),
     progress,
@@ -80,6 +65,5 @@
     kvGet,
     kvPut,
     drawGenerate,
-    drawEdit,
   });
 }(window));

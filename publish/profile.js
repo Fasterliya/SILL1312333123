@@ -102,7 +102,22 @@
     return true;
   }
 
+  function editTarget(field, nextValue, targetId) {
+    if (!targetId) return edit(field, nextValue);
+    if (!editable.includes(field)) return false;
+    const key = field.startsWith('clothing.') ? field.split('.')[1] : field;
+    if (!catalog[key]?.some((item) => item.name === nextValue)) return false;
+    const state = api.getState();
+    const target = [...state.family, ...state.contacts].find((person) => person.id === targetId);
+    if (!target) return false;
+    if (field.startsWith('clothing.')) target.clothing[key] = nextValue;
+    else target[field] = nextValue;
+    api.refresh();
+    api.save();
+    return true;
+  }
+
   function configure(options) { api = options; }
 
-  Game.profile = Object.freeze({ configure, updateGrowth, render, edit });
+  Game.profile = Object.freeze({ configure, updateGrowth, render, edit, editTarget });
 }(window));

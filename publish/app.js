@@ -92,6 +92,7 @@
     state = U.createState();
     Game.navigation.closeModule();
     Game.profile.updateGrowth(state);
+    Game.npcLife.update(state);
     refresh();
     save();
   }
@@ -109,13 +110,13 @@
       Game.familySystem.configure({ getState: () => state, refresh, save });
       Game.interactionRouter.configure({ getState: () => state, refresh, save, finish });
       Game.profile.updateGrowth(state);
-      const beforeContacts = state.contacts.length;
+      Game.npcLife.update(state);
       if (!['家中', '已毕业'].includes(state.education.school)) {
         Game.social.createClassmates(state, state.education.school, 32);
       }
       bind();
       refresh();
-      if (state.contacts.length !== beforeContacts) save();
+      save();
       Game.sdkAdapter.progress('runtime_initializing', '人生档案已建立');
       root.requestAnimationFrame(() => {
         Game.sdkAdapter.progress('first_frame', '可以开始人生');

@@ -13,7 +13,10 @@
     const module = event.target.closest('[data-open-module]');
     if (module) return Game.navigation.openModule(module.dataset.openModule, module.dataset.moduleTitle), true;
     const selector = event.target.closest('[data-selector-field]');
-    if (selector) return Game.appearance.open(selector.dataset.selectorField), true;
+    if (selector) return Game.appearance.open(
+      selector.dataset.selectorField,
+      selector.dataset.selectorTarget,
+    ), true;
     const avatar = event.target.closest('[data-character-id]');
     if (avatar) return Game.navigation.openCharacter(avatar.dataset.characterId), true;
     return false;

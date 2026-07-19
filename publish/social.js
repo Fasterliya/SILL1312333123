@@ -18,6 +18,8 @@
     for (let index = existing.length; index < target; index += 1) {
       const person = U.person('同学', U.random(C.surnames), U.between(-1, 1));
       person.school = school;
+      person.educationName = school;
+      person.educationStage = state.education.schoolStage;
       person.affection = U.between(28, 62);
       person.clothing.top = '简洁校服';
       state.contacts.push(person);
@@ -25,9 +27,11 @@
   }
 
   function enterSchool(state, school, stage, count) {
-    if (state.education.school !== school) archiveSchool(state);
+    const oldSchool = state.education.school;
+    if (oldSchool !== school) archiveSchool(state);
     state.education.school = school;
     state.education.schoolStage = stage;
+    Game.npcLife.carryClassmates(state, oldSchool, school, stage);
     createClassmates(state, school, count);
   }
 

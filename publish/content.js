@@ -36,7 +36,16 @@
       lastInteractionMonth: -1,
       phoneUnlocked: false,
       school: '',
+      educationName: '',
+      educationStage: 'home',
       job: ['父亲', '母亲'].includes(relation) ? random(C.parentJobs) : '',
+      company: '',
+      careerCity: '',
+      npcMarried: false,
+      npcMarriedAtAge: null,
+      spouseName: '',
+      childrenCount: 0,
+      lastLifeUpdateAge: null,
       status: '健康',
     };
   }
@@ -79,6 +88,10 @@
     const gender = random(['男', '女']);
     const father = person('父亲', surname, between(25, 38), '男');
     const mother = person('母亲', random(C.surnames), between(23, 36), '女');
+    father.npcMarried = true;
+    father.spouseName = mother.name;
+    mother.npcMarried = true;
+    mother.spouseName = father.name;
     const family = [father, mother];
     if (Math.random() < 0.28) {
       const relation = random(['哥哥', '姐姐']);
@@ -89,8 +102,10 @@
       sibling.clothing = { top: '彩色童装', socks: '短棉袜', shoes: '魔术贴童鞋' };
       family.push(sibling);
     }
+    father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
+    mother.childrenCount = father.childrenCount;
     return {
-      version: 4,
+      version: 5,
       updatedAt: new Date().toISOString(),
       name: makeName(surname),
       surname,

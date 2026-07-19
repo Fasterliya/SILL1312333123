@@ -75,14 +75,29 @@
 
   function characterHtml(state, person) {
     const clothes = person.clothing || {};
+    const labels = {
+      hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
+      'clothing.top': '身穿', 'clothing.socks': '袜子', 'clothing.shoes': '鞋',
+    };
     const rows = [
       ['关系', person.relation], ['年龄', `${U.personAge(state, person)}岁`], ['性别', person.gender],
       ['性格', person.personality], ['特质', person.trait], ['状态', person.status],
-      ['学校', person.school || '-'], ['职业', person.job || '-'],
+      ['当前学业', person.educationName || person.school || '-'],
+      ['职业', person.job || '-'], ['公司', person.company || '-'],
+      ['工作城市', person.careerCity || '-'],
+      ['婚姻', person.npcMarried ? `已婚 · ${person.spouseName || '伴侣'}` : '未婚'],
+      ['子女', `${person.childrenCount || 0}人`],
       ['发色', person.hairColor], ['发型', person.hairstyle], ['气质', person.temperament],
       ['身材', person.bodyType], ['身穿', clothes.top || '-'], ['袜子', clothes.socks || '-'],
       ['鞋', clothes.shoes || '-'], ['好感', person.affection], ['互动次数', person.interactions],
     ];
+    const editor = Object.entries(labels).map(([field, label]) => {
+      const key = field.startsWith('clothing.') ? field.split('.')[1] : field;
+      const value = field.startsWith('clothing.') ? clothes[key] : person[key];
+      return `<button class="selector-row" data-selector-field="${field}"
+        data-selector-target="${escape(person.id)}"><span>${label}</span>
+        <strong>${escape(value || '-')}</strong><b aria-hidden="true">›</b></button>`;
+    }).join('');
     return `${Game.portraitSystem.npcHtml(state, person)}<section class="character-hero">
       <div class="character-avatar">${escape(person.name.slice(-1))}</div>
       <div><p>${escape(person.relation)}</p><h3>${escape(person.name)}</h3>
@@ -90,6 +105,8 @@
       <section class="detail-facts">${rows.map(([label, value]) => (
         `<div><span>${escape(label)}</span><strong>${escape(value)}</strong></div>`
       )).join('')}</section>
+      <section class="panel npc-editor"><div class="panel-title"><h3>编辑角色外观</h3>
+      <span>发型、身材与三部位穿搭</span></div><div class="profile-editor">${editor}</div></section>
       <section class="detail-actions">${detailActions(state, person)}</section>`;
   }
 

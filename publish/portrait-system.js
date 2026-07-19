@@ -35,14 +35,14 @@
     const gender = player ? state.gender : target.gender;
     const clothes = `${target.clothing.top}、${target.clothing.socks}、${target.clothing.shoes}`;
     const weighted = custom ? `，(${custom}:1.8)` : '';
-    return `现代人生模拟游戏角色立绘，${gender}性，${age}岁，${target.hairColor}${target.hairstyle}，${target.bodyType}身材，${target.temperament}气质，${target.personality}性格，${target.trait}特质，穿${clothes}${weighted}。全身站姿，单人，干净浅色背景，精致二次元商业游戏立绘，符合真实年龄，健康自然，全年龄，非性感，无文字，无水印。`;
+    return `仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和服装褶皱质感，重绘一个全新角色。不得复制图1的人物身份、五官、发型、服装、姿势、摄影器材、文字框、台词、标志或构图。现代人生模拟游戏角色立绘，${gender}性，${age}岁，${target.hairColor}${target.hairstyle}，${target.bodyType}身材，${target.temperament}气质，${target.personality}性格，${target.trait}特质，穿${clothes}${weighted}。全身自然站姿，单人，干净浅色背景，符合真实年龄，健康自然，全年龄，非性感，禁止文字、水印、对话框和摄影器材。`;
   }
 
   async function retryDraw(input) {
     const retryable = new Set(['RATE_LIMITED', 'NETWORK_ERROR', 'TIMEOUT', 'DRAW_TIMEOUT', 'CREATE_TASK_FAILED', 'INTERNAL_ERROR', 'SERVICE_UNAVAILABLE']);
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
-        return await Game.sdkAdapter.drawGenerate(input);
+        return await Game.sdkAdapter.drawEdit(input);
       } catch (err) {
         if (!retryable.has(err?.code) || !err?.retryable || attempt === 1) throw err;
         await new Promise((resolve) => root.setTimeout(resolve, 1200 * (attempt + 1)));
@@ -79,9 +79,12 @@
     api.refresh();
     try {
       const state = api.getState();
+      const reference = await Game.styleReference.load();
       const result = await retryDraw({
-        prompt: description(state, target, key, custom), dimension: '2:3', model: 'anime',
-        negativePrompt: 'lowres, blurry, bad anatomy, bad hands, text, watermark, nsfw, revealing clothes',
+        prompt: description(state, target, key, custom),
+        images: [reference],
+        dimension: '2:3',
+        model: 'pro',
       });
       if (latest.get(key) !== requestId || findTarget(key) !== target) return;
       target.portraitUrl = result.images[0];
@@ -105,7 +108,7 @@
       : `<div class="portrait-empty"><b>${escape(name.slice(-1))}</b><span>尚未生成立绘</span></div>`;
     return `<button class="portrait-slot ${npc ? 'npc-portrait-slot' : ''}" ${slotAttr}
       type="button" ${waiting ? 'disabled' : ''}>${slot}</button>
-      <div class="portrait-actions"><p>${waiting ? '正在生成，预计约30秒' : (errors.get(key) || '自定义描述将以1.8权重加入')}</p>
+      <div class="portrait-actions"><p>${waiting ? '参考图重绘中，预计约30-60秒' : (errors.get(key) || '参考图画风 · 自定义描述权重1.8')}</p>
       <label class="prompt-field"><span>附加提示词 · 权重1.8</span>
       <input maxlength="120" value="${escape(target.customPrompt)}" ${npc ? 'data-npc-prompt' : 'id="portraitPromptInput"'}
         placeholder="例如：戴金丝眼镜、手持书本"></label>
@@ -126,11 +129,11 @@
       api.save();
       api.refresh();
     }, { once: true });
-    elements.portraitStatus.textContent = waiting ? '正在生成，预计约30秒'
-      : (errors.get('player') || '自定义描述将以1.8权重加入');
+    elements.portraitStatus.textContent = waiting ? '参考图重绘中，预计约30-60秒'
+      : (errors.get('player') || '参考图画风 · 自定义描述权重1.8');
     elements.portraitSlot.disabled = waiting;
     elements.generatePortraitBtn.disabled = waiting;
-    elements.generatePortraitBtn.textContent = waiting ? '生成中…约30秒' : (image ? '重新生成立绘' : '生成角色立绘');
+    elements.generatePortraitBtn.textContent = waiting ? '生成中…约30-60秒' : (image ? '重新生成立绘' : '生成角色立绘');
     if (document.activeElement !== elements.portraitPromptInput) {
       elements.portraitPromptInput.value = target.customPrompt || '';
     }

@@ -35,6 +35,15 @@
     item.lastInteractionMonth ??= -1;
     item.phoneUnlocked ??= false;
     item.school ||= '';
+    item.educationName ||= item.school || '';
+    item.educationStage ||= 'home';
+    item.company ||= '';
+    item.careerCity ||= '';
+    item.npcMarried ??= ['父亲', '母亲', '配偶'].includes(item.relation);
+    item.npcMarriedAtAge ??= null;
+    item.spouseName ||= '';
+    item.childrenCount ??= 0;
+    item.lastLifeUpdateAge ??= null;
     return item;
   }
 
@@ -61,7 +70,7 @@
 
   function upgradeState(state) {
     if (!state) return U.createState();
-    state.version = 4;
+    state.version = 5;
     state.location.country ||= C.cities.find((city) => city.city === state.location.city)?.country || '华夏';
     state.hometown ||= { ...state.location };
     state.hometown.country ||= '华夏';
@@ -70,6 +79,19 @@
     delete state.stats.体魄;
     state.family = (state.family || []).map(fillPerson);
     state.contacts = (state.contacts || []).map(fillPerson);
+    const father = state.family.find((item) => item.relation === '父亲');
+    const mother = state.family.find((item) => item.relation === '母亲');
+    if (father && mother) {
+      const childCount = state.family.filter((item) => (
+        ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)
+      )).length + 1;
+      father.npcMarried = true;
+      father.spouseName ||= mother.name;
+      father.childrenCount = Math.max(father.childrenCount, childCount);
+      mother.npcMarried = true;
+      mother.spouseName ||= father.name;
+      mother.childrenCount = Math.max(mother.childrenCount, childCount);
+    }
     state.education.schoolStage ||= 'home';
     state.education.universityType ??= null;
     state.education.graduated ??= false;

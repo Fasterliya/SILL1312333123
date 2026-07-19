@@ -164,6 +164,7 @@
     }
     state.monthActionTaken = false;
     Game.profile.updateGrowth(state);
+    Game.npcLife.update(state);
     finances(state);
     relationships(state);
     schoolMilestones(state);

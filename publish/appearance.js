@@ -11,6 +11,7 @@
   let api = null;
   let activeField = '';
   let activeFilter = '适龄';
+  let activeTargetId = '';
 
   function keyFor(field) {
     return field.startsWith('clothing.') ? field.split('.')[1] : field;
@@ -35,8 +36,11 @@
 
   function render() {
     const state = api.getState();
-    const profile = state.profile;
-    const years = Game.content.age(state);
+    const profile = activeTargetId
+      ? [...state.family, ...state.contacts].find((person) => person.id === activeTargetId)
+      : state.profile;
+    if (!profile) return Game.navigation.closeDetail();
+    const years = activeTargetId ? Game.content.personAge(state, profile) : Game.content.age(state);
     const key = keyFor(activeField);
     const selected = currentValue(profile, activeField);
     const items = (catalog[key] || []).filter((entry) => visible(entry, years))
@@ -59,9 +63,10 @@
       <section class="style-options">${list}</section>`, 'selector');
   }
 
-  function open(field) {
+  function open(field, targetId) {
     if (!labels[field] || !catalog[keyFor(field)]) return;
     activeField = field;
+    activeTargetId = targetId || '';
     activeFilter = '适龄';
     render();
   }
@@ -76,11 +81,14 @@
     const option = event.target.closest('[data-style-value]');
     if (!option || !activeField) return false;
     const label = labels[activeField];
-    if (Game.profile.edit(activeField, option.dataset.styleValue)) {
-      Game.navigation.closeDetail();
+    const targetId = activeTargetId;
+    if (Game.profile.editTarget(activeField, option.dataset.styleValue, targetId)) {
+      if (targetId) Game.navigation.openCharacter(targetId);
+      else Game.navigation.closeDetail();
       Game.view.showToast(`${label}已更换`, 'good');
     }
     activeField = '';
+    activeTargetId = '';
     return true;
   }
 

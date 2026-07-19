@@ -1,11 +1,12 @@
 .module-directory {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 9px;
 }
 
 .module-directory > button {
   width: 100%;
-  min-height: 72px;
+  min-height: 82px;
   padding: 10px 12px;
   display: grid;
   grid-template-columns: 38px 1fr 18px;
@@ -54,6 +55,133 @@
   color: #a0a39d;
   font-size: 22px;
   font-style: normal;
+}
+
+.fold-section,
+.record-section {
+  margin-bottom: 10px;
+  overflow: hidden;
+  border: 1px solid #dedbd0;
+  border-radius: 6px;
+  background: #fffdf7;
+}
+
+.fold-section > summary,
+.record-section > summary,
+.editor-group > summary {
+  min-height: 48px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  color: #263b37;
+  cursor: pointer;
+  list-style: none;
+}
+
+.fold-section > summary::-webkit-details-marker,
+.record-section > summary::-webkit-details-marker,
+.editor-group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold-section > summary::after,
+.record-section > summary::after,
+.editor-group > summary::after {
+  content: "+";
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: #315f58;
+  font-size: 18px;
+}
+
+.fold-section[open] > summary::after,
+.record-section[open] > summary::after,
+.editor-group[open] > summary::after {
+  content: "−";
+}
+
+.fold-section > summary span,
+.record-section > summary span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.fold-section > summary small,
+.record-section > summary small {
+  color: #7a817c;
+  font-size: 9px;
+}
+
+.fold-content,
+.record-grid,
+.record-section > .profile-editor {
+  padding: 12px;
+  border-top: 1px solid #e5e2d8;
+}
+
+.event-scroll {
+  max-height: 46dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.gene-facts,
+.record-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.gene-facts > div,
+.record-grid > div {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #e1ded3;
+  background: #f8f5ea;
+}
+
+.gene-facts span,
+.gene-facts strong,
+.record-grid span,
+.record-grid strong {
+  display: block;
+}
+
+.gene-facts span,
+.record-grid span {
+  color: #747b76;
+  font-size: 9px;
+}
+
+.gene-facts strong,
+.record-grid strong {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+
+.record-stack {
+  margin-top: 10px;
+}
+
+.editor-group {
+  border-bottom: 1px solid #e3e0d6;
+}
+
+.editor-group > summary {
+  padding-inline: 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.editor-group > .selector-row {
+  padding-left: 16px;
+}
+
+@media (min-width: 460px) {
+  .module-directory { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 .portrait-panel {
@@ -346,6 +474,11 @@
 }
 
 @media (max-width: 360px) {
+  .gene-facts,
+  .record-grid {
+    grid-template-columns: 1fr;
+  }
+
   .portrait-panel {
     grid-template-columns: 1fr;
   }

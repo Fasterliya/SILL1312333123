@@ -115,7 +115,7 @@
     const guaranteedMeeting = years === 20 && state.totalMonths % 12 === 0;
     if (years >= 18 && !state.romance.partnerId && !hasFriend
       && (guaranteedMeeting || Math.random() < 0.035)) {
-      const person = U.person('朋友', U.random(C.surnames), U.between(-2, 3));
+      const person = U.person('朋友', U.random(Game.nameSystem.surnames()), U.between(-2, 3));
       person.affection = 52;
       Game.npcLife.syncGrowth(state, person);
       state.family.push(person);
@@ -144,6 +144,9 @@
         child.bodyType = '幼小';
         child.hairstyle = '胎毛短发';
         child.clothing = { top: '婴儿连体衣', socks: '婴儿袜', shoes: '婴儿软底鞋' };
+        const partner = [...state.family, ...state.contacts].find((item) => item.id === state.romance.partnerId);
+        if (partner) Game.genetics.inheritInto(child, child.gender, state.profile, partner, `child-${child.id}`);
+        Game.geneticsGrowth.applyAppearance(child, child.gender, 0);
         Game.npcLife.syncGrowth(state, child);
         state.family.push(child);
         addLog(state, '新生命降临', `${child.name}出生了，你成为了${state.gender === '男' ? '父亲' : '母亲'}。`, 'milestone');

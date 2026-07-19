@@ -9,7 +9,7 @@
     'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'travelPanel',
     'propertyPanel', 'stockPanel', 'industryPanel',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
-    'portraitPromptInput', 'profileEditor', 'traitGrid', 'decision', 'decisionTitle', 'decisionText',
+    'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
     'decisionBody', 'monthBtn', 'yearBtn', 'actionStrip', 'toast', 'tabPages',
     'tabs', 'heroCanvas', 'resetBtn', 'childPlanBtn',
   ];

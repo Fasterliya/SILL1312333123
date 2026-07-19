@@ -13,7 +13,11 @@
   <link rel="stylesheet" href="./career.css">
   <link rel="stylesheet" href="./life-loop.css">
   <script src="./config.js" defer></script>
+  <script src="./name-catalog.js" defer></script>
   <script src="./world-data.js" defer></script>
+  <script src="./genetics-catalog.js" defer></script>
+  <script src="./genetics.js" defer></script>
+  <script src="./genetics-growth.js" defer></script>
   <script src="./appearance-catalog.js" defer></script>
   <script src="./cosplay-wuwa.js" defer></script>
   <script src="./cosplay-catalog.js" defer></script>
@@ -75,20 +79,22 @@
     <section class="tab-pages" id="tabPages">
       <div class="page active" id="timelinePage">
         <section class="panel goal-panel" id="goalPanel"></section>
-        <section class="panel stat-panel">
-          <div class="panel-title"><h2>当前状态</h2><span>四项状态</span></div>
-          <div class="stat-grid" id="statGrid"></div>
-          <div class="action-strip" id="actionStrip">
-            <button type="button" data-activity="study"><b>学</b><span>学习</span></button>
-            <button type="button" data-activity="sport"><b>炼</b><span>锻炼</span></button>
-            <button type="button" data-activity="social"><b>友</b><span>社交</span></button>
-            <button type="button" data-activity="rest"><b>闲</b><span>休息</span></button>
+        <details class="fold-section" open>
+          <summary><span>当前状态</span><small>属性与本月行动</small></summary>
+          <div class="fold-content">
+            <div class="stat-grid" id="statGrid"></div>
+            <div class="action-strip" id="actionStrip">
+              <button type="button" data-activity="study"><b>学</b><span>学习</span></button>
+              <button type="button" data-activity="sport"><b>炼</b><span>锻炼</span></button>
+              <button type="button" data-activity="social"><b>友</b><span>社交</span></button>
+              <button type="button" data-activity="rest"><b>闲</b><span>休息</span></button>
+            </div>
           </div>
-        </section>
-        <section class="panel">
-          <div class="panel-title"><h2>人生纪事</h2><span>最近 60 条</span></div>
-          <div class="event-list" id="eventList"></div>
-        </section>
+        </details>
+        <details class="fold-section">
+          <summary><span>人生纪事</span><small>最近 60 条</small></summary>
+          <div class="fold-content event-scroll"><div class="event-list" id="eventList"></div></div>
+        </details>
       </div>
 
       <div class="page" id="rolePage">
@@ -145,18 +151,21 @@
               <input id="portraitPromptInput" maxlength="120" placeholder="例如：戴金丝眼镜、手持书本"></label>
             <button id="generatePortraitBtn" type="button">生成角色立绘</button></div>
         </section>
-        <section class="panel">
-          <div class="panel-title"><h2>角色信息</h2><span>成长档案</span></div>
-          <div class="profile-facts" id="profileFacts"></div>
-          <h3>性格与特质</h3>
-          <div class="trait-grid" id="traitGrid"></div>
-        </section>
+        <details class="fold-section" open>
+          <summary><span>成长档案</span><small>身高、外貌与气质</small></summary>
+          <div class="fold-content"><div class="profile-facts" id="profileFacts"></div>
+            <h3>性格与特质</h3><div class="trait-grid" id="traitGrid"></div></div>
+        </details>
+        <details class="fold-section">
+          <summary><span>遗传档案</span><small>DNA 与实际表达</small></summary>
+          <div class="fold-content"><div class="gene-facts" id="geneFacts"></div></div>
+        </details>
       </div>
       <div class="module-view" id="roleAppearance">
-        <section class="panel">
-          <div class="panel-title"><h2>外观与穿着</h2><span>点击进入选择器</span></div>
-          <div class="profile-editor" id="profileEditor"></div>
-        </section>
+        <details class="fold-section" open>
+          <summary><span>外观与穿着</span><small>分组选择造型</small></summary>
+          <div class="fold-content"><div class="profile-editor" id="profileEditor"></div></div>
+        </details>
       </div>
       <div class="module-view" id="familySubpage"><section class="panel">
         <div class="panel-title"><h2>家庭关系</h2><span>点击头像查看详情</span></div>
@@ -229,13 +238,6 @@
       <h2 id="decisionTitle"></h2>
       <div class="decision-text" id="decisionText"></div>
       <div class="decision-body" id="decisionBody"></div>
-    </section>
-  </div>
-  <div class="month-report" id="monthReport" hidden>
-    <section class="month-report-sheet" role="dialog" aria-modal="true" aria-labelledby="monthReportTitle">
-      <header class="month-report-head"><div><p>时间推进结算</p><h2 id="monthReportTitle">人生月报</h2></div>
-        <button id="monthReportClose" type="button" aria-label="关闭月报">×</button></header>
-      <div id="monthReportBody"></div>
     </section>
   </div>
   <div class="toast" id="toast" role="status" hidden></div>

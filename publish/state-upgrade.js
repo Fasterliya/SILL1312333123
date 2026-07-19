@@ -68,6 +68,7 @@
     item.spouseName ||= '';
     item.childrenCount ??= 0;
     item.lastLifeUpdateAge ??= null;
+    Game.genetics.ensure(item, item.gender, `legacy-${item.id || item.name}`, true);
     return item;
   }
 
@@ -84,10 +85,12 @@
     profile.portraitTaskId ??= null;
     profile.customPrompt ||= '';
     profile.cosplay = Game.cosplayCatalog.find(profile.cosplay).name;
+    profile.id ||= 'player-profile';
     if (profile.bodyType === '丰润') profile.bodyType = '丰满';
     if (state.gender === '女' && profile.bodyType === '清瘦') profile.bodyType = '娇小纤细';
     if (state.gender === '女' && profile.bodyType === '健壮') profile.bodyType = '匀称';
     fillPortraits(profile, state.updatedAt);
+    Game.genetics.ensure(profile, state.gender, `legacy-player-${state.name}`, true);
   }
 
   function fillStocks(state) {
@@ -99,7 +102,7 @@
 
   function upgradeState(state) {
     if (!state) return U.createState();
-    state.version = 8;
+    state.version = 9;
     state.location.country ||= C.cities.find((city) => city.city === state.location.city)?.country || '华夏';
     state.hometown ||= { ...state.location };
     state.hometown.country ||= '华夏';
@@ -141,7 +144,7 @@
     state.routine.actionMonth ??= state.totalMonths;
     state.routine.fatigue = U.clamp(Number(state.routine.fatigue) || 0, 0, 100);
     state.routine.actions ||= { study: 0, sport: 0, social: 0, rest: 0 };
-    state.routine.lastReport ??= null;
+    delete state.routine.lastReport;
     return state;
   }
 

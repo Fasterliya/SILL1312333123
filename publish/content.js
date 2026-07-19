@@ -6,26 +6,8 @@
   const random = (list) => list[Math.floor(Math.random() * list.length)];
   const between = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const makeName = (surname) => {
-    if (!surname && C.fullNames?.length && Math.random() < 0.65) return random(C.fullNames);
-    return (surname || random(C.surnames)) + random(C.givenNames);
-  };
-
-  function setUniqueName(state, person) {
-    const used = (name) => [...state.family, ...state.contacts].some((item) => item.name === name);
-    const fixed = C.fullNames?.find((name) => !used(name));
-    if (fixed) {
-      person.name = fixed;
-      return;
-    }
-    for (let attempt = 0; attempt < 12; attempt += 1) {
-      const candidate = makeName(random(C.surnames));
-      if (!used(candidate)) {
-        person.name = candidate;
-        return;
-      }
-    }
-  }
+  const makeName = (surname, gender, culture) => Game.nameSystem.makeName(surname, gender, culture);
+  const setUniqueName = (state, person, culture) => Game.nameSystem.setUnique(state, person, culture);
 
   function clothing(top) {
     return { top: top || '品质日常', socks: '短棉袜', shoes: '白色运动鞋' };
@@ -36,10 +18,9 @@
     const bodyTypes = resolvedGender === '女'
       ? (age < 7 ? ['幼小'] : ['小胸', '丰满', '匀称', '娇小纤细'])
       : (age < 7 ? ['幼小'] : ['清瘦', '匀称', '健壮']);
-    return {
+    const created = {
       id: `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
-      name: !['父亲', '母亲', '哥哥', '姐姐', '弟弟', '妹妹', '儿子', '女儿'].includes(relation)
-        && C.fullNames?.length && Math.random() < 0.55 ? random(C.fullNames) : makeName(surname),
+      name: makeName(surname, resolvedGender),
       relation,
       gender: resolvedGender,
       baseAge: age,
@@ -76,6 +57,8 @@
       lastLifeUpdateAge: null,
       status: '健康',
     };
+    Game.genetics.founder(created, resolvedGender, `${created.id}-${created.name}`, false);
+    return created;
   }
 
   function log(title, text, tone, month) {
@@ -85,8 +68,9 @@
     };
   }
 
-  function profile() {
-    return {
+  function profile(gender, father, mother) {
+    const created = {
+      id: 'player-profile',
       height: 50,
       weight: 3.4,
       growthSeed: between(-4, 4),
@@ -104,6 +88,9 @@
       portraitGallery: [],
       customPrompt: '',
     };
+    if (father && mother) Game.genetics.inheritInto(created, gender, father, mother, 'player-founder');
+    else Game.genetics.founder(created, gender, 'player-founder', false);
+    return created;
   }
 
   function stockState() {
@@ -113,11 +100,11 @@
   }
 
   function createState() {
-    const surname = random(C.surnames);
+    const surname = random(Game.nameSystem.surnames());
     const location = random(C.locations);
     const gender = random(['男', '女']);
     const father = person('父亲', surname, between(25, 38), '男');
-    const mother = person('母亲', random(C.surnames), between(23, 36), '女');
+    const mother = person('母亲', random(Game.nameSystem.surnames()), between(23, 36), '女');
     father.npcMarried = true;
     father.spouseName = mother.name;
     mother.npcMarried = true;
@@ -130,14 +117,15 @@
       sibling.bodyType = '幼小';
       sibling.hairstyle = '儿童短发';
       sibling.clothing = { top: '彩色童装', socks: '短棉袜', shoes: '魔术贴童鞋' };
+      Game.genetics.inheritInto(sibling, sibling.gender, father, mother, `sibling-${sibling.id}`);
       family.push(sibling);
     }
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 8,
+      version: 9,
       updatedAt: new Date().toISOString(),
-      name: makeName(surname),
+      name: makeName(surname, gender),
       surname,
       gender,
       location: { province: location[0], city: location[1], country: '华夏' },
@@ -145,7 +133,7 @@
       year: C.startYear,
       month: C.startMonth,
       totalMonths: 0,
-      profile: profile(),
+      profile: profile(gender, father, mother),
       stats: { 健康: between(72, 94), 心情: between(68, 90), 智力: between(46, 66), 魅力: between(42, 68) },
       money: between(300, 1800),
       familyWealth: between(90000, 850000),
@@ -163,8 +151,7 @@
       romance: { partnerId: null, married: false, pendingBirth: 0 },
       assets: { house: null, mortgage: 0, stocks: stockState(), businesses: [], vehicles: [] },
       travel: { activeId: null },
-      routine: { actionMonth: 0, fatigue: 0,
-        actions: { study: 0, sport: 0, social: 0, rest: 0 }, lastReport: null },
+      routine: { actionMonth: 0, fatigue: 0, actions: { study: 0, sport: 0, social: 0, rest: 0 } },
       pendingDecision: null,
       gameOver: false,
       logs: [log('呱呱坠地', `你出生在${location[0]}${location[1]}，父母为你取名${surname}家新生命。`, 'milestone', 0)],

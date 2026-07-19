@@ -4,7 +4,6 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
   const el = {};
-  let api = null;
 
   const activityData = {
     study: { label: '学习', fatigue: 10, stats: { 智力: 2, 心情: -2 }, study: 7 },
@@ -25,7 +24,7 @@
     state.routine.fatigue = U.clamp(Number(state.routine.fatigue) || 0, 0, 100);
     state.routine.actions ||= {};
     Object.keys(activityData).forEach((key) => { state.routine.actions[key] ||= 0; });
-    state.routine.lastReport ??= null;
+    delete state.routine.lastReport;
     if (state.routine.actionMonth !== state.totalMonths) {
       state.routine.actionMonth = state.totalMonths;
       state.routine.actions = { study: 0, sport: 0, social: 0, rest: 0 };
@@ -64,45 +63,20 @@
     };
   }
 
-  function capture(state) {
+  function beforeAdvance(state) {
     const routine = ensure(state);
     return {
       totalMonths: state.totalMonths,
-      date: `${state.year}年${state.month}月`,
-      money: state.money,
-      study: state.education.study,
-      stats: { ...state.stats },
       fatigue: routine.fatigue,
-      actions: { ...routine.actions },
-      firstLogId: state.logs[0]?.id || '',
     };
   }
 
-  function completeAdvance(state, before) {
+  function settleAdvance(state, before) {
     const routine = ensure(state);
     const months = Math.max(0, state.totalMonths - before.totalMonths);
-    const events = [];
-    for (const item of state.logs) {
-      if (item.id === before.firstLogId) break;
-      events.push(item.title);
-    }
-    const statDeltas = Object.fromEntries(Object.entries(state.stats).map(([name, value]) => (
-      [name, value - before.stats[name]]
-    )));
     routine.fatigue = U.clamp(before.fatigue - months * 35, 0, 100);
     routine.actionMonth = state.totalMonths;
     routine.actions = { study: 0, sport: 0, social: 0, rest: 0 };
-    routine.lastReport = {
-      title: `${before.date} → ${state.year}年${state.month}月`,
-      months,
-      money: state.money - before.money,
-      study: state.education.study - before.study,
-      stats: statDeltas,
-      fatigueBefore: before.fatigue,
-      fatigueAfter: routine.fatigue,
-      actions: before.actions,
-      events: events.slice(0, 6),
-    };
   }
 
   function nextExam(state) {
@@ -140,28 +114,6 @@
     return { title: '建立生活储备', detail: '现金达到10万元', value: state.money, target: 100000 };
   }
 
-  function signed(value, suffix) {
-    return `${value > 0 ? '+' : ''}${value}${suffix || ''}`;
-  }
-
-  function reportHtml(report) {
-    const actions = Object.entries(report.actions).filter(([, count]) => count > 0)
-      .map(([key, count]) => `${activityData[key].label}×${count}`).join(' · ') || '本阶段没有主动行动';
-    const stats = Object.entries(report.stats).map(([name, delta]) => (
-      `<div><span>${escape(name)}</span><strong class="${delta < 0 ? 'down' : ''}">${signed(delta)}</strong></div>`
-    )).join('');
-    const events = report.events.length
-      ? report.events.map((item) => `<li>${escape(item)}</li>`).join('')
-      : '<li>这段时间平稳度过。</li>';
-    return `<p class="report-date">${escape(report.title)} · 推进${report.months}个月</p>
-      <div class="report-deltas">${stats}
-      <div><span>现金</span><strong class="${report.money < 0 ? 'down' : ''}">${signed(report.money, '元')}</strong></div>
-      <div><span>学习</span><strong class="${report.study < 0 ? 'down' : ''}">${signed(report.study)}</strong></div></div>
-      <div class="report-actions"><span>行动记录</span><strong>${escape(actions)}</strong></div>
-      <div class="report-actions"><span>疲劳恢复</span><strong>${report.fatigueBefore} → ${report.fatigueAfter}</strong></div>
-      <h3>重要变化</h3><ul class="report-events">${events}</ul>`;
-  }
-
   function render(state) {
     const routine = ensure(state);
     const currentGoal = goal(state);
@@ -170,30 +122,16 @@
       <small>${escape(currentGoal.detail)}</small></div><b>${percent}%</b>
       <i><em style="width:${percent}%"></em></i>
       <p>本月疲劳 ${routine.fatigue}/100 · 行动不限次数，重复收益会递减</p>`;
-    el.report.hidden = !routine.lastReport;
-    if (routine.lastReport) el.reportBody.innerHTML = reportHtml(routine.lastReport);
-  }
-
-  function dismiss() {
-    const state = api.getState();
-    ensure(state).lastReport = null;
-    el.report.hidden = true;
-    api.save();
   }
 
   function init() {
     el.goal = document.getElementById('goalPanel');
-    el.report = document.getElementById('monthReport');
-    el.reportBody = document.getElementById('monthReportBody');
-    el.close = document.getElementById('monthReportClose');
-    if (Object.values(el).some((item) => !item)) throw new Error('人生循环界面结构不完整');
-    el.close.addEventListener('click', dismiss);
+    if (!el.goal) throw new Error('人生循环界面结构不完整');
   }
 
-  function configure(options) { api = options; }
   const performancePenalty = (state) => ensure(state).fatigue / 700;
 
   Game.lifeLoop = Object.freeze({
-    configure, init, ensure, performActivity, capture, completeAdvance, render, performancePenalty,
+    init, ensure, performActivity, beforeAdvance, settleAdvance, render, performancePenalty,
   });
 }(window));

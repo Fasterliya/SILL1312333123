@@ -53,12 +53,16 @@
     const size = `${Number(target.height || 0).toFixed(1)}cm，${Number(target.weight || 0).toFixed(1)}kg`;
     const style = '仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和材质细节，重绘一个全新角色。不得复制图1人物的身份、五官、现有造型、姿势、摄影器材、文字框、台词、标志或构图。';
     const direction = '必须为完整全身照，人物从头顶到鞋底全部入镜，双手双脚可见，不裁切身体。动作可以站、坐或躺，姿势、取景与场景背景优先遵循玩家附加提示词；未指定时采用自然全身构图与协调环境。健康自然、克制得体、非性感，禁止文字、水印、对话框和摄影器材。';
+    const face = `${neutral(target.eyeColor)}瞳色，${neutral(target.faceShape)}，${neutral(target.featureProportions)}`;
+    const marks = [target.molePosition, target.freckles, target.distinctiveFeature]
+      .filter((item) => item && !String(item).startsWith('无')).map(neutral).join('，');
+    const finalize = (text) => text.replace(/\s{2,}/g, ' ').slice(0, 1950);
     const cosplay = Game.cosplayCatalog.find(target.cosplay);
     if (cosplay.name !== '无') {
-      return `${style}现代同人COS写真风格角色插画，${gender}性，身高约${Number(target.height || 0).toFixed(1)}cm，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质。高还原扮演${cosplay.name}，${neutral(cosplay.prompt)}。发色、发型、整套服装、腿部服饰、鞋靴、配饰和道具全部采用上述COS部件，不混入被绘角色原本的发型发色或日常穿着${weighted}。${direction}`;
+      return finalize(`${style}现代同人COS写真风格角色插画，${gender}性，身高约${Number(target.height || 0).toFixed(1)}cm，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${face}${marks ? `，${marks}` : ''}。高还原扮演${cosplay.name}，${neutral(cosplay.prompt)}。袜子独立搭配为${neutral(target.clothing.socks)}，与套装默认袜装冲突时以此选择为准。发色、发型、主体服装、鞋靴、配饰和道具采用上述COS部件，不混入被绘角色原本的日常穿着${weighted}。${direction}`);
     }
     const clothes = [target.clothing.top, target.clothing.socks, target.clothing.shoes].map(neutral).join('、');
-    return `${style}现代人生模拟游戏角色插画，${gender}性，身高体重约${size}，${neutral(target.hairColor)}${neutral(target.hairstyle)}，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${neutral(target.personality)}性格，${neutral(target.trait)}特质，穿${clothes}${weighted}。${direction}`;
+    return finalize(`${style}现代人生模拟游戏角色插画，${gender}性，身高体重约${size}，${neutral(target.hairColor)}${neutral(target.hairstyle)}，${face}，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${neutral(target.personality)}性格，${neutral(target.trait)}特质${marks ? `，${marks}` : ''}，穿${clothes}${weighted}。${direction}`);
   }
 
   async function retryDraw(input) {

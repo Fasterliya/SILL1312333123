@@ -79,20 +79,33 @@
       cosplay: 'COS服', hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
       'clothing.top': '身穿', 'clothing.socks': '袜子', 'clothing.shoes': '鞋',
     };
-    const rows = [
+    const identity = [
       ['关系', person.relation], ['年龄', `${U.personAge(state, person)}岁`], ['性别', person.gender],
       ['身高', `${Number(person.height || 0).toFixed(1)} cm`],
       ['体重', `${Number(person.weight || 0).toFixed(1)} kg`],
+      ['成长身高', `${Number(person.maxHeight || 0).toFixed(1)} cm`],
       ['性格', person.personality], ['特质', person.trait], ['状态', person.status],
+    ];
+    const life = [
       ['当前学业', person.educationName || person.school || '-'],
       ['职业', person.job || '-'], ['公司', person.company || '-'],
       ['工作城市', person.careerCity || '-'],
       ['婚姻', person.npcMarried ? `已婚 · ${person.spouseName || '伴侣'}` : '未婚'],
       ['子女', `${person.childrenCount || 0}人`],
+      ['好感', person.affection], ['互动次数', person.interactions],
+    ];
+    const looks = [
       ['COS服', person.cosplay || '无'],
       ['发色', effective('hairColor')], ['发型', effective('hairstyle')], ['气质', person.temperament],
+      ['瞳色', person.eyeColor], ['脸型', person.faceShape], ['五官比例', person.featureProportions],
       ['身材', person.bodyType], ['身穿', effective('clothing.top')], ['袜子', effective('clothing.socks')],
-      ['鞋', effective('clothing.shoes')], ['好感', person.affection], ['互动次数', person.interactions],
+      ['鞋', effective('clothing.shoes')],
+    ];
+    const inherited = [
+      ['DNA编码', person.genetics?.code || '-'], ['遗传骨架', person.bodyFrame],
+      ['发育倾向', person.developmentTendency], ['痣', person.molePosition],
+      ['雀斑', person.freckles], ['个人特征', person.distinctiveFeature],
+      ['基因变异', person.genetics?.mutations?.length ? `${person.genetics.mutations.length}项` : '未检测到'],
     ];
     const editor = Object.entries(labels).map(([field, label]) => {
       const covered = Game.cosplayCatalog.overrides(person, field);
@@ -100,15 +113,20 @@
         data-selector-target="${escape(person.id)}"><span>${label}</span>
         <strong>${escape(effective(field) || '-')}</strong><b aria-hidden="true">${covered ? '覆' : '›'}</b></button>`;
     }).join('');
+    const section = (title, hint, rows, open) => `<details class="record-section" ${open ? 'open' : ''}>
+      <summary><span>${title}</span><small>${hint}</small></summary><div class="record-grid">${rows.map(([label, value]) => (
+        `<div><span>${escape(label)}</span><strong>${escape(value || '-')}</strong></div>`
+      )).join('')}</div></details>`;
     return `${Game.portraitSystem.npcHtml(state, person)}<section class="character-hero">
       <div class="character-avatar">${escape(person.name.slice(-1))}</div>
       <div><p>${escape(person.relation)}</p><h3>${escape(person.name)}</h3>
       <span>${escape(person.personality)} · ${escape(person.trait)}</span></div></section>
-      <section class="detail-facts">${rows.map(([label, value]) => (
-        `<div><span>${escape(label)}</span><strong>${escape(value)}</strong></div>`
-      )).join('')}</section>
-      <section class="panel npc-editor"><div class="panel-title"><h3>编辑角色外观</h3>
-      <span>COS、发型、身材与三部位穿搭</span></div><div class="profile-editor">${editor}</div></section>
+      <div class="record-stack">${section('基本档案', '身份与成长', identity, true)}
+      ${section('外貌表现', '当前实际外观', looks, false)}
+      ${section('遗传信息', 'DNA 与成长倾向', inherited, false)}
+      ${section('人生状态', '学业、职业与家庭', life, false)}</div>
+      <details class="record-section npc-editor"><summary><span>编辑角色外观</span>
+      <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}</div></details>
       <section class="detail-actions">${detailActions(state, person)}</section>`;
   }
 

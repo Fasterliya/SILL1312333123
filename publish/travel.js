@@ -2,7 +2,6 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const C = Game.config;
   const U = Game.content;
   const areas = [
     ['商业街', 120, '店铺与行人很多，容易遇到开朗的角色。'],
@@ -29,11 +28,11 @@
     const cost = Math.round(area[1] * discount);
     if (state.money < cost) return { ok: false, message: `这次出行需要 ¥${cost}` };
     state.money -= cost;
-    const person = U.person('路人', U.random(C.surnames), U.between(-5, 8));
+    const person = U.person('路人', U.random(Game.nameSystem.surnames()), U.between(-5, 8));
     person.affection = U.between(25, 42);
     person.metCity = `${state.location.city}${areaName}`;
     if (state.location.country === '日本') {
-      person.name = Game.worldData.japaneseName();
+      person.name = Game.worldData.japaneseName(person.gender);
       const tops = Game.appearanceCatalog.top.filter((entry) => entry.tags.includes('和风'));
       const hairs = Game.appearanceCatalog.hairstyle.filter((entry) => entry.tags.includes('和风'));
       person.clothing.top = U.random(tops).name;

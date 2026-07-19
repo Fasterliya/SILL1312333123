@@ -16,26 +16,7 @@
   };
 
   function updateGrowth(person, age) {
-    const years = Math.max(0, age);
-    const seed = Number(person.growthSeed) || 0;
-    let height;
-    if (years < 1) height = 50 + years * 25;
-    else if (years < 3) height = 75 + (years - 1) * 10;
-    else if (years < 6) height = 95 + (years - 3) * 7;
-    else if (years < 12) height = 116 + (years - 6) * 5.7;
-    else {
-      const adult = person.gender === '男' ? 175 : 164;
-      height = 150 + (adult - 150) * Math.min(1, (years - 12) / 6);
-    }
-    height += seed * Math.min(1, years / 14);
-    const bodyOffset = {
-      幼小: -1.5, 小胸: -0.8, 丰满: 2.6, 匀称: 0,
-      娇小纤细: -1.2, 清瘦: -1.2, 健壮: 1.8,
-    }[person.bodyType] || 0;
-    const weight = years < 2 ? 3.4 + years * 6
-      : (14.8 + Math.min(7, years * 0.35) + bodyOffset) * (height / 100) ** 2;
-    person.height = Math.round(height * 10) / 10;
-    person.weight = Math.max(3.2, Math.round(weight * 10) / 10);
+    Game.geneticsGrowth.updateGrowth(person, person.gender, Math.max(0, age), false);
   }
 
   function syncGrowth(state, person) {
@@ -87,7 +68,7 @@
     if (!person.npcMarried && age >= 24 && Math.random() < Math.min(0.22, 0.055 + (age - 24) * 0.009)) {
       person.npcMarried = true;
       person.npcMarriedAtAge = age;
-      person.spouseName = U.makeName();
+      person.spouseName = U.makeName('', person.gender === '男' ? '女' : '男');
     }
     if (!person.npcMarried || age < 25 || age > 45 || person.childrenCount >= 3) return;
     const yearsMarried = age - (person.npcMarriedAtAge || age);
@@ -109,23 +90,7 @@
     person.clothing.top = U.random(tops);
     person.clothing.socks = age < 3 ? '婴儿袜' : (age < 18 ? '白色中筒袜' : '短棉袜');
     person.clothing.shoes = age < 3 ? '婴儿软底鞋' : (age < 7 ? '魔术贴童鞋' : U.random(['帆布鞋', '白色运动鞋', '乐福鞋']));
-    if (age < 3) {
-      person.bodyType = '幼小';
-      person.hairstyle = '胎毛短发';
-      person.temperament = '懵懂';
-    } else {
-      if (girl) {
-        person.bodyType = age < 7 ? '幼小'
-          : U.random(age < 12 ? ['幼小', '娇小纤细'] : ['小胸', '丰满', '匀称', '娇小纤细']);
-      } else {
-        person.bodyType = age < 7 ? '幼小' : U.random(['清瘦', '匀称', '健壮']);
-      }
-      person.hairstyle = U.random(girl
-        ? ['齐肩直发', '高马尾', '柔顺侧编发', '日式低双马尾', '柔顺空气刘海长发']
-        : ['清爽短发', '层次碎发', '日式短碎发', '清爽侧分短发', '自然层次发']);
-      person.temperament = U.random(age < 18 ? ['童真', '清朗', '青涩', '灵动'] : ['明快', '沉稳', '文雅', '干练']);
-    }
-    if (age >= 60 && Math.random() < 0.35) person.hairColor = '银灰';
+    Game.geneticsGrowth.applyAppearance(person, person.gender, age);
   }
 
   function updatePerson(state, person) {

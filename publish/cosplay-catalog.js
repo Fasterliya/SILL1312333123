@@ -2,11 +2,35 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
+  const details = {
+    '东方Project': [
+      '和洋折衷棉布、缎面、薄纱与皮革，保留原设主辅色、滚边、蝴蝶结、袖口和裙摆层次',
+      '按原设还原帽饰、发饰、胸针、领结、腰饰与手持配件',
+      '按原设还原长袜、过膝袜、足袋或裸腿与腿饰层次',
+      '按原设还原玛丽珍鞋、短靴、木屐或布鞋的颜色与结构',
+    ],
+    '星穹铁道': [
+      '高精度织物、金属、皮革、半透明薄纱与能量材质，保留原设主色、辅色、金属描边和纹样分区',
+      '按原设还原头冠、发饰、耳饰、手套、胸针、腰饰与阵营配件',
+      '按原设还原长袜、连裤袜、紧身裤、腿环与腿甲层次',
+      '按原设还原高跟鞋、长靴、短靴或战术鞋的鞋型、配色与金属装饰',
+    ],
+    '鸣潮': [
+      '机能织物、哑光皮革、金属护甲、透明能量件与细密刺绣，保留原设配色、渐变、发光纹路和不对称剪裁',
+      '按原设还原冠饰、帽饰、发簪、耳饰、手套、腰挂与共鸣配件',
+      '按原设还原袜装、紧身腿套、绑带、腿环与护甲层次',
+      '按原设还原战术靴、长靴、短靴或礼鞋的鞋型、配色与能量结构',
+    ],
+  };
+  function enhance(series, character, prompt) {
+    const [material, accessory, legwear, shoes] = details[series] || details.鸣潮;
+    return `主体服装与发型：${prompt}。材质与颜色：${material}。头饰与配饰：${accessory}。袜装与腿部：${legwear}。鞋履：${shoes}。标志性元素：完整保留${character}的武器、道具、纹样、翅膀或能量特征。`;
+  }
   const make = (series, character, prompt) => ({
     name: `${series} · ${character}`,
     series,
     character,
-    prompt,
+    prompt: enhance(series, character, prompt),
     tags: [series, 'COS'],
     minAge: 0,
     maxAge: 120,
@@ -101,13 +125,15 @@
     ['停云', '红金狐族商旅礼服、棕色长发、狐耳狐尾与折扇元素'],
   ].map(([name, prompt]) => make('星穹铁道', name, prompt));
 
-  const wuwa = Array.isArray(Game.cosplayWuwa) ? Game.cosplayWuwa : [];
+  const wuwa = Array.isArray(Game.cosplayWuwa) ? Game.cosplayWuwa.map((entry) => ({
+    ...entry, prompt: enhance('鸣潮', entry.character, entry.prompt),
+  })) : [];
   const items = [{
     name: '无', series: '基础', character: '无', prompt: '', tags: ['基础'],
     minAge: 0, maxAge: 120, personalities: [], temperaments: [],
   }, ...touhou, ...starRail, ...wuwa];
   const find = (name) => items.find((item) => item.name === name) || items[0];
-  const covered = new Set(['hairColor', 'hairstyle', 'clothing.top', 'clothing.socks', 'clothing.shoes']);
+  const covered = new Set(['hairColor', 'hairstyle', 'clothing.top', 'clothing.shoes']);
 
   function overrides(profile, field) {
     return find(profile?.cosplay).name !== '无' && covered.has(field);
@@ -122,7 +148,6 @@
       hairColor: `${cosplay.character}角色假发发色`,
       hairstyle: `${cosplay.character}角色假发造型`,
       'clothing.top': `${cosplay.character}完整COS服`,
-      'clothing.socks': `${cosplay.character}腿部服饰`,
       'clothing.shoes': `${cosplay.character}COS鞋靴`,
     }[field];
   }

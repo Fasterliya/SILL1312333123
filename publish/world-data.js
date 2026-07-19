@@ -2,8 +2,6 @@
   'use strict';
 
   const C = root.LifeGame.config;
-  const japaneseSurnames = ['佐藤', '铃木', '高桥', '田中', '伊藤', '渡边', '山本', '中村'];
-  const japaneseNames = ['葵', '凛', '悠真', '结衣', '阳菜', '莲', '美月', '拓海', '千夏', '直树'];
   C.cities.forEach((city) => { city.country ||= '华夏'; });
   C.cities.push(
     { city: '东京', province: '东京都', country: '日本', tier: 1, cost: 24000 },
@@ -84,10 +82,8 @@
     { id: 'sports', name: '双门跑车', price: 880000, mood: 12 },
   );
   root.LifeGame.worldData = Object.freeze({
-    japaneseName() {
-      const surname = japaneseSurnames[Math.floor(Math.random() * japaneseSurnames.length)];
-      const name = japaneseNames[Math.floor(Math.random() * japaneseNames.length)];
-      return surname + name;
+    japaneseName(gender) {
+      return root.LifeGame.nameSystem.makeName('', gender, 'ja-JP');
     },
   });
 }(window));

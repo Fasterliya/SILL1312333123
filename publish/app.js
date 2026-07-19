@@ -30,9 +30,9 @@
   function advance(months) {
     if (busy || state.pendingDecision || state.gameOver) return;
     busy = true;
-    const before = Game.lifeLoop.capture(state);
+    const before = Game.lifeLoop.beforeAdvance(state);
     Game.lifeDirector.advance(state, months);
-    Game.lifeLoop.completeAdvance(state, before);
+    Game.lifeLoop.settleAdvance(state, before);
     refresh();
     save().finally(() => { busy = false; });
   }
@@ -95,7 +95,6 @@
       Game.profile.configure({ getState: () => state, refresh, save });
       Game.portraitGallery.configure({ getState: () => state, refresh, save });
       Game.portraitSystem.configure({ getState: () => state, refresh, save });
-      Game.lifeLoop.configure({ getState: () => state, refresh, save });
       Game.navigation.configure({ getState: () => state });
       Game.appearance.configure({ getState: () => state });
       Game.actions.configure({ getState: () => state, refresh, save });

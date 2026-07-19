@@ -2,7 +2,6 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const C = Game.config;
   const U = Game.content;
   let classFilter = '全部';
 
@@ -16,7 +15,7 @@
     const existing = state.contacts.filter((item) => item.school === school);
     const target = Math.max(30, count || 32);
     for (let index = existing.length; index < target; index += 1) {
-      const person = U.person('同学', U.random(C.surnames), U.between(-1, 1));
+      const person = U.person('同学', U.random(Game.nameSystem.surnames()), U.between(-1, 1));
       U.setUniqueName(state, person);
       person.school = school;
       person.educationName = school;

@@ -41,6 +41,7 @@
     state.cityLife.residenceMonths = 0;
     state.cityLife.familiarity[state.location.city] ||= 0;
     state.cityLife.reputation = Math.round(state.cityLife.reputation * 0.65);
+    Game.socialWorld.ensure(state);
   }
 
   function monthly(state) {

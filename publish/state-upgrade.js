@@ -66,6 +66,8 @@
     item.educationStage ||= 'home';
     item.company ||= '';
     item.companyId ||= '';
+    const company = C.companies.find((entry) => entry.id === item.companyId);
+    if (company) item.company = company.name;
     item.departmentId ||= '';
     item.departmentName ||= '';
     item.careerCity ||= '';
@@ -158,6 +160,11 @@
     state.education.durationMonths = Math.max(0, Number(state.education.durationMonths) || 0);
     state.education.graduated ??= false;
     state.career.jobId ??= null;
+    const currentJob = C.jobs.find((item) => item.id === state.career.jobId);
+    if (currentJob) {
+      state.career.job = currentJob.name;
+      state.career.company = currentJob.company;
+    }
     state.career.company ??= null;
     state.career.performance ??= 0;
     state.career.lastPromotionMonth ??= -12;

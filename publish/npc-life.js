@@ -77,6 +77,7 @@
       person.job = `退休${person.job}`;
       return;
     }
+    if (person.populationResident && !person.job) return;
     const available = person.educationStage === 'workforce' || person.educationStage === 'graduate';
     if (age < 18 || !available || person.job || Math.random() > (age >= 22 ? 0.88 : 0.72)) return;
     const job = U.random(C.jobs.filter((item) => (

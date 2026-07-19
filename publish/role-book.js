@@ -49,9 +49,10 @@
       ['city', '当前城市'], ['school', '同窗校友'], ['work', '同事'],
       ['contact', '可联系'], ['all', '全部人物'],
     ];
-    const people = peopleFor(state).slice(0, 60);
+    const source = peopleFor(state);
+    const people = filter === 'city' ? source : source.slice(0, 100);
     host.innerHTML = `<section class="list-guide"><strong>${escape(state.location.city)}人物网络</strong>
-      <span>同窗不会因升学消失；异地旧识仍可查看，同城时可以尝试重逢。</span></section>
+      <span>本地居民完整模拟 ${source.length} 人；异地城市使用轻量档案推进。同窗迁居后仍会保留。</span></section>
       <nav class="filter-chips">${filters.map(([id, label]) => (
         `<button class="${filter === id ? 'active' : ''}" data-role-filter="${id}">${label}</button>`
       )).join('')}</nav><div class="directory-list">${people.length

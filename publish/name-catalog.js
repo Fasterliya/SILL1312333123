@@ -41,9 +41,9 @@
       female: ['Amelia', 'Isla', 'Florence', 'Lily', 'Freya', 'Alice', 'Sophie', 'Emily', 'Grace', 'Charlotte', 'Lucy', 'Ruby'],
     },
     'fr-FR': {
-      surnames: ['Martin ', 'Bernard ', 'Dubois ', 'Thomas ', 'Robert ', 'Petit '],
-      male: ['Louis', 'Hugo', 'Gabriel', 'Arthur', 'Jules', 'Theo'],
-      female: ['Lea', 'Camille', 'Manon', 'Chloe', 'Ines', 'Juliette'],
+      surnames: ['Martin', 'Bernard', 'Dubois', 'Thomas', 'Robert', 'Petit', 'Durand', 'Leroy', 'Moreau', 'Simon'],
+      male: ['Louis', 'Hugo', 'Gabriel', 'Arthur', 'Jules', 'Theo', 'Raphael', 'Lucas', 'Nathan', 'Paul'],
+      female: ['Lea', 'Camille', 'Manon', 'Chloe', 'Ines', 'Juliette', 'Louise', 'Alice', 'Clara', 'Nina'],
     },
   };
 

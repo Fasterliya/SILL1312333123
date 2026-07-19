@@ -3,8 +3,6 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
-  const POOL_SIZE = 12;
-
   function cityFromText(state, value) {
     const text = String(value || '');
     return Game.config.cities.find((item) => text.includes(item.city))?.city
@@ -24,13 +22,15 @@
   function ensure(state) {
     state.worldPeople = Array.isArray(state.worldPeople) ? state.worldPeople : [];
     state.socialWorld = state.socialWorld && typeof state.socialWorld === 'object'
-      ? state.socialWorld : { cityPools: {}, version: 1 };
+      ? state.socialWorld : { cityPools: {}, cityArchives: {}, version: 2 };
     state.socialWorld.cityPools ||= {};
     Game.people.all(state).forEach((person) => {
       person.homeCity ||= cityFromText(state, person.metCity);
       person.currentCity ||= person.careerCity || person.homeCity;
       person.schoolHistory = Array.isArray(person.schoolHistory) ? person.schoolHistory.slice(-8) : [];
     });
+    Game.cityPopulation.ensure(state);
+    Game.cityPopulation.activate(state, state.location.city);
     rebuild(state);
     return state.socialWorld;
   }
@@ -41,27 +41,12 @@
     rebuild(state);
   }
 
-  function createLocal(state, city) {
-    const playerAge = U.age(state);
-    const age = U.between(Math.max(0, playerAge - 8), Math.min(72, playerAge + 18));
-    const person = U.person('当地角色', U.random(Game.nameSystem.surnames()), age, null, state.totalMonths);
-    person.affection = U.between(18, 38);
-    person.metCity = city;
-    person.homeCity = city;
-    person.currentCity = city;
-    Game.worldCulture.applyPerson(person, state.location.country);
-    U.setUniqueName(state, person, Game.worldCulture.profile(state.location.country).locale);
-    Game.npcLife.updateGrowth(person, age);
-    state.worldPeople.push(person);
-    return person;
-  }
-
   function ensureCityPool(state, city) {
     ensure(state);
-    let locals = Game.people.all(state).filter((person) => (
+    Game.cityPopulation.activate(state, city);
+    const locals = Game.people.all(state).filter((person) => (
       person.currentCity === city && person.status === '健康'
     ));
-    while (locals.length < POOL_SIZE) locals.push(createLocal(state, city));
     rebuild(state);
     return locals;
   }

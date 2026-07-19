@@ -84,6 +84,10 @@
     }
     person.childrenCount = person.childIds.length;
     spouse.childrenCount = spouse.childIds.length;
+    if (person.populationResident || spouse.populationResident) {
+      person.familyMaterialized = true;
+      spouse.familyMaterialized = true;
+    }
     Game.socialWorld.rebuild(state);
     return changed;
   }

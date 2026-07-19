@@ -13,7 +13,7 @@
   function valid(value) {
     return Boolean(
       value
-      && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(value.version)
+      && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].includes(value.version)
       && typeof value.name === 'string'
       && Number.isInteger(value.totalMonths)
       && value.totalMonths >= 0
@@ -71,7 +71,7 @@
 
   function saveNow(value) {
     return async () => {
-      const next = clone(value);
+      const next = Game.populationStorage.compact(clone(value));
       next.updatedAt = new Date().toISOString();
       memory = next;
       const localSaved = writeLocal(next);
@@ -152,7 +152,7 @@
     if (!validSlot(index) || !valid(value)) return Promise.reject(new Error('INVALID_SAVE_SLOT'));
     const pending = queue.then(async () => {
       const key = slotKey(index);
-      const next = clone(value);
+      const next = Game.populationStorage.compact(clone(value));
       next.updatedAt = new Date().toISOString();
       const localSaved = writeLocal(next, key);
       const remote = await readRemote(key);

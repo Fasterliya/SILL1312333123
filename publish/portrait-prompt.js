@@ -173,6 +173,12 @@
     const customLine = model === 'iroha'
       ? `PRIMARY PLAYER DIRECTION, must follow exactly: ${intent.direction}`
       : `(${intent.direction}:1.8)`;
+    const culture = target.culture || (player ? state.hometown?.country : state.location.country) || '华夏';
+    const identities = { 华夏: 'Chinese cultural identity', 日本: 'Japanese cultural identity',
+      韩国: 'Korean cultural identity', 新加坡: 'Singaporean cultural identity',
+      法国: 'French cultural identity', 英国: 'British cultural identity',
+      美国: 'American cultural identity',
+    };
     const parts = [
       ...subjectRules,
       ...quality,
@@ -180,6 +186,7 @@
       'full body',
       ...poseLines,
       'character centered',
+      `cultural_identity: ${identities[culture] || identities.华夏}`,
       intent.scene ? `environment: ${intent.scene}` : '',
       ...appearance.lines,
       ...clothingLines(target),

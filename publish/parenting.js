@@ -46,13 +46,32 @@
   function monthly(state) {
     const gains = styles[state.parenting.style] || styles.均衡陪伴;
     children(state).forEach((child) => {
-      if (child.status !== '健康' || U.personAge(state, child) >= 18) return;
+      const age = U.personAge(state, child);
+      if (child.status !== '健康' || age > 18) return;
+      if (age === 18 && (state.totalMonths - child.birthMonth) % 12 !== 0) return;
       const up = child.upbringing;
       ['care', 'education', 'independence', 'health'].forEach((key, index) => {
         up[key] = clamp(up[key] + gains[index] / 12);
       });
       if (up.care < 25 && state.totalMonths % 6 === 0) child.affection = clamp(child.affection - 2);
       if (up.health >= 70) child.status = '健康';
+      if ((state.totalMonths - child.birthMonth) % 12 !== 0) return;
+      if (age === 12) {
+        child.personality = up.independence >= 65 ? '自律' : (up.care >= 70 ? '温柔' : child.personality);
+        Game.lifeDirector.addLog(state, `${child.name}进入青春期`, '长期养育方式开始塑造性格与独立能力。', 'milestone');
+      } else if (age === 18) {
+        const funded = state.parenting.educationFund >= 10000;
+        if (up.education + (funded ? 12 : 0) >= 68) {
+          child.educationName = U.random(Game.config.universities.slice(3)).name;
+          child.educationStage = 'university';
+          if (funded) state.parenting.educationFund -= 10000;
+        } else {
+          child.educationName = '职业技能教育';
+          child.educationStage = 'vocational';
+        }
+        child.trait = up.health >= 70 ? '自律' : (up.independence >= 65 ? '勇敢' : child.trait);
+        Game.lifeDirector.addLog(state, `${child.name}成年`, `${child.name}开始了${child.educationName}阶段。`, 'milestone');
+      }
     });
   }
 

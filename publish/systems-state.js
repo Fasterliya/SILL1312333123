@@ -39,8 +39,17 @@
       retirementFund: 0, pension: 0, retired: false, careLevel: 0,
     };
     state.health.conditions = Array.isArray(state.health.conditions) ? state.health.conditions : [];
+    state.health.diet ||= '均衡饮食';
+    state.health.sleep = Math.max(4, Math.min(10, Number(state.health.sleep) || 7));
+    if (!['基础医保', '补充医疗', '高端医疗'].includes(state.health.insurance)) state.health.insurance = '基础医保';
+    state.health.retirementFund = Math.max(0, Number(state.health.retirementFund) || 0);
+    state.health.pension = Math.max(0, Number(state.health.pension) || 0);
+    state.health.retired = Boolean(state.health.retired);
+    state.health.careLevel = Math.max(0, Math.min(100, Number(state.health.careLevel) || 0));
     state.cityLife ||= { familiarity: {}, reputation: 0, residenceMonths: 0, lastCity: state.location.city };
     state.cityLife.familiarity ||= {};
+    state.cityLife.reputation = Math.max(0, Math.min(100, Number(state.cityLife.reputation) || 0));
+    state.cityLife.residenceMonths = Math.max(0, Number(state.cityLife.residenceMonths) || 0);
     state.career.specialty ||= '';
     state.career.skillPoints = Math.max(0, Number(state.career.skillPoints) || 0);
     state.career.skills ||= {};

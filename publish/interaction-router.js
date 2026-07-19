@@ -70,6 +70,10 @@
   }
 
   function handleCareer(event, state) {
+    const specialty = event.target.closest('[data-career-specialty]');
+    if (specialty) return finish(Game.careerSpecialties.choose(state, specialty.dataset.careerSpecialty)), true;
+    const careerAction = event.target.closest('[data-career-action]');
+    if (careerAction) return finish(Game.careerSpecialties.act(state, careerAction.dataset.careerAction)), true;
     const filter = event.target.closest('[data-job-filter]');
     if (filter) {
       Game.careerView.setJobFilter(filter.dataset.jobFilter);
@@ -103,6 +107,22 @@
     return false;
   }
 
+  function handleLifeSystems(event, state) {
+    const diet = event.target.closest('[data-health-diet]');
+    if (diet) return finish(Game.healthSystem.setDiet(state, diet.dataset.healthDiet)), true;
+    const sleep = event.target.closest('[data-health-sleep]');
+    if (sleep) return finish(Game.healthSystem.setSleep(state, sleep.dataset.healthSleep)), true;
+    const insurance = event.target.closest('[data-health-insurance]');
+    if (insurance) return finish(Game.healthSystem.setInsurance(state, insurance.dataset.healthInsurance)), true;
+    const action = event.target.closest('[data-health-action]');
+    if (action) {
+      return finish(Game.healthSystem.action(
+        state, action.dataset.healthAction, action.dataset.healthValue,
+      )), true;
+    }
+    return false;
+  }
+
   function handleAssets(event, state) {
     const roam = event.target.closest('[data-roam-area]');
     if (roam) return finish(Game.travelSystem.roam(state, roam.dataset.roamArea)), true;
@@ -122,7 +142,7 @@
     if (Game.appearance.handleClick(event)) return;
     if (handlePortrait(event) || handleNavigation(event)) return;
     const state = api.getState();
-    if (handleRelations(event, state) || handleCareer(event, state)) return;
+    if (handleRelations(event, state) || handleCareer(event, state) || handleLifeSystems(event, state)) return;
     handleAssets(event, state);
   }
 

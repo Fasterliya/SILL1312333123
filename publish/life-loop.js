@@ -107,6 +107,16 @@
         detail: `${state.education.university} · ${state.education.major || '专业学习'}`,
         value: Math.max(0, years - 18), target: 4 };
     }
+    if (years >= 60 && state.health.retired) {
+      return { title: '经营晚年生活', detail: '保持健康并维系家庭关系',
+        value: state.stats.健康, target: 75 };
+    }
+    const growing = state.family.find((person) => ['儿子', '女儿'].includes(person.relation)
+      && U.personAge(state, person) < 18 && person.status === '健康');
+    if (growing && growing.upbringing.care < 70) {
+      return { title: `陪伴${growing.name}成长`, detail: '关爱成长达到70',
+        value: growing.upbringing.care, target: 70 };
+    }
     if (!state.career.job) return { title: '寻找人生方向', detail: '进入求职菜单并获得一份工作', value: 0, target: 1 };
     if (state.career.performance < 70) {
       return { title: '积累职业表现', detail: '绩效达到70后申请晋升', value: state.career.performance, target: 70 };

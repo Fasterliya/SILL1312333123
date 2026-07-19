@@ -44,7 +44,7 @@
   }
 
   function updateGrowth(state) {
-    const years = state.totalMonths / 12;
+    const years = Math.max(0, (state.totalMonths - state.playerBornAt) / 12);
     const phase = agePhase(U.age(state));
     const phaseChanged = state.profile.styleStage !== phase;
     if (phaseChanged) Game.geneticsGrowth.applyAppearance(state.profile, state.gender, years);
@@ -64,7 +64,7 @@
     const p = state.profile;
     Game.portraitSystem.renderPlayer(state, elements);
     elements.profileFacts.innerHTML = [
-      ['年龄', `${U.age(state)}岁${state.totalMonths % 12}月`], ['身高', `${p.height.toFixed(1)} cm`],
+      ['年龄', `${U.age(state)}岁${(state.totalMonths - state.playerBornAt) % 12}月`], ['身高', `${p.height.toFixed(1)} cm`],
       ['体重', `${p.weight.toFixed(1)} kg`], ['成长身高', `${Number(p.maxHeight).toFixed(1)} cm`],
       ['COS服', p.cosplay], ['发色', value(p, 'hairColor')],
       ['发型', value(p, 'hairstyle')], ['瞳色', p.eyeColor], ['气质', p.temperament],

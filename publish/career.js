@@ -52,6 +52,7 @@
 
   function apply(state, jobId) {
     if (U.age(state) < 18) return { ok: false, message: '成年后才能正式求职' };
+    if (state.health?.retired) return { ok: false, message: '当前已办理退休，不再参加全职招聘' };
     if (state.education.university && !state.education.graduated) return { ok: false, message: '完成大学学业后才能全职求职' };
     const job = board(state).find((item) => item.id === jobId);
     if (!job) return { ok: false, message: '当前城市没有这个岗位' };
@@ -70,7 +71,7 @@
     state.career.job = job.name;
     state.career.jobId = job.id;
     state.career.company = job.company;
-    state.career.salary = Math.round(job.salary * (cityInfo(state).tier === 1 ? 1.12 : 1));
+    state.career.salary = Math.round(job.salary * Game.cityLife.salaryFactor(state));
     state.career.level = 0;
     state.career.exp = 0;
     state.career.performance = 10;
@@ -99,6 +100,7 @@
     state.career.exp += exp;
     state.stats.心情 = U.clamp(state.stats.心情 + mood, 0, 100);
     state.stats.智力 = U.clamp(state.stats.智力 + intelligence, 0, 100);
+    Game.careerSpecialties.afterWork(state, type);
     Game.lifeDirector.addLog(state, '职场行动', label, 'good');
     return { ok: true, message: `${label}，绩效达到 ${state.career.performance}${income ? `，收入 ¥${income}` : ''}` };
   }
@@ -134,6 +136,7 @@
       });
     }
     state.location = { province: city.province, city: city.city, country: city.country };
+    Game.cityLife.onMove(state);
     Game.lifeDirector.addLog(state, '迁居新城', `你搬到${city.country}${city.city}寻找新的机会。`, 'milestone');
     return { ok: true, message: `已迁居${city.city}` };
   }

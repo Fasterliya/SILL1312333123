@@ -85,8 +85,9 @@
     const current = state();
     const decision = current.pendingDecision;
     if (!decision) return;
-    if (decision.type === 'lifeEvent') {
-      const result = Game.lifeEvents.resolve(current, value);
+    if (['lifeEvent', 'succession'].includes(decision.type)) {
+      const system = decision.type === 'lifeEvent' ? Game.lifeEvents : Game.legacySystem;
+      const result = system.resolve(current, value);
       current.pendingDecision = null;
       Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
       return done();
@@ -124,8 +125,8 @@
     const d = current.pendingDecision;
     Game.view.el.decision.hidden = !d;
     if (!d) return;
-    if (d.type === 'lifeEvent') {
-      const content = Game.lifeEvents.render(current);
+    if (['lifeEvent', 'succession'].includes(d.type)) {
+      const content = d.type === 'lifeEvent' ? Game.lifeEvents.render(current) : Game.legacySystem.renderDecision(current);
       if (!content) return;
       Game.view.el.decisionTitle.textContent = content.title;
       Game.view.el.decisionText.textContent = content.text;

@@ -1,0 +1,179 @@
+.system-fold {
+  margin-top: 12px;
+  border: 1px solid #dedbd0;
+  background: #fff;
+}
+
+.system-fold summary {
+  min-height: 48px;
+  padding: 13px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.specialty-grid,
+.system-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.specialty-grid button,
+.system-choice button {
+  min-height: 44px;
+  padding: 9px;
+  border: 1px solid #dedbd0;
+  background: #fff;
+  color: #263b37;
+  text-align: left;
+}
+
+.specialty-grid button strong,
+.specialty-grid button small {
+  display: block;
+}
+
+.specialty-grid button small {
+  margin-top: 3px;
+  color: #66726f;
+  line-height: 1.35;
+}
+
+.specialty-grid button.active,
+.system-choice button.active {
+  border-color: #c23b32;
+  background: #fff3e3;
+}
+
+.system-actions,
+.growth-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.system-actions button,
+.growth-actions button {
+  min-height: 44px;
+  border: 0;
+  background: #263b37;
+  color: #fff;
+  font-weight: 700;
+}
+
+.system-note {
+  margin: 0;
+  padding: 0 12px 12px;
+  color: #66726f;
+  font-size: 12px;
+}
+
+.city-profile,
+.health-summary,
+.legacy-summary {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border-left: 4px solid #c23b32;
+  background: #fff8eb;
+}
+
+.city-profile strong,
+.health-summary strong,
+.legacy-summary strong {
+  display: block;
+  margin: 4px 0;
+  font-size: 20px;
+}
+
+.city-profile span,
+.city-profile small,
+.health-summary span,
+.health-summary small,
+.legacy-summary span,
+.legacy-summary small {
+  color: #66726f;
+}
+
+.city-profile dl,
+.health-summary dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.city-profile dl div,
+.health-summary dl div {
+  padding: 8px;
+  background: #fff;
+}
+
+.city-profile dt,
+.health-summary dt {
+  color: #66726f;
+  font-size: 11px;
+}
+
+.city-profile dd,
+.health-summary dd {
+  margin: 3px 0 0;
+  font-weight: 800;
+}
+
+.growth-card,
+.legacy-row,
+.memory-row {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-bottom: 1px solid #dedbd0;
+  background: #fff;
+}
+
+.growth-card span,
+.legacy-row span,
+.legacy-row small,
+.memory-row span {
+  color: #66726f;
+  font-size: 12px;
+}
+
+.growth-actions {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 4px 0 0;
+}
+
+.growth-actions button {
+  padding: 5px;
+  font-size: 12px;
+}
+
+.memory-list {
+  border-top: 1px solid #dedbd0;
+}
+
+.memory-row strong {
+  line-height: 1.45;
+}
+
+.ending-note {
+  padding: 12px;
+  border: 1px solid #a8453a;
+  background: #fff0ed;
+  color: #7b241d;
+  font-weight: 800;
+}
+
+@media (max-width: 420px) {
+  .system-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .growth-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

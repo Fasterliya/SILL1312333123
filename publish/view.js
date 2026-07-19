@@ -7,7 +7,7 @@
     'profileName', 'profileMeta', 'ageValue', 'stageValue', 'moneyValue', 'lifeDate',
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
     'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'travelPanel',
-    'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel',
+    'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
     'decisionBody', 'monthBtn', 'yearBtn', 'actionStrip', 'toast', 'tabPages',
@@ -72,8 +72,9 @@
 
   function logCards(state) {
     return state.logs.map((item) => {
-      const years = Math.floor(item.month / 12);
-      return `<article class="event ${item.tone}"><time>${years}岁${item.month % 12}月</time>
+      const lived = Number.isFinite(item.ageMonth) ? item.ageMonth : item.month;
+      const years = Math.floor(lived / 12);
+      return `<article class="event ${item.tone}"><time>${item.generation || 1}代 · ${years}岁${lived % 12}月</time>
         <div><strong>${item.title}</strong><p>${item.text}</p></div></article>`;
     }).join('');
   }
@@ -141,7 +142,7 @@
     const years = U.age(state);
     el.profileName.textContent = state.name;
     el.profileMeta.textContent = `${state.gender} · ${state.location.country || '华夏'} ${state.location.city}`;
-    el.ageValue.textContent = `${years}岁${state.totalMonths % 12}月`;
+    el.ageValue.textContent = `${years}岁${(state.totalMonths - state.playerBornAt) % 12}月`;
     el.stageValue.textContent = state.education.schoolStage === 'workforce' ? '职业起步' : U.stage(years).name;
     el.moneyValue.textContent = money(state.money);
     el.lifeDate.textContent = `${state.year}年${state.month}月`;
@@ -159,6 +160,8 @@
     el.propertyPanel.innerHTML = properties(state);
     el.stockPanel.innerHTML = stocks(state);
     el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);
+    el.healthPanel.innerHTML = Game.healthSystem.render(state);
+    el.legacyPanel.innerHTML = Game.legacySystem.render(state);
     Game.profile.render(state, el);
     Game.navigation.refreshDetail();
     const partner = [...state.family, ...state.contacts].find((item) => item.id === state.romance.partnerId);

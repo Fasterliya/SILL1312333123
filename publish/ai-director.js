@@ -6,7 +6,9 @@
   const U = Game.content;
 
   function addLog(state, title, text, tone) {
-    state.logs.unshift(U.log(title, text, tone, state.totalMonths));
+    const entry = U.log(title, text, tone, state.totalMonths);
+    Object.assign(entry, { generation: state.generation, ageMonth: state.totalMonths - state.playerBornAt });
+    state.logs.unshift(entry);
     state.logs = state.logs.slice(0, 60);
   }
 
@@ -184,10 +186,7 @@
     schoolMilestones(state);
     regularExam(state);
     randomEvent(state);
-    if (U.age(state) >= 88 && Math.random() < 0.035) {
-      state.gameOver = true;
-      addLog(state, '人生谢幕', `你走过了 ${U.age(state)} 年，留下了属于自己的故事。`, 'milestone');
-    }
+    Game.monthlySystems.run(state);
   }
 
   function advance(state, months) {

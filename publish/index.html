@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="./systems.css">
   <link rel="stylesheet" href="./career.css">
   <link rel="stylesheet" href="./life-loop.css">
+  <link rel="stylesheet" href="./advanced-systems.css">
   <script src="./config.js" defer></script>
   <script src="./name-catalog.js" defer></script>
   <script src="./world-data.js" defer></script>
@@ -27,6 +28,11 @@
   <script src="./life-events.js" defer></script>
   <script src="./relationship-memory.js" defer></script>
   <script src="./parenting.js" defer></script>
+  <script src="./career-specialties.js" defer></script>
+  <script src="./city-life.js" defer></script>
+  <script src="./legacy-system.js" defer></script>
+  <script src="./health-system.js" defer></script>
+  <script src="./monthly-systems.js" defer></script>
   <script src="./sdk-adapter.js" defer></script>
   <script src="./storage.js" defer></script>
   <script src="./portrait-gallery.js" defer></script>
@@ -122,6 +128,7 @@
         <div class="module-directory">
           <button data-open-module="studySubpage" data-module-title="学习"><b>学</b><span><strong>学习</strong><small>学校、考试成绩与升学进度</small></span><i>›</i></button>
           <button data-open-module="careerSubpage" data-module-title="求职"><b>职</b><span><strong>求职</strong><small>浏览岗位并承担录取风险</small></span><i>›</i></button>
+          <button data-open-module="healthSubpage" data-module-title="健康与养老"><b>康</b><span><strong>健康与养老</strong><small>生活方式、医疗、退休与晚年</small></span><i>›</i></button>
           <button data-open-module="citySubpage" data-module-title="迁居"><b>迁</b><span><strong>迁居</strong><small>前往其他城市寻找不同机会</small></span><i>›</i></button>
           <button data-open-module="travelSubpage" data-module-title="街区旅途"><b>游</b><span><strong>街区旅途</strong><small>上街探索并遇到新的角色</small></span><i>›</i></button>
         </div>
@@ -132,6 +139,7 @@
           <button data-open-module="propertySubpage" data-module-title="房产"><b>房</b><span><strong>房产</strong><small>查看住房、首付与月供</small></span><i>›</i></button>
           <button data-open-module="stockSubpage" data-module-title="股票"><b>股</b><span><strong>股票</strong><small>查看行情并买卖持仓</small></span><i>›</i></button>
           <button data-open-module="industrySubpage" data-module-title="产业与座驾"><b>产</b><span><strong>产业与座驾</strong><small>经营现金流与购买交通工具</small></span><i>›</i></button>
+          <button data-open-module="legacySubpage" data-module-title="家族传承"><b>承</b><span><strong>家族传承</strong><small>代际记录、继承人、房产与资金</small></span><i>›</i></button>
         </div>
       </div>
     </section>
@@ -201,6 +209,10 @@
         <div class="panel-title"><h2>职业市场</h2><span>当前招聘</span></div>
         <div id="careerPanel"></div>
       </section></div>
+      <div class="module-view" id="healthSubpage"><section class="panel">
+        <div class="panel-title"><h2>健康与养老</h2><span>贯穿一生</span></div>
+        <div id="healthPanel"></div>
+      </section></div>
       <div class="module-view" id="citySubpage"><section class="panel">
         <div class="panel-title"><h2>城市迁移</h2><span>城市列表</span></div>
         <div id="cityPanel"></div>
@@ -220,6 +232,10 @@
       <div class="module-view" id="industrySubpage"><section class="panel">
         <div class="panel-title"><h2>产业与座驾</h2><span>长期资产</span></div>
         <div id="industryPanel"></div>
+      </section></div>
+      <div class="module-view" id="legacySubpage"><section class="panel">
+        <div class="panel-title"><h2>家族传承</h2><span>多代人生</span></div>
+        <div id="legacyPanel"></div>
       </section></div>
     </div>
   </section>

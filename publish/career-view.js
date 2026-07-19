@@ -30,7 +30,8 @@
     if (!state.career.job) return '<p class="empty-state">当前没有工作。先筛选方向，再打开职位详情确认应聘。</p>';
     return `<section class="career-current"><span>${state.career.company || '当前单位'}</span>
       <strong>${state.career.job} · L${state.career.level + 1}</strong><b>${money(state.career.salary)}/月</b>
-      <small>绩效 ${state.career.performance} · 经验 ${state.career.exp}</small></section>${workActions(state)}`;
+      <small>绩效 ${state.career.performance} · 经验 ${state.career.exp}</small></section>${workActions(state)}
+      ${Game.careerSpecialties.render(state)}`;
   }
 
   function renderCareer(state, money) {
@@ -88,7 +89,7 @@
     const filters = ['全部', '华夏', '日本', '核心城市', '低成本'];
     const cities = C.cities.filter((city) => cityFilter === '全部' || city.country === cityFilter
       || (cityFilter === '核心城市' && city.tier === 1) || (cityFilter === '低成本' && city.cost <= 9000));
-    return chips(filters, cityFilter, 'data-city-filter') + cities.map((city) => (
+    return Game.cityLife.render(state) + chips(filters, cityFilter, 'data-city-filter') + cities.map((city) => (
       `<article class="city-row ${city.city === state.location.city ? 'current' : ''}">
         <div><strong>${city.city}</strong><span>${city.country} · ${city.province} · ${city.tier === 1 ? '核心城市' : '发展城市'}</span></div>
         <b>¥${city.cost.toLocaleString()}</b>

@@ -32,9 +32,24 @@
     const previous = person.name;
     person.birthName ||= previous;
     person.nameHistory = Array.isArray(person.nameHistory) ? person.nameHistory : [];
-    Game.content.setUniqueName(state, person, 'ja-JP');
+    if (person.japaneseSurnameOnly) {
+      const givenName = Game.specialCharacters.find(person.fullName)?.fullName.slice(1) || '玲玲';
+      const surnames = Game.nameSystem.surnames('ja-JP');
+      const used = new Set(Game.people.all(state).map((item) => item.name));
+      const offset = hash(`${person.id}:${state.name}:${state.hometown?.city}`) % surnames.length;
+      for (let index = 0; index < surnames.length; index += 1) {
+        const surname = surnames[(offset + index) % surnames.length];
+        if (!used.has(`${surname}${givenName}`)) {
+          person.name = `${surname}${givenName}`;
+          person.surname = surname;
+          break;
+        }
+      }
+    } else {
+      Game.content.setUniqueName(state, person, 'ja-JP');
+    }
     person.nameCulture = '日本';
-    person.surname = Game.familyNaming.surnameOf(person, '', '日本');
+    person.surname ||= Game.familyNaming.surnameOf(person, '', '日本');
     person.nameHistory.push({
       from: previous, to: person.name, country: '日本',
       month: state.totalMonths, reason: '主动采用日本姓名',
@@ -47,10 +62,13 @@
   function update(state, person, age) {
     const culture = person.culture || state.hometown?.country || '华夏';
     if (person.gender !== '女' || culture !== '华夏' || age < 18) return;
-    if (person.namePreference !== preference && hash(person.id || person.name) % 100 >= 8) return;
-    person.namePreference = preference;
-    person.culturePreference = '日本文化';
-    rename(state, person);
+    const special = person.japaneseFashion;
+    if (!special && person.namePreference !== preference && hash(person.id || person.name) % 100 >= 8) return;
+    person.namePreference = special ? '媚日二次元' : preference;
+    person.culturePreference = special ? '媚日二次元' : '日本文化';
+    const chance = Number(person.japaneseRenameChance) || 100;
+    const roll = hash(`${person.id}:${state.name}:${state.hometown?.city}:rename`) % 100;
+    if (!special || roll < chance) rename(state, person);
     const cycle = Math.floor(state.totalMonths / 36);
     if (person.culturalStyleCycle === cycle) return;
     person.culturalStyleCycle = cycle;

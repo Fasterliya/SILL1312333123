@@ -122,13 +122,17 @@
   function makeName(surname, gender, culture) {
     const data = cultures[culture || 'zh-CN'] || cultures['zh-CN'];
     const family = surname || random(data.surnames);
-    const given = random(poolFor(gender, culture) || data.male);
-    return western.has(culture) ? `${given}·${family}` : family + given;
+    const pool = poolFor(gender, culture) || data.male;
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const given = random(pool);
+      const candidate = western.has(culture) ? `${given}·${family}` : family + given;
+      if (!Game.specialCharacters.find(candidate)) return candidate;
+    }
+    return western.has(culture) ? `${pool[0]}·${family}` : family + pool[0];
   }
 
   function setUnique(state, person, culture) {
     const locale = localeFor(culture);
-    if (Game.specialCharacters.assignAvailable(state, person, locale)) return;
     const used = new Set([state.name, ...(Game.people ? Game.people.all(state) : [...state.family, ...state.contacts])].map((item) => (
       typeof item === 'string' ? item : item?.name
     )));

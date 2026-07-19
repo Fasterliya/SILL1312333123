@@ -81,7 +81,7 @@
       }
       state.socialWorld.cityArchives[city.city] = records;
     });
-    state.socialWorld.populationVersion = 1;
+    state.socialWorld.populationVersion = 1; Game.specialPopulation?.seed(state);
     return state.socialWorld.cityArchives;
   }
   function applyCareer(person, record, cityName) {
@@ -106,7 +106,7 @@
     const age = Math.max(0, Math.floor((state.totalMonths - record.b) / 12));
     const person = U.person('当地角色', '', age, record.g, state.totalMonths);
     Object.assign(person, {
-      id: record.i, name: record.n, birthMonth: record.b, baseAge: age,
+      id: record.i, name: record.n, fullName: record.s || null, birthMonth: record.b, baseAge: age,
       metCity: cityName, homeCity: cityName, currentCity: cityName,
       culture: record.c, personality: record.p, trait: record.t,
       affection: record.a, populationResident: true, residentKey: record.i,
@@ -115,13 +115,13 @@
       fertilityBase: record.f
         ?? (record.g === '女' ? Game.demography.baseFertility(record.i) : null),
       birthName: record.o || record.n, namePreference: record.x || '',
-      culturePreference: record.x ? '日本文化' : '', nameCulture: record.x ? '日本' : '',
+      culturePreference: record.x ? '日本文化' : '', nameCulture: record.o && record.o !== record.n ? '日本' : '',
       nameHistory: record.o && record.o !== record.n
         ? [{ from: record.o, to: record.n, country: '日本', reason: '主动采用日本姓名' }] : [],
     });
     person.spouseName = records.find((item) => item.i === record.m)?.n || '';
     Game.worldCulture.applyPerson(person, record.c);
-    person.name = record.n;
+    person.name = record.n; Game.specialCharacters.apply(person);
     applyCareer(person, record, cityName);
     Game.npcLife.updatePerson(state, person);
     Game.systemsState.ensurePerson(state, person);
@@ -137,7 +137,7 @@
     record.m = person.spouseId || record.m;
     record.k = Math.max(record.k || 0, person.childrenCount || 0);
     if (person.gender === '女') record.f = person.fertilityBase;
-    record.n = person.name; record.x = person.namePreference || null; record.o = person.birthName || null;
+    record.n = person.name; record.x = person.namePreference || null; record.o = person.birthName || null; record.s ||= person.fullName || null;
     record.l = person.lifeExpectancyMonths || record.l;
   }
   function compact(state, activeCity) {

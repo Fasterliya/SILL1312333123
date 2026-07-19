@@ -68,6 +68,7 @@
   }
 
   function preferredTags(person) {
+    if (person.japaneseFashion) return ['和风', '校园'];
     if (['理性', '自律', '务实'].includes(person.personality)) return ['正式', '休闲'];
     if (['浪漫', '敏感', '文雅'].includes(person.personality)) return ['文艺', '和风'];
     if (['外向', '热血', '乐观'].includes(person.personality)) return ['运动', '休闲'];

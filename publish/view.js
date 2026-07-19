@@ -105,16 +105,6 @@
       <div class="house-actions" id="houseActions"></div>`;
   }
 
-  function stocks(state) {
-    return Object.entries(state.assets.stocks).map(([name, item]) => {
-      const delta = item.price - item.previous;
-      return `<article class="stock"><div><strong>${name}</strong><span>${item.shares}股</span></div>
-        <b class="${delta >= 0 ? 'up' : 'down'}">¥${item.price.toFixed(2)}</b>
-        <button data-stock="${name}" data-trade="buy">买100</button>
-        <button data-stock="${name}" data-trade="sell">卖100</button></article>`;
-    }).join('');
-  }
-
   function render(state) {
     const years = U.age(state);
     el.profileName.textContent = state.name;
@@ -138,7 +128,7 @@
     el.journeyPanel.innerHTML = Game.journeySystem.render(state);
     Game.roleBook.render(state);
     el.propertyPanel.innerHTML = properties(state);
-    el.stockPanel.innerHTML = stocks(state);
+    el.stockPanel.innerHTML = Game.marketView.render(state);
     el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);
     el.healthPanel.innerHTML = Game.healthSystem.render(state);
     el.legacyPanel.innerHTML = Game.legacySystem.render(state);

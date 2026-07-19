@@ -130,6 +130,20 @@
   }
 
   function handleAssets(event, state) {
+    const marketFilter = event.target.closest('[data-market-filter]');
+    if (marketFilter) {
+      Game.marketView.setFilter(marketFilter.dataset.marketFilter);
+      api.refresh();
+      return true;
+    }
+    const companyStock = event.target.closest('[data-company-stock]');
+    if (companyStock) return Game.marketView.openDetail(state, companyStock.dataset.companyStock), true;
+    const stockTrade = event.target.closest('[data-stock-company]');
+    if (stockTrade) {
+      Game.actions.trade(stockTrade.dataset.stockCompany, stockTrade.dataset.trade, stockTrade.dataset.lot);
+      Game.marketView.openDetail(state, stockTrade.dataset.stockCompany);
+      return true;
+    }
     const journeyStart = event.target.closest('[data-journey-start]');
     if (journeyStart) return finish(Game.journeySystem.start(state, journeyStart.dataset.journeyStart)), true;
     const journeyChoice = event.target.closest('[data-journey-choice]');
@@ -140,8 +154,6 @@
     if (business) return finish(Game.assetsSystem.buyBusiness(state, business.dataset.business)), true;
     const vehicle = event.target.closest('[data-vehicle]');
     if (vehicle) return finish(Game.assetsSystem.buyVehicle(state, vehicle.dataset.vehicle)), true;
-    const stock = event.target.closest('[data-stock]');
-    if (stock) return Game.actions.trade(stock.dataset.stock, stock.dataset.trade), true;
     const house = event.target.closest('[data-house]');
     if (house) return Game.actions.buyHouse(Number(house.dataset.house)), true;
     return false;

@@ -95,9 +95,7 @@
   }
 
   function stockState() {
-    return Object.fromEntries(Object.entries(C.stocks).map(([name, price]) => (
-      [name, { price, shares: 0, previous: price }]
-    )));
+    return {};
   }
 
   function createState() {
@@ -124,7 +122,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 15,
+      version: 16,
       updatedAt: new Date().toISOString(),
       name: makeName(surname, gender),
       surname,
@@ -157,7 +155,7 @@
       },
       workplace: { companyId: null, departmentId: null, leaderId: null, rosterIds: [], reportIds: [] },
       romance: { partnerId: null, married: false, pendingBirth: 0 },
-      assets: { house: null, mortgage: 0, stocks: stockState(), businesses: [], vehicles: [] },
+      assets: { house: null, mortgage: 0, stocks: stockState(), dividends: 0, businesses: [], vehicles: [] },
       matchmaking: { candidates: [] },
       travel: { activeId: null, activeIds: [], encounters: [], journey: null, history: [] },
       settings: { drawModel: 'anime' },

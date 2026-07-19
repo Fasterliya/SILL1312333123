@@ -106,10 +106,7 @@
   }
 
   function fillStocks(state) {
-    state.assets.stocks ||= {};
-    Object.entries(C.stocks).forEach(([name, price]) => {
-      state.assets.stocks[name] ||= { price, previous: price, shares: 0 };
-    });
+    Game.companyMarket.ensure(state);
   }
 
   function upgradeState(state) {
@@ -174,6 +171,7 @@
     state.assets ||= { house: null, mortgage: 0, stocks: {} };
     state.assets.businesses ||= [];
     state.assets.vehicles ||= [];
+    state.assets.dividends = Math.max(0, Number(state.assets.dividends) || 0);
     fillStocks(state);
     Game.socialWorld.ensure(state);
     state.routine ||= {};

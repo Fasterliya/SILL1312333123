@@ -78,6 +78,24 @@
     });
   });
 
+  const companyNames = new Map(C.companies.map((company) => [company.name, company]));
+  C.jobs.forEach((job, index) => {
+    if (job.freelance) return;
+    let company = companyNames.get(job.company);
+    if (!company) {
+      const city = job.cities?.[0] || '全国';
+      company = {
+        id: `employer-${index}`, name: job.company || `城市企业${index + 1}`,
+        parent: '', city, country: C.cities.find((item) => item.city === city)?.country || '华夏',
+        industry: job.industry || '综合', positions: [],
+      };
+      C.companies.push(company);
+      companyNames.set(company.name, company);
+    }
+    job.companyId ||= company.id;
+    if (!company.positions.includes(job.id)) company.positions.push(job.id);
+  });
+
   root.LifeGame.companyCatalog = Object.freeze({
     find(id) {
       return C.companies.find((company) => company.id === id) || null;

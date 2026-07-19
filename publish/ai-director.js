@@ -96,10 +96,6 @@
     if (state.assets.mortgage > 0) {
       state.money -= state.assets.mortgage;
     }
-    Object.values(state.assets.stocks).forEach((stock) => {
-      stock.previous = stock.price;
-      stock.price = Math.max(2, Math.round(stock.price * (1 + U.between(-8, 9) / 100) * 100) / 100);
-    });
   }
 
   function relationships(state) {

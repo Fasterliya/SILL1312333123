@@ -15,21 +15,12 @@
     api.save();
   }
 
-  function trade(name, mode) {
+  function trade(name, mode, lot) {
     const current = state();
     if (U.age(current) < 18) return Game.view.showToast('成年后才能进入股票市场', 'warning');
-    const stock = current.assets.stocks[name];
-    const cost = Math.round(stock.price * 100);
-    if (mode === 'buy') {
-      if (current.money < cost) return Game.view.showToast('现金不足', 'warning');
-      current.money -= cost;
-      stock.shares += 100;
-    } else {
-      if (stock.shares < 100) return Game.view.showToast('持仓不足', 'warning');
-      current.money += cost;
-      stock.shares -= 100;
-    }
-    Game.view.showToast(`${mode === 'buy' ? '买入' : '卖出'}${name} 100股`, 'good');
+    const result = Game.companyMarket.trade(current, name, mode, Number(lot) || 100);
+    Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
+    if (!result.ok) return;
     done();
   }
 

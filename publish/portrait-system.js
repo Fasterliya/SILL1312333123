@@ -34,7 +34,9 @@
       .replace(/婴儿软底鞋/g, '柔软底鞋').replace(/婴儿连体衣/g, '柔软连体衣')
       .replace(/婴儿袜/g, '柔软棉袜').replace(/胎毛短发/g, '柔软短发')
       .replace(/儿童短发/g, '自然短发').replace(/彩色童装/g, '彩色休闲装')
-      .replace(/幼小/g, '娇小')
+      .replace(/幼小/g, '娇小').replace(/小胸/g, '纤细匀称').replace(/丰满/g, '柔和匀称')
+      .replace(/裸腿/g, '无袜装').replace(/紧身/g, '修身')
+      .replace(/迷你裙/g, '短款百褶裙').replace(/露肩/g, '肩部开口设计')
       .replace(/未成年|成年人|婴儿|幼儿|儿童|少年|少女|青年|中年|老年|成年/g, '')
       .replace(/[零一二三四五六七八九十百两〇\d]{1,4}\s*(?:周?岁|years? old|year-old)/gi, '')
       .replace(/\b(?:age|aged)\s*[:：=]?\s*\d{1,3}\b/gi, '')
@@ -52,14 +54,14 @@
     const weighted = custom ? `，(${custom}:1.8)` : '';
     const size = `${Number(target.height || 0).toFixed(1)}cm，${Number(target.weight || 0).toFixed(1)}kg`;
     const style = '仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和材质细节，重绘一个全新角色。不得复制图1人物的身份、五官、现有造型、姿势、摄影器材、文字框、台词、标志或构图。';
-    const direction = '必须为完整全身照，人物从头顶到鞋底全部入镜，双手双脚可见，不裁切身体。动作可以站、坐或躺，姿势、取景与场景背景优先遵循玩家附加提示词；未指定时采用自然全身构图与协调环境。健康自然、克制得体、非性感，禁止文字、水印、对话框和摄影器材。';
+    const direction = '必须为完整全身照，人物从头顶到鞋底全部入镜，双手双脚可见，不裁切身体。动作可以站立、端坐或采用自然动态，姿势、取景与场景背景优先遵循玩家附加提示词；未指定时采用自然全身构图与协调环境。端庄自然、服装完整、适合全年龄观看，禁止文字、水印、对话框和摄影器材。';
     const face = `${neutral(target.eyeColor)}瞳色，${neutral(target.faceShape)}，${neutral(target.featureProportions)}`;
     const marks = [target.molePosition, target.freckles, target.distinctiveFeature]
       .filter((item) => item && !String(item).startsWith('无')).map(neutral).join('，');
     const finalize = (text) => text.replace(/\s{2,}/g, ' ').slice(0, 1950);
     const cosplay = Game.cosplayCatalog.find(target.cosplay);
     if (cosplay.name !== '无') {
-      return finalize(`${style}现代同人COS写真风格角色插画，${gender}性，身高约${Number(target.height || 0).toFixed(1)}cm，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${face}${marks ? `，${marks}` : ''}。高还原扮演${cosplay.name}，${neutral(cosplay.prompt)}。袜子独立搭配为${neutral(target.clothing.socks)}，与套装默认袜装冲突时以此选择为准。发色、发型、主体服装、鞋靴、配饰和道具采用上述COS部件，不混入被绘角色原本的日常穿着${weighted}。${direction}`);
+      return finalize(`${style}现代同人COS全身角色立绘，${gender}性，身高约${Number(target.height || 0).toFixed(1)}cm，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${face}${marks ? `，${marks}` : ''}。高还原扮演${cosplay.name}，${neutral(cosplay.prompt)}。袜子独立搭配为${neutral(target.clothing.socks)}，与套装默认袜装冲突时以此选择为准。发色、发型、主体服装、鞋靴、配饰和道具采用上述COS部件，不混入被绘角色原本的日常穿着${weighted}。${direction}`);
     }
     const clothes = [target.clothing.top, target.clothing.socks, target.clothing.shoes].map(neutral).join('、');
     return finalize(`${style}现代人生模拟游戏角色插画，${gender}性，身高体重约${size}，${neutral(target.hairColor)}${neutral(target.hairstyle)}，${face}，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${neutral(target.personality)}性格，${neutral(target.trait)}特质${marks ? `，${marks}` : ''}，穿${clothes}${weighted}。${direction}`);
@@ -81,7 +83,7 @@
   function guidance(err) {
     return {
       SDK_UNAVAILABLE: '请在 Game Studio 预览中生成立绘',
-      SENSITIVE_CONTENT_DETECTED: '提示词未通过内容检查，请调整后重试',
+      SENSITIVE_CONTENT_DETECTED: '提示词未通过内容检查，请先清空附加提示词，或更换COS后重试',
       QUOTA_EXHAUSTED: '今日绘图额度或积分不足',
       VIP_REQUIRED: '当前模型需要会员权限',
       UNAUTHORIZED: '登录状态失效，请重新进入游戏',

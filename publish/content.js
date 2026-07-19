@@ -13,7 +13,7 @@
     return { top: top || '品质日常', socks: '短棉袜', shoes: '白色运动鞋' };
   }
 
-  function person(relation, surname, age, gender) {
+  function person(relation, surname, age, gender, anchorMonth) {
     const resolvedGender = gender || random(['男', '女']);
     const bodyTypes = resolvedGender === '女'
       ? (age < 7 ? ['幼小'] : ['小胸', '丰满', '匀称', '娇小纤细'])
@@ -25,6 +25,7 @@
       gender: resolvedGender,
       baseAge: age,
       bornAt: 0,
+      birthMonth: (Number(anchorMonth) || 0) - age * 12,
       growthSeed: between(-4, 4),
       height: 0,
       weight: 0,
@@ -123,7 +124,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 9,
+      version: 10,
       updatedAt: new Date().toISOString(),
       name: makeName(surname, gender),
       surname,
@@ -158,14 +159,13 @@
     };
   }
 
-  const age = (state) => Math.floor(state.totalMonths / 12);
+  const age = (state) => Math.max(0, Math.floor((state.totalMonths - Number(state.playerBornAt || 0)) / 12));
   const stage = (years) => C.stages.find((item) => years <= item.max) || C.stages.at(-1);
 
   function personAge(state, item) {
-    if (['儿子', '女儿'].includes(item.relation)) {
-      return Math.max(0, Math.floor((state.totalMonths - item.bornAt) / 12));
-    }
-    return item.baseAge + age(state);
+    const birthMonth = Number.isFinite(item.birthMonth)
+      ? item.birthMonth : (['儿子', '女儿'].includes(item.relation) ? item.bornAt : -(item.baseAge || 0) * 12);
+    return Math.max(0, Math.floor((state.totalMonths - birthMonth) / 12));
   }
 
   function gradeLabel(state) {

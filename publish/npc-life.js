@@ -20,11 +20,7 @@
   }
 
   function syncGrowth(state, person) {
-    const child = ['儿子', '女儿'].includes(person.relation);
-    const years = child
-      ? (state.totalMonths - Number(person.bornAt || 0)) / 12
-      : Number(person.baseAge || 0) + state.totalMonths / 12;
-    updateGrowth(person, years);
+    updateGrowth(person, U.personAge(state, person));
   }
 
   function education(state, person, age) {

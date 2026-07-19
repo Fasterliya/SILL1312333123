@@ -115,7 +115,7 @@
     const guaranteedMeeting = years === 20 && state.totalMonths % 12 === 0;
     if (years >= 18 && !state.romance.partnerId && !hasFriend
       && (guaranteedMeeting || Math.random() < 0.035)) {
-      const person = U.person('朋友', U.random(Game.nameSystem.surnames()), U.between(-2, 3));
+      const person = U.person('朋友', U.random(Game.nameSystem.surnames()), U.between(-2, 3), null, state.playerBornAt);
       person.affection = 52;
       Game.npcLife.syncGrowth(state, person);
       state.family.push(person);
@@ -137,8 +137,9 @@
       state.romance.pendingBirth -= 1;
       if (state.romance.pendingBirth === 0) {
         const relation = U.random(['儿子', '女儿']);
-        const child = U.person(relation, state.surname, 0, relation === '儿子' ? '男' : '女');
+        const child = U.person(relation, state.surname, 0, relation === '儿子' ? '男' : '女', state.totalMonths);
         child.bornAt = state.totalMonths;
+        child.birthMonth = state.totalMonths;
         child.affection = 80;
         child.temperament = '懵懂';
         child.bodyType = '幼小';

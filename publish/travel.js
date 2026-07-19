@@ -28,7 +28,7 @@
     const cost = Math.round(area[1] * discount);
     if (state.money < cost) return { ok: false, message: `这次出行需要 ¥${cost}` };
     state.money -= cost;
-    const person = U.person('路人', U.random(Game.nameSystem.surnames()), U.between(-5, 8));
+    const person = U.person('路人', U.random(Game.nameSystem.surnames()), U.between(-5, 8), null, state.playerBornAt);
     person.affection = U.between(25, 42);
     person.metCity = `${state.location.city}${areaName}`;
     if (state.location.country === '日本') {

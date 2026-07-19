@@ -11,7 +11,7 @@
     state.money -= 500;
     state.contacts = state.contacts.filter((item) => item.relation !== '相亲对象');
     for (let index = 0; index < 10; index += 1) {
-      const person = U.person('相亲对象', U.random(Game.nameSystem.surnames()), U.between(-4, 8));
+      const person = U.person('相亲对象', U.random(Game.nameSystem.surnames()), U.between(-4, 8), null, state.playerBornAt);
       if (state.location.country === '日本') person.name = Game.worldData.japaneseName(person.gender);
       person.affection = U.between(38, 58);
       person.phoneUnlocked = true;

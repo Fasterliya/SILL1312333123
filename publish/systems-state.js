@@ -1,0 +1,55 @@
+(function initSystemsState(root) {
+  'use strict';
+
+  const Game = root.LifeGame = root.LifeGame || {};
+
+  function ensurePerson(state, person) {
+    const child = ['儿子', '女儿'].includes(person.relation);
+    if (!Number.isFinite(person.birthMonth)) {
+      person.birthMonth = child && Number.isFinite(person.bornAt)
+        ? person.bornAt : -(Number(person.baseAge) || 0) * 12;
+    }
+    person.memories = Array.isArray(person.memories) ? person.memories.slice(0, 12) : [];
+    person.trust = Number.isFinite(person.trust) ? person.trust : Math.round(person.affection || 50);
+    person.conflict = Number.isFinite(person.conflict) ? person.conflict : 0;
+    person.lastInteractionMonth = Number.isFinite(person.lastInteractionMonth)
+      ? person.lastInteractionMonth : state.totalMonths;
+    if (child) {
+      person.upbringing ||= { care: 50, education: 20, independence: 20, health: 60 };
+      ['care', 'education', 'independence', 'health'].forEach((key) => {
+        person.upbringing[key] = Math.max(0, Math.min(100, Number(person.upbringing[key]) || 0));
+      });
+    }
+    return person;
+  }
+
+  function ensure(state) {
+    state.version = 10;
+    state.playerBornAt = Number.isFinite(state.playerBornAt) ? state.playerBornAt : 0;
+    state.generation = Math.max(1, Math.floor(Number(state.generation) || 1));
+    state.profile.birthMonth = state.playerBornAt;
+    state.legacy ||= { ancestors: [], inheritedMoney: 0 };
+    state.legacy.ancestors = Array.isArray(state.legacy.ancestors) ? state.legacy.ancestors.slice(-12) : [];
+    state.eventState ||= { seen: {}, lastMonth: -12, history: [] };
+    state.eventState.seen ||= {};
+    state.eventState.history = Array.isArray(state.eventState.history) ? state.eventState.history.slice(-30) : [];
+    state.parenting ||= { style: '均衡陪伴', educationFund: 0 };
+    state.health ||= {
+      diet: '均衡饮食', sleep: 7, conditions: [], insurance: '基础医保',
+      retirementFund: 0, pension: 0, retired: false, careLevel: 0,
+    };
+    state.health.conditions = Array.isArray(state.health.conditions) ? state.health.conditions : [];
+    state.cityLife ||= { familiarity: {}, reputation: 0, residenceMonths: 0, lastCity: state.location.city };
+    state.cityLife.familiarity ||= {};
+    state.career.specialty ||= '';
+    state.career.skillPoints = Math.max(0, Number(state.career.skillPoints) || 0);
+    state.career.skills ||= {};
+    state.career.projects = Array.isArray(state.career.projects) ? state.career.projects.slice(-12) : [];
+    state.career.burnout = Math.max(0, Math.min(100, Number(state.career.burnout) || 0));
+    state.family.forEach((person) => ensurePerson(state, person));
+    state.contacts.forEach((person) => ensurePerson(state, person));
+    return state;
+  }
+
+  Game.systemsState = Object.freeze({ ensure, ensurePerson });
+}(window));

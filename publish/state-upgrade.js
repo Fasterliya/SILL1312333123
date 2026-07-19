@@ -101,8 +101,8 @@
   }
 
   function upgradeState(state) {
-    if (!state) return U.createState();
-    state.version = 9;
+    state ||= U.createState();
+    state.version = 10;
     state.location.country ||= C.cities.find((city) => city.city === state.location.city)?.country || '华夏';
     state.hometown ||= { ...state.location };
     state.hometown.country ||= '华夏';
@@ -145,7 +145,7 @@
     state.routine.fatigue = U.clamp(Number(state.routine.fatigue) || 0, 0, 100);
     state.routine.actions ||= { study: 0, sport: 0, social: 0, rest: 0 };
     delete state.routine.lastReport;
-    return state;
+    return Game.systemsState.ensure(state);
   }
 
   Game.stateUpgrade = Object.freeze({ upgradeState });

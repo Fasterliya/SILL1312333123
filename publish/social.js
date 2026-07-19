@@ -15,7 +15,7 @@
     const existing = state.contacts.filter((item) => item.school === school);
     const target = Math.max(30, count || 32);
     for (let index = existing.length; index < target; index += 1) {
-      const person = U.person('同学', U.random(Game.nameSystem.surnames()), U.between(-1, 1));
+      const person = U.person('同学', U.random(Game.nameSystem.surnames()), U.between(-1, 1), null, state.playerBornAt);
       U.setUniqueName(state, person);
       person.school = school;
       person.educationName = school;

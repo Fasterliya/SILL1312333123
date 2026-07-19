@@ -125,21 +125,7 @@
     if (state.romance.pendingBirth > 0) {
       state.romance.pendingBirth -= 1;
       if (state.romance.pendingBirth === 0) {
-        const relation = U.random(['儿子', '女儿']);
-        const child = U.person(relation, state.surname, 0, relation === '儿子' ? '男' : '女', state.totalMonths);
-        child.bornAt = state.totalMonths;
-        child.birthMonth = state.totalMonths;
-        child.affection = 80;
-        child.temperament = '懵懂';
-        child.bodyType = '幼小';
-        child.hairstyle = '胎毛短发';
-        child.clothing = { top: '婴儿连体衣', socks: '婴儿袜', shoes: '婴儿软底鞋' };
-        const partner = [...state.family, ...state.contacts].find((item) => item.id === state.romance.partnerId);
-        if (partner) Game.genetics.inheritInto(child, child.gender, state.profile, partner, `child-${child.id}`);
-        Game.geneticsGrowth.applyAppearance(child, child.gender, 0);
-        Game.npcLife.syncGrowth(state, child);
-        state.family.push(child);
-        addLog(state, '新生命降临', `${child.name}出生了，你成为了${state.gender === '男' ? '父亲' : '母亲'}。`, 'milestone');
+        Game.demography.deliver(state);
       }
     }
   }

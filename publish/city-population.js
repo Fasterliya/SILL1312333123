@@ -1,10 +1,8 @@
 (function initCityPopulation(root) {
   'use strict';
-
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
   const POPULATION_SIZE = 100;
-
   function cityInfo(name) {
     return Game.config.cities.find((item) => item.city === name) || {
       city: name, country: '华夏', tier: 3,
@@ -56,6 +54,7 @@
       m: null,
       w: null,
       k: 0,
+      f: gender === '女' ? Game.demography.baseFertility(`resident-${cityIndex}-${index}`) : null,
     };
   }
 
@@ -67,6 +66,7 @@
       c: record.culture, p: record.personality, t: record.trait,
       a: record.affection, j: record.jobId || '', m: record.marriedTo || null,
       w: record.marriedAtMonth || null, k: record.childrenCount || 0,
+      f: record.gender === '女' ? record.fertilityBase : null,
     };
   }
 
@@ -114,6 +114,7 @@
       affection: record.a, populationResident: true, residentKey: record.i,
       populationMonth: state.totalMonths, npcMarried: Boolean(record.m),
       spouseId: record.m, childrenCount: record.k,
+      fertilityBase: record.f ?? (record.g === '女' ? Game.demography.baseFertility(record.i) : null),
     });
     person.spouseName = records.find((item) => item.i === record.m)?.n || '';
     applyCareer(person, record, cityName);
@@ -123,7 +124,6 @@
     Game.systemsState.ensurePerson(state, person);
     return person;
   }
-
   function syncRecord(state, person) {
     const records = state.socialWorld.cityArchives[person.homeCity] || [];
     const record = records.find((item) => item.i === person.residentKey);
@@ -133,6 +133,7 @@
       || (job.name === person.job && job.companyId === person.companyId))?.id || record.j;
     record.m = person.spouseId || record.m;
     record.k = Math.max(record.k || 0, person.childrenCount || 0);
+    if (person.gender === '女') record.f = person.fertilityBase;
   }
 
   function compact(state, activeCity) {
@@ -192,7 +193,6 @@
     });
     linkWorkplaces(state, state.location.city);
   }
-
   Game.cityPopulation = Object.freeze({
     ensure, activate, refreshActive, syncRecord, jobFor,
     populationSize: POPULATION_SIZE,

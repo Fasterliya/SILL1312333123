@@ -168,7 +168,8 @@
     const customLine = model === 'iroha'
       ? `PRIMARY PLAYER DIRECTION: ${proportionSafeDirection}`
       : `(${proportionSafeDirection}:1.8)`;
-    const culture = target.culture || (player ? state.hometown?.country : state.location.country) || '华夏';
+    const culture = target.culture || (player ? state.civic?.identityCulture || state.hometown?.country
+      : state.location.country) || '华夏';
     const identities = { 华夏: 'Chinese cultural identity', 日本: 'Japanese cultural identity',
       韩国: 'Korean cultural identity', 新加坡: 'Singaporean cultural identity',
       法国: 'French cultural identity', 英国: 'British cultural identity',

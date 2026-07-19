@@ -6,7 +6,7 @@
   const ids = [
     'profileName', 'profileMeta', 'ageValue', 'stageValue', 'moneyValue', 'lifeDate',
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
-    'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'travelPanel', 'journeyPanel',
+    'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'governmentPanel', 'travelPanel', 'journeyPanel',
     'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
@@ -90,7 +90,9 @@
       <article class="person"><button class="person-avatar" type="button"
         data-character-id="${item.id}" aria-label="查看${item.name}详情">${Game.portraitSystem.avatar(item)}</button>
         <div class="person-main"><strong>${item.name}</strong>
-        <span>${item.relation} · ${U.personAge(state, item)}岁 · ${item.personality} · ${item.trait}${item.job ? ` · ${item.job}` : ''}</span>
+        <span>${item.relation} · ${U.personAge(state, item)}岁 · ${item.personality} · ${item.trait}
+        ${item.job ? ` · ${item.job}` : ''}${item.gender === '女' && item.npcMarried
+          ? ` · 生育力 ${Game.demography.fertility(state, item)}%` : ''}</span>
         <div class="affection"><i style="width:${item.affection}%"></i></div></div>
         <details class="interaction-menu"><summary>互动选项</summary>
         <div class="interaction-options">${actions}</div></details></article>`;
@@ -124,6 +126,7 @@
     el.educationPanel.innerHTML = Game.educationSystem.render(state);
     el.careerPanel.innerHTML = Game.careerView.renderCareer(state, money);
     el.cityPanel.innerHTML = Game.careerView.renderCities(state);
+    el.governmentPanel.innerHTML = Game.civicSystem.render(state);
     el.travelPanel.innerHTML = Game.travelSystem.render(state);
     el.journeyPanel.innerHTML = Game.journeySystem.render(state);
     Game.roleBook.render(state);
@@ -136,8 +139,12 @@
     Game.profile.render(state, el);
     Game.navigation.refreshDetail();
     const partner = [...state.family, ...state.contacts].find((item) => item.id === state.romance.partnerId);
-    el.childPlanBtn.disabled = !state.romance.married || partner?.status !== '健康' || Boolean(state.romance.pendingBirth);
-    el.childPlanBtn.textContent = state.romance.pendingBirth ? `期待新生命 · ${state.romance.pendingBirth}个月` : '计划孩子';
+    const fertility = Game.demography.fertilityContext(state, partner);
+    el.childPlanBtn.disabled = !state.romance.married || partner?.status !== '健康'
+      || Boolean(state.romance.pendingBirth) || fertility.value <= 0;
+    el.childPlanBtn.textContent = state.romance.pendingBirth
+      ? `期待${state.romance.pendingBabies === 2 ? '双胞胎' : '新生命'} · ${state.romance.pendingBirth}个月`
+      : `计划孩子 · 生育力 ${fertility.value}%`;
     el.monthBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
     el.yearBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
   }

@@ -3,7 +3,6 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
   let classFilter = '全部';
-
   function archiveSchool(state) {
     const school = state.education.school;
     if (!school || ['家中', '已毕业'].includes(school)) return;
@@ -30,7 +29,6 @@
       state.contacts.push(person);
     }
   }
-
   function enterSchool(state, school, stage, count) {
     const oldSchool = state.education.school;
     if (oldSchool !== school) archiveSchool(state);
@@ -38,19 +36,15 @@
     state.education.schoolStage = stage;
     createClassmates(state, school, count);
   }
-
   function currentClassmates(state) {
     return state.contacts.filter((item) => item.school === state.education.school && item.status === '健康');
   }
-
   function phoneContacts(state) {
     return state.contacts.filter((item) => item.phoneUnlocked && item.status === '健康');
   }
-
   function spend(state, amount) {
     Game.economy.spend(state, amount);
   }
-
   function romance(state, person, type) {
     const age = U.age(state);
     if (type === 'confess') {
@@ -84,11 +78,17 @@
     const legalAge = state.gender === '男' ? 22 : 20;
     if (age < legalAge) return { ok: false, message: `${legalAge}岁后才能登记结婚` };
     if (person.affection < 82) return { ok: false, message: '好感达到82后更适合求婚' };
+    const decision = Game.demography.proposalDecision(state, person);
+    if (!decision.accepted) return { ok: false, message: person.gender === '女'
+      ? `${person.name}没有接受求婚 · 择偶评估 ${decision.score}/${decision.threshold}`
+      : `${person.name}希望再考虑一段时间` };
     spend(state, 20000);
-    const accepted = Math.random() < U.clamp(0.58 + (person.affection - 80) / 45, 0.58, 0.96);
-    if (!accepted) return { ok: false, message: `${person.name}希望再考虑一段时间` };
     state.romance.married = true;
     person.relation = '配偶';
+    Object.assign(person, {
+      npcMarried: true, npcMarriedAtAge: U.personAge(state, person),
+      spouseId: state.profile.id, spouseName: state.name,
+    });
     state.contacts = state.contacts.filter((item) => item.id !== person.id);
     if (!state.family.some((item) => item.id === person.id)) state.family.push(person);
     Game.relationshipMemory.record(state, person, '家庭', '共同组建了家庭', 16, -8);
@@ -139,7 +139,8 @@
     return `<article class="contact-card"><button class="person-avatar" type="button"
       data-character-id="${person.id}" aria-label="查看${person.name}详情">${Game.portraitSystem.avatar(person)}</button>
       <div class="contact-main"><strong>${person.name}</strong>
-      <span>${person.relation} · ${person.personality} · ${person.trait} · 好感 ${person.affection}</span>
+      <span>${person.relation} · ${person.gender} · ${person.personality} · ${person.trait}
+      · 好感 ${person.affection}${person.gender === '女' ? ` · 择偶标准 ${person.marriageStandard}` : ''}</span>
       <small>${[person.school || person.metCity, person.educationName !== person.school
         ? person.educationName : '', person.job].filter(Boolean).join(' · ') || '生活圈'}</small></div>
       <details class="interaction-menu"><summary>互动选项</summary><div class="interaction-options">${buttons}</div></details></article>`;
@@ -176,7 +177,6 @@
     if (!contacts.length) return '<p class="empty-state">互动并交换联系方式后，联系人会保留在这里。</p>';
     return contacts.map((item) => card(item, [['phone', '联系'], ['meal', '约饭']])).join('');
   }
-
   function detailActions(state, person) {
     if (!Game.socialWorld.reachable(state, person)) return person.currentCity === state.location.city
       ? [['reconnect', '尝试重逢']] : [];

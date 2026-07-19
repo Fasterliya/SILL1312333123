@@ -71,6 +71,8 @@
       ['体重', `${p.weight.toFixed(1)} kg`], ['成长身高', `${Number(p.maxHeight).toFixed(1)} cm`],
       ['COS服', p.cosplay], ['发色', value(p, 'hairColor')],
       ['发型', value(p, 'hairstyle')], ['瞳色', p.eyeColor], ['气质', p.temperament],
+      ...(state.gender === '女' && state.romance.married
+        ? [['生育力', `${Game.demography.fertility(state, p)}%`]] : []),
     ].map(([label, text]) => `<div><span>${label}</span><b>${text}</b></div>`).join('');
     elements.traitGrid.innerHTML = [['性格', p.personality], ['特质', p.trait]]
       .map(([label, text]) => `<div><span>${label}</span><strong>${text}</strong></div>`).join('');

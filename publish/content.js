@@ -59,6 +59,7 @@
       status: '健康',
     };
     Game.genetics.founder(created, resolvedGender, `${created.id}-${created.name}`, false);
+    Game.demography?.ensureWoman(created);
     return created;
   }
 
@@ -122,7 +123,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 17,
+      version: 18,
       updatedAt: new Date().toISOString(),
       name: makeName(surname, gender),
       surname,
@@ -154,7 +155,7 @@
         titleTrack: 'staff', titleRank: 0, lastTitleMonth: -12, lastRaiseMonth: -6, lastAutoRaiseMonth: -12,
       },
       workplace: { companyId: null, departmentId: null, leaderId: null, rosterIds: [], reportIds: [] },
-      romance: { partnerId: null, married: false, pendingBirth: 0 },
+      romance: { partnerId: null, married: false, pendingBirth: 0, pendingBabies: 1, pendingBirthMotherId: null },
       assets: { house: null, mortgage: 0, stocks: stockState(), dividends: 0, businesses: [], vehicles: [] },
       matchmaking: { candidates: [] },
       travel: { activeId: null, activeIds: [], encounters: [], journey: null, history: [] },

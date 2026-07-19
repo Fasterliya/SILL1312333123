@@ -19,19 +19,28 @@
   function pairResidents(state, records) {
     const singles = records.filter((record) => {
       const years = age(state, record);
-      return !record.m && years >= 23 && years <= 48;
+      return !record.m && years >= 20 && years <= (record.g === '女' ? 45 : 55);
     });
-    const men = singles.filter((record) => record.g === '男').sort(() => Math.random() - 0.5);
+    const men = singles.filter((record) => record.g === '男');
     const women = singles.filter((record) => record.g === '女').sort(() => Math.random() - 0.5);
-    const count = Math.min(3, men.length, women.length);
-    for (let index = 0; index < count; index += 1) {
-      if (Math.random() > 0.52) continue;
-      const first = men[index];
-      const second = women[index];
-      first.m = second.i;
-      second.m = first.i;
-      first.w = state.totalMonths;
-      second.w = state.totalMonths;
+    let paired = 0;
+    women.some((woman) => {
+      const ranked = men.filter((man) => !man.m).map((man) => ({
+        man, result: Game.demography.residentPairScore(state, woman, man),
+      })).sort((a, b) => b.result.score - a.result.score);
+      const selected = ranked[0];
+      if (!selected || selected.result.score < selected.result.standard || Math.random() > 0.62) return false;
+      woman.m = selected.man.i;
+      selected.man.m = woman.i;
+      woman.w = state.totalMonths;
+      selected.man.w = state.totalMonths;
+      paired += 1;
+      return paired >= 3;
+    });
+    if (paired > 0) {
+      records.forEach((record) => {
+        if (record.g === '女' && record.f == null) record.f = Game.demography.baseFertility(record.i);
+      });
     }
   }
 
@@ -40,12 +49,14 @@
     records.forEach((record) => {
       const spouse = byId.get(record.m);
       if (!spouse || record.i > spouse.i || record.k >= 3) return;
-      const firstAge = age(state, record);
-      const secondAge = age(state, spouse);
-      if (firstAge < 25 || secondAge < 25 || firstAge > 45 || secondAge > 45) return;
+      const woman = record.g === '女' ? record : spouse;
+      const womanAge = age(state, woman);
+      if (womanAge < 20 || womanAge > 49) return;
       const yearsMarried = (state.totalMonths - (record.w || state.totalMonths)) / 12;
-      if (yearsMarried >= 1 && Math.random() < 0.18) {
-        record.k += 1;
+      const chance = Game.demography.fertilityAt(woman.f
+        ?? Game.demography.baseFertility(woman.i), womanAge, record.k);
+      if (yearsMarried >= 1 && Math.random() * 100 < chance) {
+        record.k = Math.min(3, record.k + Game.demography.twinCountAt(womanAge, record.k));
         spouse.k = record.k;
       }
     });

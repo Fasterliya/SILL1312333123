@@ -110,6 +110,15 @@
   }
 
   function handleLifeSystems(event, state) {
+    const transfer = event.target.closest('[data-civic-transfer]');
+    if (transfer) return finish(Game.civicSystem.transfer(state, transfer.dataset.civicTransfer)), true;
+    const surname = event.target.closest('[data-civic-surname]');
+    if (surname) {
+      if (root.confirm(`确定采用“${surname.dataset.civicSurname}”作为当地文化姓氏吗？`)) {
+        finish(Game.civicSystem.changeSurname(state, surname.dataset.civicSurname));
+      }
+      return true;
+    }
     const studyFocus = event.target.closest('[data-study-focus]');
     if (studyFocus) return finish(Game.educationSystem.setFocus(state, studyFocus.dataset.studyFocus)), true;
     const education = event.target.closest('[data-education-action]');

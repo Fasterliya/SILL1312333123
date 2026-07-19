@@ -99,7 +99,8 @@
     if (['父亲', '母亲', '配偶'].includes(person.relation)) return;
     if (state.romance.partnerId === person.id || person.relation === '恋人') return;
     if (person.populationResident) return;
-    if (!person.npcMarried && age >= 24 && Math.random() < Math.min(0.22, 0.055 + (age - 24) * 0.009)) {
+    if (!person.npcMarried && age >= 23
+      && Math.random() < Game.demography.npcMarriageChance(state, person, age)) {
       person.npcMarried = true;
       person.npcMarriedAtAge = age;
       const locale = Game.worldCulture.profile(person.culture || state.location.country).locale;
@@ -108,9 +109,15 @@
     if (person.spouseId && person.id > person.spouseId) return;
     if (!person.npcMarried || age < 25 || age > 45 || person.childrenCount >= 3) return;
     const yearsMarried = age - (person.npcMarriedAtAge || age);
-    if (yearsMarried >= 1 && Math.random() < 0.16) {
-      person.childrenCount += 1;
-      const spouse = Game.people.find(state, person.spouseId);
+    const spouse = Game.people.find(state, person.spouseId);
+    const woman = person.gender === '女' ? person : (spouse?.gender === '女' ? spouse : null);
+    const womanAge = woman ? U.personAge(state, woman) : age;
+    const base = woman ? (Game.demography.ensureWoman(woman), woman.fertilityBase)
+      : Game.demography.baseFertility(`${person.id}-spouse`);
+    const chance = Game.demography.fertilityAt(base, womanAge, person.childrenCount);
+    if (yearsMarried >= 1 && Math.random() * 100 < chance) {
+      person.childrenCount = Math.min(3, person.childrenCount
+        + Game.demography.twinCountAt(womanAge, person.childrenCount));
       if (spouse) spouse.childrenCount = person.childrenCount;
     }
   }

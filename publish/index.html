@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="./save-manager.css">
   <link rel="stylesheet" href="./social-world.css">
   <link rel="stylesheet" href="./market.css">
+  <link rel="stylesheet" href="./civic.css">
   <script src="./config.js" defer></script>
   <script src="./name-catalog.js" defer></script>
   <script src="./world-data.js" defer></script>
@@ -32,6 +33,8 @@
   <script src="./cosplay-wuwa.js" defer></script>
   <script src="./cosplay-catalog.js" defer></script>
   <script src="./content.js" defer></script>
+  <script src="./demography.js" defer></script>
+  <script src="./civic-system.js" defer></script>
   <script src="./economy.js" defer></script>
   <script src="./company-market.js" defer></script>
   <script src="./time-system.js" defer></script>
@@ -162,6 +165,7 @@
           <button data-open-module="careerSubpage" data-module-title="求职"><b>职</b><span><strong>求职</strong><small>浏览岗位并承担录取风险</small></span><i>›</i></button>
           <button data-open-module="healthSubpage" data-module-title="健康与养老"><b>康</b><span><strong>健康与养老</strong><small>生活方式、医疗、退休与晚年</small></span><i>›</i></button>
           <button data-open-module="citySubpage" data-module-title="迁居"><b>迁</b><span><strong>迁居</strong><small>前往其他城市寻找不同机会</small></span><i>›</i></button>
+          <button data-open-module="governmentSubpage" data-module-title="市政府"><b>政</b><span><strong>市政府</strong><small>户口迁移、登记姓名与当地文化</small></span><i>›</i></button>
           <button data-open-module="travelSubpage" data-module-title="街区旅途"><b>游</b><span><strong>街区旅途</strong><small>上街探索，一次遇到三位新角色</small></span><i>›</i></button>
           <button data-open-module="journeySubpage" data-module-title="国际旅途"><b>旅</b><span><strong>国际旅途</strong><small>汇率、文化适应与多阶段社交</small></span><i>›</i></button>
         </div>
@@ -253,6 +257,10 @@
       <div class="module-view" id="citySubpage"><section class="panel">
         <div class="panel-title"><h2>城市迁移</h2><span>城市列表</span></div>
         <div id="cityPanel"></div>
+      </section></div>
+      <div class="module-view" id="governmentSubpage"><section class="panel">
+        <div class="panel-title"><h2>市政府</h2><span>户籍与姓名登记</span></div>
+        <div id="governmentPanel"></div>
       </section></div>
       <div class="module-view" id="travelSubpage"><section class="panel">
         <div class="panel-title"><h2>街区旅途</h2><span>自由探索</span></div>

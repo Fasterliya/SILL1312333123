@@ -108,6 +108,8 @@
       ['职业', person.job || '-'], ['公司', person.company || '-'],
       ['工作城市', person.careerCity || '-'],
       ['婚姻', person.npcMarried ? `已婚 · ${person.spouseName || '伴侣'}` : '未婚'],
+      ...(person.gender === '女' ? [[person.npcMarried ? '生育力' : '择偶标准',
+        person.npcMarried ? `${Game.demography.fertility(state, person)}%` : `${person.marriageStandard}/100`]] : []),
       ['子女', `${person.childrenCount || 0}人`],
       ['好感', person.affection], ['互动次数', person.interactions],
     ];

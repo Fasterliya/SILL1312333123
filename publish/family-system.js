@@ -32,9 +32,17 @@
     const legalAge = state.gender === '男' ? 22 : 20;
     if (U.age(state) < legalAge) return { ok: false, message: `${legalAge}岁后才能登记结婚` };
     if (person.affection < 82) return { ok: false, message: '好感达到82后更适合求婚' };
+    const decision = Game.demography.proposalDecision(state, person);
+    if (!decision.accepted) return { ok: false, message: person.gender === '女'
+      ? `${person.name}没有接受求婚 · 择偶评估 ${decision.score}/${decision.threshold}`
+      : `${person.name}希望再考虑一段时间` };
     Game.economy.spend(state, 20000);
     state.romance.married = true;
     person.relation = '配偶';
+    Object.assign(person, {
+      npcMarried: true, npcMarriedAtAge: U.personAge(state, person),
+      spouseId: state.profile.id, spouseName: state.name,
+    });
     Game.relationshipMemory.record(state, person, '家庭', '共同组建了家庭', 16, -8);
     Game.lifeDirector.addLog(state, '步入婚姻', `你与${person.name}组成了家庭。`, 'milestone');
     return { ok: true, message: Game.economy.message(state, '求婚成功，你们结婚了') };
@@ -78,9 +86,10 @@
     if (!partner || partner.status !== '健康') return Game.view.showToast('当前家庭状态无法计划孩子', 'warning');
     if (state.romance.pendingBirth) return Game.view.showToast('新生命已经在期待中', 'warning');
     Game.economy.spend(state, 8000);
-    state.romance.pendingBirth = 9;
-    Game.lifeDirector.addLog(state, '家庭计划', '你们开始期待一个新生命。', 'milestone');
-    finish(Game.economy.message(state, '家庭计划已经开始'));
+    const result = Game.demography.tryConceive(state, partner);
+    Game.lifeDirector.addLog(state, result.ok ? '家庭计划' : '备孕记录', result.message,
+      result.ok ? 'milestone' : 'normal');
+    finish(Game.economy.message(state, result.message), result.ok ? 'good' : 'warning');
   }
 
   function detailActions(state, person) {

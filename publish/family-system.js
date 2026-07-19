@@ -79,19 +79,6 @@
     finish(Game.economy.message(state, `${person.name}的好感达到 ${person.affection}`));
   }
 
-  function planChild() {
-    const state = api.getState();
-    if (!state.romance.married) return Game.view.showToast('结婚后才能共同计划孩子', 'warning');
-    const partner = [...state.family, ...state.contacts].find((item) => item.id === state.romance.partnerId);
-    if (!partner || partner.status !== '健康') return Game.view.showToast('当前家庭状态无法计划孩子', 'warning');
-    if (state.romance.pendingBirth) return Game.view.showToast('新生命已经在期待中', 'warning');
-    Game.economy.spend(state, 8000);
-    const result = Game.demography.tryConceive(state, partner);
-    Game.lifeDirector.addLog(state, result.ok ? '家庭计划' : '备孕记录', result.message,
-      result.ok ? 'milestone' : 'normal');
-    finish(Game.economy.message(state, result.message), result.ok ? 'good' : 'warning');
-  }
-
   function detailActions(state, person) {
     const actions = [['chat', '聊天'], ['dine', '聚餐'], ['gift', '送礼'], ['outing', '出游'], ['support', '支持']];
     if (['儿子', '女儿'].includes(person.relation)) actions.push(...Game.parenting.detailActions(person));
@@ -102,5 +89,5 @@
 
   function configure(options) { api = options; }
 
-  Game.familySystem = Object.freeze({ configure, interact, planChild, detailActions });
+  Game.familySystem = Object.freeze({ configure, interact, detailActions });
 }(window));

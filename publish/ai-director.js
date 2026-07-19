@@ -127,6 +127,12 @@
       if (state.romance.pendingBirth === 0) {
         Game.demography.deliver(state);
       }
+      return;
+    }
+    const conception = Game.demography.rollMonthlyConception(state);
+    if (conception) {
+      addLog(state, conception.babies === 2 ? '怀上双胞胎' : '自然受孕',
+        `本月自然受孕，月受孕率为${conception.monthlyPercent}%。`, 'milestone');
     }
   }
 

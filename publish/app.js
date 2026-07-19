@@ -66,7 +66,6 @@
     const generate = () => Game.portraitSystem.generatePlayer(Game.view.el.portraitPromptInput.value);
     Game.view.el.generatePortraitBtn.addEventListener('click', generate);
     Game.view.el.portraitSlot.addEventListener('click', () => Game.portraitGallery.open('player'));
-    Game.view.el.childPlanBtn.addEventListener('click', Game.familySystem.planChild);
     Game.view.el.resetBtn.addEventListener('click', reset);
     root.addEventListener('resize', Game.view.drawHero);
   }

@@ -11,7 +11,7 @@
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
     'decisionBody', 'monthBtn', 'yearBtn', 'toast', 'tabPages',
-    'tabs', 'heroCanvas', 'resetBtn', 'childPlanBtn',
+    'tabs', 'heroCanvas', 'resetBtn',
   ];
   const el = {};
   let toastTimer = 0;
@@ -81,7 +81,15 @@
 
   function familyCards(state) {
     const summary = `<div class="detail-row family-wealth"><span>原生家庭资产</span><b>${money(state.familyWealth)}</b></div>`;
-    return summary + state.family.map((item) => {
+    const partner = Game.people.find(state, state.romance.partnerId);
+    const stats = Game.demography.conceptionStats(state, partner);
+    const birthStatus = state.romance.pendingBirth
+      ? `孕期剩余 ${state.romance.pendingBirth}个月${state.romance.pendingBabies === 2 ? ' · 双胞胎' : ''}`
+      : (state.romance.conceptionCooldown > 0 ? `产后恢复 ${state.romance.conceptionCooldown}个月`
+        : `月受孕率 ${stats.monthlyPercent}% · 连续12月累计 ${stats.annualPercent}%`);
+    const fertility = state.romance.married
+      ? `<div class="detail-row"><span>自然生育</span><b>${birthStatus}</b></div>` : '';
+    return summary + fertility + state.family.map((item) => {
       const actions = item.status === '已故' ? '<button disabled>追忆</button>'
         : Game.familySystem.detailActions(state, item).map(([type, label]) => (
           `<button data-detail-family="${item.id}" data-family-action="${type}">${label}</button>`
@@ -138,13 +146,6 @@
     Game.drawSettings.render(state);
     Game.profile.render(state, el);
     Game.navigation.refreshDetail();
-    const partner = [...state.family, ...state.contacts].find((item) => item.id === state.romance.partnerId);
-    const fertility = Game.demography.fertilityContext(state, partner);
-    el.childPlanBtn.disabled = !state.romance.married || partner?.status !== '健康'
-      || Boolean(state.romance.pendingBirth) || fertility.value <= 0;
-    el.childPlanBtn.textContent = state.romance.pendingBirth
-      ? `期待${state.romance.pendingBabies === 2 ? '双胞胎' : '新生命'} · ${state.romance.pendingBirth}个月`
-      : `计划孩子 · 生育力 ${fertility.value}%`;
     el.monthBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
     el.yearBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
   }

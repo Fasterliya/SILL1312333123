@@ -38,6 +38,7 @@
     state.romance.pendingBabies = [1, 2].includes(state.romance.pendingBabies)
       ? state.romance.pendingBabies : 1;
     state.romance.pendingBirthMotherId ||= null;
+    state.romance.conceptionCooldown = Math.max(0, Number(state.romance.conceptionCooldown) || 0);
   }
   function agePenalty(age) {
     if (age < 18) return 100;
@@ -57,31 +58,32 @@
     if (Number.isFinite(woman.birthsGiven)) return Math.max(0, woman.birthsGiven);
     return woman === state.profile ? playerChildren(state) : Math.max(0, Number(woman.childrenCount) || 0);
   }
-
   function fertility(state, woman) {
     ensureWoman(woman);
     if (!woman || woman.gender !== '女') return 0;
     return clamp(Math.round(woman.fertilityBase - agePenalty(womanAge(state, woman))
       - childCount(state, woman) * 4), 0, 100);
   }
-
   function fertilityAt(base, age, children) {
     return clamp(Math.round((Number.isFinite(base) ? base : 23) - agePenalty(age)
       - Math.max(0, Number(children) || 0) * 4), 0, 100);
   }
-
   function coupleWomen(state, partner) {
     const women = [];
     if (state.gender === '女') women.push(state.profile);
     if (partner?.gender === '女') women.push(partner);
     return women.sort((a, b) => fertility(state, b) - fertility(state, a));
   }
-
   function fertilityContext(state, partner) {
     const woman = coupleWomen(state, partner)[0] || null;
     return { woman, value: woman ? fertility(state, woman) : 0 };
   }
-
+  function conceptionStats(state, partner) {
+    const context = fertilityContext(state, partner);
+    const monthly = context.value / 1000;
+    return { ...context, monthly, monthlyPercent: Number((monthly * 100).toFixed(1)),
+      annualPercent: Number(((1 - ((1 - monthly) ** 12)) * 100).toFixed(1)) };
+  }
   function proposalScore(state, woman, partner) {
     ensureWoman(woman);
     const womanAgeValue = woman === state.profile ? Game.content.age(state) : Game.content.personAge(state, woman);
@@ -97,7 +99,6 @@
       + culture + Math.max(-18, 10 - Math.max(0, ageGap - woman.preferredAgeGap) * 3));
     return { score: clamp(score, 0, 100), threshold: woman.marriageStandard, ageGap };
   }
-
   function proposalDecision(state, person) {
     const player = { player: true, gender: state.gender, culture: state.civic?.identityCulture || state.location.country };
     if (person.gender !== '女') {
@@ -109,7 +110,6 @@
     return { ...result, accepted: result.score >= result.threshold && Math.random() < chance,
       chance: Math.round(chance * 100) };
   }
-
   function residentPairScore(state, woman, man) {
     const womanAgeValue = Math.max(0, Math.floor((state.totalMonths - woman.b) / 12));
     const manAge = Math.max(0, Math.floor((state.totalMonths - man.b) / 12));
@@ -120,7 +120,6 @@
       + Math.max(-20, 12 - Math.max(0, Math.abs(womanAgeValue - manAge) - preferredGap) * 3);
     return { score, standard };
   }
-
   function npcMarriageChance(state, person, age) {
     const base = Math.min(0.24, 0.045 + Math.max(0, age - 23) * 0.009);
     if (person.gender !== '女') return base * 0.75;
@@ -128,7 +127,6 @@
     const readiness = clamp((age - 20) / 12, 0.25, 1);
     return base * readiness * clamp((82 - person.marriageStandard) / 20, 0.45, 1.15);
   }
-
   function twinCount(state, woman) {
     const age = womanAge(state, woman);
     const chance = clamp(0.025 + Math.max(0, age - 30) * 0.003 + childCount(state, woman) * 0.006, 0.02, 0.08);
@@ -141,20 +139,21 @@
     return Math.random() < chance ? 2 : 1;
   }
 
-  function tryConceive(state, partner) {
-    const context = fertilityContext(state, partner);
-    if (!context.woman) return { ok: false, message: '当前家庭没有可怀孕的女性成员' };
-    if (context.value <= 0) return { ok: false, message: '当前生育力为0%，无法进入孕期' };
-    if (Math.random() * 100 >= context.value) {
-      return { ok: false, message: `本次未受孕，当前生育力 ${context.value}%` };
+  function rollMonthlyConception(state) {
+    if (!state.romance.married || state.romance.pendingBirth > 0) return null;
+    if (state.romance.conceptionCooldown > 0) {
+      state.romance.conceptionCooldown -= 1;
+      return null;
     }
-    const babies = twinCount(state, context.woman);
+    const partner = Game.people.find(state, state.romance.partnerId);
+    if (!partner || partner.status !== '健康') return null;
+    const stats = conceptionStats(state, partner);
+    if (!stats.woman || stats.monthly <= 0 || Math.random() >= stats.monthly) return null;
+    const babies = twinCount(state, stats.woman);
     state.romance.pendingBirth = 9;
     state.romance.pendingBabies = babies;
-    state.romance.pendingBirthMotherId = context.woman === state.profile ? state.profile.id : context.woman.id;
-    return { ok: true, babies, fertility: context.value,
-      message: babies === 2 ? `成功怀孕，检查显示是双胞胎 · 生育力 ${context.value}%`
-        : `成功怀孕 · 生育力 ${context.value}%` };
+    state.romance.pendingBirthMotherId = stats.woman === state.profile ? state.profile.id : stats.woman.id;
+    return { babies, fertility: stats.value, monthlyPercent: stats.monthlyPercent };
   }
 
   function deliver(state) {
@@ -187,14 +186,15 @@
     if (mother) mother.birthsGiven = previousBirths + babies;
     state.romance.pendingBabies = 1;
     state.romance.pendingBirthMotherId = null;
+    state.romance.conceptionCooldown = 3;
     const names = children.map((child) => child.name).join('、');
     Game.lifeDirector.addLog(state, babies === 2 ? '双胞胎降临' : '新生命降临',
       `${names}出生了，你成为了${state.gender === '男' ? '父亲' : '母亲'}。`, 'milestone');
   }
 
   Game.demography = Object.freeze({
-    ensureWoman, ensureState, baseFertility, fertility, fertilityAt, fertilityContext,
+    ensureWoman, ensureState, baseFertility, fertility, fertilityAt, fertilityContext, conceptionStats,
     proposalDecision, proposalScore, residentPairScore, npcMarriageChance,
-    twinCount, twinCountAt, tryConceive, deliver,
+    twinCount, twinCountAt, rollMonthlyConception, deliver,
   });
 }(window));

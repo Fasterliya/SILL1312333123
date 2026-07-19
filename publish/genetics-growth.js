@@ -42,9 +42,10 @@
     target.molePosition = genes.molePosition;
     target.freckles = genes.freckles;
     target.distinctiveFeature = genes.distinctiveFeature;
-    target.maxHeight = genes.maxHeight;
+    target.maxHeight = Number(target.adultHeight) || genes.maxHeight;
     target.temperament = age < 3 ? '懵懂' : (age < 7 ? '童真' : genes.temperament);
-    target.bodyType = bodyType(gender, age, genes.bodyFrame, genes.developmentTendency);
+    target.bodyType = target.adultBodyType && age >= 18
+      ? target.adultBodyType : bodyType(gender, age, genes.bodyFrame, genes.developmentTendency);
     target.hairstyle = hairstyle(gender, age, genes.hairStyleTendency);
     target.hairColor = age >= 72 ? '银灰' : (age >= 60 ? '黑灰' : genes.hairColor);
   }
@@ -61,7 +62,7 @@
     if (syncAppearance !== false) applyAppearance(target, gender, age);
     else {
       Game.genetics.ensure(target, gender, `${target.id || target.name}-growth`, true);
-      target.maxHeight = target.genetics.expressed.maxHeight;
+      target.maxHeight = Number(target.adultHeight) || target.genetics.expressed.maxHeight;
     }
     let height;
     if (age < 1) height = 50 + age * 25;

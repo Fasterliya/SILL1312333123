@@ -82,6 +82,7 @@
     item.childIds = Array.isArray(item.childIds) ? item.childIds.slice(0, 3) : [];
     item.parentIds = Array.isArray(item.parentIds) ? item.parentIds.slice(0, 2) : [];
     item.lastLifeUpdateAge ??= null;
+    Game.specialCharacters.apply(item);
     Game.mortality.ensurePerson(item);
     Game.genetics.ensure(item, item.gender, `legacy-${item.id || item.name}`, true);
     return item;

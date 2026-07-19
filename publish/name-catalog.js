@@ -10,7 +10,7 @@
         '于', '董', '萧', '程', '沈', '叶', '潘', '姚', '夏', '陆', '盛',
       ],
       male: [
-        '景行', '明远', '以煊', '思远', '浩然', '宇航', '沐阳', '泽宇', '亦辰', '庭轩',
+        '景行', '明远', '思远', '浩然', '宇航', '沐阳', '泽宇', '亦辰', '庭轩',
         '承泽', '修远', '文昊', '俊熙', '弘毅', '嘉树', '云舟', '知衡', '砚川', '屹安',
         '子谦', '绍钧', '怀瑾', '嘉言', '星野', '靖川', '启铭', '博衍', '清和', '昭临',
       ],
@@ -18,7 +18,9 @@
         '知夏', '雨桐', '若溪', '嘉禾', '清越', '欣彤', '佳妮', '怡然', '秋雨', '思怡',
         '雨霏', '梦怡', '晓雨', '婉若', '安琪', '佳丽', '晓婷', '诗涵', '语桐', '芷晴',
         '若琳', '可欣', '静宜', '书瑶', '念初', '昭宁', '映雪', '舒然', '云舒', '令仪',
+        '以瑄', '以煊',
       ],
+      fullNames: Game.specialCharacters.names(),
     },
     'ja-JP': {
       surnames: ['佐藤', '铃木', '高桥', '田中', '伊藤', '渡边', '山本', '中村', '小林', '加藤', '吉田', '山田'],
@@ -101,6 +103,8 @@
   }
 
   function setUnique(state, person, culture) {
+    const locale = localeFor(culture);
+    if (Game.specialCharacters.assignAvailable(state, person, locale)) return;
     const used = new Set([state.name, ...(Game.people ? Game.people.all(state) : [...state.family, ...state.contacts])].map((item) => (
       typeof item === 'string' ? item : item?.name
     )));
@@ -119,6 +123,9 @@
     normalizeName,
     normalizeSurname,
     setUnique,
+    fullNames(culture) {
+      return (cultures[culture || 'zh-CN'] || cultures['zh-CN']).fullNames || [];
+    },
     surnames(culture) {
       return (cultures[culture || 'zh-CN'] || cultures['zh-CN']).surnames;
     },

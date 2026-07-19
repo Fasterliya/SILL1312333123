@@ -109,6 +109,10 @@
       ['当前学业', person.educationName || person.school || '-'],
       ['职业', person.job || '-'], ['公司', person.company || '-'],
       ['工作城市', person.careerCity || '-'],
+      ...(person.specialCharacter ? [
+        ['家境', person.familyBackground],
+        ['家庭资产', Game.worldCulture.format(person.familyWealth, person.culture || '华夏')],
+      ] : []),
       ['婚姻', person.npcMarried ? `已婚 · ${person.spouseName || '伴侣'}` : '未婚'],
       ...(person.gender === '女' ? [[person.npcMarried ? '生育力' : '择偶标准',
         person.npcMarried ? `${Game.demography.fertility(state, person)}%` : `${person.marriageStandard}/100`]] : []),

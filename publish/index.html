@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="./career.css">
   <link rel="stylesheet" href="./life-loop.css">
   <link rel="stylesheet" href="./advanced-systems.css">
+  <link rel="stylesheet" href="./education.css">
   <script src="./config.js" defer></script>
   <script src="./name-catalog.js" defer></script>
   <script src="./world-data.js" defer></script>
@@ -23,6 +24,7 @@
   <script src="./cosplay-wuwa.js" defer></script>
   <script src="./cosplay-catalog.js" defer></script>
   <script src="./content.js" defer></script>
+  <script src="./education-system.js" defer></script>
   <script src="./people.js" defer></script>
   <script src="./world-culture.js" defer></script>
   <script src="./systems-state.js" defer></script>
@@ -98,15 +100,9 @@
       <div class="page active" id="timelinePage">
         <section class="panel goal-panel" id="goalPanel"></section>
         <details class="fold-section" open>
-          <summary><span>当前状态</span><small>属性与本月行动</small></summary>
+          <summary><span>当前状态</span><small>人生属性</small></summary>
           <div class="fold-content">
             <div class="stat-grid" id="statGrid"></div>
-            <div class="action-strip" id="actionStrip">
-              <button type="button" data-activity="study"><b>学</b><span>学习</span></button>
-              <button type="button" data-activity="sport"><b>炼</b><span>锻炼</span></button>
-              <button type="button" data-activity="social"><b>友</b><span>社交</span></button>
-              <button type="button" data-activity="rest"><b>闲</b><span>休息</span></button>
-            </div>
           </div>
         </details>
         <details class="fold-section">

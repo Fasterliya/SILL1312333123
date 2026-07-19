@@ -10,7 +10,7 @@
     'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
-    'decisionBody', 'monthBtn', 'yearBtn', 'actionStrip', 'toast', 'tabPages',
+    'decisionBody', 'monthBtn', 'yearBtn', 'toast', 'tabPages',
     'tabs', 'heroCanvas', 'resetBtn', 'childPlanBtn',
   ];
   const el = {};
@@ -97,24 +97,6 @@
     }).join('');
   }
 
-  function education(state) {
-    const latest = state.education.exams[0];
-    const scores = latest ? Object.entries(latest.scores).map(([name, score]) => (
-      `<span>${name}<b>${score}</b></span>`
-    )).join('') : '<p class="empty-state">还没有考试记录。</p>';
-    const track = state.education.track
-      ? [state.education.track, ...state.education.electives].join(' + ') : '尚未选科';
-    return `<div class="detail-row"><span>当前阶段</span><b>${U.gradeLabel(state)}</b></div>
-      <div class="detail-row"><span>学校</span><b>${state.education.school}</b></div>
-      <div class="detail-row"><span>教育路径</span><b>${state.education.path || '-'}</b></div>
-      <div class="detail-row"><span>高中类型</span><b>${state.education.highSchoolType || '-'}</b></div>
-      <div class="detail-row"><span>学校类型</span><b>${state.education.universityType || '-'}</b></div>
-      <div class="detail-row"><span>专业/选科</span><b>${state.education.major || track}</b></div>
-      <div class="detail-row"><span>学习积累</span><b>${state.education.study}</b></div>
-      <h3>${latest ? `${latest.label} · ${latest.total}分` : '考试成绩'}</h3>
-      <div class="score-grid">${scores}</div>`;
-  }
-
   function properties(state) {
     const house = state.assets.house ? state.assets.house.name : '暂无房产';
     return `<div class="detail-row"><span>当前城市</span><b>${state.location.city}</b></div>
@@ -148,7 +130,7 @@
     el.phoneList.innerHTML = Game.social.renderPhone(state);
     el.matchmakingList.innerHTML = Game.matchmaking.render(state);
     el.parentingPanel.innerHTML = Game.parenting.render(state);
-    el.educationPanel.innerHTML = education(state);
+    el.educationPanel.innerHTML = Game.educationSystem.render(state);
     el.careerPanel.innerHTML = Game.careerView.renderCareer(state, money);
     el.cityPanel.innerHTML = Game.careerView.renderCities(state);
     el.travelPanel.innerHTML = Game.travelSystem.render(state);

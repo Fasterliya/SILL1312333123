@@ -39,7 +39,7 @@
       state.matchmaking.candidates.push(...candidates);
       state.contacts = state.contacts.filter((person) => !candidates.includes(person));
     }
-    state.version = 12;
+    state.version = 13;
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {
@@ -75,7 +75,11 @@
     state.career.skills ||= {};
     state.career.projects = Array.isArray(state.career.projects) ? state.career.projects.slice(-12) : [];
     state.career.burnout = Math.max(0, Math.min(100, Number(state.career.burnout) || 0));
-    Game.people.all(state).forEach((person) => ensurePerson(state, person));
+    Game.educationSystem.ensure(state);
+    Game.people.all(state).forEach((person) => {
+      ensurePerson(state, person);
+      Game.educationSystem.ensurePerson(person);
+    });
     return state;
   }
 

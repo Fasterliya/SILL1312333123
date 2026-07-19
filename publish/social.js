@@ -16,8 +16,14 @@
       person.school = school;
       person.educationName = school;
       person.educationStage = state.education.schoolStage;
+      if (state.education.schoolStage === 'university') {
+        person.educationLevel = state.education.universityType === '高职专科' ? 2 : 3;
+      } else if (['high', 'vocational'].includes(state.education.schoolStage)) {
+        person.educationLevel = 1;
+      }
       person.affection = U.between(28, 62);
       person.clothing.top = '简洁校服';
+      Game.educationSystem.ensurePerson(person);
       Game.npcLife.syncGrowth(state, person);
       state.contacts.push(person);
     }
@@ -28,7 +34,6 @@
     if (oldSchool !== school) archiveSchool(state);
     state.education.school = school;
     state.education.schoolStage = stage;
-    Game.npcLife.carryClassmates(state, oldSchool, school, stage);
     createClassmates(state, school, count);
   }
 
@@ -37,9 +42,7 @@
   }
 
   function phoneContacts(state) {
-    return state.contacts.filter((item) => (
-      item.school !== state.education.school && item.phoneUnlocked && item.status === '健康'
-    ));
+    return state.contacts.filter((item) => item.phoneUnlocked && item.status === '健康');
   }
 
   function spend(state, amount) {
@@ -121,7 +124,7 @@
     person.interactions += 1;
     person.affection = U.clamp(person.affection + action[1], 0, 100);
     state.stats.心情 = U.clamp(state.stats.心情 + action[2], 0, 100);
-    if (type === 'study') state.education.study += 4;
+    if (type === 'study') Game.educationSystem.addPreparation(state, 4);
     if (type === 'exchange') {
       Game.people.addContact(state, person);
     } else if (person.affection >= 75 && person.relation === '同学') person.relation = '好友';
@@ -138,7 +141,8 @@
       data-character-id="${person.id}" aria-label="查看${person.name}详情">${Game.portraitSystem.avatar(person)}</button>
       <div class="contact-main"><strong>${person.name}</strong>
       <span>${person.relation} · ${person.personality} · ${person.trait} · 好感 ${person.affection}</span>
-      <small>${person.school || person.metCity || '生活圈'}</small></div>
+      <small>${[person.school || person.metCity, person.educationName !== person.school
+        ? person.educationName : '', person.job].filter(Boolean).join(' · ') || '生活圈'}</small></div>
       <details class="interaction-menu"><summary>互动选项</summary><div class="interaction-options">${buttons}</div></details></article>`;
   }
 

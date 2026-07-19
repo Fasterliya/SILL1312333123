@@ -1,0 +1,84 @@
+.study-summary {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.study-summary strong,
+.study-summary span,
+.study-summary small {
+  display: block;
+}
+
+.study-summary strong {
+  margin: 4px 0;
+  font-size: 17px;
+}
+
+.study-summary span,
+.study-summary small {
+  color: #66726f;
+  font-size: 11px;
+}
+
+.study-summary dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.study-summary dl div {
+  padding: 8px;
+  background: #fff;
+}
+
+.study-summary dt {
+  color: #66726f;
+  font-size: 10px;
+}
+
+.study-summary dd {
+  margin: 3px 0 0;
+  font-weight: 800;
+}
+
+.study-focus,
+.study-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.study-focus button,
+.study-actions button {
+  min-height: 44px;
+  padding: 9px;
+  border: 1px solid #d8d9d2;
+  background: #fffdf7;
+  color: #263b37;
+  text-align: left;
+}
+
+.study-focus button.active {
+  border-color: #c23b32;
+  background: #fff3e3;
+}
+
+.study-actions button strong,
+.study-actions button small {
+  display: block;
+}
+
+.study-actions button small {
+  margin-top: 3px;
+  color: #66726f;
+  font-size: 10px;
+}
+
+.study-actions button:disabled {
+  opacity: 0.45;
+}

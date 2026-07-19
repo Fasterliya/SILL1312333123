@@ -4,6 +4,7 @@
   const Game = root.LifeGame = root.LifeGame || {};
 
   function run(state) {
+    Game.educationSystem.monthly(state);
     Game.cityLife.monthly(state);
     Game.careerSpecialties.monthly(state);
     Game.relationshipMemory.monthly(state);

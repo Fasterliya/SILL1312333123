@@ -30,19 +30,9 @@
   function advance(months) {
     if (busy || state.pendingDecision || state.gameOver) return;
     busy = true;
-    const before = Game.lifeLoop.beforeAdvance(state);
     Game.lifeDirector.advance(state, months);
-    Game.lifeLoop.settleAdvance(state, before);
     refresh();
     save().finally(() => { busy = false; });
-  }
-
-  function activity(type) {
-    const result = Game.lifeLoop.performActivity(state, type);
-    if (!result) return;
-    Game.view.showToast(result.message, 'good');
-    refresh();
-    save();
   }
 
   function switchTabs(event) {
@@ -57,7 +47,6 @@
   function bind() {
     Game.view.el.monthBtn.addEventListener('click', () => advance(1));
     Game.view.el.yearBtn.addEventListener('click', () => advance(12));
-    Game.view.el.actionStrip.addEventListener('click', (event) => activity(event.target.closest('[data-activity]')?.dataset.activity));
     Game.view.el.decisionBody.addEventListener('click', (event) => {
       const choice = event.target.closest('[data-choice]');
       if (choice) Game.actions.decide(choice.dataset.choice);

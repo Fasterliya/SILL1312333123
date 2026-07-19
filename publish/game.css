@@ -36,43 +36,6 @@
   background: #3d796a;
 }
 
-.action-strip {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 15px;
-}
-
-.action-strip button {
-  padding: 8px 4px;
-  border: 1px solid #dedbd0;
-  border-radius: 5px;
-  background: #f8f4e8;
-  color: #293c38;
-}
-
-.action-strip button:active {
-  transform: translateY(1px);
-  background: #ede6d4;
-}
-
-.action-strip b {
-  width: 25px;
-  height: 25px;
-  margin: 0 auto 4px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #315f58;
-  color: white;
-  font: 700 12px serif;
-}
-
-.action-strip span {
-  display: block;
-  font-size: 10px;
-}
-
 .event-list {
   position: relative;
 }

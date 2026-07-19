@@ -67,14 +67,16 @@
       .replace(/婴儿软底鞋/g, '柔软底鞋').replace(/婴儿连体衣/g, '柔软连体衣')
       .replace(/婴儿袜/g, '柔软棉袜').replace(/胎毛短发/g, '柔软短发')
       .replace(/儿童短发/g, '自然短发').replace(/彩色童装/g, '彩色休闲装')
+      .replace(/学生装|校服/g, '学院制服')
       .replace(/幼小/g, '娇小').replace(/小胸/g, '纤细匀称').replace(/丰满/g, '柔和匀称')
       .replace(/裸腿/g, '无袜装').replace(/紧身/g, '修身')
       .replace(/迷你裙/g, '短款百褶裙').replace(/露肩/g, '肩部开口设计')
-      .replace(/未成年|成年人|婴儿|幼儿|儿童|少年|少女|青年|中年|老年|成年/g, '')
+      .replace(/未成年|成年人|婴儿|幼儿|儿童|少年|少女|学生|青年|中年|老年|成年/g, '')
       .replace(/[零一二三四五六七八九十百两〇\d]{1,4}\s*(?:周?岁|years? old|year-old)/gi, '')
       .replace(/\b(?:age|aged)\s*[:：=]?\s*\d{1,3}\b/gi, '')
       .replace(/\b\d{1,3}\s*(?:y\/o|yo|yrs?\.?\s*old)\b/gi, '')
-      .replace(/\b(?:young|teenage|elderly|adult|child)\b/gi, '')
+      .replace(/\b(?:minor|underage|schoolgirl|schoolboy|teen|teenage|teenager|child|young|boy|girl|elderly|adult)\b/gi, '')
+      .replace(/\bschool uniform\b/gi, 'academy-inspired uniform')
       .replace(/(?:年龄|年纪)\s*[:：为是]?\s*[^，。；;]{0,12}/g, '')
       .replace(/半身照|半身像|大头照|头像照|胸像|人物特写|局部特写|只拍上半身|上半身(?:照|像)?|腰部?以上|膝盖?以上|膝上构图|七分身|裁(?:掉|切)脚部?|脚部不入镜|不拍脚/g, '完整全身照')
       .replace(/\b(?:close[- ]?up|headshot|bust shot|half[- ]body|upper[- ]body|waist[- ]up|knee[- ]up|cowboy shot|three[- ]quarter shot|cropped (?:feet|legs|body))\b/gi, 'full body')
@@ -92,24 +94,39 @@
     return Math.max(0, Math.min(120, Math.floor(Number(years) || 0)));
   }
 
+  function headRatio(years, height) {
+    if (height < 90) return 3.5;
+    if (height < 120) return 4.2;
+    if (height < 145) return 4.8;
+    if (height < 160) return 5.5;
+    return years < 18 ? 6 : 7;
+  }
+
   function appearanceLines(state, target, player) {
     const years = ageFor(state, target, player);
+    const height = Number(target.height || 0);
+    const protectedAge = years < 18;
     const marks = [target.molePosition, target.freckles, target.distinctiveFeature]
       .filter((item) => item && !String(item).startsWith('无')).map(clean).filter(Boolean).join(', ');
+    const identity = [
+      `gender: ${player ? state.gender : target.gender}`,
+      protectedAge ? '' : `age: ${years} years old`,
+      `body_type: ${clean(target.bodyType)}, ${clean(target.bodyFrame)}`,
+      `height: ${height.toFixed(1)} cm`,
+      protectedAge ? `body_proportion: ${headRatio(years, height).toFixed(1)} heads tall` : '',
+    ];
     return {
       years,
       lines: [
-        `gender: ${player ? state.gender : target.gender}`,
-        `age: ${years} years old`,
-        `body_type: ${clean(target.bodyType)}, ${clean(target.bodyFrame)}`,
-        `height: ${Number(target.height || 0).toFixed(1)} cm`,
+        ...identity,
         `hair_style: ${clean(Game.cosplayCatalog.effectiveValue(target, 'hairstyle'))}`,
         `hair_color: ${clean(Game.cosplayCatalog.effectiveValue(target, 'hairColor'))}`,
         `eye_color: ${clean(target.eyeColor)}`,
         `face_shape: ${clean(target.faceShape)}`,
         `facial_features: ${clean(target.featureProportions)}`,
-        `expression: ${clean(target.temperament)} natural expression`,
-        `personality: ${clean(target.personality)}, ${clean(target.trait)}, ${clean(target.temperament)}`,
+        protectedAge ? 'expression: natural expression'
+          : `expression: ${clean(target.temperament)} natural expression`,
+        protectedAge ? '' : `personality: ${clean(target.personality)}, ${clean(target.trait)}, ${clean(target.temperament)}`,
         marks ? `skin_details: ${marks}` : '',
       ].filter((line) => !line.endsWith(': ') && !line.includes(': ,')),
     };
@@ -141,7 +158,7 @@
   function build(state, target, key, custom) {
     const player = key === 'player';
     const appearance = appearanceLines(state, target, player);
-    const pose = appearance.years < 3 ? 'age-appropriate full body pose' : 'standing pose';
+    const pose = appearance.years < 18 ? 'full body neutral pose' : 'standing pose';
     const customText = clean(custom);
     const parts = [
       ...quality,

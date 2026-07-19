@@ -76,7 +76,7 @@
       state.stats[key] = clamp((state.stats[key] || 0) + value);
     });
     state.money += effects.money || 0;
-    state.education.study = Math.max(0, state.education.study + (effects.study || 0));
+    if (effects.study) Game.educationSystem.addPreparation(state, effects.study);
     state.cityLife.reputation = clamp(state.cityLife.reputation + (effects.city || 0));
     state.career.burnout = clamp(state.career.burnout + (effects.burnout || 0));
     Object.entries(effects.career || {}).forEach(([key, value]) => {

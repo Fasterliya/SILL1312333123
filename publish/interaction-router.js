@@ -108,6 +108,10 @@
   }
 
   function handleLifeSystems(event, state) {
+    const studyFocus = event.target.closest('[data-study-focus]');
+    if (studyFocus) return finish(Game.educationSystem.setFocus(state, studyFocus.dataset.studyFocus)), true;
+    const education = event.target.closest('[data-education-action]');
+    if (education) return finish(Game.educationSystem.act(state, education.dataset.educationAction)), true;
     const diet = event.target.closest('[data-health-diet]');
     if (diet) return finish(Game.healthSystem.setDiet(state, diet.dataset.healthDiet)), true;
     const sleep = event.target.closest('[data-health-sleep]');

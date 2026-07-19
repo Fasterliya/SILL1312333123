@@ -26,22 +26,7 @@
   }
 
   function exam(state, label) {
-    const scores = {};
-    const effort = state.education.study;
-    const fatiguePenalty = Game.lifeLoop.performancePenalty(state);
-    Object.entries(subjects(state)).forEach(([name, cap]) => {
-      const rate = U.clamp(0.46 + state.stats.智力 / 190 + effort / 210
-        + U.between(-8, 8) / 100 - fatiguePenalty, 0.3, 0.98);
-      scores[name] = Math.round(cap * rate);
-    });
-    const total = Object.values(scores).reduce((sum, value) => sum + value, 0);
-    const record = { label, age: U.age(state), scores, total, date: `${state.year}.${state.month}` };
-    state.education.exams.unshift(record);
-    state.education.exams = state.education.exams.slice(0, 12);
-    state.education.study = Math.max(0, state.education.study - 12);
-    state.stats.心情 = U.clamp(state.stats.心情 + (total > 500 ? 5 : -4), 0, 100);
-    addLog(state, label, `总分 ${total}。${total > 560 ? '你的努力得到了回报。' : '这次成绩将成为下一段努力的起点。'}`, total > 560 ? 'good' : 'normal');
-    return record;
+    return Game.educationSystem.exam(state, label, subjects(state));
   }
 
   function schoolMilestones(state) {

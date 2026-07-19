@@ -94,7 +94,7 @@
         )).join('')}</div></article>`;
     }).join('');
     return `<section class="list-guide"><strong>当前方式：${state.parenting.style}</strong>
-      <span>教育储备 ¥${state.parenting.educationFund.toLocaleString()}，成长数值会随月份持续积累。</span></section>
+      <span>教育储备 ${Game.view.money(state.parenting.educationFund)}，成长数值会随月份持续积累。</span></section>
       <nav class="filter-chips">${styleButtons}</nav>${cards || '<p class="empty-state">家庭中还没有需要养育的子女。</p>'}
       ${children(state).length ? Game.schoolLines.render(state) : ''}`;
   }

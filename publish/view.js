@@ -15,6 +15,7 @@
   ];
   const el = {};
   let toastTimer = 0;
+  let currentCountry = '华夏';
 
   function init() {
     ids.forEach((id) => { el[id] = document.getElementById(id); });
@@ -22,10 +23,8 @@
     drawHero();
   }
 
-  function money(value) {
-    const abs = Math.abs(value);
-    if (abs >= 10000) return `${value < 0 ? '-' : ''}¥${(abs / 10000).toFixed(1)}万`;
-    return `${value < 0 ? '-' : ''}¥${abs.toLocaleString()}`;
+  function money(value, country) {
+    return Game.worldCulture.format(value, country || currentCountry);
   }
 
   function drawHero() {
@@ -116,6 +115,7 @@
   }
 
   function render(state) {
+    currentCountry = state.location.country || '华夏';
     const years = U.age(state);
     el.profileName.textContent = state.name;
     el.profileMeta.textContent = `${state.gender} · ${state.location.country || '华夏'} ${state.location.city}`;

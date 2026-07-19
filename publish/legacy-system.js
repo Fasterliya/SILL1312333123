@@ -150,7 +150,8 @@
     Game.systemsState.ensure(state);
     Game.profile.updateGrowth(state);
     Game.npcLife.update(state);
-    Game.lifeDirector.addLog(state, `第${state.generation}代人生`, `${state.name}继承家业与 ¥${inherited.toLocaleString()} 资金，开始续写家族故事。`, 'milestone');
+    Game.lifeDirector.addLog(state, `第${state.generation}代人生`,
+      `${state.name}继承家业与 ${Game.view.money(inherited)} 资金，开始续写家族故事。`, 'milestone');
     return { ok: true, message: `已由${state.name}继承家族人生` };
   }
 
@@ -169,7 +170,7 @@
       <span>${item.age}岁 · ${item.job} · ${item.cause}</span><small>${item.house}</small></article>`
     )).join('');
     return `<section class="legacy-summary"><span>当前第 ${state.generation} 代</span>
-      <strong>${state.surname}氏家族</strong><small>累计继承现金 ¥${state.legacy.inheritedMoney.toLocaleString()} · 可继承子女 ${heirs.length} 人</small></section>
+      <strong>${state.surname}氏家族</strong><small>累计继承现金 ${Game.view.money(state.legacy.inheritedMoney)} · 可继承子女 ${heirs.length} 人</small></section>
       <h3>家族先辈</h3>${history || '<p class="empty-state">第一代人生仍在书写中。</p>'}`;
   }
 

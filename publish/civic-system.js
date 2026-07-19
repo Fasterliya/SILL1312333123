@@ -83,7 +83,7 @@
       return `<article class="city-row ${current ? 'current' : ''}">
         <div><strong>${city.city}</strong><span>${city.country} · ${city.province}
         · 办理费 ${Game.worldCulture.format(cost, city.country)}</span></div>
-        <b>¥${cost.toLocaleString()}</b>
+        <b>${Game.view.money(cost)}</b>
         <button data-civic-transfer="${city.city}" ${current ? 'disabled' : ''}>迁户口</button></article>`;
     }).join('');
   }

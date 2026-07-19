@@ -94,7 +94,7 @@
     if (mode === 'buy') {
       if (stock.availableShares < amount) return { ok: false, message: '当前卖盘不足，需要等待其他股东抛售' };
       if (stock.shares + amount > stock.totalShares * HOLDING_CAP) return { ok: false, message: '单个玩家最多持有公司10%股份' };
-      if (state.money < value) return { ok: false, message: `买入需要 ¥${value.toLocaleString()}` };
+      if (state.money < value) return { ok: false, message: `买入需要 ${Game.view.money(value)}` };
       state.money -= value;
       stock.shares += amount;
       stock.availableShares -= amount;
@@ -137,7 +137,7 @@
     if (dividend > 0) {
       state.money += dividend;
       state.assets.dividends += dividend;
-      Game.lifeDirector.addLog(state, '季度股份分红', `你的公司持股带来 ¥${dividend.toLocaleString()} 分红。`, 'good');
+      Game.lifeDirector.addLog(state, '季度股份分红', `你的公司持股带来 ${Game.view.money(dividend)} 分红。`, 'good');
     }
   }
 

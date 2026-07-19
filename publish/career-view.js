@@ -59,7 +59,7 @@
       return `<article class="job-card ${locked ? 'locked' : ''}">
         <div><strong>${job.name}</strong><span>${job.company} · ${job.industry}</span>
         <small>${Game.careerSystem.requirementLabel(job.education || 0)} · 录取率${chance(state, job)}%</small></div>
-        <b>¥${job.salary.toLocaleString()}</b>
+        <b>${money(job.salary)}</b>
         <button data-job-detail="${job.id}">${locked ? '门槛' : '查看'}</button></article>`;
     }).join('') : '<p class="empty-state">当前筛选没有职位。</p>';
     const companies = new Set(jobs.map((job) => job.company)).size;
@@ -83,7 +83,7 @@
     const facts = [
       ['公司/主体', job.company], ['母公司/集团', company?.parent || '独立单位'],
       ['工作方式', job.freelance ? '自由职业' : '单位岗位'],
-      ['所在城市', state.location.city], ['参考月收入', `¥${job.salary.toLocaleString()}`],
+      ['所在城市', state.location.city], ['参考月收入', Game.view.money(job.salary)],
       ['学历要求', Game.careerSystem.requirementLabel(job.education || 0)],
       ['当前资格', Game.careerSystem.qualificationLabel(Game.careerSystem.qualification(state))],
       ['参考录取率', `${chance(state, job)}%`], ['主要职责', duties(job)],
@@ -106,7 +106,7 @@
       `<article class="city-row ${city.city === state.location.city ? 'current' : ''}">
         <div><strong>${city.city}</strong><span>${city.country} · ${city.province} · ${city.tier === 1 ? '核心城市' : '发展城市'}
         · ${Game.worldCulture.format(city.cost, city.country)}</span></div>
-        <b>¥${city.cost.toLocaleString()}</b>
+        <b>${Game.view.money(city.cost)}</b>
         <button data-city="${city.city}" ${city.city === state.location.city ? 'disabled' : ''}>迁居</button></article>`
     )).join('');
   }

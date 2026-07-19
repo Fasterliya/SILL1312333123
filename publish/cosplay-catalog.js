@@ -21,6 +21,18 @@
       '角色专属袜装或修身腿套、绑带、腿环与护甲层次',
       '与角色服装同色系的战术靴或礼鞋，保留鞋型、金属件与发光结构',
     ],
+    '原神': [
+      '高精度织物、皮革、金属与轻纱，严格对应角色国度配色、元素纹样和服装剪裁',
+      '角色专属帽饰、发冠、耳饰、手套、胸针、腰饰与神之眼主题配件',
+      '角色专属袜装、腿环、绑带、护膝与不对称腿部装饰层次',
+      '与角色服装同色系的长短靴或礼鞋，保留鞋面纹样与金属装饰',
+    ],
+    '蔚蓝档案': [
+      '学院制服面料、机能织物、皮革与金属件，严格对应学园配色、徽章和制服结构',
+      '角色专属头饰、发饰、耳机、领结、袖章、手套与学园日常配件',
+      '角色专属长短袜、过膝袜、腿环、绑带与校园制服腿部层次',
+      '与角色制服同色系的制服鞋、运动鞋或短靴，保留鞋型与装饰细节',
+    ],
   };
   function stripWeapons(value) {
     return String(value || '')
@@ -39,7 +51,10 @@
   function enhance(series, character, prompt) {
     const [material, accessory, legwear, shoes] = details[series] || details.鸣潮;
     const safePrompt = stripWeapons(prompt);
-    const alias = { 星穹铁道: 'Honkai Star Rail', 鸣潮: 'Wuthering Waves', 东方Project: 'Touhou Project' }[series] || series;
+    const alias = {
+      星穹铁道: 'Honkai Star Rail', 鸣潮: 'Wuthering Waves', 东方Project: 'Touhou Project',
+      原神: 'Genshin Impact', 蔚蓝档案: 'Blue Archive',
+    }[series] || series;
     return `角色识别：${series}（${alias}）${character}官方角色COS，高辨识度完整还原。主体服装与发型：${safePrompt}。材质与颜色：${material}。头饰与配饰：${accessory}。袜装与腿部：${legwear}。鞋履：${shoes}。标志性元素：保留主体描述中的发型配色、徽记、纹样、随身日常配件与角色主题元素`;
   }
   const make = (series, character, prompt) => ({
@@ -144,10 +159,14 @@
   const wuwa = Array.isArray(Game.cosplayWuwa) ? Game.cosplayWuwa.map((entry) => ({
     ...entry, prompt: enhance('鸣潮', entry.character, entry.prompt),
   })) : [];
+  const genshin = Array.isArray(Game.cosplayGenshin)
+    ? Game.cosplayGenshin.map(([name, prompt]) => make('原神', name, prompt)) : [];
+  const blueArchive = Array.isArray(Game.cosplayBlueArchive)
+    ? Game.cosplayBlueArchive.map(([name, prompt]) => make('蔚蓝档案', name, prompt)) : [];
   const items = [{
     name: '无', series: '基础', character: '无', prompt: '', tags: ['基础'],
     minAge: 0, maxAge: 120, personalities: [], temperaments: [],
-  }, ...touhou, ...starRail, ...wuwa];
+  }, ...touhou, ...starRail, ...wuwa, ...genshin, ...blueArchive];
   const find = (name) => items.find((item) => item.name === name) || items[0];
   const covered = new Set(['hairColor', 'hairstyle', 'clothing.top', 'clothing.shoes']);
 

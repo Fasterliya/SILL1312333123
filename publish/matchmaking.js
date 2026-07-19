@@ -26,7 +26,7 @@
     if (U.age(state) < 20) return '<p class="empty-state">20岁后开放相亲活动。</p>';
     const matches = state.matchmaking.candidates;
     const head = `<section class="list-guide"><strong>城市相亲会</strong><span>见面、约会并培养好感，关系成熟后可以告白。</span></section>
-      <button class="wide-action" data-create-matches>刷新10位相亲对象 · ¥500
+      <button class="wide-action" data-create-matches>刷新10位相亲对象 · ${Game.view.money(500)}
       · ${Game.worldCulture.format(500, state.location.country)}</button>`;
     return head + (matches.length ? matches.map((item) => (
       Game.social.card(item, [['chat', '聊天'], ['date', '约会'], ['exchange', '加联系人']])

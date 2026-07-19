@@ -102,6 +102,12 @@
   }
 
   function schoolQuality(state) {
+    const university = Game.config.universities.find((school) => (
+      school.id === state.education.universityId || school.name === state.education.university
+    ));
+    if (state.education.schoolStage === 'university' && university) {
+      return Game.schoolLines.institutionResource(university);
+    }
     const stageQuality = state.education.schoolStage === 'primary' ? 58
       : (state.education.schoolStage === 'middle' ? 62
         : (state.education.schoolStage === 'vocational' ? 56 : ({
@@ -149,7 +155,9 @@
   function monthly(state) {
     if (!enrolled(state)) return;
     const item = ensure(state);
-    item.preparation = clamp(item.preparation + 1 + item.discipline / 80);
+    const resourceGain = state.education.schoolStage === 'university'
+      ? Math.max(0, (schoolQuality(state) - 70) / 35) : 0;
+    item.preparation = clamp(item.preparation + 1 + item.discipline / 80 + resourceGain);
     const strain = item.focus === '应试冲刺' ? 2 : 0;
     item.pressure = clamp(item.pressure + strain - (state.health.sleep >= 8 ? 1 : 0));
     item.study = Math.round(item.preparation);
@@ -171,7 +179,7 @@
         `<button class="${item.focus === name ? 'active' : ''}" data-study-focus="${name}">${name}</button>`)).join('')}</div>
       <h3>本月学习安排</h3><div class="study-actions">${Object.entries(actions).map(([id, action]) => (
         `<button data-education-action="${id}" ${used || !enrolled(state) ? 'disabled' : ''}>
-        <strong>${action[5]}</strong><small>${action[0] ? `¥${action[0]}` : '自主安排'}</small></button>`)).join('')}</div>
+        <strong>${action[5]}</strong><small>${action[0] ? Game.view.money(action[0]) : '自主安排'}</small></button>`)).join('')}</div>
       <h3>${latest ? `${latest.label} · ${latest.total}/${latest.maximum || '-'}` : '考试成绩'}</h3>
       <div class="score-grid">${scores}</div>${Game.schoolLines.render(state)}`;
   }

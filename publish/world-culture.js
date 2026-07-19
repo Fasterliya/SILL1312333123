@@ -24,12 +24,14 @@
   }
 
   function localAmount(cny, country) {
-    return Math.max(0, Math.round(Number(cny || 0) / profile(country).rate));
+    const value = Number(cny);
+    return Number.isFinite(value) ? Math.round(value / profile(country).rate) : 0;
   }
 
   function format(cny, country) {
     const item = profile(country);
-    return `${item.symbol}${localAmount(cny, country).toLocaleString()} ${item.code}`;
+    const amount = localAmount(cny, country);
+    return `${amount < 0 ? '-' : ''}${item.symbol}${Math.abs(amount).toLocaleString(item.locale)} ${item.code}`;
   }
 
   function applyPerson(person, country) {

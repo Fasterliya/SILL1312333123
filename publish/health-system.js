@@ -39,7 +39,7 @@
       if (![1000, 5000].includes(amount) || state.money < amount) return { ok: false, message: '退休储备资金不足' };
       state.money -= amount;
       state.health.retirementFund += amount;
-      return { ok: true, message: `退休储备增加 ¥${amount.toLocaleString()}` };
+      return { ok: true, message: `退休储备增加 ${Game.view.money(amount)}` };
     }
     if (type === 'checkup') {
       const cost = price(state, 1200);
@@ -86,8 +86,8 @@
       job: null, jobId: null, company: null, salary: 0, performance: 0, management: false,
     });
     Game.workplace.leave(state);
-    Game.lifeDirector.addLog(state, '正式退休', `你开始领取每月 ¥${state.health.pension.toLocaleString()} 的养老金。`, 'milestone');
-    return { ok: true, message: `退休完成，每月养老金 ¥${state.health.pension.toLocaleString()}` };
+    Game.lifeDirector.addLog(state, '正式退休', `你开始领取每月 ${Game.view.money(state.health.pension)} 的养老金。`, 'milestone');
+    return { ok: true, message: `退休完成，每月养老金 ${Game.view.money(state.health.pension)}` };
   }
 
   function addCondition(state) {
@@ -131,8 +131,8 @@
     return `<section class="health-summary"><div><span>健康状态</span><strong>${state.stats.健康}</strong>
       <small>${conditions}</small></div><dl><div><dt>睡眠</dt><dd>${state.health.sleep}小时</dd></div>
       <div><dt>医疗保障</dt><dd>${state.health.insurance}</dd></div><div><dt>退休储备</dt>
-      <dd>¥${state.health.retirementFund.toLocaleString()}</dd></div><div><dt>养老金</dt>
-      <dd>¥${state.health.pension.toLocaleString()}/月</dd></div></dl></section>
+      <dd>${Game.view.money(state.health.retirementFund)}</dd></div><div><dt>养老金</dt>
+      <dd>${Game.view.money(state.health.pension)}/月</dd></div></dl></section>
       <h3>生活方式</h3><div class="system-choice">${Object.keys(dietScore).map((item) => (
         `<button class="${state.health.diet === item ? 'active' : ''}" data-health-diet="${item}">${item}</button>`)).join('')}</div>
       <div class="system-choice">${[6, 7, 8, 9].map((item) => (

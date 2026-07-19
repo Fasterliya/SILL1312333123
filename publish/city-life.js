@@ -70,7 +70,7 @@
     const etiquette = Game.worldCulture.profile(city.country).etiquette;
     return `<section class="city-profile"><div><span>${city.country || '华夏'} · ${city.province}</span>
       <strong>${city.city}</strong><small>${traits(city).join(' · ')} · ${etiquette}</small></div>
-      <dl><div><dt>月生活费</dt><dd>¥${monthlyCost(state).toLocaleString()}</dd></div>
+      <dl><div><dt>月生活费</dt><dd>${Game.view.money(monthlyCost(state))}</dd></div>
       <div><dt>当地货币</dt><dd>${local}</dd></div>
       <div><dt>城市熟悉</dt><dd>${familiarity}</dd></div><div><dt>城市声望</dt>
       <dd>${Math.round(state.cityLife.reputation)}</dd></div></dl></section>`;

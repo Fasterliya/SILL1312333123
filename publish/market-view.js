@@ -5,7 +5,7 @@
   let filter = 'all';
   let api = null;
 
-  const money = (value) => `¥${Math.round(value).toLocaleString()}`;
+  const money = (value) => Game.view.money(value);
   const percent = (value) => `${(value * 100).toFixed(2)}%`;
 
   function escape(value) {
@@ -33,7 +33,7 @@
       <button class="market-main" type="button" data-company-stock="${company.id}">
         <span>${escape(company.city)} · ${escape(company.industry)}</span><strong>${escape(company.name)}</strong>
         <small>营收 ${money(stock.revenue)} · 利润 ${money(stock.profit)} · 流通 ${stock.availableShares.toLocaleString()}股</small>
-      </button><div class="market-quote"><strong class="${delta >= 0 ? 'up' : 'down'}">¥${stock.price.toFixed(2)}</strong>
+      </button><div class="market-quote"><strong class="${delta >= 0 ? 'up' : 'down'}">${money(stock.price)}</strong>
       <span>${delta >= 0 ? '+' : ''}${delta.toFixed(2)}</span><small>持股 ${percent(Game.companyMarket.ownership(stock))}</small></div>
       <div class="market-actions"><button data-stock-company="${company.id}" data-trade="buy" data-lot="100">买100</button>
       <button data-stock-company="${company.id}" data-trade="sell" data-lot="100">卖100</button></div></article>`;
@@ -79,7 +79,7 @@
     const board = Game.boardSystem.render(state, companyId);
     api?.save();
     const facts = [
-      ['当前股价', `¥${stock.price.toFixed(2)}`], ['本月变动', `${(stock.price - stock.previous).toFixed(2)}`],
+      ['当前股价', money(stock.price)], ['本月变动', money(stock.price - stock.previous)],
       ['月营收', money(stock.revenue)], ['月利润', money(stock.profit)],
       ['经营增长', `${stock.growth.toFixed(1)}%`], ['经营风险', `${stock.risk}/10`],
       ['市场卖盘', `${stock.availableShares.toLocaleString()}股`], ['总股本', `${stock.totalShares.toLocaleString()}股`],
@@ -92,7 +92,7 @@
       `<button data-stock-company="${companyId}" data-trade="sell" data-lot="${lot}">卖出${lot}</button>`
     )).join('');
     Game.navigation.openDetail(company.name, `<section class="company-stock-head"><span>${company.city} · ${company.industry}</span>
-      <h3>${company.name}</h3><strong>¥${stock.price.toFixed(2)}</strong></section>${chart(stock)}
+      <h3>${company.name}</h3><strong>${money(stock.price)}</strong></section>${chart(stock)}
       <section class="detail-facts">${facts.map(([label, value]) => (
         `<div><span>${label}</span><strong>${value}</strong></div>`)).join('')}</section>
       <div class="stock-trade-grid">${trade}</div>${board}`, 'stock');

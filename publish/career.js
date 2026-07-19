@@ -113,7 +113,7 @@
     Game.careerSpecialties.afterWork(state, type);
     Game.lifeDirector.addLog(state, '职场行动', label, 'good');
     return { ok: true, message: Game.economy.message(
-      state, `${label}，绩效达到 ${state.career.performance}${income ? `，收入 ¥${income}` : ''}`,
+      state, `${label}，绩效达到 ${state.career.performance}${income ? `，收入 ${Game.view.money(income)}` : ''}`,
     ) };
   }
 

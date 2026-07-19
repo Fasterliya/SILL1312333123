@@ -57,8 +57,8 @@
     state.career.projects.push({ month: state.totalMonths, specialty: id, success, reward });
     state.career.projects = state.career.projects.slice(-12);
     Game.lifeDirector.addLog(state, success ? '专项项目完成' : '专项项目受挫',
-      success ? `项目获得认可，并带来 ¥${reward.toLocaleString()} 奖励。` : '项目没有达到预期，但积累了经验。', success ? 'good' : 'normal');
-    return { ok: success, message: success ? `项目成功，获得 ¥${reward.toLocaleString()}` : '项目未达预期，专业能力仍有提升' };
+      success ? `项目获得认可，并带来 ${Game.view.money(reward)} 奖励。` : '项目没有达到预期，但积累了经验。', success ? 'good' : 'normal');
+    return { ok: success, message: success ? `项目成功，获得 ${Game.view.money(reward)}` : '项目未达预期，专业能力仍有提升' };
   }
 
   function afterWork(state, type) {

@@ -10,7 +10,8 @@
   }
 
   function debtText(state) {
-    return state.money < 0 ? `，当前负债 ¥${Math.abs(state.money).toLocaleString()}` : '';
+    return state.money < 0
+      ? `，当前负债 ${Game.worldCulture.format(Math.abs(state.money), state.location.country)}` : '';
   }
 
   function message(state, text) {

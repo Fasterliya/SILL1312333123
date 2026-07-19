@@ -9,18 +9,18 @@
     if (U.age(state) < 18) return { ok: false, message: '成年后才能经营产业' };
     const item = C.businesses.find((entry) => entry.id === id);
     if (!item || state.assets.businesses.includes(id)) return { ok: false, message: '已经拥有这项产业' };
-    if (state.money < item.price) return { ok: false, message: `购买需要 ¥${item.price.toLocaleString()}` };
+    if (state.money < item.price) return { ok: false, message: `购买需要 ${Game.view.money(item.price)}` };
     state.money -= item.price;
     state.assets.businesses.push(id);
     Game.lifeDirector.addLog(state, '购入产业', `你成为${item.name}的经营者。`, 'milestone');
-    return { ok: true, message: `${item.name}每月预计收入 ¥${item.income.toLocaleString()}` };
+    return { ok: true, message: `${item.name}每月预计收入 ${Game.view.money(item.income)}` };
   }
 
   function buyVehicle(state, id) {
     if (U.age(state) < 16) return { ok: false, message: '16岁后才能购买个人交通工具' };
     const item = C.vehicles.find((entry) => entry.id === id);
     if (!item || state.assets.vehicles.includes(id)) return { ok: false, message: '已经拥有这项座驾' };
-    if (state.money < item.price) return { ok: false, message: `购买需要 ¥${item.price.toLocaleString()}` };
+    if (state.money < item.price) return { ok: false, message: `购买需要 ${Game.view.money(item.price)}` };
     state.money -= item.price;
     state.assets.vehicles.push(id);
     state.stats.心情 = U.clamp(state.stats.心情 + item.mood, 0, 100);

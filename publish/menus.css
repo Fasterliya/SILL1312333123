@@ -116,7 +116,8 @@
 
 .fold-content,
 .record-grid,
-.record-section > .profile-editor {
+.record-section > .profile-editor,
+.record-section > .travel-grid {
   padding: 12px;
   border-top: 1px solid #e5e2d8;
 }

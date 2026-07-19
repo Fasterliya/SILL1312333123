@@ -3,15 +3,22 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
-  const areas = [
-    ['商业街', 120, '店铺与行人很多，容易遇到开朗的角色。'],
-    ['城市公园', 40, '节奏舒缓，适合散步和自然交谈。'],
-    ['书店街', 80, '常遇到安静、好奇或文艺的角色。'],
-    ['车站广场', 60, '来自不同地方的人在这里短暂停留。'],
-    ['夜间食街', 160, '成年后可以在热闹的夜晚结识新朋友。'],
-    ['城市漫展', 260, '观看舞台、逛同人摊位，并结识Coser与创作者。'],
-    ['创作者市集', 180, '插画、手作、写真与穿搭创作者在这里交流。'],
-  ];
+  const neighborhoods = [
+    ['商业街', 120, 3, '店铺与行人很多，容易遇到开朗的角色。'],
+    ['城市公园', 40, 4, '节奏舒缓，适合散步和自然交谈。'],
+    ['书店街', 80, 3, '常遇到安静、好奇或文艺的角色。'],
+    ['车站广场', 60, 2, '来自不同地方的人在这里短暂停留。'],
+    ['夜间食街', 160, 4, '成年后可以在热闹的夜晚结识新朋友。'],
+    ['城市漫展', 260, 6, '观看舞台、逛同人摊位，并结识Coser与创作者。'],
+    ['创作者市集', 180, 5, '插画、手作、写真与穿搭创作者在这里交流。'],
+  ].map(([name, cost, mood, description]) => ({
+    name, cost, mood, description, kind: 'neighborhood',
+  }));
+
+  function places(state) {
+    const landmarks = Game.cityAttractions?.forCity(state.location.city) || [];
+    return [...landmarks, ...neighborhoods];
+  }
 
   function activePeople(state) {
     const ids = state.travel.activeIds?.length
@@ -19,62 +26,95 @@
     return ids.map((id) => Game.people.find(state, id)).filter(Boolean);
   }
 
-  function createEncounter(state, areaName) {
+  function createEncounter(state, place) {
     const person = U.person('路人', U.random(Game.nameSystem.surnames()), U.between(-5, 8), null, state.playerBornAt);
     person.affection = U.between(25, 42);
-    person.metCity = `${state.location.city}${areaName}`;
+    person.metCity = `${state.location.city}${place.name}`;
     Game.worldCulture.applyPerson(person, state.location.country);
     U.setUniqueName(state, person, Game.worldCulture.profile(state.location.country).locale);
-    if (areaName === '城市漫展') {
+    if (place.name === '城市漫展') {
       person.job = U.random(['职业Coser', '虚拟主播', '动画原画师', '漫展活动执行']);
       person.clothing.top = U.random(['舞台演出礼服', '毕业袴套装', '复古灯笼袖长裙']);
-    } else if (areaName === '创作者市集') {
+    } else if (place.name === '创作者市集') {
       person.job = U.random(['写真博主', '穿搭博主', '自由插画师', '商业摄影师']);
+    } else if (place.kind === 'landmark') {
+      person.job = U.random(['本地向导', '旅行摄影师', '文化场馆职员', '城市规划师']);
     }
     Game.npcLife.syncGrowth(state, person);
     return person;
   }
 
-  function roam(state, areaName) {
-    const area = areas.find((entry) => entry[0] === areaName);
-    if (!area) return { ok: false, message: '没有这个街区' };
-    if (areaName === '夜间食街' && U.age(state) < 18) return { ok: false, message: '成年后才能前往夜间食街' };
-    if (['城市漫展', '创作者市集'].includes(areaName) && U.age(state) < 12) {
-      return { ok: false, message: '12岁后可以独立参加创作者活动' };
+  function unavailable(state, place) {
+    if (place.name === '夜间食街' && U.age(state) < 18) return '成年后才能前往夜间食街';
+    if (['城市漫展', '创作者市集'].includes(place.name) && U.age(state) < 12) {
+      return '12岁后可以独立参加创作者活动';
     }
+    return '';
+  }
+
+  function roam(state, placeName) {
+    const place = places(state).find((entry) => entry.name === placeName);
+    if (!place) return { ok: false, message: '没有这个城市目的地' };
+    const blocked = unavailable(state, place);
+    if (blocked) return { ok: false, message: blocked };
     const discount = state.assets.vehicles.length ? 0.5 : 1;
-    const cost = Math.round(area[1] * discount);
+    const cost = Math.round(place.cost * discount);
     Game.economy.spend(state, cost);
     const previous = new Set([...(state.travel.activeIds || []), state.travel.activeId].filter(Boolean));
     state.travel.encounters = state.travel.encounters.filter((item) => !previous.has(item.id));
     const people = Array.from({ length: 3 }, () => {
-      const person = createEncounter(state, areaName);
+      const person = createEncounter(state, place);
       state.travel.encounters.push(person);
       return person;
     });
     state.travel.activeIds = people.map((person) => person.id);
     state.travel.activeId = state.travel.activeIds[0];
-    state.stats.心情 = U.clamp(state.stats.心情 + 3, 0, 100);
+    state.stats.心情 = U.clamp(state.stats.心情 + place.mood, 0, 100);
+    const familiarity = state.cityLife.familiarity;
+    familiarity[state.location.city] = U.clamp((familiarity[state.location.city] || 0)
+      + (place.kind === 'landmark' ? 4 : 2), 0, 100);
+    state.travel.localHistory.unshift({
+      city: state.location.city, place: place.name, kind: place.kind, month: state.totalMonths,
+    });
+    state.travel.localHistory = state.travel.localHistory.slice(0, 20);
     const names = people.map((person) => person.name).join('、');
-    Game.lifeDirector.addLog(state, '街头相遇', `你在${areaName}遇见了${names}。`, 'good');
-    return { ok: true, message: Game.economy.message(state, `你在${areaName}遇见了3位新角色`) };
+    const title = place.kind === 'landmark' ? '城市景观旅途' : '街头相遇';
+    Game.lifeDirector.addLog(state, title, `你在${place.name}游览并遇见了${names}。`, 'good');
+    return { ok: true, message: Game.economy.message(
+      state, `游览${place.name}，心情 +${place.mood}，遇见3位新角色`,
+    ) };
+  }
+
+  function choice(state, place) {
+    const cost = Math.round(place.cost * (state.assets.vehicles.length ? 0.5 : 1));
+    return `<button class="travel-choice" data-roam-area="${place.name}"><span>
+      <strong>${place.name}</strong><small>${place.description}</small></span>
+      <b>${Game.worldCulture.format(cost, state.location.country)}</b></button>`;
+  }
+
+  function section(title, hint, entries, open) {
+    return `<details class="record-section" ${open ? 'open' : ''}><summary><span>${title}</span>
+      <small>${hint}</small></summary><div class="travel-grid">${entries}</div></details>`;
   }
 
   function render(state) {
     const people = activePeople(state);
-    const vehicle = state.assets.vehicles.length ? '拥有座驾，街区交通费减半' : '购买座驾可让街区交通费减半';
-    const buttons = areas.map(([name, cost, description]) => (
-      `<button class="travel-choice" data-roam-area="${name}"><span><strong>${name}</strong>
-      <small>${description}</small></span><b>¥${state.assets.vehicles.length ? Math.round(cost / 2) : cost}</b></button>`
-    )).join('');
-    const encounter = people.length ? `<h3>本次相遇 · ${people.length}人</h3>${people.map((person) => (
+    const landmarks = Game.cityAttractions?.forCity(state.location.city) || [];
+    const vehicle = state.assets.vehicles.length ? '座驾已生效，交通费减半' : '购买座驾可让交通费减半';
+    const recent = state.travel.localHistory[0];
+    const encounter = people.length ? people.map((person) => (
       Game.social.card(person, [
         ['chat', '交谈'], ['meal', '请客'], ...(person.phoneUnlocked ? [] : [['exchange', '留联系方式']]),
       ])
-    )).join('')}` : '<p class="empty-state">选择一个街区，一次会遇到3位新的具体角色。</p>';
+    )).join('') : '<p class="empty-state">选择一个目的地，一次会遇到3位新的具体角色。</p>';
     return `<section class="list-guide"><strong>${state.location.country} · ${state.location.city}</strong>
-      <span>${vehicle}。街区与创作者活动可以自由探索。</span></section>
-      <div class="travel-grid">${buttons}</div>${encounter}`;
+      <span>${vehicle}。${recent ? `最近游览：${recent.city}${recent.place}。` : '从城市景观开始认识当地。'}</span></section>
+      ${section('城市景观与景区', `${landmarks.length}处当地目的地 · 默认展开`,
+    landmarks.map((place) => choice(state, place)).join('') || '<p class="empty-state">当地景观资料整理中。</p>', true)}
+      ${section('日常街区', `${neighborhoods.length}种日常与创作者活动`,
+    neighborhoods.map((place) => choice(state, place)).join(''), false)}
+      ${section('本次相遇', people.length ? `${people.length}位新角色` : '游览后出现',
+    encounter, people.length > 0)}`;
   }
 
   Game.travelSystem = Object.freeze({ roam, render });

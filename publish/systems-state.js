@@ -33,6 +33,7 @@
     state.travel ||= { activeId: null };
     state.travel.encounters = Array.isArray(state.travel.encounters) ? state.travel.encounters : [];
     state.travel.history = Array.isArray(state.travel.history) ? state.travel.history.slice(-20) : [];
+    state.travel.localHistory = Array.isArray(state.travel.localHistory) ? state.travel.localHistory.slice(-20) : [];
     state.travel.journey ||= null;
     state.worldPeople = Array.isArray(state.worldPeople) ? state.worldPeople : [];
     if (sourceVersion < 11) {
@@ -43,7 +44,7 @@
       state.matchmaking.candidates.push(...candidates);
       state.contacts = state.contacts.filter((person) => !candidates.includes(person));
     }
-    state.version = 19;
+    state.version = 20;
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {

@@ -77,6 +77,10 @@
   margin: 12px 0;
 }
 
+.record-section > .travel-grid {
+  margin: 0;
+}
+
 .travel-choice {
   width: 100%;
   min-height: 66px;

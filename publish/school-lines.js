@@ -58,7 +58,8 @@
   }
 
   function institutionResource(school) {
-    return clamp(cityResource(school.city) + schoolBonus(school.type), 50, 99);
+    const score = cityResource(school.city) + schoolBonus(school.type);
+    return school.country === '华夏' ? clamp(score, 50, 92) : clamp(score + 8, 94, 99);
   }
 
   function localHighSchools(state) {

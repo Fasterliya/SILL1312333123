@@ -34,7 +34,7 @@
     state.career.salary = Math.round(state.career.salary * rate);
     state.career.performance = Math.max(10, state.career.performance - 16);
     Game.lifeDirector.addLog(state, '主动加薪成功', `你的薪级提升到P${state.career.level + 1}。`, 'milestone');
-    return { ok: true, message: `加薪成功，月薪 ¥${state.career.salary.toLocaleString()}` };
+    return { ok: true, message: `加薪成功，月薪 ${Game.view.money(state.career.salary)}` };
   }
 
   function requestTitle(state, track) {
@@ -61,7 +61,7 @@
     state.career.performance = Math.max(12, state.career.performance - 22);
     Game.workplace.onTitlePromotion(state);
     Game.lifeDirector.addLog(state, '职级提拔', `你被提拔为${next}，进入${track === 'management' ? '管理' : '专业'}晋升线。`, 'milestone');
-    return { ok: true, message: `提拔成功：${next}，月薪 ¥${state.career.salary.toLocaleString()}` };
+    return { ok: true, message: `提拔成功：${next}，月薪 ${Game.view.money(state.career.salary)}` };
   }
 
   function monthly(state) {

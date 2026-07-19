@@ -44,7 +44,8 @@
     if (!item) return { ok: false, message: '没有这条国际路线' };
     Game.economy.spend(state, item.cost);
     state.travel.journey = { routeId, stage: 0, score: 0, startedAt: state.totalMonths, encounterId: null };
-    Game.lifeDirector.addLog(state, '国际旅途启程', `你前往${item.country}${item.city}，支付了 ¥${item.cost.toLocaleString()}。`, 'milestone');
+    Game.lifeDirector.addLog(state, '国际旅途启程',
+      `你前往${item.country}${item.city}，支付了 ${Game.view.money(item.cost)}。`, 'milestone');
     return { ok: true, message: Game.economy.message(state, `已启程前往${item.city}`) };
   }
 
@@ -110,7 +111,7 @@
     const cards = routes.map((item) => (
       `<button class="travel-choice" data-journey-start="${item.id}"><span><strong>${item.country} · ${item.city}</strong>
       <small>${Game.worldCulture.profile(item.country).etiquette}</small></span>
-      <b>¥${item.cost.toLocaleString()}<br>${Game.worldCulture.format(item.cost, item.country)}</b></button>`
+      <b>${Game.view.money(item.cost)}<br>${Game.worldCulture.format(item.cost, item.country)}</b></button>`
     )).join('');
     return `<section class="list-guide"><strong>国际多阶段旅途</strong>
       <span>汇率为游戏内固定参考值。每段旅途包含行前、抵达、文化、社交与返程选择。</span></section>

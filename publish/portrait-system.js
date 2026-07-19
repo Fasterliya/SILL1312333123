@@ -30,7 +30,7 @@
   }
 
   function neutral(value) {
-    return String(value || '')
+    const text = String(value || '')
       .replace(/婴儿软底鞋/g, '柔软底鞋').replace(/婴儿连体衣/g, '柔软连体衣')
       .replace(/婴儿袜/g, '柔软棉袜').replace(/胎毛短发/g, '柔软短发')
       .replace(/儿童短发/g, '自然短发').replace(/彩色童装/g, '彩色休闲装')
@@ -46,14 +46,16 @@
       .replace(/半身照|半身像|大头照|头像照|胸像|人物特写|局部特写|只拍上半身|上半身(?:照|像)?|腰部?以上|膝盖?以上|膝上构图|七分身|裁(?:掉|切)脚部?|脚部不入镜|不拍脚/g, '完整全身照')
       .replace(/\b(?:close[- ]?up|headshot|bust shot|half[- ]body|upper[- ]body|waist[- ]up|knee[- ]up|cowboy shot|three[- ]quarter shot|cropped (?:feet|legs|body))\b/gi, 'full body')
       .replace(/\s{2,}/g, ' ').trim();
+    return Game.cosplayCatalog?.stripWeapons ? Game.cosplayCatalog.stripWeapons(text) : text;
   }
 
   function description(state, target, key, custom) {
     const player = key === 'player';
     const gender = player ? state.gender : target.gender;
-    const weighted = custom ? `，(${custom}:1.8)` : '';
+    const safeCustom = neutral(custom);
+    const weighted = safeCustom ? `，(${safeCustom}:1.8)` : '';
     const size = `${Number(target.height || 0).toFixed(1)}cm，${Number(target.weight || 0).toFixed(1)}kg`;
-    const style = '仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和材质细节，重绘一个全新角色。不得复制图1人物的身份、五官、现有造型、姿势、摄影器材、文字框、台词、标志或构图。';
+    const style = '清透日系商业插画风格，细腻线稿，高明度粉彩配色，柔和赛璐璐光影，空气感渐变，发丝高光与精细材质表现。人物设计独立完整，画面不含文字、台词框、摄影器材或水印。';
     const direction = '必须为完整全身照，人物从头顶到鞋底全部入镜，双手双脚可见，不裁切身体。动作可以站立、端坐或采用自然动态，姿势、取景与场景背景优先遵循玩家附加提示词；未指定时采用自然全身构图与协调环境。端庄自然、服装完整、适合全年龄观看，禁止文字、水印、对话框和摄影器材。';
     const face = `${neutral(target.eyeColor)}瞳色，${neutral(target.faceShape)}，${neutral(target.featureProportions)}`;
     const marks = [target.molePosition, target.freckles, target.distinctiveFeature]
@@ -61,7 +63,7 @@
     const finalize = (text) => text.replace(/\s{2,}/g, ' ').slice(0, 1950);
     const cosplay = Game.cosplayCatalog.find(target.cosplay);
     if (cosplay.name !== '无') {
-      return finalize(`${style}现代同人COS全身角色立绘，${gender}性，身高约${Number(target.height || 0).toFixed(1)}cm，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${face}${marks ? `，${marks}` : ''}。高还原扮演${cosplay.name}，${neutral(cosplay.prompt)}。袜子独立搭配为${neutral(target.clothing.socks)}，与套装默认袜装冲突时以此选择为准。发色、发型、主体服装、鞋靴、配饰和道具采用上述COS部件，不混入被绘角色原本的日常穿着${weighted}。${direction}`);
+      return finalize(`${style}现代同人COS全身角色立绘，${gender}性，身高约${Number(target.height || 0).toFixed(1)}cm，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${face}${marks ? `，${marks}` : ''}。高还原扮演${cosplay.name}，${neutral(cosplay.prompt)}。袜子独立搭配为${neutral(target.clothing.socks)}，与套装默认袜装冲突时以此选择为准。发色、发型、主体服装、鞋靴与装饰性配件采用上述COS部件，不混入被绘角色原本的日常穿着。双手自然放松，画面只呈现服装、发饰与装饰性配件${weighted}。${direction}`);
     }
     const clothes = [target.clothing.top, target.clothing.socks, target.clothing.shoes].map(neutral).join('、');
     return finalize(`${style}现代人生模拟游戏角色插画，${gender}性，身高体重约${size}，${neutral(target.hairColor)}${neutral(target.hairstyle)}，${face}，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${neutral(target.personality)}性格，${neutral(target.trait)}特质${marks ? `，${marks}` : ''}，穿${clothes}${weighted}。${direction}`);
@@ -137,7 +139,7 @@
       : `<div class="portrait-empty"><b>${escape(name.slice(-1))}</b><span>尚未生成立绘</span></div>`;
     return `<button class="portrait-slot ${npc ? 'npc-portrait-slot' : ''}" ${slotAttr}
       type="button" aria-label="查看${escape(name)}的立绘大图">${slot}</button>
-      <div class="portrait-actions"><p>${waiting ? '参考图重绘中，预计约30-60秒' : (errors.get(key) || '参考图画风 · 自定义描述权重1.8')}</p>
+      <div class="portrait-actions"><p>${waiting ? '角色立绘生成中，预计约30-60秒' : (errors.get(key) || '固定画风 · 自定义描述权重1.8')}</p>
       <label class="prompt-field"><span>附加提示词 · 权重1.8</span>
       <input maxlength="120" value="${escape(target.customPrompt)}" ${npc ? 'data-npc-prompt' : 'id="portraitPromptInput"'}
         placeholder="例如：戴金丝眼镜、手持书本"></label>
@@ -156,8 +158,8 @@
       errors.set('player', '原立绘地址已失效，已切换其他缓存');
       Game.portraitGallery.remove('player', image);
     }, { once: true });
-    elements.portraitStatus.textContent = waiting ? '参考图重绘中，预计约30-60秒'
-      : (errors.get('player') || '参考图画风 · 自定义描述权重1.8');
+    elements.portraitStatus.textContent = waiting ? '角色立绘生成中，预计约30-60秒'
+      : (errors.get('player') || '固定画风 · 自定义描述权重1.8');
     elements.portraitSlot.disabled = false;
     elements.generatePortraitBtn.disabled = waiting;
     elements.generatePortraitBtn.textContent = waiting ? '生成中…约30-60秒' : (image ? '重新生成立绘' : '生成角色立绘');
@@ -184,6 +186,6 @@
   }
 
   Game.portraitSystem = Object.freeze({
-    configure, renderPlayer, npcHtml, avatar, generatePlayer, generateNpc, cancelAll,
+    configure, renderPlayer, npcHtml, avatar, generatePlayer, generateNpc, cancelAll, description,
   });
 }(window));

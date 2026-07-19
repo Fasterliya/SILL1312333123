@@ -5,7 +5,7 @@
   const details = {
     '东方Project': [
       '和洋折衷棉布、缎面、薄纱与皮革，保留原设主辅色、滚边、蝴蝶结、袖口和裙摆层次',
-      '按原设还原帽饰、发饰、衣襟徽饰、领结、腰饰与手持配件',
+      '按原设还原帽饰、发饰、衣襟徽饰、领结、腰饰与装饰挂件',
       '按原设还原长袜、过膝袜、足袋或无袜装造型与腿饰层次',
       '按原设还原玛丽珍鞋、短靴、木屐或布鞋的颜色与结构',
     ],
@@ -22,9 +22,21 @@
       '按原设还原战术靴、长靴、短靴或礼鞋的鞋型、配色与能量结构',
     ],
   };
+  function stripWeapons(value) {
+    return String(value || '')
+      .replace(/剑士/g, '武者').replace(/剑客/g, '侠客').replace(/枪手/g, '游侠')
+      .replace(/战斗(?:装|服|礼装|制服)/g, '机能服装').replace(/佣兵/g, '旅者')
+      .replace(/(?:手持|携带|拿着)?(?:冰晶弓箭|黑金武器|宽刃武器|重型武器|七星剑|万宝槌|破碎剑|宽刃剑|大镰刀|龙纹长枪|青色长剑|绯红双剑|双枪|手枪|左轮|长枪|巨剑|长剑|飞剑|冰剑|双剑|双刀|飞刀|弯刀|镰刀|太刀|佩剑|盾牌|巨盾|拳套|权杖|弓箭|武器|忍具)(?:元素)?(?:与|和)?/g, '')
+      .replace(/[枪剑刀弓镰盾]/g, '')
+      .replace(/爆竹元素/g, '节庆彩带元素').replace(/核能手臂元素/g, '发光机械臂元素')
+      .replace(/、(?:与|和)/g, '、').replace(/(?:、|，){2,}/g, '、')
+      .replace(/[、，](?:与|和)?$/g, '').replace(/(?:与|和)$/g, '')
+      .replace(/^(?:与|和)[、，]?/g, '').trim();
+  }
   function enhance(series, character, prompt) {
     const [material, accessory, legwear, shoes] = details[series] || details.鸣潮;
-    return `主体服装与发型：${prompt}。材质与颜色：${material}。头饰与配饰：${accessory}。袜装与腿部：${legwear}。鞋履：${shoes}。标志性元素：完整保留${character}在主体描述中列出的武器、道具、纹样与角色识别元素`;
+    const safePrompt = stripWeapons(prompt);
+    return `主体服装与发型：${safePrompt}。材质与颜色：${material}。头饰与配饰：${accessory}。袜装与腿部：${legwear}。鞋履：${shoes}。标志性元素：完整保留${character}在主体描述中列出的发饰、徽记、纹样与日常装饰元素`;
   }
   const make = (series, character, prompt) => ({
     name: `${series} · ${character}`,
@@ -153,6 +165,6 @@
   }
 
   Game.cosplayCatalog = Object.freeze({
-    items: Object.freeze(items), find, overrides, effectiveValue,
+    items: Object.freeze(items), find, overrides, effectiveValue, stripWeapons,
   });
 }(window));

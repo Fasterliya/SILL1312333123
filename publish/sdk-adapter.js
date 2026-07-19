@@ -58,7 +58,7 @@
   }
 
   async function drawEdit(options) {
-    if (!sdk()?.draw?.edit) throw Object.assign(new Error('当前环境不支持参考图立绘生成'), {
+    if (!sdk()?.draw?.edit) throw Object.assign(new Error('当前环境不支持立绘生成'), {
       code: 'SDK_UNAVAILABLE',
       retryable: false,
     });

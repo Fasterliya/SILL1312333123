@@ -166,6 +166,11 @@
     state.career.lastPromotionMonth ??= -12;
     state.career.applications ||= [];
     state.career.management = Boolean(state.career.management);
+    state.career.titleTrack ||= state.career.management ? 'management' : 'staff';
+    state.career.titleRank = Math.max(0, Number(state.career.titleRank) || 0);
+    state.career.lastTitleMonth ??= state.career.lastPromotionMonth ?? -12;
+    state.career.lastRaiseMonth ??= state.career.lastPromotionMonth ?? -6;
+    state.career.lastAutoRaiseMonth ??= -12;
     state.assets ||= { house: null, mortgage: 0, stocks: {} };
     state.assets.businesses ||= [];
     state.assets.vehicles ||= [];

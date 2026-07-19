@@ -104,22 +104,14 @@
   }
 
   function act(state, action) {
-    if (action !== 'lead') return { ok: false, message: '没有这个职场行动' };
     if (!state.career.job) return { ok: false, message: '当前没有工作' };
-    if (state.career.management) return { ok: false, message: '你已经进入管理路线' };
-    if (state.career.level < 1 || state.career.performance < 50) {
-      return { ok: false, message: '达到L2且绩效50后可以申请管理岗' };
-    }
-    const chance = U.clamp(0.32 + state.career.performance / 150 + state.stats.魅力 / 300, 0.32, 0.88);
-    if (Math.random() >= chance) return { ok: false, message: `管理岗申请未通过，参考概率 ${Math.round(chance * 100)}%` };
-    state.career.management = true;
-    state.career.salary = Math.round(state.career.salary * 1.12);
-    assignReports(state);
-    Game.lifeDirector.addLog(state, '进入管理岗位', `你开始带领${state.workplace.reportIds.length}人的小组。`, 'milestone');
-    return { ok: true, message: `你成为团队负责人，获得${state.workplace.reportIds.length}名下属` };
+    if (action === 'lead') return Game.careerGrowth.requestTitle(state, 'management');
+    if (action === 'promote-management') return Game.careerGrowth.requestTitle(state, 'management');
+    if (action === 'promote-professional') return Game.careerGrowth.requestTitle(state, 'professional');
+    return { ok: false, message: '没有这个职场行动' };
   }
 
-  function onPromotion(state) {
+  function onTitlePromotion(state) {
     if (state.career.management) assignReports(state);
   }
 
@@ -133,9 +125,14 @@
     const people = roster(state);
     const leader = Game.people.find(state, state.workplace.leaderId);
     const peers = people.filter((person) => person.id !== leader?.id).slice(0, 6);
-    const management = state.career.management
-      ? `<p class="system-note">管理路线 · 当前直属下属 ${state.workplace.reportIds.length} 人</p>`
-      : `<button class="wide-action" data-workplace-action="lead">申请管理岗</button>`;
+    const track = state.career.titleTrack;
+    const options = track === 'staff'
+      ? [['promote-management', '申请管理提拔'], ['promote-professional', '申请专业晋级']]
+      : [[`promote-${track}`, `申请${track === 'management' ? '管理提拔' : '专业晋级'}`]];
+    const management = `<div class="system-actions">${options.map(([id, label]) => (
+      `<button data-workplace-action="${id}">${label}</button>`
+    )).join('')}</div><p class="system-note">${Game.careerGrowth.titleName(state)}
+      ${state.career.management ? ` · 直属下属 ${state.workplace.reportIds.length} 人` : ''}</p>`;
     return `<details class="system-fold" open><summary>${departmentName(
       Game.config.jobs.find((job) => job.id === state.career.jobId),
     )} · ${people.length}人</summary><div class="relation-links">
@@ -156,6 +153,6 @@
   }
 
   Game.workplace = Object.freeze({
-    departmentId, departmentName, join, leave, act, onPromotion, render, personSection,
+    departmentId, departmentName, join, leave, act, onTitlePromotion, render, personSection,
   });
 }(window));

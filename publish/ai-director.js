@@ -86,7 +86,7 @@
       state.career.exp += 1;
       if (state.career.exp % 24 === 0) {
         state.career.performance = U.clamp(state.career.performance + 8, 0, 100);
-        addLog(state, '年度工作评价', '长期经验让你的绩效积累有所提升，可以考虑申请晋升。', 'good');
+        addLog(state, '年度工作评价', '长期经验让你的绩效积累有所提升，可以申请加薪或职级提拔。', 'good');
       }
     } else if (['primary', 'middle', 'high', 'vocational', 'university']
       .includes(state.education.schoolStage)) {

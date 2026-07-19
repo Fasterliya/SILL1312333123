@@ -7,6 +7,7 @@
     Game.educationSystem.monthly(state);
     Game.cityLife.monthly(state);
     Game.socialWorld.monthly(state);
+    Game.careerGrowth.monthly(state);
     Game.careerSpecialties.monthly(state);
     Game.relationshipMemory.monthly(state);
     Game.parenting.monthly(state);

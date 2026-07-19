@@ -80,6 +80,11 @@
     state.career.projects = Array.isArray(state.career.projects) ? state.career.projects.slice(-12) : [];
     state.career.burnout = Math.max(0, Math.min(100, Number(state.career.burnout) || 0));
     state.career.management = Boolean(state.career.management);
+    state.career.titleTrack ||= state.career.management ? 'management' : 'staff';
+    state.career.titleRank = Math.max(0, Number(state.career.titleRank) || 0);
+    state.career.lastTitleMonth = Number(state.career.lastTitleMonth) || -12;
+    state.career.lastRaiseMonth = Number(state.career.lastRaiseMonth) || -6;
+    state.career.lastAutoRaiseMonth = Number(state.career.lastAutoRaiseMonth) || -12;
     state.workplace = state.workplace && typeof state.workplace === 'object' ? state.workplace
       : { companyId: null, departmentId: null, leaderId: null, rosterIds: [], reportIds: [] };
     state.workplace.rosterIds = Array.isArray(state.workplace.rosterIds) ? state.workplace.rosterIds : [];

@@ -153,6 +153,7 @@
       career: {
         job: null, jobId: null, company: null, salary: 0, level: 0, exp: 0,
         performance: 0, lastPromotionMonth: -12, applications: [], management: false,
+        titleTrack: 'staff', titleRank: 0, lastTitleMonth: -12, lastRaiseMonth: -6, lastAutoRaiseMonth: -12,
       },
       workplace: { companyId: null, departmentId: null, leaderId: null, rosterIds: [], reportIds: [] },
       romance: { partnerId: null, married: false, pendingBirth: 0 },

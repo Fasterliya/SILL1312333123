@@ -78,6 +78,11 @@
     state.career.performance = 10;
     state.career.lastPromotionMonth = state.totalMonths - 6;
     state.career.management = false;
+    state.career.titleTrack = 'staff';
+    state.career.titleRank = 0;
+    state.career.lastTitleMonth = state.totalMonths - 12;
+    state.career.lastRaiseMonth = state.totalMonths - 6;
+    state.career.lastAutoRaiseMonth = state.totalMonths;
     const employerJob = { ...job, company: employer, companyId: job.companyId || `local-${state.location.city}-${job.id}` };
     if (job.freelance) Game.workplace.leave(state);
     else Game.workplace.join(state, employerJob);
@@ -87,7 +92,7 @@
 
   function work(state, type) {
     if (!state.career.job) return { ok: false, message: '当前没有工作' };
-    if (type === 'promotion') return applyPromotion(state);
+    if (type === 'promotion') return Game.careerGrowth.requestRaise(state);
     const actions = {
       focus: [8, 5, -3, 0, '专注完成关键任务', 0, 0],
       network: [5, 3, 1, 2, '主动结识同事与合作伙伴', 0, 0],
@@ -112,23 +117,6 @@
     ) };
   }
 
-  function applyPromotion(state) {
-    if (state.totalMonths - state.career.lastPromotionMonth < 6) return { ok: false, message: '距离上次晋升申请不足6个月' };
-    if (state.career.performance < 35) return { ok: false, message: '绩效达到35后才能申请晋升' };
-    state.career.lastPromotionMonth = state.totalMonths;
-    const chance = U.clamp(0.25 + state.career.performance / 130 + state.career.exp / 500, 0.25, 0.9);
-    if (Math.random() >= chance) {
-      state.career.performance = Math.max(0, state.career.performance - 8);
-      return { ok: false, message: `晋升申请未通过，参考概率 ${Math.round(chance * 100)}%` };
-    }
-    state.career.level += 1;
-    state.career.salary = Math.round(state.career.salary * 1.18);
-    state.career.performance = Math.max(10, state.career.performance - 28);
-    Game.workplace.onPromotion(state);
-    Game.lifeDirector.addLog(state, '申请晋升成功', `你升至L${state.career.level + 1}，月薪提高。`, 'milestone');
-    return { ok: true, message: `晋升成功，月薪 ¥${state.career.salary.toLocaleString()}` };
-  }
-
   function move(state, cityName) {
     if (U.age(state) < 18) return { ok: false, message: '成年后才能独立迁居' };
     const city = C.cities.find((item) => item.city === cityName);
@@ -139,7 +127,7 @@
       Game.lifeDirector.addLog(state, '离开原岗位', `迁居让你结束了${state.career.company || ''}${state.career.job}的工作。`, 'normal');
       Object.assign(state.career, {
         job: null, jobId: null, company: null, salary: 0, exp: 0,
-        performance: 0, lastPromotionMonth: -12, management: false,
+        performance: 0, lastPromotionMonth: -12, management: false, titleTrack: 'staff', titleRank: 0,
       });
       Game.workplace.leave(state);
     }

@@ -21,7 +21,7 @@
     const job = C.jobs.find((item) => item.id === state.career.jobId);
     const actions = job?.freelance
       ? [['create', '发布作品'], ['stream', '直播'], ['sponsor', '商务合作'], ['convention', '参加漫展'], ['promotion', '扩大事业']]
-      : [['focus', '专注工作'], ['network', '经营人脉'], ['train', '技能培训'], ['overtime', '项目加班'], ['promotion', '申请晋升']];
+      : [['focus', '专注工作'], ['network', '经营人脉'], ['train', '技能培训'], ['overtime', '项目加班'], ['promotion', '申请加薪']];
     return `<div class="work-actions">${actions.map(([id, label]) => (
       `<button data-work-action="${id}">${label}</button>`)).join('')}</div>`;
   }
@@ -29,8 +29,8 @@
   function currentJob(state, money) {
     if (!state.career.job) return '<p class="empty-state">当前没有工作。先筛选方向，再打开职位详情确认应聘。</p>';
     return `<section class="career-current"><span>${state.career.company || '当前单位'}</span>
-      <strong>${state.career.job} · L${state.career.level + 1}${state.career.management ? ' · 管理岗' : ''}</strong><b>${money(state.career.salary)}/月</b>
-      <small>绩效 ${state.career.performance} · 经验 ${state.career.exp}</small></section>${workActions(state)}
+      <strong>${Game.careerGrowth.titleName(state)} · 薪级P${state.career.level + 1}</strong><b>${money(state.career.salary)}/月</b>
+      <small>绩效 ${state.career.performance} · 经验 ${state.career.exp} · ${state.career.titleTrack === 'staff' ? '待选择晋升方向' : '已进入晋升序列'}</small></section>${workActions(state)}
       ${Game.workplace.render(state)}${Game.careerSpecialties.render(state)}`;
   }
 

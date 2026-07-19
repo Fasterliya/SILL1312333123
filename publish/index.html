@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="./admissions.css">
   <link rel="stylesheet" href="./school-lines.css">
   <link rel="stylesheet" href="./save-manager.css">
+  <link rel="stylesheet" href="./social-world.css">
   <script src="./config.js" defer></script>
   <script src="./name-catalog.js" defer></script>
   <script src="./world-data.js" defer></script>
@@ -35,6 +36,7 @@
   <script src="./education-system.js" defer></script>
   <script src="./people.js" defer></script>
   <script src="./world-culture.js" defer></script>
+  <script src="./social-world.js" defer></script>
   <script src="./systems-state.js" defer></script>
   <script src="./state-upgrade.js" defer></script>
   <script src="./life-events.js" defer></script>
@@ -55,6 +57,7 @@
   <script src="./portrait-system.js" defer></script>
   <script src="./profile.js" defer></script>
   <script src="./social.js" defer></script>
+  <script src="./role-book.js" defer></script>
   <script src="./matchmaking.js" defer></script>
   <script src="./family-system.js" defer></script>
   <script src="./career.js" defer></script>
@@ -126,6 +129,7 @@
 
       <div class="page" id="rolePage">
         <div class="module-directory">
+          <button data-open-module="roleBookSubpage" data-module-title="人物册"><b>人</b><span><strong>人物册</strong><small>查看当前城市、同窗与异地旧识</small></span><i>›</i></button>
           <button data-open-module="roleArchive" data-module-title="角色档案"><b>档</b><span><strong>角色档案</strong><small>立绘、成长信息、性格与特质</small></span><i>›</i></button>
           <button data-open-module="roleAppearance" data-module-title="外观与穿着"><b>装</b><span><strong>外观与穿着</strong><small>发型、气质及三部位穿搭</small></span><i>›</i></button>
         </div>
@@ -174,6 +178,10 @@
       <h2 id="moduleTitle">子菜单</h2>
     </header>
     <div class="screen-scroll" id="moduleContent">
+      <div class="module-view" id="roleBookSubpage"><section class="panel">
+        <div class="panel-title"><h2>人物册</h2><span>城市与人生关系</span></div>
+        <div id="roleBookPanel"></div>
+      </section></div>
       <div class="module-view" id="roleArchive">
         <section class="panel portrait-panel">
           <button class="portrait-slot" id="portraitSlot" type="button" title="查看立绘大图" aria-label="查看立绘大图"></button>

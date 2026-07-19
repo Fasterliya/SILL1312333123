@@ -136,6 +136,7 @@
     el.cityPanel.innerHTML = Game.careerView.renderCities(state);
     el.travelPanel.innerHTML = Game.travelSystem.render(state);
     el.journeyPanel.innerHTML = Game.journeySystem.render(state);
+    Game.roleBook.render(state);
     el.propertyPanel.innerHTML = properties(state);
     el.stockPanel.innerHTML = stocks(state);
     el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);

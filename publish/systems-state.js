@@ -31,6 +31,7 @@
     state.travel.encounters = Array.isArray(state.travel.encounters) ? state.travel.encounters : [];
     state.travel.history = Array.isArray(state.travel.history) ? state.travel.history.slice(-20) : [];
     state.travel.journey ||= null;
+    state.worldPeople = Array.isArray(state.worldPeople) ? state.worldPeople : [];
     if (sourceVersion < 11) {
       const candidates = state.contacts.filter((person) => (
         person.relation === '相亲对象' && person.id !== state.romance?.partnerId
@@ -39,7 +40,7 @@
       state.matchmaking.candidates.push(...candidates);
       state.contacts = state.contacts.filter((person) => !candidates.includes(person));
     }
-    state.version = 14;
+    state.version = 15;
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {

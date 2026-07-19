@@ -56,6 +56,9 @@
     item.height = Number.isFinite(item.height) ? item.height : 0;
     item.weight = Number.isFinite(item.weight) ? item.weight : 0;
     item.metCity ||= '';
+    item.currentCity ||= item.careerCity || '';
+    item.homeCity ||= '';
+    item.schoolHistory = Array.isArray(item.schoolHistory) ? item.schoolHistory.slice(-8) : [];
     item.interactions ||= 0;
     item.phoneUnlocked ??= false;
     item.school ||= '';
@@ -111,6 +114,7 @@
     delete state.stats.体魄;
     state.family = (state.family || []).map((item) => fillPerson(item, state.updatedAt));
     state.contacts = (state.contacts || []).map((item) => fillPerson(item, state.updatedAt));
+    state.worldPeople = (state.worldPeople || []).map((item) => fillPerson(item, state.updatedAt));
     state.matchmaking ||= { candidates: [] };
     state.matchmaking.candidates = (state.matchmaking.candidates || [])
       .map((item) => fillPerson(item, state.updatedAt));
@@ -156,6 +160,7 @@
     state.assets.businesses ||= [];
     state.assets.vehicles ||= [];
     fillStocks(state);
+    Game.socialWorld.ensure(state);
     state.routine ||= {};
     state.routine.actionMonth ??= state.totalMonths;
     state.routine.fatigue = U.clamp(Number(state.routine.fatigue) || 0, 0, 100);

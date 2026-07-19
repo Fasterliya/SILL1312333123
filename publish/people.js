@@ -3,7 +3,7 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
 
-  function pools(state) {
+  function externalPools(state) {
     return [
       state.matchmaking?.candidates || [],
       state.travel?.encounters || [],
@@ -11,12 +11,12 @@
   }
 
   function external(state) {
-    return pools(state).flat();
+    return externalPools(state).flat();
   }
 
   function all(state) {
     const seen = new Set();
-    return [...state.family, ...state.contacts, ...external(state)].filter((person) => {
+    return [...state.family, ...state.contacts, ...(state.worldPeople || []), ...external(state)].filter((person) => {
       if (!person?.id || seen.has(person.id)) return false;
       seen.add(person.id);
       return true;
@@ -38,6 +38,7 @@
     if (state.travel) {
       state.travel.encounters = state.travel.encounters.filter((item) => item.id !== id);
     }
+    state.worldPeople = (state.worldPeople || []).filter((item) => item.id !== id);
   }
 
   function addContact(state, person) {

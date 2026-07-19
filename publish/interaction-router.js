@@ -148,6 +148,7 @@
   function handle(event) {
     if (Game.portraitGallery.handleClick(event)) return;
     if (Game.saveManager.handleClick(event)) return;
+    if (Game.roleBook.handleClick(event)) return;
     if (Game.appearance.handleClick(event)) return;
     if (Game.drawSettings.handleClick(event)) return;
     if (Game.schoolLines.handleClick(event)) return;

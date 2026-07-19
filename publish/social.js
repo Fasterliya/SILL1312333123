@@ -1,12 +1,14 @@
 (function initSocial(root) {
   'use strict';
-
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
   let classFilter = '全部';
 
-  function archiveSchool() {}
-
+  function archiveSchool(state) {
+    const school = state.education.school;
+    if (!school || ['家中', '已毕业'].includes(school)) return;
+    Game.socialWorld.archiveClassmates(state, state.contacts.filter((item) => item.school === school), school);
+  }
   function createClassmates(state, school, count) {
     const existing = state.contacts.filter((item) => item.school === school);
     const target = Math.max(30, count || 32);
@@ -97,9 +99,8 @@
   function interact(state, id, type) {
     const person = Game.people.find(state, id);
     if (!person || person.status !== '健康') return { ok: false, message: '无法联系这位角色' };
-    const accessible = person.school === state.education.school || person.phoneUnlocked
-      || Game.people.isExternal(state, person) || person.relation === '恋人';
-    if (!accessible) return { ok: false, message: '毕业前没有留下联系方式' };
+    if (type === 'reconnect') return Game.socialWorld.reconnect(state, person);
+    if (!Game.socialWorld.reachable(state, person)) return { ok: false, message: '毕业前没有留下联系方式' };
     const romantic = romance(state, person, type);
     if (romantic) {
       person.interactions += 1;
@@ -177,6 +178,8 @@
   }
 
   function detailActions(state, person) {
+    if (!Game.socialWorld.reachable(state, person)) return person.currentCity === state.location.city
+      ? [['reconnect', '尝试重逢']] : [];
     const actions = [['chat', '聊天'], ['meal', '约饭'], ['gift', '送礼'], ['walk', '散步']];
     if (person.school === state.education.school) actions.splice(1, 0, ['study', '共学']);
     if (!person.phoneUnlocked) actions.push(['exchange', '交换联系方式']);

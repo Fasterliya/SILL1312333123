@@ -13,7 +13,7 @@
   function valid(value) {
     return Boolean(
       value
-      && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].includes(value.version)
+      && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].includes(value.version)
       && typeof value.name === 'string'
       && Number.isInteger(value.totalMonths)
       && value.totalMonths >= 0

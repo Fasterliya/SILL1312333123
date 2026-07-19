@@ -42,10 +42,10 @@
       portraitTaskId: null,
       portraitGallery: [],
       customPrompt: '',
-      metCity: '',
+      metCity: '', currentCity: '', homeCity: '',
       interactions: 0,
       phoneUnlocked: false,
-      school: '',
+      school: '', schoolHistory: [],
       educationName: '',
       educationStage: 'home',
       job: ['父亲', '母亲'].includes(relation) ? random(C.parentJobs) : '',
@@ -124,7 +124,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 14,
+      version: 15,
       updatedAt: new Date().toISOString(),
       name: makeName(surname, gender),
       surname,
@@ -140,6 +140,8 @@
       familyWealth: between(90000, 850000),
       family,
       contacts: [],
+      worldPeople: [],
+      socialWorld: { cityPools: {}, version: 1 },
       education: {
         study: 0, track: null, electives: [], school: '家中', schoolStage: 'home',
         highSchoolType: null, vocationalMajor: null, path: '基础教育',

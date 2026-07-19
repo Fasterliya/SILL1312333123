@@ -15,6 +15,37 @@
     return ['graduate', '已毕业'];
   };
 
+  function updateGrowth(person, age) {
+    const years = Math.max(0, age);
+    const seed = Number(person.growthSeed) || 0;
+    let height;
+    if (years < 1) height = 50 + years * 25;
+    else if (years < 3) height = 75 + (years - 1) * 10;
+    else if (years < 6) height = 95 + (years - 3) * 7;
+    else if (years < 12) height = 116 + (years - 6) * 5.7;
+    else {
+      const adult = person.gender === '男' ? 175 : 164;
+      height = 150 + (adult - 150) * Math.min(1, (years - 12) / 6);
+    }
+    height += seed * Math.min(1, years / 14);
+    const bodyOffset = {
+      幼小: -1.5, 小胸: -0.8, 丰满: 2.6, 匀称: 0,
+      娇小纤细: -1.2, 清瘦: -1.2, 健壮: 1.8,
+    }[person.bodyType] || 0;
+    const weight = years < 2 ? 3.4 + years * 6
+      : (14.8 + Math.min(7, years * 0.35) + bodyOffset) * (height / 100) ** 2;
+    person.height = Math.round(height * 10) / 10;
+    person.weight = Math.max(3.2, Math.round(weight * 10) / 10);
+  }
+
+  function syncGrowth(state, person) {
+    const child = ['儿子', '女儿'].includes(person.relation);
+    const years = child
+      ? (state.totalMonths - Number(person.bornAt || 0)) / 12
+      : Number(person.baseAge || 0) + state.totalMonths / 12;
+    updateGrowth(person, years);
+  }
+
   function education(state, person, age) {
     const [stage] = schoolStage(age);
     if (person.school === state.education.school && !['家中', '已毕业'].includes(person.school)) {
@@ -83,7 +114,12 @@
       person.hairstyle = '胎毛短发';
       person.temperament = '懵懂';
     } else {
-      person.bodyType = age < 7 ? '幼小' : U.random(['清瘦', '匀称', '健壮', '丰润']);
+      if (girl) {
+        person.bodyType = age < 7 ? '幼小'
+          : U.random(age < 12 ? ['幼小', '娇小纤细'] : ['小胸', '丰满', '匀称', '娇小纤细']);
+      } else {
+        person.bodyType = age < 7 ? '幼小' : U.random(['清瘦', '匀称', '健壮']);
+      }
       person.hairstyle = U.random(girl
         ? ['齐肩直发', '高马尾', '柔顺侧编发', '日式低双马尾', '柔顺空气刘海长发']
         : ['清爽短发', '层次碎发', '日式短碎发', '清爽侧分短发', '自然层次发']);
@@ -94,12 +130,16 @@
 
   function updatePerson(state, person) {
     const age = U.personAge(state, person);
-    if (person.lastLifeUpdateAge === age) return;
+    if (person.lastLifeUpdateAge === age) {
+      syncGrowth(state, person);
+      return;
+    }
     person.lastLifeUpdateAge = age;
     education(state, person, age);
     career(state, person, age);
     relationships(state, person, age);
     appearance(person, age);
+    syncGrowth(state, person);
   }
 
   function update(state) {
@@ -121,5 +161,5 @@
     });
   }
 
-  Game.npcLife = Object.freeze({ update, carryClassmates });
+  Game.npcLife = Object.freeze({ update, updateGrowth, syncGrowth, carryClassmates });
 }(window));

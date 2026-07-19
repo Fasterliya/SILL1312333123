@@ -75,7 +75,7 @@
     document.addEventListener('click', Game.interactionRouter.handle);
     const generate = () => Game.portraitSystem.generatePlayer(Game.view.el.portraitPromptInput.value);
     Game.view.el.generatePortraitBtn.addEventListener('click', generate);
-    Game.view.el.portraitSlot.addEventListener('click', generate);
+    Game.view.el.portraitSlot.addEventListener('click', () => Game.portraitGallery.open('player'));
     Game.view.el.childPlanBtn.addEventListener('click', Game.familySystem.planChild);
     Game.view.el.resetBtn.addEventListener('click', reset);
     root.addEventListener('resize', Game.view.drawHero);
@@ -84,6 +84,7 @@
   async function reset() {
     if (!root.confirm('确定重新开始一段人生吗？当前存档会被覆盖。')) return;
     Game.portraitSystem.cancelAll();
+    Game.portraitGallery.close();
     await Game.storage.reset();
     state = U.createState();
     Game.navigation.closeModule();
@@ -97,8 +98,10 @@
     try {
       Game.view.init();
       Game.navigation.init();
+      Game.portraitGallery.init();
       state = Game.stateUpgrade.upgradeState(await Game.storage.load());
       Game.profile.configure({ getState: () => state, refresh, save });
+      Game.portraitGallery.configure({ getState: () => state, refresh, save });
       Game.portraitSystem.configure({ getState: () => state, refresh, save });
       Game.navigation.configure({ getState: () => state });
       Game.appearance.configure({ getState: () => state });

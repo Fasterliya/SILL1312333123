@@ -17,6 +17,7 @@
       person.affection = U.between(38, 58);
       person.phoneUnlocked = true;
       person.metCity = state.location.city;
+      Game.npcLife.syncGrowth(state, person);
       state.contacts.push(person);
     }
     return { ok: true, message: '新的相亲名单已经整理好' };

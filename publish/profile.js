@@ -28,15 +28,16 @@
 
   function phaseStyle(state, phase) {
     const p = state.profile;
+    const female = state.gender === '女';
     const styles = [
       ['黑色', '懵懂', '幼小', '胎毛短发', '婴儿连体衣', '婴儿袜', '婴儿软底鞋'],
       ['黑色', '童真', '幼小', '儿童短发', '彩色童装', '短棉袜', '魔术贴童鞋'],
-      ['黑色', '清朗', '匀称', '清爽短发', '简洁校服', '白色中筒袜', '白色运动鞋'],
-      ['黑色', '青涩', '清瘦', '层次碎发', '简洁校服', '白色中筒袜', '帆布鞋'],
+      ['黑色', '清朗', female ? '娇小纤细' : '匀称', '清爽短发', '简洁校服', '白色中筒袜', '白色运动鞋'],
+      ['黑色', '青涩', female ? '小胸' : '清瘦', '层次碎发', '简洁校服', '白色中筒袜', '帆布鞋'],
       ['深棕', '明快', '匀称', '自然层次发', styleTop(state), '短棉袜', '白色运动鞋'],
       ['深棕', '沉稳', '匀称', '利落短发', styleTop(state), '黑色商务袜', '皮鞋'],
       ['黑灰', '从容', p.bodyType, '简约短发', '品质日常', '短棉袜', '乐福鞋'],
-      ['银灰', '温和', '清瘦', '银丝短发', '舒适棉麻', '羊毛袜', '舒适布鞋'],
+      ['银灰', '温和', female ? '娇小纤细' : '清瘦', '银丝短发', '舒适棉麻', '羊毛袜', '舒适布鞋'],
     ];
     const values = styles[phase];
     [p.hairColor, p.temperament, p.bodyType, p.hairstyle] = values;
@@ -57,7 +58,10 @@
       height = 150 + (adult - 150) * Math.min(1, (years - 12) / 6);
     }
     height += seed * Math.min(1, years / 14);
-    const bodyOffset = { 幼小: -1, 清瘦: -1.2, 匀称: 0, 健壮: 1.8, 丰润: 2.5 }[state.profile.bodyType] || 0;
+    const bodyOffset = {
+      幼小: -1.5, 小胸: -0.8, 丰满: 2.6, 匀称: 0,
+      娇小纤细: -1.2, 清瘦: -1.2, 健壮: 1.8,
+    }[state.profile.bodyType] || 0;
     const weight = years < 2 ? 3.4 + years * 6
       : (14.8 + Math.min(7, years * 0.35) + bodyOffset) * (height / 100) ** 2;
     state.profile.height = Math.round(height * 10) / 10;
@@ -112,6 +116,7 @@
     if (!target) return false;
     if (field.startsWith('clothing.')) target.clothing[key] = nextValue;
     else target[field] = nextValue;
+    if (field === 'bodyType') Game.npcLife.syncGrowth(state, target);
     api.refresh();
     api.save();
     return true;

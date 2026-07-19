@@ -34,6 +34,13 @@
     return item.tags.includes(activeFilter) && years >= item.minAge && years <= item.maxAge;
   }
 
+  function bodyMatches(item, profile) {
+    if (activeField !== 'bodyType') return true;
+    const female = ['幼小', '小胸', '丰满', '匀称', '娇小纤细'];
+    const male = ['幼小', '清瘦', '匀称', '健壮'];
+    return (profile.gender === '女' ? female : male).includes(item.name);
+  }
+
   function render() {
     const state = api.getState();
     const profile = activeTargetId
@@ -43,7 +50,10 @@
     const years = activeTargetId ? Game.content.personAge(state, profile) : Game.content.age(state);
     const key = keyFor(activeField);
     const selected = currentValue(profile, activeField);
-    const items = (catalog[key] || []).filter((entry) => visible(entry, years))
+    const items = (catalog[key] || []).filter((entry) => visible(entry, years) && bodyMatches(entry, {
+      ...profile,
+      gender: activeTargetId ? profile.gender : state.gender,
+    }))
       .sort((a, b) => Number(recommended(b, profile, years)) - Number(recommended(a, profile, years)));
     const chips = filters.map((filter) => (
       `<button class="${filter === activeFilter ? 'active' : ''}" data-style-filter="${filter}">${filter}</button>`

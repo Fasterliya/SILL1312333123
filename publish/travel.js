@@ -45,6 +45,7 @@
     } else if (areaName === '创作者市集') {
       person.job = U.random(['写真博主', '穿搭博主', '自由插画师', '商业摄影师']);
     }
+    Game.npcLife.syncGrowth(state, person);
     state.contacts.push(person);
     state.travel.activeId = person.id;
     state.stats.心情 = U.clamp(state.stats.心情 + 3, 0, 100);

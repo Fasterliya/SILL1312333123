@@ -32,24 +32,32 @@
   }
 
   function person(relation, surname, age, gender) {
+    const resolvedGender = gender || random(['男', '女']);
+    const bodyTypes = resolvedGender === '女'
+      ? (age < 7 ? ['幼小'] : ['小胸', '丰满', '匀称', '娇小纤细'])
+      : (age < 7 ? ['幼小'] : ['清瘦', '匀称', '健壮']);
     return {
       id: `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
       name: !['父亲', '母亲', '哥哥', '姐姐', '弟弟', '妹妹', '儿子', '女儿'].includes(relation)
         && C.fullNames?.length && Math.random() < 0.55 ? random(C.fullNames) : makeName(surname),
       relation,
-      gender: gender || random(['男', '女']),
+      gender: resolvedGender,
       baseAge: age,
       bornAt: 0,
+      growthSeed: between(-4, 4),
+      height: 0,
+      weight: 0,
       affection: between(48, 78),
       personality: random(C.personalities),
       trait: random(C.traits),
       hairColor: random(C.appearance.hairColor.slice(0, 4)),
       temperament: random(C.appearance.temperament.slice(4)),
-      bodyType: random(C.appearance.bodyType.slice(1)),
+      bodyType: random(bodyTypes),
       hairstyle: random(C.appearance.hairstyle.slice(2, 9)),
       clothing: clothing(random(C.appearance.top.slice(3, 10))),
       portraitUrl: null,
       portraitTaskId: null,
+      portraitGallery: [],
       customPrompt: '',
       metCity: '',
       interactions: 0,
@@ -91,6 +99,7 @@
       styleStage: -1,
       portraitUrl: null,
       portraitTaskId: null,
+      portraitGallery: [],
       customPrompt: '',
     };
   }
@@ -124,7 +133,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 6,
+      version: 7,
       updatedAt: new Date().toISOString(),
       name: makeName(surname),
       surname,

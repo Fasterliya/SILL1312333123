@@ -23,6 +23,7 @@
       person.educationStage = state.education.schoolStage;
       person.affection = U.between(28, 62);
       person.clothing.top = '简洁校服';
+      Game.npcLife.syncGrowth(state, person);
       state.contacts.push(person);
     }
   }

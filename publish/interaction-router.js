@@ -110,6 +110,7 @@
   }
 
   function handle(event) {
+    if (Game.portraitGallery.handleClick(event)) return;
     if (Game.appearance.handleClick(event)) return;
     if (handlePortrait(event) || handleNavigation(event)) return;
     const state = api.getState();

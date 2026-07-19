@@ -81,6 +81,8 @@
     };
     const rows = [
       ['关系', person.relation], ['年龄', `${U.personAge(state, person)}岁`], ['性别', person.gender],
+      ['身高', `${Number(person.height || 0).toFixed(1)} cm`],
+      ['体重', `${Number(person.weight || 0).toFixed(1)} kg`],
       ['性格', person.personality], ['特质', person.trait], ['状态', person.status],
       ['当前学业', person.educationName || person.school || '-'],
       ['职业', person.job || '-'], ['公司', person.company || '-'],

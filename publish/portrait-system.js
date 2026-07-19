@@ -35,7 +35,8 @@
     const gender = player ? state.gender : target.gender;
     const clothes = `${target.clothing.top}、${target.clothing.socks}、${target.clothing.shoes}`;
     const weighted = custom ? `，(${custom}:1.8)` : '';
-    return `仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和服装褶皱质感，重绘一个全新角色。不得复制图1的人物身份、五官、发型、服装、姿势、摄影器材、文字框、台词、标志或构图。现代人生模拟游戏角色立绘，${gender}性，${age}岁，${target.hairColor}${target.hairstyle}，${target.bodyType}身材，${target.temperament}气质，${target.personality}性格，${target.trait}特质，穿${clothes}${weighted}。全身自然站姿，单人，干净浅色背景，符合真实年龄，健康自然，全年龄，非性感，禁止文字、水印、对话框和摄影器材。`;
+    const size = `${Number(target.height || 0).toFixed(1)}cm，${Number(target.weight || 0).toFixed(1)}kg`;
+    return `仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和服装褶皱质感，重绘一个全新角色。不得复制图1的人物身份、五官、发型、服装、姿势、摄影器材、文字框、台词、标志或构图。现代人生模拟游戏角色插画，${gender}性，${age}岁，身高体重约${size}，${target.hairColor}${target.hairstyle}，${target.bodyType}身材，${target.temperament}气质，${target.personality}性格，${target.trait}特质，穿${clothes}${weighted}。动作、姿势、取景、构图与场景背景优先遵循玩家附加提示词；玩家未指定时采用自然人物构图与协调环境。符合真实年龄，健康自然，全年龄，非性感，禁止文字、水印、对话框和摄影器材。`;
   }
 
   async function retryDraw(input) {
@@ -70,6 +71,7 @@
     }
     const target = findTarget(key);
     if (!target) return;
+    if (key !== 'player') Game.npcLife.syncGrowth(api.getState(), target);
     const custom = String(rawCustom || '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, 120);
     target.customPrompt = custom;
     drawing.add(key);
@@ -87,8 +89,7 @@
         model: 'pro',
       });
       if (latest.get(key) !== requestId || findTarget(key) !== target) return;
-      target.portraitUrl = result.images[0];
-      target.portraitTaskId = result.taskId || null;
+      if (!Game.portraitGallery.add(key, result, custom)) throw new Error('绘图结果没有有效图片');
       await api.save();
     } catch (err) {
       if (latest.get(key) !== requestId) return;
@@ -103,11 +104,11 @@
   function portraitMarkup(target, key, name, npc) {
     const image = safeImage(target.portraitUrl);
     const waiting = drawing.has(key);
-    const slotAttr = npc ? `data-npc-generate="${escape(key)}"` : '';
+    const slotAttr = `data-portrait-view="${escape(key)}"`;
     const slot = image ? `<img src="${escape(image)}" alt="${escape(name)}的角色立绘">`
       : `<div class="portrait-empty"><b>${escape(name.slice(-1))}</b><span>尚未生成立绘</span></div>`;
     return `<button class="portrait-slot ${npc ? 'npc-portrait-slot' : ''}" ${slotAttr}
-      type="button" ${waiting ? 'disabled' : ''}>${slot}</button>
+      type="button" aria-label="查看${escape(name)}的立绘大图">${slot}</button>
       <div class="portrait-actions"><p>${waiting ? '参考图重绘中，预计约30-60秒' : (errors.get(key) || '参考图画风 · 自定义描述权重1.8')}</p>
       <label class="prompt-field"><span>附加提示词 · 权重1.8</span>
       <input maxlength="120" value="${escape(target.customPrompt)}" ${npc ? 'data-npc-prompt' : 'id="portraitPromptInput"'}
@@ -124,14 +125,12 @@
       : `<div class="portrait-empty"><b>${escape(state.name.slice(-1))}</b><span>尚未生成立绘</span></div>`;
     elements.portraitSlot.querySelector('img')?.addEventListener('error', () => {
       if (target.portraitUrl !== image) return;
-      target.portraitUrl = null;
-      errors.set('player', '原立绘地址已失效，请重新生成');
-      api.save();
-      api.refresh();
+      errors.set('player', '原立绘地址已失效，已切换其他缓存');
+      Game.portraitGallery.remove('player', image);
     }, { once: true });
     elements.portraitStatus.textContent = waiting ? '参考图重绘中，预计约30-60秒'
       : (errors.get('player') || '参考图画风 · 自定义描述权重1.8');
-    elements.portraitSlot.disabled = waiting;
+    elements.portraitSlot.disabled = false;
     elements.generatePortraitBtn.disabled = waiting;
     elements.generatePortraitBtn.textContent = waiting ? '生成中…约30-60秒' : (image ? '重新生成立绘' : '生成角色立绘');
     if (document.activeElement !== elements.portraitPromptInput) {

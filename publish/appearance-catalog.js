@@ -100,7 +100,10 @@
   Game.appearanceCatalog = Object.freeze({
     hairColor: simple('hairColor', (name) => name.includes('银') ? ['个性'] : ['自然']),
     temperament: simple('temperament', () => ['气质']),
-    bodyType: C.appearance.bodyType.map((name) => item(name, ['身材'], name === '幼小' ? 0 : 6, name === '幼小' ? 7 : 120)),
+    bodyType: C.appearance.bodyType.map((name) => {
+      const mature = ['小胸', '丰满'].includes(name);
+      return item(name, ['身材'], name === '幼小' ? 0 : (mature ? 12 : 6), name === '幼小' ? 11 : 120);
+    }),
     hairstyle: unique([
       ...simple('hairstyle', (name) => name.includes('短') ? ['短发'] : ['日常']),
       ...variants(hairFamilies, hairFinishes, 8, 90), ...japaneseHair,

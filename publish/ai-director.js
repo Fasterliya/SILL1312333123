@@ -115,6 +115,7 @@
       && (guaranteedMeeting || Math.random() < 0.035)) {
       const person = U.person('朋友', U.random(C.surnames), U.between(-2, 3));
       person.affection = 52;
+      Game.npcLife.syncGrowth(state, person);
       state.family.push(person);
       addLog(state, '新的相遇', `你在一次活动中认识了${person.name}，彼此留下不错的印象。`, 'good');
     }
@@ -141,6 +142,7 @@
         child.bodyType = '幼小';
         child.hairstyle = '胎毛短发';
         child.clothing = { top: '婴儿连体衣', socks: '婴儿袜', shoes: '婴儿软底鞋' };
+        Game.npcLife.syncGrowth(state, child);
         state.family.push(child);
         addLog(state, '新生命降临', `${child.name}出生了，你成为了${state.gender === '男' ? '父亲' : '母亲'}。`, 'milestone');
       }

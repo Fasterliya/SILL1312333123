@@ -163,28 +163,36 @@
     item.study = Math.round(item.preparation);
   }
 
+  function renderQuick(state) {
+    if (!enrolled(state)) return '';
+    const item = ensure(state);
+    const used = item.lastStudyMonth === state.totalMonths;
+    return `<div class="quick-study"><header><strong>学习安排</strong>
+      <span>${used ? '本月已完成' : `备考度 ${Math.round(item.preparation)}`}</span></header>
+      <div class="study-focus">${Object.keys(focuses).map((name) => (
+        `<button class="${item.focus === name ? 'active' : ''}" data-study-focus="${name}">${name}</button>`
+      )).join('')}</div><div class="study-actions">${Object.entries(actions).map(([id, action]) => (
+        `<button data-education-action="${id}" ${used ? 'disabled' : ''}>
+        <strong>${action[5]}</strong><small>${action[0] ? Game.view.money(action[0]) : '自主安排'}</small></button>`
+      )).join('')}</div></div>`;
+  }
+
   function render(state) {
     const item = ensure(state);
     const latest = item.exams[0];
     const scores = latest ? Object.entries(latest.scores).map(([name, score]) => (
       `<span>${name}<b>${score}</b></span>`)).join('') : '<p class="empty-state">还没有考试记录。</p>';
-    const used = item.lastStudyMonth === state.totalMonths;
     return `<section class="study-summary"><div><span>${Game.content.gradeLabel(state)}</span>
       <strong>${state.education.school}</strong><small>${state.education.path || '基础教育'}</small></div>
       <dl><div><dt>备考度</dt><dd>${Math.round(item.preparation)}</dd></div>
       <div><dt>学习纪律</dt><dd>${Math.round(item.discipline)}</dd></div>
       <div><dt>应试能力</dt><dd>${Math.round(item.examTechnique)}</dd></div>
       <div><dt>学习压力</dt><dd>${Math.round(item.pressure)}</dd></div></dl></section>
-      <h3>学习方向</h3><div class="study-focus">${Object.keys(focuses).map((name) => (
-        `<button class="${item.focus === name ? 'active' : ''}" data-study-focus="${name}">${name}</button>`)).join('')}</div>
-      <h3>本月学习安排</h3><div class="study-actions">${Object.entries(actions).map(([id, action]) => (
-        `<button data-education-action="${id}" ${used || !enrolled(state) ? 'disabled' : ''}>
-        <strong>${action[5]}</strong><small>${action[0] ? Game.view.money(action[0]) : '自主安排'}</small></button>`)).join('')}</div>
       <h3>${latest ? `${latest.label} · ${latest.total}/${latest.maximum || '-'}` : '考试成绩'}</h3>
       <div class="score-grid">${scores}</div>${Game.schoolLines.render(state)}`;
   }
 
   Game.educationSystem = Object.freeze({
-    ensure, ensurePerson, readiness, addPreparation, setFocus, act, exam, monthly, render,
+    ensure, ensurePerson, readiness, addPreparation, setFocus, act, exam, monthly, render, renderQuick,
   });
 }(window));

@@ -93,9 +93,6 @@
       const allowance = { primary: 30, middle: 120, high: 120, vocational: 120, university: 500 };
       state.money += allowance[state.education.schoolStage];
     }
-    if (state.assets.mortgage > 0) {
-      state.money -= state.assets.mortgage;
-    }
   }
 
   function relationships(state) {

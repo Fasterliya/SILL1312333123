@@ -21,7 +21,6 @@
   function refresh() {
     Game.view.render(state);
     Game.lifeLoop.render(state);
-    Game.actions.renderHouseActions();
     Game.actions.renderDecision();
   }
 

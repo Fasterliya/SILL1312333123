@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="./market.css">
   <link rel="stylesheet" href="./civic.css">
   <link rel="stylesheet" href="./hunter-chat.css">
+  <link rel="stylesheet" href="./property-quick.css">
   <script src="./config.js" defer></script>
   <script src="./special-characters.js" defer></script>
   <script src="./name-catalog.js" defer></script>
@@ -50,6 +51,7 @@
   <script src="./social-world.js" defer></script>
   <script src="./npc-fashion.js" defer></script>
   <script src="./hunter-mode.js" defer></script>
+  <script src="./property-system.js" defer></script>
   <script src="./systems-state.js" defer></script>
   <script src="./state-upgrade.js" defer></script>
   <script src="./life-events.js" defer></script>
@@ -141,6 +143,7 @@
     <section class="tab-pages" id="tabPages">
       <div class="page active" id="timelinePage">
         <section class="panel goal-panel" id="goalPanel"></section>
+        <section id="quickStudyPanel" hidden></section>
         <details class="fold-section" open>
           <summary><span>当前状态</span><small>人生属性</small></summary>
           <div class="fold-content">
@@ -187,7 +190,7 @@
 
       <div class="page" id="assetsPage">
         <div class="module-directory">
-          <button data-open-module="propertySubpage" data-module-title="房产"><b>房</b><span><strong>房产</strong><small>查看住房、首付与月供</small></span><i>›</i></button>
+          <button data-open-module="propertySubpage" data-module-title="不动产"><b>房</b><span><strong>不动产</strong><small>购入、还贷、市值与出售</small></span><i>›</i></button>
           <button data-open-module="stockSubpage" data-module-title="股票"><b>股</b><span><strong>股票</strong><small>查看行情并买卖持仓</small></span><i>›</i></button>
           <button data-open-module="industrySubpage" data-module-title="产业与座驾"><b>产</b><span><strong>产业与座驾</strong><small>经营现金流与购买交通工具</small></span><i>›</i></button>
           <button data-open-module="legacySubpage" data-module-title="家族传承"><b>承</b><span><strong>家族传承</strong><small>代际记录、继承人、房产与资金</small></span><i>›</i></button>
@@ -292,7 +295,7 @@
         <div id="journeyPanel"></div>
       </section></div>
       <div class="module-view" id="propertySubpage"><section class="panel">
-        <div class="panel-title"><h2>房产配置</h2><span>首付与月供</span></div>
+        <div class="panel-title"><h2>不动产买卖</h2><span>首付、贷款与出售</span></div>
         <div id="propertyPanel"></div>
       </section></div>
       <div class="module-view" id="stockSubpage"><section class="panel">

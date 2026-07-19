@@ -11,7 +11,7 @@
   const finite = (value, fallback) => (Number.isFinite(Number(value)) ? Number(value) : fallback);
 
   function initial(company, index) {
-    const base = 12 + (index % 9) * 5 + (company.industry === '科技' ? 16 : 0);
+    const base = 35 + (index % 9) * 10 + (company.industry === '科技' ? 18 : 0);
     const history = Array.from({ length: 12 }, (_, offset) => (
       round(base * (0.88 + offset * 0.012 + ((index + offset) % 3) * 0.015))
     ));
@@ -35,15 +35,16 @@
     const record = validRecord(source) ? source : fallback;
     record.companyId = company.id;
     record.totalShares = TOTAL_SHARES;
-    record.basePrice = round(clamp(finite(record.basePrice, fallback.basePrice), 1.5, 500));
+    record.basePrice = round(clamp(finite(record.basePrice, fallback.basePrice),
+      fallback.basePrice * 0.78, fallback.basePrice * 1.25));
     record.baselineRevenue = Math.max(500000, Math.round(finite(
       record.baselineRevenue, fallback.baselineRevenue,
     )));
     record.outlook = round(clamp(finite(record.outlook, 0), -25, 35));
     record.price = round(clamp(finite(record.price, fallback.price),
-      record.basePrice * 0.45, record.basePrice * 1.8));
+      record.basePrice * 0.72, record.basePrice * 1.55));
     record.previous = round(clamp(finite(record.previous, record.price),
-      record.basePrice * 0.45, record.basePrice * 1.8));
+      record.basePrice * 0.72, record.basePrice * 1.55));
     record.shares = clamp(Math.floor(finite(record.shares, 0)), 0, TOTAL_SHARES * HOLDING_CAP);
     record.availableShares = clamp(
       Math.floor(finite(record.availableShares, fallback.availableShares)),
@@ -58,9 +59,10 @@
     record.risk = round(clamp(finite(record.risk, fallback.risk), 1, 10));
     record.dividendRate = clamp(finite(record.dividendRate, fallback.dividendRate), 0, 0.2);
     record.history = record.history.map(Number).filter(Number.isFinite).map((value) => (
-      round(clamp(value, record.basePrice * 0.4, record.basePrice * 1.8))
+      round(clamp(value, record.basePrice * 0.68, record.basePrice * 1.6))
     )).slice(-24);
     if (!record.history.length) record.history = [record.price];
+    record.history[record.history.length - 1] = record.price;
     record.boardIds = Array.isArray(record.boardIds)
       ? [...new Set(record.boardIds.filter((id) => typeof id === 'string'))].slice(0, 5) : [];
     record.lastDividend = Math.max(0, Math.round(finite(record.lastDividend, 0)));
@@ -136,12 +138,14 @@
       + (Math.random() - 0.5) * 0.018, -0.08, 0.24);
     stock.profit = Math.round(stock.revenue * margin);
     const fairPrice = stock.basePrice * (1 + stock.outlook / 100);
-    const reversion = clamp((fairPrice - stock.price) / Math.max(1, stock.price) * 0.14, -0.045, 0.045);
-    const sentiment = stock.growth / 1400 + (margin - targetMargin) / 14
-      + (Math.random() - 0.5) * 0.055;
-    const priceMove = clamp(reversion + sentiment, -0.065, 0.065);
+    const valuationGap = (fairPrice - stock.price) / stock.basePrice;
+    const reversion = clamp(valuationGap * 0.16, -0.035, 0.055);
+    const support = stock.price < stock.basePrice * 0.88 ? 0.012 : 0;
+    const sentiment = stock.growth / 2200 + (margin - targetMargin) / 20
+      + (Math.random() - 0.5) * 0.028;
+    const priceMove = clamp(reversion + support + sentiment, -0.035, 0.048);
     stock.price = round(clamp(stock.price * (1 + priceMove),
-      stock.basePrice * 0.4, stock.basePrice * 1.75));
+      stock.basePrice * 0.7, stock.basePrice * 1.6));
     const flow = Math.round((Math.random() - 0.48) * stock.totalShares * 0.008);
     stock.availableShares = clamp(stock.availableShares + flow, 0, stock.totalShares - stock.shares);
     stock.history.push(stock.price);

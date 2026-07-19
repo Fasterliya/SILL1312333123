@@ -159,12 +159,18 @@
     if (journeyChoice) return finish(Game.journeySystem.choose(state, journeyChoice.dataset.journeyChoice)), true;
     const roam = event.target.closest('[data-roam-area]');
     if (roam) return finish(Game.travelSystem.roam(state, roam.dataset.roamArea)), true;
+    const propertyBuy = event.target.closest('[data-property-buy]');
+    if (propertyBuy) return finish(Game.propertySystem.buy(state, Number(propertyBuy.dataset.propertyBuy))), true;
+    if (event.target.closest('[data-property-sell]')) {
+      if (root.confirm('确定出售当前房产并结清剩余贷款吗？')) finish(Game.propertySystem.sell(state));
+      return true;
+    }
+    const propertyRepay = event.target.closest('[data-property-repay]');
+    if (propertyRepay) return finish(Game.propertySystem.repay(state, propertyRepay.dataset.propertyRepay)), true;
     const business = event.target.closest('[data-business]');
     if (business) return finish(Game.assetsSystem.buyBusiness(state, business.dataset.business)), true;
     const vehicle = event.target.closest('[data-vehicle]');
     if (vehicle) return finish(Game.assetsSystem.buyVehicle(state, vehicle.dataset.vehicle)), true;
-    const house = event.target.closest('[data-house]');
-    if (house) return Game.actions.buyHouse(Number(house.dataset.house)), true;
     return false;
   }
 

@@ -6,6 +6,7 @@
   const ids = [
     'profileName', 'profileMeta', 'ageValue', 'stageValue', 'moneyValue', 'lifeDate',
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
+    'quickStudyPanel',
     'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'governmentPanel', 'travelPanel', 'journeyPanel',
     'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
     'hunterModePanel', 'possessedList',
@@ -107,14 +108,6 @@
     }).join('');
   }
 
-  function properties(state) {
-    const house = state.assets.house ? state.assets.house.name : '暂无房产';
-    return `<div class="detail-row"><span>当前城市</span><b>${state.location.city}</b></div>
-      <div class="detail-row"><span>住房</span><b>${house}</b></div>
-      <div class="detail-row"><span>月供</span><b>${money(state.assets.mortgage)}</b></div>
-      <div class="house-actions" id="houseActions"></div>`;
-  }
-
   function render(state) {
     currentCountry = state.location.country || '华夏';
     const years = U.age(state);
@@ -128,6 +121,9 @@
     el.moneyValue.classList.toggle('debt', state.money < 0);
     el.lifeDate.textContent = `${state.year}年${state.month}月`;
     el.statGrid.innerHTML = statCards(state);
+    const quickStudy = Game.educationSystem.renderQuick(state);
+    el.quickStudyPanel.innerHTML = quickStudy;
+    el.quickStudyPanel.hidden = !quickStudy;
     el.eventList.innerHTML = logCards(state);
     el.familyList.innerHTML = familyCards(state);
     el.classmatesList.innerHTML = Game.social.renderSchool(state);
@@ -142,7 +138,7 @@
     el.journeyPanel.innerHTML = Game.journeySystem.render(state);
     Game.roleBook.render(state);
     Game.hunterMode.render(state);
-    el.propertyPanel.innerHTML = properties(state);
+    el.propertyPanel.innerHTML = Game.propertySystem.render(state);
     el.stockPanel.innerHTML = Game.marketView.render(state);
     el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);
     el.healthPanel.innerHTML = Game.healthSystem.render(state);

@@ -1,0 +1,132 @@
+.quick-study {
+  margin-top: -8px;
+  padding: 12px;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.quick-study header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 9px;
+}
+
+.quick-study header strong {
+  font-size: 13px;
+}
+
+.quick-study header span {
+  color: #66726f;
+  font-size: 10px;
+}
+
+.quick-study .study-focus {
+  margin-bottom: 8px;
+}
+
+.quick-study .study-focus button,
+.quick-study .study-actions button {
+  font-size: 11px;
+}
+
+.property-summary {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.property-summary strong,
+.property-summary span,
+.property-summary small {
+  display: block;
+}
+
+.property-summary strong {
+  margin: 4px 0;
+  font-size: 18px;
+}
+
+.property-summary span,
+.property-summary small,
+.property-row span,
+.property-row small {
+  color: #66726f;
+  font-size: 11px;
+}
+
+.property-summary dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.property-summary dl div {
+  padding: 9px;
+  background: #fff;
+}
+
+.property-summary dt {
+  color: #66726f;
+  font-size: 10px;
+}
+
+.property-summary dd {
+  margin: 4px 0 0;
+  font-weight: 800;
+}
+
+.property-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.property-actions button,
+.property-row button {
+  min-height: 44px;
+  border: 0;
+  background: #315f58;
+  color: #fff;
+  font-weight: 700;
+}
+
+.property-actions .sell {
+  background: #9a4339;
+}
+
+.property-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #dedbd0;
+}
+
+.property-row div {
+  display: grid;
+  gap: 4px;
+}
+
+.property-row button {
+  min-width: 64px;
+}
+
+.property-empty {
+  margin: 0;
+  padding: 12px;
+  background: #f7f3e9;
+  color: #66726f;
+  font-size: 12px;
+}
+
+@media (max-width: 420px) {
+  .property-actions {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,7 +2,6 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const C = Game.config;
   const U = Game.content;
   let api = null;
 
@@ -22,30 +21,6 @@
     Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
     if (!result.ok) return;
     done();
-  }
-
-  function buyHouse(index) {
-    const current = state();
-    const house = C.houses[index];
-    const down = Math.round(house.price * 0.3);
-    if (U.age(current) < 18) return Game.view.showToast('成年后才能购买房产', 'warning');
-    if (current.assets.house) return Game.view.showToast('当前已有住房', 'warning');
-    if (current.money < down) return Game.view.showToast(`首付需要 ${Game.view.money(down)}`, 'warning');
-    current.money -= down;
-    current.assets.house = house;
-    current.assets.mortgage = Math.round(house.price * 0.7 / 240);
-    current.stats.心情 = U.clamp(current.stats.心情 + house.comfort, 0, 100);
-    Game.lifeDirector.addLog(current, '安家置业', `你支付首付，买下了${house.name}。`, 'milestone');
-    done();
-  }
-
-  function renderHouseActions() {
-    const current = state();
-    const host = document.getElementById('houseActions');
-    if (!host || current.assets.house) return;
-    host.innerHTML = C.houses.map((house, index) => (
-      `<button data-house="${index}">${house.name}<small>首付 ${Game.view.money(house.price * 0.3)}</small></button>`
-    )).join('');
   }
 
   function enterWorkforce(current, path) {
@@ -176,6 +151,6 @@
   }
 
   Game.actions = Object.freeze({
-    configure, trade, buyHouse, decide, renderHouseActions, renderDecision,
+    configure, trade, decide, renderDecision,
   });
 }(window));

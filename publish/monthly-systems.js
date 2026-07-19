@@ -6,6 +6,7 @@
   function run(state) {
     Game.educationSystem.monthly(state);
     Game.cityLife.monthly(state);
+    Game.propertySystem.monthly(state);
     Game.socialWorld.monthly(state);
     Game.populationSimulation.monthly(state);
     Game.careerGrowth.monthly(state);

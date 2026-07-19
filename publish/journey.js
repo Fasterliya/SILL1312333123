@@ -42,11 +42,10 @@
     if (state.travel.journey) return { ok: false, message: '当前已有一段旅途正在进行' };
     const item = routes.find((entry) => entry.id === routeId);
     if (!item) return { ok: false, message: '没有这条国际路线' };
-    if (state.money < item.cost) return { ok: false, message: `这段旅途需要 ¥${item.cost.toLocaleString()}` };
-    state.money -= item.cost;
+    Game.economy.spend(state, item.cost);
     state.travel.journey = { routeId, stage: 0, score: 0, startedAt: state.totalMonths, encounterId: null };
     Game.lifeDirector.addLog(state, '国际旅途启程', `你前往${item.country}${item.city}，支付了 ¥${item.cost.toLocaleString()}。`, 'milestone');
-    return { ok: true, message: `已启程前往${item.city}` };
+    return { ok: true, message: Game.economy.message(state, `已启程前往${item.city}`) };
   }
 
   function encounter(state, item) {
@@ -69,7 +68,6 @@
     const choice = stage?.options.find((entry) => entry[0] === choiceId);
     if (!item || !choice) return { ok: false, message: '当前旅途选择已经失效' };
     const effect = choice[2];
-    if (effect.money && state.money + effect.money < 0) return { ok: false, message: '现金不足，无法选择这项安排' };
     state.money += effect.money || 0;
     state.stats.心情 = U.clamp(state.stats.心情 + (effect.mood || 0), 0, 100);
     state.stats.魅力 = U.clamp(state.stats.魅力 + (effect.charm || 0), 0, 100);

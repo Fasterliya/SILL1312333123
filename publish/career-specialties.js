@@ -34,19 +34,17 @@
     if (!state.career.job || !id) return { ok: false, message: '请先选择职业专精' };
     const skill = Number(state.career.skills[id]) || 0;
     if (type === 'train') {
-      if (state.money < 500) return { ok: false, message: '专项培训需要 ¥500' };
-      state.money -= 500;
+      Game.economy.spend(state, 500);
       state.career.skills[id] = U.clamp(skill + 8, 0, 100);
       state.career.exp += 4;
       state.career.burnout = U.clamp(state.career.burnout + 3, 0, 100);
-      return { ok: true, message: `专项能力提升到 ${state.career.skills[id]}` };
+      return { ok: true, message: Game.economy.message(state, `专项能力提升到 ${state.career.skills[id]}`) };
     }
     if (type === 'mentor') {
-      if (state.money < 1200) return { ok: false, message: '行业导师交流需要 ¥1,200' };
-      state.money -= 1200;
+      Game.economy.spend(state, 1200);
       state.career.skills[id] = U.clamp(skill + 12, 0, 100);
       state.stats.魅力 = U.clamp(state.stats.魅力 + 2, 0, 100);
-      return { ok: true, message: '导师反馈让你的专业路径更清晰' };
+      return { ok: true, message: Game.economy.message(state, '导师反馈让你的专业路径更清晰') };
     }
     const chance = U.clamp(0.35 + skill / 160 + state.career.performance / 260, 0.35, 0.92);
     state.career.burnout = U.clamp(state.career.burnout + 12, 0, 100);

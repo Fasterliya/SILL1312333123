@@ -7,8 +7,7 @@
   function createMatches(state) {
     if (U.age(state) < 20) return { ok: false, message: '20岁后可以参加相亲活动' };
     if (state.romance.partnerId) return { ok: false, message: '已有稳定关系，不需要刷新相亲名单' };
-    if (state.money < 500) return { ok: false, message: '整理相亲名单需要 ¥500' };
-    state.money -= 500;
+    Game.economy.spend(state, 500);
     state.matchmaking.candidates = [];
     for (let index = 0; index < 10; index += 1) {
       const person = U.person('相亲对象', U.random(Game.nameSystem.surnames()), U.between(-4, 8), null, state.playerBornAt);
@@ -20,7 +19,7 @@
       Game.npcLife.syncGrowth(state, person);
       state.matchmaking.candidates.push(person);
     }
-    return { ok: true, message: '新的相亲名单已经整理好' };
+    return { ok: true, message: Game.economy.message(state, '新的相亲名单已经整理好') };
   }
 
   function render(state) {

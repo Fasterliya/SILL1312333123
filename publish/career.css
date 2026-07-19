@@ -22,6 +22,48 @@
   text-align: left;
 }
 
+.company-directory {
+  margin: 12px 0;
+  border: 1px solid #d8d9d2;
+  background: #f5f2e8;
+}
+
+.company-directory > summary {
+  min-height: 44px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.company-directory > div {
+  display: grid;
+  gap: 1px;
+  background: #deddd5;
+}
+
+.company-directory article {
+  padding: 9px 12px;
+  background: #fffdf7;
+}
+
+.company-directory strong,
+.company-directory span {
+  display: block;
+}
+
+.company-directory strong {
+  font-size: 11px;
+}
+
+.company-directory span {
+  margin-top: 3px;
+  color: #69726f;
+  font-size: 9px;
+}
+
 .job-card.locked {
   background: #f3f1eb;
   color: #747a76;

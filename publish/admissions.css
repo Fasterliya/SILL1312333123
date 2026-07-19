@@ -1,0 +1,153 @@
+.admission-guide {
+  padding: 12px;
+  border-left: 4px solid #c23b32;
+  background: #f4efe2;
+}
+
+.admission-guide strong,
+.admission-guide span {
+  display: block;
+}
+
+.admission-guide strong {
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+
+.admission-guide span {
+  color: #66726f;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.admission-selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admission-selectors label,
+.admission-selectors > div {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid #dbd8cd;
+  background: #fff;
+}
+
+.admission-selectors span {
+  display: block;
+  margin-bottom: 4px;
+  color: #68716e;
+  font-size: 9px;
+}
+
+.admission-selectors select {
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: #263b37;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admission-selectors strong {
+  font-size: 14px;
+}
+
+.admission-list {
+  display: grid;
+  gap: 7px;
+}
+
+.admission-card {
+  border: 1px solid #d7d5cb;
+  background: #fffdf7;
+}
+
+.admission-card > summary {
+  min-height: 54px;
+  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.admission-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admission-card summary div,
+.admission-card summary strong,
+.admission-card summary span {
+  min-width: 0;
+  display: block;
+}
+
+.admission-card summary strong {
+  font-size: 13px;
+}
+
+.admission-card summary span {
+  margin-top: 4px;
+  color: #69736f;
+  font-size: 10px;
+}
+
+.admission-card summary > b {
+  flex: 0 0 auto;
+  color: #c23b32;
+  font-size: 12px;
+}
+
+.admission-card.locked {
+  opacity: 0.68;
+}
+
+.admission-detail {
+  padding: 0 11px 11px;
+  border-top: 1px solid #ece8dc;
+}
+
+.admission-detail p {
+  margin: 8px 0;
+  color: #65706c;
+  font-size: 10px;
+}
+
+.major-options {
+  display: grid;
+  gap: 6px;
+}
+
+.decision-body .major-options button {
+  min-height: 44px;
+  background: #eef3ec;
+}
+
+.major-options strong,
+.major-options small {
+  display: block;
+}
+
+.major-options small {
+  margin-top: 3px;
+  color: #68716e;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.decision-body .admission-workforce {
+  border-color: #9eaaa6;
+  background: #eef0ed;
+}
+
+@media (max-width: 360px) {
+  .admission-selectors {
+    grid-template-columns: 1fr;
+  }
+}

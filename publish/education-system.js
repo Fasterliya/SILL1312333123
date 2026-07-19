@@ -87,8 +87,7 @@
     const action = actions[type];
     if (!enrolled(state) || !action) return { ok: false, message: '当前阶段没有全日制学习安排' };
     if (item.lastStudyMonth === state.totalMonths) return { ok: false, message: '本月已经完成学习安排' };
-    if (state.money < action[0]) return { ok: false, message: `这项安排需要 ¥${action[0]}` };
-    state.money -= action[0];
+    Game.economy.spend(state, action[0]);
     item.preparation = clamp(item.preparation + action[1]);
     item.discipline = clamp(item.discipline + action[2]);
     item.examTechnique = clamp(item.examTechnique + action[3]);
@@ -97,7 +96,9 @@
     item.study = Math.round(item.preparation);
     if (type === 'balance') state.stats.心情 = clamp(state.stats.心情 + 3);
     Game.lifeDirector.addLog(state, '学习安排', action[5], 'good');
-    return { ok: true, message: `${action[5]}，备考度达到 ${Math.round(item.preparation)}` };
+    return { ok: true, message: Game.economy.message(
+      state, `${action[5]}，备考度达到 ${Math.round(item.preparation)}`,
+    ) };
   }
 
   function schoolQuality(state) {

@@ -34,6 +34,15 @@
       ${Game.careerSpecialties.render(state)}`;
   }
 
+  function companyDirectory(state) {
+    const companies = Game.companyCatalog.inCity(state.location.city);
+    return `<details class="company-directory"><summary>本地特色公司 · ${companies.length}家</summary>
+      <div>${companies.map((company) => (
+        `<article><strong>${company.name}</strong><span>${company.industry} · ${company.positions.length}个职位
+        ${company.parent ? ` · ${company.parent}旗下` : ''}</span></article>`
+      )).join('')}</div></details>`;
+  }
+
   function renderCareer(state, money) {
     const available = Game.careerSystem.board(state);
     const filters = ['全部', '可应聘', '适配', ...new Set(available.map((job) => job.industry))];
@@ -53,8 +62,10 @@
         <b>¥${job.salary.toLocaleString()}</b>
         <button data-job-detail="${job.id}">${locked ? '门槛' : '查看'}</button></article>`;
     }).join('') : '<p class="empty-state">当前筛选没有职位。</p>';
-    return `${currentJob(state, money)}${guide}${chips(filters, jobFilter, 'data-job-filter')}
-      <div class="market-title">${state.location.city} · ${jobs.length}个职位</div><div class="job-list">${cards}</div>`;
+    const companies = new Set(jobs.map((job) => job.company)).size;
+    return `${currentJob(state, money)}${companyDirectory(state)}${guide}${chips(filters, jobFilter, 'data-job-filter')}
+      <div class="market-title">${state.location.city} · ${companies}家公司 · ${jobs.length}个职位</div>
+      <div class="job-list">${cards}</div>`;
   }
 
   function duties(job) {
@@ -67,9 +78,11 @@
   function openJob(state, id) {
     const job = Game.careerSystem.board(state).find((item) => item.id === id);
     if (!job) return;
+    const company = Game.companyCatalog.find(job.companyId);
     const allowed = Game.careerSystem.eligible(state, job);
     const facts = [
-      ['公司/主体', job.company], ['工作方式', job.freelance ? '自由职业' : '单位岗位'],
+      ['公司/主体', job.company], ['母公司/集团', company?.parent || '独立单位'],
+      ['工作方式', job.freelance ? '自由职业' : '单位岗位'],
       ['所在城市', state.location.city], ['参考月收入', `¥${job.salary.toLocaleString()}`],
       ['学历要求', Game.careerSystem.requirementLabel(job.education || 0)],
       ['当前资格', Game.careerSystem.qualificationLabel(Game.careerSystem.qualification(state))],

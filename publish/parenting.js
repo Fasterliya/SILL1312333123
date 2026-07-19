@@ -23,8 +23,7 @@
     const child = children(state).find((person) => person.id === childId);
     const action = actions[type];
     if (!child || !action || child.status !== '健康') return { ok: false, message: '当前无法进行这项养育行动' };
-    if (state.money < action[0]) return { ok: false, message: `这项行动需要 ¥${action[0]}` };
-    state.money -= action[0];
+    Game.economy.spend(state, action[0]);
     const up = child.upbringing;
     up.care = clamp(up.care + action[1]);
     up.education = clamp(up.education + action[2]);
@@ -34,7 +33,7 @@
     if (type === 'education') state.parenting.educationFund += action[0];
     Game.relationshipMemory.record(state, child, '养育', action[5], 5, -2);
     Game.lifeDirector.addLog(state, `陪伴${child.name}`, action[5], 'good');
-    return { ok: true, message: `${child.name}的成长状态得到提升` };
+    return { ok: true, message: Game.economy.message(state, `${child.name}的成长状态得到提升`) };
   }
 
   function setStyle(state, style) {

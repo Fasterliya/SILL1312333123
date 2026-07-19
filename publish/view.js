@@ -120,8 +120,9 @@
     el.profileName.textContent = state.name;
     el.profileMeta.textContent = `${state.gender} · ${state.location.country || '华夏'} ${state.location.city}`;
     el.ageValue.textContent = `${years}岁${(state.totalMonths - state.playerBornAt) % 12}月`;
-    el.stageValue.textContent = state.education.schoolStage === 'workforce' ? '职业起步' : U.stage(years).name;
+    el.stageValue.textContent = Game.timeSystem.stageLabel(state);
     el.moneyValue.textContent = money(state.money);
+    el.moneyValue.classList.toggle('debt', state.money < 0);
     el.lifeDate.textContent = `${state.year}年${state.month}月`;
     el.statGrid.innerHTML = statCards(state);
     el.eventList.innerHTML = logCards(state);

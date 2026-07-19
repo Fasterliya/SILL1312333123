@@ -2,7 +2,7 @@
   'use strict';
 
   const config = {
-    version: 13,
+    version: 14,
     title: '华夏人生',
     storageKey: 'huaxia-life:v1',
     startYear: 2026,
@@ -106,6 +106,7 @@
       { name: '市中心三居室', price: 1380000, comfort: 20 },
     ],
     stocks: { 华夏科技: 32.4, 民生消费: 18.6, 绿色能源: 24.8 },
+    companies: [],
     businesses: [],
     vehicles: [],
   };

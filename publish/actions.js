@@ -69,18 +69,6 @@
     Game.lifeDirector.addLog(current, '进入职业社会', `你完成${path}阶段，开始直接寻找工作机会。`, 'milestone');
   }
 
-  function enrollUniversity(current, school) {
-    current.education.university = school.name;
-    current.education.universityType = school.type;
-    current.education.major = school.major;
-    current.education.graduated = false;
-    current.education.path = school.type === '高职专科' ? '高职升学' : '大学教育';
-    Game.social.enterSchool(current, school.name, 'university', 6);
-    const city = C.cities.find((item) => item.city === school.city);
-    if (city) current.location = { province: city.province, city: city.city, country: city.country };
-    Game.lifeDirector.addLog(current, '大学录取', `你被${school.name}${school.major}专业录取，前往${school.city}求学。`, 'milestone');
-  }
-
   function decide(value) {
     const current = state();
     const decision = current.pendingDecision;
@@ -111,10 +99,18 @@
       Game.lifeDirector.addLog(current, '完成选科', `你选择了${track}，再选${electives.replace(',', '、')}。`, 'milestone');
     } else if (decision.type === 'volunteer') {
       if (value === 'workforce') enterWorkforce(current, '普通高中毕业');
-      else enrollUniversity(current, C.universities.find((item) => item.name === value));
+      else {
+        const result = Game.admissions.enroll(current, value);
+        if (!result.ok) return Game.view.showToast(result.message, 'warning');
+        Game.view.showToast(result.message, 'good');
+      }
     } else if (decision.type === 'vocationalExit') {
       if (value === 'vocational-work') enterWorkforce(current, `职高${current.education.vocationalMajor || '技能'}专业毕业`);
-      else enrollUniversity(current, C.universities.find((item) => item.name === '城市职业学院'));
+      else {
+        const result = Game.admissions.enroll(current, Game.admissions.vocationalToken(), true);
+        if (!result.ok) return Game.view.showToast(result.message, 'warning');
+        Game.view.showToast(result.message, 'good');
+      }
     }
     current.pendingDecision = null;
     done();
@@ -157,10 +153,9 @@
       })));
     } else if (d.type === 'volunteer') {
       Game.view.el.decisionTitle.textContent = `高考 ${d.score} 分，填报志愿`;
-      Game.view.el.decisionText.textContent = '可选择达到投档线的院校，也可以高中毕业后直接进入岗位市场。';
-      options = C.universities.filter((item) => d.score >= item.min)
-        .map((item) => ({ value: item.name, label: `${item.name} · ${item.type} · ${item.major} · ${item.city}` }));
-      options.push({ value: 'workforce', label: '不升大学 · 直接就业与自由职业' });
+      Game.view.el.decisionText.textContent = '按国家、城市、院校类型和专业筛选，展开院校后选择具体专业。';
+      Game.view.el.decisionBody.innerHTML = Game.admissions.render(current, d.score);
+      return;
     } else if (d.type === 'vocationalExit') {
       Game.view.el.decisionTitle.textContent = '职高毕业去向';
       Game.view.el.decisionText.textContent = `你完成了${current.education.vocationalMajor || '职业技能'}学习，可以直接就业或继续读高职。`;

@@ -26,8 +26,7 @@
     }
     const discount = state.assets.vehicles.length ? 0.5 : 1;
     const cost = Math.round(area[1] * discount);
-    if (state.money < cost) return { ok: false, message: `这次出行需要 ¥${cost}` };
-    state.money -= cost;
+    Game.economy.spend(state, cost);
     const person = U.person('路人', U.random(Game.nameSystem.surnames()), U.between(-5, 8), null, state.playerBornAt);
     person.affection = U.between(25, 42);
     person.metCity = `${state.location.city}${areaName}`;
@@ -45,7 +44,7 @@
     state.travel.activeId = person.id;
     state.stats.心情 = U.clamp(state.stats.心情 + 3, 0, 100);
     Game.lifeDirector.addLog(state, '街头相遇', `你在${areaName}遇见了${person.name}。`, 'good');
-    return { ok: true, message: `你在${areaName}遇见了${person.name}` };
+    return { ok: true, message: Game.economy.message(state, `你在${areaName}遇见了${person.name}`) };
   }
 
   function render(state) {

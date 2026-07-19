@@ -46,9 +46,7 @@
   }
 
   function spend(state, amount) {
-    if (state.money < amount) return false;
-    state.money -= amount;
-    return true;
+    Game.economy.spend(state, amount);
   }
 
   function romance(state, person, type) {
@@ -73,18 +71,18 @@
       if (state.romance.partnerId && state.romance.partnerId !== person.id) {
         return { ok: false, message: '你已有稳定交往对象' };
       }
-      if (!spend(state, 220)) return { ok: false, message: '约会至少需要 ¥220' };
+      spend(state, 220);
       person.affection = U.clamp(person.affection + U.between(6, 10), 0, 100);
       state.stats.心情 = U.clamp(state.stats.心情 + 5, 0, 100);
       Game.relationshipMemory.record(state, person, '约会', '共同度过了一次约会', 7, -2);
-      return { ok: true, message: `约会很愉快，好感达到 ${person.affection}` };
+      return { ok: true, message: Game.economy.message(state, `约会很愉快，好感达到 ${person.affection}`) };
     }
     if (type !== 'propose') return null;
     if (state.romance.partnerId !== person.id) return { ok: false, message: '需要先建立恋爱关系' };
     const legalAge = state.gender === '男' ? 22 : 20;
     if (age < legalAge) return { ok: false, message: `${legalAge}岁后才能登记结婚` };
     if (person.affection < 82) return { ok: false, message: '好感达到82后更适合求婚' };
-    if (!spend(state, 20000)) return { ok: false, message: '婚礼准备至少需要 ¥20,000' };
+    spend(state, 20000);
     const accepted = Math.random() < U.clamp(0.58 + (person.affection - 80) / 45, 0.58, 0.96);
     if (!accepted) return { ok: false, message: `${person.name}希望再考虑一段时间` };
     state.romance.married = true;
@@ -93,7 +91,7 @@
     if (!state.family.some((item) => item.id === person.id)) state.family.push(person);
     Game.relationshipMemory.record(state, person, '家庭', '共同组建了家庭', 16, -8);
     Game.lifeDirector.addLog(state, '步入婚姻', `你与${person.name}组成了家庭。`, 'milestone');
-    return { ok: true, message: '求婚成功，你们结婚了' };
+    return { ok: true, message: Game.economy.message(state, '求婚成功，你们结婚了') };
   }
 
   function interact(state, id, type) {
@@ -119,7 +117,7 @@
       exchange: [0, 3, 2, '你提出交换联系方式。'],
     };
     const action = actions[type] || actions.chat;
-    if (!spend(state, action[0])) return { ok: false, message: `这次互动需要 ¥${action[0]}` };
+    spend(state, action[0]);
     if (type === 'exchange' && person.affection < 42) return { ok: false, message: '再熟悉一些后更容易交换联系方式' };
     person.interactions += 1;
     person.affection = U.clamp(person.affection + action[1], 0, 100);
@@ -130,7 +128,7 @@
     } else if (person.affection >= 75 && person.relation === '同学') person.relation = '好友';
     Game.lifeDirector.addLog(state, `与${person.name}互动`, action[3], 'good');
     Game.relationshipMemory.record(state, person, '日常互动', action[3], Math.max(2, action[1] - 2), -1);
-    return { ok: true, message: `${person.name}的好感提升到 ${person.affection}` };
+    return { ok: true, message: Game.economy.message(state, `${person.name}的好感提升到 ${person.affection}`) };
   }
 
   function card(person, actions) {

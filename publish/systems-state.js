@@ -39,7 +39,7 @@
       state.matchmaking.candidates.push(...candidates);
       state.contacts = state.contacts.filter((person) => !candidates.includes(person));
     }
-    state.version = 13;
+    state.version = 14;
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {
@@ -76,6 +76,22 @@
     state.career.projects = Array.isArray(state.career.projects) ? state.career.projects.slice(-12) : [];
     state.career.burnout = Math.max(0, Math.min(100, Number(state.career.burnout) || 0));
     Game.educationSystem.ensure(state);
+    const university = Game.config.universities.find((item) => (
+      item.id === state.education.universityId || item.name === state.education.university
+    ));
+    state.education.universityId ||= university?.id || null;
+    state.education.durationMonths = Math.max(0, Number(state.education.durationMonths)
+      || university?.durationMonths || (state.education.university ? 48 : 0));
+    if (state.education.university && !Number.isFinite(state.education.enrolledAt)) {
+      const studied = Math.min(state.education.durationMonths, Math.max(0, (Game.content.age(state) - 18) * 12));
+      state.education.enrolledAt = state.totalMonths - studied;
+    }
+    if (!state.education.university) {
+      state.education.universityId = null;
+      state.education.enrolledAt = null;
+      state.education.durationMonths = 0;
+    }
+    Game.timeSystem.syncCalendar(state);
     Game.people.all(state).forEach((person) => {
       ensurePerson(state, person);
       Game.educationSystem.ensurePerson(person);

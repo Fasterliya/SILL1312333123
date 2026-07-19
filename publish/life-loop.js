@@ -20,13 +20,30 @@
     return candidates[0];
   }
 
+  function decisionGoal(state) {
+    const type = state.pendingDecision?.type;
+    const goals = {
+      highSchool: ['完成高中志愿', '根据中考成绩选择高中或职业教育方向'],
+      track: ['完成高考选科', '选择主科与两门再选科目'],
+      volunteer: ['完成大学志愿', '筛选院校并选择具体专业'],
+      vocationalExit: ['选择职高毕业去向', '决定直接就业或继续高职升学'],
+      lifeEvent: ['处理人生事件', '完成当前事件选择后继续推进时间'],
+      succession: ['选择家族继承人', '确认下一代人生后继续时间'],
+    };
+    const item = goals[type];
+    return item ? { title: item[0], detail: item[1], value: 0, target: 1 } : null;
+  }
+
   function goal(state) {
     const years = U.age(state);
+    const pending = decisionGoal(state);
+    if (pending) return pending;
     if (years < 3) return { title: '健康成长', detail: '保持健康达到80', value: state.stats.健康, target: 80 };
     if (years < 6) return { title: '探索世界', detail: '保持心情达到80', value: state.stats.心情, target: 80 };
-    if (years < 18) {
+    if (['primary', 'middle', 'high', 'vocational'].includes(state.education.schoolStage)) {
       const exam = nextExam(state);
-      const target = years < 12 ? 45 : (years < 15 ? 65 : 85);
+      const target = state.education.schoolStage === 'primary' ? 45
+        : (state.education.schoolStage === 'middle' ? 65 : 85);
       return {
         title: `${exam.distance}个月后${exam.target === 1 ? '期末考试' : '期中考试'}`,
         detail: `综合备考度目标 ${target}`,
@@ -37,7 +54,8 @@
     if (state.education.university && !state.education.graduated) {
       return { title: '完成大学学业',
         detail: `${state.education.university} · ${state.education.major || '专业学习'}`,
-        value: Math.max(0, years - 18), target: 4 };
+        value: Game.timeSystem.educationElapsed(state),
+        target: state.education.durationMonths || 48 };
     }
     if (years >= 60 && state.health.retired) {
       return { title: '经营晚年生活', detail: '保持健康并维系家庭关系',

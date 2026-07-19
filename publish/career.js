@@ -94,15 +94,17 @@
       convention: [12, 8, 4, 1, '参加城市漫展并经营个人展位', 680, 260],
     };
     const [performance, exp, mood, intelligence, label, income, cost] = actions[type] || actions.focus;
-    if (state.money < cost) return { ok: false, message: `这项工作行动需要 ¥${cost}` };
-    state.money += income - cost;
+    state.money += income;
+    Game.economy.spend(state, cost);
     state.career.performance = U.clamp(state.career.performance + performance, 0, 100);
     state.career.exp += exp;
     state.stats.心情 = U.clamp(state.stats.心情 + mood, 0, 100);
     state.stats.智力 = U.clamp(state.stats.智力 + intelligence, 0, 100);
     Game.careerSpecialties.afterWork(state, type);
     Game.lifeDirector.addLog(state, '职场行动', label, 'good');
-    return { ok: true, message: `${label}，绩效达到 ${state.career.performance}${income ? `，收入 ¥${income}` : ''}` };
+    return { ok: true, message: Game.economy.message(
+      state, `${label}，绩效达到 ${state.career.performance}${income ? `，收入 ¥${income}` : ''}`,
+    ) };
   }
 
   function applyPromotion(state) {
@@ -125,8 +127,7 @@
     if (U.age(state) < 18) return { ok: false, message: '成年后才能独立迁居' };
     const city = C.cities.find((item) => item.city === cityName);
     if (!city || city.city === state.location.city) return { ok: false, message: '你已经在这座城市' };
-    if (state.money < city.cost) return { ok: false, message: `迁居需要 ¥${city.cost.toLocaleString()}` };
-    state.money -= city.cost;
+    Game.economy.spend(state, city.cost);
     const currentJob = C.jobs.find((item) => item.id === state.career.jobId);
     if (state.career.job && !currentJob?.freelance) {
       Game.lifeDirector.addLog(state, '离开原岗位', `迁居让你结束了${state.career.company || ''}${state.career.job}的工作。`, 'normal');
@@ -138,7 +139,7 @@
     state.location = { province: city.province, city: city.city, country: city.country };
     Game.cityLife.onMove(state);
     Game.lifeDirector.addLog(state, '迁居新城', `你搬到${city.country}${city.city}寻找新的机会。`, 'milestone');
-    return { ok: true, message: `已迁居${city.city}` };
+    return { ok: true, message: Game.economy.message(state, `已迁居${city.city}`) };
   }
 
   Game.careerSystem = Object.freeze({

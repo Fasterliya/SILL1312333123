@@ -124,7 +124,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 13,
+      version: 14,
       updatedAt: new Date().toISOString(),
       name: makeName(surname, gender),
       surname,
@@ -144,6 +144,7 @@
         study: 0, track: null, electives: [], school: '家中', schoolStage: 'home',
         highSchoolType: null, vocationalMajor: null, path: '基础教育',
         university: null, universityType: null, major: null, graduated: false, exams: [],
+        universityId: null, enrolledAt: null, durationMonths: 0,
         preparation: 0, discipline: 48, examTechnique: 20, pressure: 0,
         focus: '均衡基础', lastStudyMonth: -1, aptitudes: {},
       },
@@ -179,7 +180,9 @@
     if (years >= 12 && years <= 14) return `初中${years - 11}年级`;
     if (years >= 15 && years <= 17 && state.education.schoolStage === 'vocational') return `职高${years - 14}年级`;
     if (years >= 15 && years <= 17) return `高中${years - 14}年级`;
-    if (years >= 18 && years <= 21 && state.education.university) return `大学${years - 17}年级`;
+    if (state.education.university && !state.education.graduated) {
+      return `大学${Math.min(4, Math.floor(Game.timeSystem.educationElapsed(state) / 12) + 1)}年级`;
+    }
     return stage(years).name;
   }
 

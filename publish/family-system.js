@@ -22,24 +22,22 @@
       return { ok: true, message: '告白成功，你们开始交往' };
     }
     if (type === 'date') {
-      if (state.money < 220) return { ok: false, message: '约会至少需要 ¥220' };
-      state.money -= 220;
+      Game.economy.spend(state, 220);
       person.affection = U.clamp(person.affection + U.between(6, 10), 0, 100);
       state.stats.心情 = U.clamp(state.stats.心情 + 5, 0, 100);
       Game.relationshipMemory.record(state, person, '约会', '共同度过了一次约会', 7, -2);
-      return { ok: true, message: `约会很愉快，好感达到 ${person.affection}` };
+      return { ok: true, message: Game.economy.message(state, `约会很愉快，好感达到 ${person.affection}`) };
     }
     if (type !== 'propose') return { ok: false, message: '当前不能进行这项互动' };
     const legalAge = state.gender === '男' ? 22 : 20;
     if (U.age(state) < legalAge) return { ok: false, message: `${legalAge}岁后才能登记结婚` };
     if (person.affection < 82) return { ok: false, message: '好感达到82后更适合求婚' };
-    if (state.money < 20000) return { ok: false, message: '准备婚礼至少需要 ¥20,000' };
-    state.money -= 20000;
+    Game.economy.spend(state, 20000);
     state.romance.married = true;
     person.relation = '配偶';
     Game.relationshipMemory.record(state, person, '家庭', '共同组建了家庭', 16, -8);
     Game.lifeDirector.addLog(state, '步入婚姻', `你与${person.name}组成了家庭。`, 'milestone');
-    return { ok: true, message: '求婚成功，你们结婚了' };
+    return { ok: true, message: Game.economy.message(state, '求婚成功，你们结婚了') };
   }
 
   function interact(id, type) {
@@ -64,14 +62,13 @@
       support: [1000, 12, 2, '你在重要时刻给予了实际支持。'],
     };
     const [cost, gain, mood, text] = options[action] || options.chat;
-    if (state.money < cost) return Game.view.showToast(`这次互动需要 ¥${cost}`, 'warning');
-    state.money -= cost;
+    Game.economy.spend(state, cost);
     person.interactions += 1;
     person.affection = U.clamp(person.affection + U.between(gain - 2, gain + 2), 0, 100);
     state.stats.心情 = U.clamp(state.stats.心情 + mood, 0, 100);
     Game.relationshipMemory.record(state, person, '家庭互动', text, Math.max(2, gain - 2), -1);
     Game.lifeDirector.addLog(state, `与${person.name}相处`, text, 'good');
-    finish(`${person.name}的好感达到 ${person.affection}`);
+    finish(Game.economy.message(state, `${person.name}的好感达到 ${person.affection}`));
   }
 
   function planChild() {
@@ -80,11 +77,10 @@
     const partner = [...state.family, ...state.contacts].find((item) => item.id === state.romance.partnerId);
     if (!partner || partner.status !== '健康') return Game.view.showToast('当前家庭状态无法计划孩子', 'warning');
     if (state.romance.pendingBirth) return Game.view.showToast('新生命已经在期待中', 'warning');
-    if (state.money < 8000) return Game.view.showToast('养育准备金至少需要 ¥8,000', 'warning');
-    state.money -= 8000;
+    Game.economy.spend(state, 8000);
     state.romance.pendingBirth = 9;
     Game.lifeDirector.addLog(state, '家庭计划', '你们开始期待一个新生命。', 'milestone');
-    finish('家庭计划已经开始');
+    finish(Game.economy.message(state, '家庭计划已经开始'));
   }
 
   function detailActions(state, person) {

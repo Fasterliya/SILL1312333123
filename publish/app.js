@@ -30,8 +30,11 @@
   function advance(months) {
     if (busy || state.pendingDecision || state.gameOver) return;
     busy = true;
-    Game.lifeDirector.advance(state, months);
+    const result = Game.lifeDirector.advance(state, months);
     refresh();
+    if (result.interrupted && state.pendingDecision) {
+      Game.view.showToast(`时间推进了${result.advanced}个月，已在关键选择处暂停`, 'warning');
+    }
     save().finally(() => { busy = false; });
   }
 
@@ -50,6 +53,9 @@
     Game.view.el.decisionBody.addEventListener('click', (event) => {
       const choice = event.target.closest('[data-choice]');
       if (choice) Game.actions.decide(choice.dataset.choice);
+    });
+    Game.view.el.decisionBody.addEventListener('change', (event) => {
+      if (Game.admissions.handleChange(event)) Game.actions.renderDecision();
     });
     Game.view.el.tabs.addEventListener('click', switchTabs);
     document.addEventListener('click', Game.interactionRouter.handle);

@@ -41,6 +41,10 @@ button:disabled {
   opacity: 0.5;
 }
 
+.summary strong.debt {
+  color: #b93630;
+}
+
 [hidden] {
   display: none !important;
 }

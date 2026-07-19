@@ -135,6 +135,10 @@
     state.education.vocationalMajor ??= null;
     state.education.path ||= state.education.university ? '大学教育' : '基础教育';
     state.education.universityType ??= null;
+    state.education.universityId ??= null;
+    state.education.enrolledAt = Number.isFinite(state.education.enrolledAt)
+      ? state.education.enrolledAt : null;
+    state.education.durationMonths = Math.max(0, Number(state.education.durationMonths) || 0);
     state.education.graduated ??= false;
     state.career.jobId ??= null;
     state.career.company ??= null;

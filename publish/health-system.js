@@ -43,29 +43,26 @@
     }
     if (type === 'checkup') {
       const cost = price(state, 1200);
-      if (state.money < cost) return { ok: false, message: `体检需要 ¥${cost}` };
-      state.money -= cost;
+      Game.economy.spend(state, cost);
       state.health.careLevel = U.clamp(state.health.careLevel + 12, 0, 100);
       state.stats.健康 = U.clamp(state.stats.健康 + 3, 0, 100);
-      return { ok: true, message: '完成体检，健康风险得到更早管理' };
+      return { ok: true, message: Game.economy.message(state, '完成体检，健康风险得到更早管理') };
     }
     if (type === 'treat') {
       if (!state.health.conditions.length) return { ok: false, message: '当前没有需要持续治疗的慢性问题' };
       const cost = price(state, 2600);
-      if (state.money < cost) return { ok: false, message: `本次治疗需要 ¥${cost}` };
-      state.money -= cost;
+      Game.economy.spend(state, cost);
       state.health.conditions.shift();
       state.stats.健康 = U.clamp(state.stats.健康 + 8, 0, 100);
-      return { ok: true, message: '治疗完成，一项慢性问题得到控制' };
+      return { ok: true, message: Game.economy.message(state, '治疗完成，一项慢性问题得到控制') };
     }
     if (type === 'retire') return retire(state);
     if (type === 'family') {
       const elder = state.family.find((person) => ['父亲', '母亲', '祖父', '祖母'].includes(person.relation) && person.status === '健康');
       if (!elder) return { ok: false, message: '当前没有需要照护的长辈' };
-      if (state.money < 1200) return { ok: false, message: '本月照护支出需要 ¥1,200' };
-      state.money -= 1200;
+      Game.economy.spend(state, 1200);
       Game.relationshipMemory.record(state, elder, '养老照护', '承担了陪诊与生活照护', 10, -4);
-      return { ok: true, message: `你陪伴并照顾了${elder.name}` };
+      return { ok: true, message: Game.economy.message(state, `你陪伴并照顾了${elder.name}`) };
     }
     if (type === 'grandchild') {
       const child = state.family.find((person) => ['儿子', '女儿'].includes(person.relation) && person.childrenCount > 0);

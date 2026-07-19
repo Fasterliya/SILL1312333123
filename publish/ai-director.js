@@ -31,24 +31,17 @@
 
   function schoolMilestones(state) {
     const years = U.age(state);
-    if (state.month !== 6) return;
-    if (years === 6) {
-      const school = `${state.location.city}启明小学`;
-      Game.social.enterSchool(state, school, 'primary', 4);
-      addLog(state, '小学入学', `你背上新书包，走进${school}，班里有了新的同窗。`, 'milestone');
-    } else if (years === 12) {
-      const school = `${state.location.city}新城初级中学`;
-      Game.social.enterSchool(state, school, 'middle', 5);
-      addLog(state, '小学毕业', `你告别童年教室，升入${school}。`, 'milestone');
-    } else if (years === 15) {
-      const result = exam(state, '中考');
-      state.pendingDecision = { type: 'highSchool', score: result.total };
-    } else if (years === 16 && !state.education.track && state.education.schoolStage !== 'vocational') {
-      state.pendingDecision = { type: 'track' };
-    } else if (years === 18 && !state.education.university) {
-      if (state.education.schoolStage === 'vocational') {
-        state.pendingDecision = { type: 'vocationalExit' };
-      } else {
+    const stage = state.education.schoolStage;
+    if (stage === 'university'
+      && Game.timeSystem.educationElapsed(state) >= state.education.durationMonths) {
+      Game.social.archiveSchool(state);
+      addLog(state, '大学毕业', `你从${state.education.university}毕业，获得${state.education.major}专业学历。`, 'milestone');
+      state.education.graduated = true;
+      state.education.school = '已毕业';
+      state.education.schoolStage = 'graduate';
+    } else if (years >= 18 && ['high', 'vocational'].includes(stage)) {
+      if (stage === 'vocational') state.pendingDecision = { type: 'vocationalExit' };
+      else {
         if (!state.education.track) {
           state.education.track = '物理';
           state.education.electives = ['化学', '生物'];
@@ -56,12 +49,23 @@
         const result = exam(state, '高考');
         state.pendingDecision = { type: 'volunteer', score: result.total };
       }
-    } else if (years === 22 && state.education.university && !state.education.graduated) {
-      Game.social.archiveSchool(state);
-      addLog(state, '大学毕业', `你从${state.education.university}毕业，获得${state.education.major}专业学历。`, 'milestone');
-      state.education.graduated = true;
-      state.education.school = '已毕业';
-      state.education.schoolStage = 'graduate';
+    } else if (years >= 16 && stage === 'high' && !state.education.track) {
+      state.pendingDecision = { type: 'track' };
+    } else if (years >= 15 && ['home', 'primary', 'middle'].includes(stage)) {
+      if (stage !== 'middle') {
+        state.education.school = `${state.location.city}新城初级中学`;
+        state.education.schoolStage = 'middle';
+      }
+      const result = exam(state, '中考');
+      state.pendingDecision = { type: 'highSchool', score: result.total };
+    } else if (years >= 12 && ['home', 'primary'].includes(stage)) {
+      const school = `${state.location.city}新城初级中学`;
+      Game.social.enterSchool(state, school, 'middle', 32);
+      addLog(state, '小学毕业', `你告别小学，升入${school}。`, 'milestone');
+    } else if (years >= 6 && stage === 'home') {
+      const school = `${state.location.city}启明小学`;
+      Game.social.enterSchool(state, school, 'primary', 32);
+      addLog(state, '小学入学', `你背上新书包，走进${school}，班里有了新的同窗。`, 'milestone');
     }
   }
 
@@ -84,8 +88,10 @@
         state.career.performance = U.clamp(state.career.performance + 8, 0, 100);
         addLog(state, '年度工作评价', '长期经验让你的绩效积累有所提升，可以考虑申请晋升。', 'good');
       }
-    } else if (years >= 6 && years < 22) {
-      state.money += years < 12 ? 30 : (years < 18 ? 120 : 500);
+    } else if (['primary', 'middle', 'high', 'vocational', 'university']
+      .includes(state.education.schoolStage)) {
+      const allowance = { primary: 30, middle: 120, high: 120, vocational: 120, university: 500 };
+      state.money += allowance[state.education.schoolStage];
     }
     if (state.assets.mortgage > 0) {
       state.money -= state.assets.mortgage;
@@ -157,26 +163,29 @@
 
   function tick(state) {
     if (state.gameOver || state.pendingDecision) return;
+    const previousYear = state.year;
     state.totalMonths += 1;
-    state.month += 1;
-    if (state.month > 12) {
-      state.month = 1;
-      state.year += 1;
+    Game.timeSystem.syncCalendar(state);
+    if (state.year !== previousYear) {
       state.stats.健康 = U.clamp(state.stats.健康 - (U.age(state) > 55 ? 2 : 0), 0, 100);
     }
     Game.profile.updateGrowth(state);
     Game.npcLife.update(state);
+    schoolMilestones(state);
     finances(state);
     relationships(state);
-    schoolMilestones(state);
-    regularExam(state);
+    if (!state.pendingDecision) regularExam(state);
     randomEvent(state);
     Game.monthlySystems.run(state);
   }
 
   function advance(state, months) {
-    for (let index = 0; index < months && !state.pendingDecision && !state.gameOver; index += 1) tick(state);
-    return state;
+    let advanced = 0;
+    while (advanced < months && !state.pendingDecision && !state.gameOver) {
+      tick(state);
+      advanced += 1;
+    }
+    return { state, requested: months, advanced, interrupted: advanced < months };
   }
 
   Game.lifeDirector = Object.freeze({ addLog, advance, subjects });

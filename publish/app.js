@@ -132,7 +132,7 @@
       Game.saveManager.configure({ getState: () => state, restore });
       Game.schoolLines.configure({ getState: () => state, refresh });
       Game.roleBook.configure({ getState: () => state });
-      Game.navigation.configure({ getState: () => state });
+      Game.navigation.configure({ getState: () => state, save });
       Game.appearance.configure({ getState: () => state });
       Game.actions.configure({ getState: () => state, refresh, save });
       Game.familySystem.configure({ getState: () => state, refresh, save });

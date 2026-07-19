@@ -14,6 +14,9 @@
     person.conflict = Number.isFinite(person.conflict) ? person.conflict : 0;
     person.lastInteractionMonth = Number.isFinite(person.lastInteractionMonth)
       ? person.lastInteractionMonth : state.totalMonths;
+    person.spouseId = typeof person.spouseId === 'string' ? person.spouseId : null;
+    person.childIds = Array.isArray(person.childIds) ? [...new Set(person.childIds)].slice(0, 3) : [];
+    person.parentIds = Array.isArray(person.parentIds) ? [...new Set(person.parentIds)].slice(0, 2) : [];
     if (child) {
       person.upbringing ||= { care: 50, education: 20, independence: 20, health: 60 };
       ['care', 'education', 'independence', 'health'].forEach((key) => {

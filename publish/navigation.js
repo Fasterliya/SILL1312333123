@@ -7,6 +7,7 @@
   let api = null;
   let activeCharacterId = null;
   let detailMode = '';
+  let characterHistory = [];
 
   function escape(value) {
     return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -35,14 +36,23 @@
     el.moduleContent.scrollTop = 0;
   }
 
+  function clearDetail() {
+    el.detailScreen.hidden = true;
+    el.detailContent.innerHTML = '';
+    activeCharacterId = null;
+    detailMode = '';
+    characterHistory = [];
+  }
+
   function closeModule() {
-    closeDetail();
+    clearDetail();
     el.moduleScreen.hidden = true;
   }
 
   function openDetail(title, html, mode) {
     detailMode = mode || 'generic';
     activeCharacterId = detailMode === 'character' ? activeCharacterId : null;
+    if (detailMode !== 'character') characterHistory = [];
     el.detailTitle.textContent = title;
     el.detailContent.innerHTML = html || '';
     el.detailScreen.hidden = false;
@@ -50,10 +60,17 @@
   }
 
   function closeDetail() {
-    el.detailScreen.hidden = true;
-    el.detailContent.innerHTML = '';
-    activeCharacterId = null;
-    detailMode = '';
+    if (detailMode === 'character' && characterHistory.length) {
+      const previousId = characterHistory.pop();
+      activeCharacterId = previousId;
+      const previous = findCharacter(api.getState(), previousId);
+      if (previous) {
+        el.detailContent.innerHTML = characterHtml(api.getState(), previous);
+        el.detailContent.scrollTop = 0;
+        return;
+      }
+    }
+    clearDetail();
   }
 
   function findCharacter(state, id) {
@@ -125,6 +142,7 @@
       ${section('外貌表现', '当前实际外观', looks, false)}
       ${section('遗传信息', 'DNA 与成长倾向', inherited, false)}
       ${section('人生状态', '学业、职业与家庭', life, false)}
+      ${Game.familyLinks.render(state, person)}
       ${Game.relationshipMemory.render(person)}</div>
       <details class="record-section npc-editor"><summary><span>编辑角色外观</span>
       <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}</div></details>
@@ -136,6 +154,10 @@
     const state = api.getState();
     const person = findCharacter(state, id);
     if (!person) return;
+    if (detailMode === 'character' && !el.detailScreen.hidden && activeCharacterId !== id) {
+      characterHistory.push(activeCharacterId);
+    } else if (detailMode !== 'character' || el.detailScreen.hidden) characterHistory = [];
+    if (Game.familyLinks.materialize(state, person)) api.save();
     activeCharacterId = id;
     openDetail('角色详情', characterHtml(state, person), 'character');
     activeCharacterId = id;

@@ -53,8 +53,8 @@
       careerCity: '',
       npcMarried: false,
       npcMarriedAtAge: null,
-      spouseName: '',
-      childrenCount: 0,
+      spouseName: '', spouseId: null,
+      childrenCount: 0, childIds: [], parentIds: [],
       lastLifeUpdateAge: null,
       status: '健康',
     };

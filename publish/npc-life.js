@@ -98,9 +98,14 @@
       person.npcMarriedAtAge = age;
       person.spouseName = U.makeName('', person.gender === '男' ? '女' : '男');
     }
+    if (person.spouseId && person.id > person.spouseId) return;
     if (!person.npcMarried || age < 25 || age > 45 || person.childrenCount >= 3) return;
     const yearsMarried = age - (person.npcMarriedAtAge || age);
-    if (yearsMarried >= 1 && Math.random() < 0.16) person.childrenCount += 1;
+    if (yearsMarried >= 1 && Math.random() < 0.16) {
+      person.childrenCount += 1;
+      const spouse = Game.people.find(state, person.spouseId);
+      if (spouse) spouse.childrenCount = person.childrenCount;
+    }
   }
 
   function appearance(person, age) {

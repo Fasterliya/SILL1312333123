@@ -69,7 +69,10 @@
     item.npcMarried ??= ['父亲', '母亲', '配偶'].includes(item.relation);
     item.npcMarriedAtAge ??= null;
     item.spouseName ||= '';
+    item.spouseId = typeof item.spouseId === 'string' ? item.spouseId : null;
     item.childrenCount ??= 0;
+    item.childIds = Array.isArray(item.childIds) ? item.childIds.slice(0, 3) : [];
+    item.parentIds = Array.isArray(item.parentIds) ? item.parentIds.slice(0, 2) : [];
     item.lastLifeUpdateAge ??= null;
     Game.genetics.ensure(item, item.gender, `legacy-${item.id || item.name}`, true);
     return item;

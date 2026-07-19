@@ -81,16 +81,17 @@
       return done();
     }
     if (decision.type === 'highSchool') {
-      const school = C.highSchools.find((item) => `${current.hometown.city}${item.suffix}` === value)
-        || C.highSchools[C.highSchools.length - 1];
+      const schools = Game.schoolLines.localHighSchools(current);
+      const school = schools.find((item) => Game.schoolLines.schoolName(current, item) === value)
+        || schools[schools.length - 1];
       const line = Game.schoolLines.highSchoolLine(current, school);
-      const hasEligible = C.highSchools.some((item) => (
+      const hasEligible = schools.some((item) => (
         decision.score >= Game.schoolLines.highSchoolLine(current, item)
       ));
       if (decision.score < line && hasEligible) {
         return Game.view.showToast('中考分数未达到该校当年录取线', 'warning');
       }
-      const schoolName = `${current.hometown.city}${school.suffix}`;
+      const schoolName = Game.schoolLines.schoolName(current, school);
       const vocational = school.program === 'vocational';
       Game.social.enterSchool(current, schoolName, vocational ? 'vocational' : 'high', 5);
       current.education.highSchoolType = school.type;
@@ -143,15 +144,16 @@
       Game.view.el.decisionTitle.textContent = `中考 ${d.score} 分，填报本地高中`;
       const paper = Game.schoolLines.examContext(current, 'middle');
       Game.view.el.decisionText.textContent = `${paper.year}年${paper.area}卷${paper.label}，录取线结合当地教育资源动态调整。`;
-      options = C.highSchools.filter((item) => d.score >= Game.schoolLines.highSchoolLine(current, item))
+      const schools = Game.schoolLines.localHighSchools(current);
+      options = schools.filter((item) => d.score >= Game.schoolLines.highSchoolLine(current, item))
         .map((item) => ({
-          value: `${current.hometown.city}${item.suffix}`,
-          label: `${current.hometown.city}${item.suffix} · ${item.type}${item.major ? ` · ${item.major}` : ''} · 线${Game.schoolLines.highSchoolLine(current, item)}`,
+          value: Game.schoolLines.schoolName(current, item),
+          label: `${Game.schoolLines.schoolName(current, item)} · ${item.type}${item.major ? ` · ${item.major}` : ''} · 线${Game.schoolLines.highSchoolLine(current, item)}`,
         }));
       if (!options.length) {
-        const school = C.highSchools[C.highSchools.length - 1];
-        options = [{ value: `${current.hometown.city}${school.suffix}`,
-          label: `${current.hometown.city}${school.suffix} · ${school.type} · 补录通道` }];
+        const school = schools[schools.length - 1];
+        options = [{ value: Game.schoolLines.schoolName(current, school),
+          label: `${Game.schoolLines.schoolName(current, school)} · ${school.type} · 补录通道` }];
       }
     } else if (d.type === 'track') {
       Game.view.el.decisionTitle.textContent = '高考选科';

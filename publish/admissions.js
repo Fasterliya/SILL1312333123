@@ -94,7 +94,7 @@
     const schools = filtered(state, score);
     const paper = Game.schoolLines.examContext(state, 'high');
     const guide = `<section class="admission-guide"><strong>高考 ${score} 分 · ${paper.area}卷${paper.label}</strong>
-      <span>${paper.year}年动态投档线已结合卷面难度、生源地竞争和学校教育资源。海外录取后会迁居当地学习。</span></section>`;
+      <span>${paper.year}年动态投档线按当前考试城市、生源竞争和学校教育资源计算。海外录取后会迁居当地学习。</span></section>`;
     const cards = schools.length ? schools.map((school) => card(state, school, score)).join('')
       : '<p class="empty-state">当前筛选没有符合条件的院校，请调整筛选范围。</p>';
     return `${guide}${selectors(schools, available)}<div class="admission-list">${cards}</div>

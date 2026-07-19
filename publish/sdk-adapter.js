@@ -42,6 +42,11 @@
     return sdk().kv.put(key, value, { flush: true });
   }
 
+  async function kvDelete(key) {
+    if (!sdk()?.kv?.delete) throw new Error('SDK_UNAVAILABLE');
+    return sdk().kv.delete(key);
+  }
+
   async function drawGenerate(options) {
     if (!sdk()?.draw?.generate) throw Object.assign(new Error('当前环境不支持立绘生成'), {
       code: 'SDK_UNAVAILABLE',
@@ -79,6 +84,7 @@
     error,
     kvGet,
     kvPut,
+    kvDelete,
     drawGenerate,
     drawGenerateModels,
   });

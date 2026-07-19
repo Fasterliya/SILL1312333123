@@ -1,0 +1,120 @@
+.save-overview {
+  padding: 13px;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.save-overview span,
+.save-overview strong,
+.save-overview small {
+  display: block;
+}
+
+.save-overview span,
+.save-overview small {
+  color: #64706c;
+  font-size: 10px;
+}
+
+.save-overview strong {
+  margin: 4px 0;
+  font-size: 16px;
+}
+
+.save-overview small + small {
+  margin-top: 3px;
+}
+
+.save-toolbar {
+  margin: 10px 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-toolbar button,
+.save-slot button {
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid #d5d7cf;
+  background: #fff;
+  color: #2d4943;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.save-slots {
+  display: grid;
+  gap: 8px;
+}
+
+.save-slots.busy {
+  opacity: 0.68;
+}
+
+.save-slot {
+  padding: 12px;
+  border: 1px solid #d9d7cd;
+  background: #fffdf7;
+}
+
+.save-slot.empty {
+  border-style: dashed;
+}
+
+.save-slot header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.save-slot header strong {
+  font-size: 13px;
+}
+
+.save-slot header span {
+  color: #66726e;
+  font-size: 9px;
+}
+
+.save-slot p {
+  margin: 8px 0 4px;
+  color: #44534f;
+  font-size: 11px;
+}
+
+.save-slot small {
+  color: #7a817e;
+  font-size: 9px;
+}
+
+.save-slot > div {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.save-slot button:first-child {
+  border-color: #315f58;
+  background: #315f58;
+  color: #fff;
+}
+
+.save-slot button.danger {
+  border-color: #d9b4af;
+  color: #a7352d;
+}
+
+.save-state {
+  margin: 0;
+  padding: 24px 12px;
+  border: 1px dashed #d3d5ce;
+  color: #66726e;
+  font-size: 11px;
+  text-align: center;
+}
+
+.save-state.error {
+  color: #a7352d;
+}

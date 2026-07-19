@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="./education.css">
   <link rel="stylesheet" href="./admissions.css">
   <link rel="stylesheet" href="./school-lines.css">
+  <link rel="stylesheet" href="./save-manager.css">
   <script src="./config.js" defer></script>
   <script src="./name-catalog.js" defer></script>
   <script src="./world-data.js" defer></script>
@@ -47,6 +48,7 @@
   <script src="./sdk-adapter.js" defer></script>
   <script src="./draw-settings.js" defer></script>
   <script src="./storage.js" defer></script>
+  <script src="./save-manager.js" defer></script>
   <script src="./portrait-gallery.js" defer></script>
   <script src="./portrait-intent.js" defer></script>
   <script src="./portrait-prompt.js" defer></script>
@@ -78,6 +80,8 @@
       <div class="hero-top">
         <div class="seal">生</div>
         <div class="hero-tools">
+          <button class="icon-btn" type="button" title="存档管理" aria-label="存档管理"
+            data-open-module="saveManagerSubpage" data-module-title="存档管理">▣</button>
           <button class="icon-btn" type="button" title="绘画设置" aria-label="绘画设置"
             data-open-module="drawSettingsSubpage" data-module-title="绘画设置">⚙</button>
           <button class="icon-btn" id="resetBtn" type="button" title="重新开始" aria-label="重新开始">↻</button>
@@ -258,6 +262,10 @@
       <div class="module-view" id="drawSettingsSubpage"><section class="panel">
         <div class="panel-title"><h2>绘画模型</h2><span>角色立绘</span></div>
         <div id="drawModelSettings"></div>
+      </section></div>
+      <div class="module-view" id="saveManagerSubpage"><section class="panel">
+        <div class="panel-title"><h2>存档与缓存</h2><span>自动存档 + 3 个手动档</span></div>
+        <div id="saveManager"></div>
       </section></div>
     </div>
   </section>

@@ -10,7 +10,10 @@
   Game.sdkAdapter.progress('start', '正在生成人生');
 
   function save() {
-    return Game.storage.save(state).catch((err) => {
+    return Game.storage.save(state).then((source) => {
+      Game.saveManager.render();
+      return source;
+    }).catch((err) => {
       console.error('存档失败:', err?.message, err?.stack);
     });
   }
@@ -97,17 +100,36 @@
     }
   }
 
+  async function restore(snapshot) {
+    if (busy || resetting) throw new Error('当前有操作正在进行');
+    busy = true;
+    try {
+      Game.portraitSystem.cancelAll();
+      Game.portraitGallery.close();
+      state = Game.stateUpgrade.upgradeState(snapshot);
+      Game.navigation.closeModule();
+      Game.profile.updateGrowth(state);
+      Game.npcLife.update(state);
+      refresh();
+      await Game.storage.save(state);
+    } finally {
+      busy = false;
+    }
+  }
+
   async function boot() {
     try {
       Game.view.init();
       Game.navigation.init();
       Game.portraitGallery.init();
       Game.lifeLoop.init();
+      Game.saveManager.init();
       state = Game.stateUpgrade.upgradeState(await Game.storage.load());
       Game.profile.configure({ getState: () => state, refresh, save });
       Game.portraitGallery.configure({ getState: () => state, refresh, save });
       Game.portraitSystem.configure({ getState: () => state, refresh, save });
       Game.drawSettings.configure({ getState: () => state, save });
+      Game.saveManager.configure({ getState: () => state, restore });
       Game.schoolLines.configure({ getState: () => state, refresh });
       Game.navigation.configure({ getState: () => state });
       Game.appearance.configure({ getState: () => state });
@@ -122,6 +144,7 @@
       bind();
       refresh();
       save();
+      Game.saveManager.load();
       Game.drawSettings.load();
       Game.sdkAdapter.progress('runtime_initializing', '人生档案已建立');
       root.requestAnimationFrame(() => {

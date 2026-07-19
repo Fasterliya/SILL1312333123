@@ -87,11 +87,15 @@
     try {
       const state = api.getState();
       const model = Game.drawSettings.selected(state);
+      const years = key === 'player' ? Game.content.age(state) : Game.content.personAge(state, target);
+      const ageNegative = Game.portraitAgePrompt.negative(years);
       const result = await retryDraw({
         prompt: description(state, target, key, custom, model),
         dimension: '2:3',
         model,
-        ...(model === 'iroha' ? { negativePrompt: irohaNegative } : {}),
+        ...((model === 'iroha' || ageNegative) ? {
+          negativePrompt: [model === 'iroha' ? irohaNegative : '', ageNegative].filter(Boolean).join(', '),
+        } : {}),
       });
       if (latest.get(key) !== requestId || findTarget(key) !== target) return;
       if (!Game.portraitGallery.add(key, result, custom)) throw new Error('绘图结果没有有效图片');

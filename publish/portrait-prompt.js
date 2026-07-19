@@ -94,14 +94,6 @@
     return Math.max(0, Math.min(120, Math.floor(Number(years) || 0)));
   }
 
-  function headRatio(years, height) {
-    if (height < 90) return 3.5;
-    if (height < 120) return 4.2;
-    if (height < 145) return 4.8;
-    if (height < 160) return 5.5;
-    return years < 18 ? 6 : 7;
-  }
-
   function appearanceLines(state, target, player) {
     const years = ageFor(state, target, player);
     const height = Number(target.height || 0);
@@ -113,7 +105,7 @@
       protectedAge ? '' : `age: ${years} years old`,
       `body_type: ${clean(target.bodyType)}, ${clean(target.bodyFrame)}`,
       `height: ${height.toFixed(1)} cm`,
-      protectedAge ? `body_proportion: ${headRatio(years, height).toFixed(1)} heads tall` : '',
+        ...Game.portraitAgePrompt.lines(years),
     ];
     return {
       years,
@@ -170,9 +162,12 @@
         'natural gesture', 'elegant posture', 'empty relaxed hands'];
     const finalLighting = intent.scene
       ? lighting.filter((line) => line !== 'clean background') : lighting;
+    const ageSafeDirection = appearance.years < 18
+      ? `AGE-SAFE PLAYER DIRECTION, follow only when age-appropriate and non-sexualized: ${intent.direction}`
+      : intent.direction;
     const customLine = model === 'iroha'
-      ? `PRIMARY PLAYER DIRECTION, must follow exactly: ${intent.direction}`
-      : `(${intent.direction}:1.8)`;
+      ? `PRIMARY PLAYER DIRECTION: ${ageSafeDirection}`
+      : `(${ageSafeDirection}:1.8)`;
     const culture = target.culture || (player ? state.hometown?.country : state.location.country) || '华夏';
     const identities = { 华夏: 'Chinese cultural identity', 日本: 'Japanese cultural identity',
       韩国: 'Korean cultural identity', 新加坡: 'Singaporean cultural identity',

@@ -5,6 +5,7 @@
   const U = Game.content;
   let state = null;
   let busy = false;
+  let resetting = false;
 
   Game.sdkAdapter.progress('start', '正在生成人生');
 
@@ -68,16 +69,32 @@
   }
 
   async function reset() {
+    if (resetting) return;
     if (!root.confirm('确定重新开始一段人生吗？当前存档会被覆盖。')) return;
-    Game.portraitSystem.cancelAll();
-    Game.portraitGallery.close();
-    await Game.storage.reset();
-    state = Game.stateUpgrade.upgradeState(U.createState());
-    Game.navigation.closeModule();
-    Game.profile.updateGrowth(state);
-    Game.npcLife.update(state);
-    refresh();
-    save();
+    resetting = true;
+    busy = true;
+    Game.view.el.resetBtn.disabled = true;
+    Game.view.el.resetBtn.setAttribute('aria-busy', 'true');
+    try {
+      const nextState = Game.stateUpgrade.upgradeState(U.createState());
+      Game.portraitSystem.cancelAll();
+      Game.portraitGallery.close();
+      Game.navigation.closeModule();
+      Game.profile.updateGrowth(nextState);
+      Game.npcLife.update(nextState);
+      state = nextState;
+      refresh();
+      await Game.storage.reset(state);
+      Game.view.showToast('新的人生已经开始', 'good');
+    } catch (err) {
+      console.error('重启人生失败:', err?.message, err?.stack);
+      Game.view.showToast('重启失败，请稍后重试', 'warning');
+    } finally {
+      resetting = false;
+      busy = false;
+      Game.view.el.resetBtn.disabled = false;
+      Game.view.el.resetBtn.removeAttribute('aria-busy');
+    }
   }
 
   async function boot() {

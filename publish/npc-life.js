@@ -109,13 +109,19 @@
     const schoolTops = girl
       ? ['水手服迷你裙', '水手服过膝裙', '西式制服百褶裙', '针织背心衬衫套装']
       : ['西式制服长裤', '学院西装长裤套装', '领带衬衫直筒裤', '校园运动外套'];
-    let tops = ['品质日常', '针织开衫', '衬衫牛仔裤套装'];
+    let tops = girl
+      ? ['品质日常', '针织开衫', '针织开衫连衣裙', '宽松毛衣半身裙', '衬衫牛仔裤套装']
+      : ['品质日常', '针织开衫', '衬衫牛仔裤套装'];
     if (age < 3) tops = ['婴儿连体衣'];
     else if (age < 6) tops = ['彩色童装'];
     else if (age < 18) tops = schoolTops;
-    else if (age < 22) tops = ['校园休闲', '复古学院背带裙', '棒球夹克校服套装'];
+    else if (age < 22) tops = girl
+      ? ['校园休闲', '复古学院背带裙', '针织开衫连衣裙', '棒球夹克校服套装']
+      : ['校园休闲', '棒球夹克校服套装', '衬衫牛仔裤套装'];
     else if (age >= 60) tops = ['舒适棉麻', '针织开衫', '北欧针织冬装'];
-    else if (person.job) tops = ['通勤正装', '职业衬衫西装裤', '单排扣西装套装', '品质日常'];
+    else if (person.job) tops = girl
+      ? ['通勤正装', '职业衬衫铅笔裙', '都市西装连衣裙', '法式小香套装', '职业衬衫西装裤']
+      : ['通勤正装', '职业衬衫西装裤', '单排扣西装套装', '品质日常'];
     if (sailorPreference) tops = ['水手服迷你裙'];
     person.clothing.top = U.random(tops);
     person.clothing.socks = sailorPreference ? '白色连裤袜'

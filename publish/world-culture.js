@@ -46,7 +46,10 @@
     } else if (['法国', '英国'].includes(country)) {
       person.clothing.top = Game.content.random(['针织开衫连衣裙', '长款大衣正装', '都市西装连衣裙']);
     } else if (['美国', '新加坡'].includes(country)) {
-      person.clothing.top = Game.content.random(['牛仔外套直筒裤', '城市轻奢旅行装', '简约T恤阔腿裤']);
+      const tops = person.gender === '女'
+        ? ['城市轻奢旅行装', '海滨度假长裙', '都市衬衫裙', '牛仔外套直筒裤']
+        : ['牛仔外套直筒裤', '城市轻奢旅行装', '简约T恤阔腿裤'];
+      person.clothing.top = Game.content.random(tops);
     }
     return person;
   }

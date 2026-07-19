@@ -97,13 +97,19 @@
     return pending;
   }
 
-  async function reset() {
-    memory = null;
-    try {
-      root.localStorage.removeItem(C.storageKey);
-    } catch (_) {
-      // 沙箱可能禁用本地存储。
-    }
+  function reset(value) {
+    const pending = queue.then(async () => {
+      memory = null;
+      try {
+        root.localStorage.removeItem(C.storageKey);
+      } catch (_) {
+        // 沙箱可能禁用本地存储。
+      }
+      if (!valid(value)) return 'cleared';
+      return saveNow(value)();
+    });
+    queue = pending.catch(() => undefined);
+    return pending;
   }
 
   Game.storage = Object.freeze({ load, save, reset });

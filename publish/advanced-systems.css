@@ -168,6 +168,87 @@
   font-weight: 800;
 }
 
+.interaction-menu {
+  grid-column: 1 / -1;
+  border: 1px solid #d8d9d2;
+  background: #fffdf7;
+}
+
+.interaction-menu summary {
+  min-height: 44px;
+  padding: 12px;
+  color: #315f58;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.interaction-options {
+  display: grid;
+  gap: 7px;
+  padding: 0 10px 10px;
+}
+
+.interaction-options button {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #c9d5d1;
+  background: #edf3ef;
+  color: #315f58;
+  font-size: 11px;
+  font-weight: 750;
+  text-align: left;
+}
+
+.detail-interactions {
+  position: sticky;
+  bottom: calc(-1 * max(20px, env(safe-area-inset-bottom)));
+  margin: 12px -12px 0;
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+.journey-current {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.journey-current span,
+.journey-current small {
+  color: #66726f;
+  line-height: 1.45;
+}
+
+.journey-progress {
+  height: 6px;
+  margin-top: 6px;
+  overflow: hidden;
+  background: #d9ddd6;
+}
+
+.journey-progress i {
+  display: block;
+  height: 100%;
+  background: #c23b32;
+}
+
+.journey-options {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.journey-options button {
+  min-height: 48px;
+  padding: 10px 12px;
+  background: #263b37;
+  color: #fff;
+  text-align: left;
+}
+
 @media (max-width: 420px) {
   .system-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));

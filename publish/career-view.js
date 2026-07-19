@@ -86,12 +86,13 @@
   }
 
   function renderCities(state) {
-    const filters = ['全部', '华夏', '日本', '核心城市', '低成本'];
+    const filters = ['全部', ...new Set(C.cities.map((city) => city.country)), '核心城市', '低成本'];
     const cities = C.cities.filter((city) => cityFilter === '全部' || city.country === cityFilter
       || (cityFilter === '核心城市' && city.tier === 1) || (cityFilter === '低成本' && city.cost <= 9000));
     return Game.cityLife.render(state) + chips(filters, cityFilter, 'data-city-filter') + cities.map((city) => (
       `<article class="city-row ${city.city === state.location.city ? 'current' : ''}">
-        <div><strong>${city.city}</strong><span>${city.country} · ${city.province} · ${city.tier === 1 ? '核心城市' : '发展城市'}</span></div>
+        <div><strong>${city.city}</strong><span>${city.country} · ${city.province} · ${city.tier === 1 ? '核心城市' : '发展城市'}
+        · ${Game.worldCulture.format(city.cost, city.country)}</span></div>
         <b>¥${city.cost.toLocaleString()}</b>
         <button data-city="${city.city}" ${city.city === state.location.city ? 'disabled' : ''}>迁居</button></article>`
     )).join('');

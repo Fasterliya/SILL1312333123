@@ -102,7 +102,7 @@
 
   function upgradeState(state) {
     state ||= U.createState();
-    state.version = 10;
+    state.version = Number(state.version) || 1;
     state.location.country ||= C.cities.find((city) => city.city === state.location.city)?.country || '华夏';
     state.hometown ||= { ...state.location };
     state.hometown.country ||= '华夏';
@@ -111,6 +111,12 @@
     delete state.stats.体魄;
     state.family = (state.family || []).map((item) => fillPerson(item, state.updatedAt));
     state.contacts = (state.contacts || []).map((item) => fillPerson(item, state.updatedAt));
+    state.matchmaking ||= { candidates: [] };
+    state.matchmaking.candidates = (state.matchmaking.candidates || [])
+      .map((item) => fillPerson(item, state.updatedAt));
+    state.travel ||= { activeId: null };
+    state.travel.encounters = (state.travel.encounters || [])
+      .map((item) => fillPerson(item, state.updatedAt));
     const father = state.family.find((item) => item.relation === '父亲');
     const mother = state.family.find((item) => item.relation === '母亲');
     if (father && mother) {
@@ -139,7 +145,6 @@
     state.assets.businesses ||= [];
     state.assets.vehicles ||= [];
     fillStocks(state);
-    state.travel ||= { activeId: null };
     state.routine ||= {};
     state.routine.actionMonth ??= state.totalMonths;
     state.routine.fatigue = U.clamp(Number(state.routine.fatigue) || 0, 0, 100);

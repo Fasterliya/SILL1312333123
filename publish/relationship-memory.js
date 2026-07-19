@@ -20,7 +20,7 @@
   }
 
   function monthly(state) {
-    [...state.family, ...state.contacts].forEach((person) => {
+    Game.people.all(state).forEach((person) => {
       ensure(state, person);
       if (person.status !== '健康') return;
       const quietMonths = state.totalMonths - person.lastInteractionMonth;

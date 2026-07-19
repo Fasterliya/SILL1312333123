@@ -14,7 +14,7 @@
   ];
 
   function activePerson(state) {
-    return state.contacts.find((person) => person.id === state.travel.activeId) || null;
+    return Game.people.find(state, state.travel.activeId);
   }
 
   function roam(state, areaName) {
@@ -31,13 +31,8 @@
     const person = U.person('路人', U.random(Game.nameSystem.surnames()), U.between(-5, 8), null, state.playerBornAt);
     person.affection = U.between(25, 42);
     person.metCity = `${state.location.city}${areaName}`;
-    if (state.location.country === '日本') {
-      person.name = Game.worldData.japaneseName(person.gender);
-      const tops = Game.appearanceCatalog.top.filter((entry) => entry.tags.includes('和风'));
-      const hairs = Game.appearanceCatalog.hairstyle.filter((entry) => entry.tags.includes('和风'));
-      person.clothing.top = U.random(tops).name;
-      person.hairstyle = U.random(hairs).name;
-    }
+    Game.worldCulture.applyPerson(person, state.location.country);
+    U.setUniqueName(state, person, Game.worldCulture.profile(state.location.country).locale);
     if (areaName === '城市漫展') {
       person.job = U.random(['职业Coser', '虚拟主播', '动画原画师', '漫展活动执行']);
       person.clothing.top = U.random(['舞台演出礼服', '毕业袴套装', '复古灯笼袖长裙']);
@@ -45,7 +40,8 @@
       person.job = U.random(['写真博主', '穿搭博主', '自由插画师', '商业摄影师']);
     }
     Game.npcLife.syncGrowth(state, person);
-    state.contacts.push(person);
+    state.travel.encounters = state.travel.encounters.filter((item) => item.id !== state.travel.activeId);
+    state.travel.encounters.push(person);
     state.travel.activeId = person.id;
     state.stats.心情 = U.clamp(state.stats.心情 + 3, 0, 100);
     Game.lifeDirector.addLog(state, '街头相遇', `你在${areaName}遇见了${person.name}。`, 'good');

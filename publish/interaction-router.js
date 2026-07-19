@@ -124,6 +124,10 @@
   }
 
   function handleAssets(event, state) {
+    const journeyStart = event.target.closest('[data-journey-start]');
+    if (journeyStart) return finish(Game.journeySystem.start(state, journeyStart.dataset.journeyStart)), true;
+    const journeyChoice = event.target.closest('[data-journey-choice]');
+    if (journeyChoice) return finish(Game.journeySystem.choose(state, journeyChoice.dataset.journeyChoice)), true;
     const roam = event.target.closest('[data-roam-area]');
     if (roam) return finish(Game.travelSystem.roam(state, roam.dataset.roamArea)), true;
     const business = event.target.closest('[data-business]');

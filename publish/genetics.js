@@ -100,6 +100,10 @@
       const matched = definition.values.find((item) => item.value === current);
       loci[key] = [allele(matched || weighted(definition, rng)), allele(weighted(definition, rng))];
     });
+    if (gender === '女' && rng() < 0.32) {
+      const petite = catalog.loci.bodyFrame.values.find((item) => item.value === '娇小骨架');
+      loci.bodyFrame = [allele(petite), allele(petite)];
+    }
     const base = gender === '男' ? 175 : 164;
     const currentHeight = Number(target.maxHeight) || base + (Number(target.growthSeed) || 0);
     const maxHeight = [currentHeight + Math.round((rng() - 0.5) * 5), currentHeight + Math.round((rng() - 0.5) * 5)];

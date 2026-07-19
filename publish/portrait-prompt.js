@@ -121,11 +121,12 @@
     if (cosplay.name !== '无') {
       const prompt = clean(cosplay.prompt);
       return [
+        `character_cosplay: ${section(prompt, '角色识别')}`,
         `outfit: ${section(prompt, '主体服装与发型')}, ${section(prompt, '材质与颜色')}`,
-        `stockings: ${socks}`,
+        `stockings: ${socks}, ${section(prompt, '袜装与腿部')}`,
         `shoes: ${section(prompt, '鞋履')}`,
         `accessories: ${section(prompt, '头饰与配饰')}, ${section(prompt, '标志性元素')}`,
-        `headwear: ${section(prompt, '头饰与配饰')}`,
+        `headwear: exact signature head ornament matching ${cosplay.series} ${cosplay.character}`,
         prompt.includes('手套') ? 'gloves: character-specific gloves matching the outfit' : '',
       ].filter(Boolean);
     }

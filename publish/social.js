@@ -5,11 +5,7 @@
   const U = Game.content;
   let classFilter = '全部';
 
-  function archiveSchool(state) {
-    state.contacts.forEach((person) => {
-      if (person.school === state.education.school && person.interactions > 0) person.phoneUnlocked = true;
-    });
-  }
+  function archiveSchool() {}
 
   function createClassmates(state, school, count) {
     const existing = state.contacts.filter((item) => item.school === school);
@@ -63,6 +59,7 @@
         person.affection = Math.max(0, person.affection - 4);
         return { ok: false, message: `${person.name}暂时没有接受告白` };
       }
+      Game.people.addContact(state, person);
       state.romance.partnerId = person.id;
       person.relation = '恋人';
       Game.relationshipMemory.record(state, person, '关系', '确认了恋爱关系', 12, -4);
@@ -97,10 +94,10 @@
   }
 
   function interact(state, id, type) {
-    const person = state.contacts.find((item) => item.id === id);
+    const person = Game.people.find(state, id);
     if (!person || person.status !== '健康') return { ok: false, message: '无法联系这位角色' };
     const accessible = person.school === state.education.school || person.phoneUnlocked
-      || ['相亲对象', '路人', '恋人'].includes(person.relation);
+      || Game.people.isExternal(state, person) || person.relation === '恋人';
     if (!accessible) return { ok: false, message: '毕业前没有留下联系方式' };
     const romantic = romance(state, person, type);
     if (romantic) {
@@ -126,8 +123,7 @@
     state.stats.心情 = U.clamp(state.stats.心情 + action[2], 0, 100);
     if (type === 'study') state.education.study += 4;
     if (type === 'exchange') {
-      person.phoneUnlocked = true;
-      if (person.relation === '路人') person.relation = '朋友';
+      Game.people.addContact(state, person);
     } else if (person.affection >= 75 && person.relation === '同学') person.relation = '好友';
     Game.lifeDirector.addLog(state, `与${person.name}互动`, action[3], 'good');
     Game.relationshipMemory.record(state, person, '日常互动', action[3], Math.max(2, action[1] - 2), -1);
@@ -142,7 +138,8 @@
       data-character-id="${person.id}" aria-label="查看${person.name}详情">${Game.portraitSystem.avatar(person)}</button>
       <div class="contact-main"><strong>${person.name}</strong>
       <span>${person.relation} · ${person.personality} · ${person.trait} · 好感 ${person.affection}</span>
-      <small>${person.school || person.metCity || '生活圈'}</small></div><div class="contact-actions">${buttons}</div></article>`;
+      <small>${person.school || person.metCity || '生活圈'}</small></div>
+      <details class="interaction-menu"><summary>互动选项</summary><div class="interaction-options">${buttons}</div></details></article>`;
   }
 
   function filteredClassmates(state) {
@@ -167,7 +164,7 @@
     if (U.age(state) < 6 || !all.length) return '<p class="empty-state">当前阶段还没有固定同窗。</p>';
     const contacts = filteredClassmates(state);
     return filterBar(all.length) + (contacts.length ? contacts.map((item) => (
-      card(item, [['chat', '聊天'], ['study', '共学']])
+      card(item, [['chat', '聊天'], ['study', '共学'], ...(item.phoneUnlocked ? [] : [['exchange', '加联系人']])])
     )).join('') : '<p class="empty-state">当前筛选没有符合条件的同学。</p>');
   }
 
@@ -180,7 +177,7 @@
   function detailActions(state, person) {
     const actions = [['chat', '聊天'], ['meal', '约饭'], ['gift', '送礼'], ['walk', '散步']];
     if (person.school === state.education.school) actions.splice(1, 0, ['study', '共学']);
-    if (person.relation === '路人' && !person.phoneUnlocked) actions.push(['exchange', '交换联系方式']);
+    if (!person.phoneUnlocked) actions.push(['exchange', '交换联系方式']);
     if (state.romance.partnerId === person.id) actions.push(['date', '约会'], ['propose', '求婚']);
     else if (!state.romance.partnerId && U.age(state) >= 16 && person.affection >= 62) actions.push(['confess', '告白']);
     else if (person.relation === '相亲对象') actions.push(['date', '约会']);

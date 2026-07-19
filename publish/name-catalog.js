@@ -25,6 +25,21 @@
       male: ['悠真', '莲', '拓海', '直树', '翔太', '悠斗', '和也', '大辅', '健太', '凉介'],
       female: ['葵', '凛', '结衣', '阳菜', '美月', '千夏', '樱', '美咲', '七海', '玲奈'],
     },
+    'ko-KR': {
+      surnames: ['金', '李', '朴', '崔', '郑', '姜', '赵', '尹'],
+      male: ['敏俊', '志勋', '贤宇', '道允', '俊昊', '泰成', '成珉', '宇镇'],
+      female: ['智恩', '秀妍', '书妍', '多恩', '允儿', '海仁', '彩英', '恩彩'],
+    },
+    'en-US': {
+      surnames: ['Smith ', 'Johnson ', 'Brown ', 'Miller ', 'Davis ', 'Wilson '],
+      male: ['Alex', 'Daniel', 'Ethan', 'Julian', 'Noah', 'Ryan'],
+      female: ['Emma', 'Olivia', 'Chloe', 'Grace', 'Mia', 'Sophie'],
+    },
+    'fr-FR': {
+      surnames: ['Martin ', 'Bernard ', 'Dubois ', 'Thomas ', 'Robert ', 'Petit '],
+      male: ['Louis', 'Hugo', 'Gabriel', 'Arthur', 'Jules', 'Theo'],
+      female: ['Lea', 'Camille', 'Manon', 'Chloe', 'Ines', 'Juliette'],
+    },
   };
 
   const random = (list) => list[Math.floor(Math.random() * list.length)];
@@ -36,7 +51,7 @@
   }
 
   function setUnique(state, person, culture) {
-    const used = new Set([state.name, ...state.family, ...state.contacts].map((item) => (
+    const used = new Set([state.name, ...(Game.people ? Game.people.all(state) : [...state.family, ...state.contacts])].map((item) => (
       typeof item === 'string' ? item : item?.name
     )));
     for (let attempt = 0; attempt < 24; attempt += 1) {

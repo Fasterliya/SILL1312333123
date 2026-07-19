@@ -10,6 +10,13 @@
     { city: '京都', province: '京都府', country: '日本', tier: 2, cost: 16000 },
     { city: '福冈', province: '福冈县', country: '日本', tier: 2, cost: 13500 },
     { city: '札幌', province: '北海道', country: '日本', tier: 3, cost: 12000 },
+    { city: '首尔', province: '首尔特别市', country: '韩国', tier: 1, cost: 22000 },
+    { city: '釜山', province: '釜山广域市', country: '韩国', tier: 2, cost: 16000 },
+    { city: '新加坡', province: '新加坡', country: '新加坡', tier: 1, cost: 26000 },
+    { city: '巴黎', province: '法兰西岛', country: '法国', tier: 1, cost: 30000 },
+    { city: '伦敦', province: '大伦敦', country: '英国', tier: 1, cost: 32000 },
+    { city: '纽约', province: '纽约州', country: '美国', tier: 1, cost: 33000 },
+    { city: '旧金山', province: '加利福尼亚州', country: '美国', tier: 1, cost: 31000 },
   );
 
   const companyMap = {

@@ -27,7 +27,7 @@
     if (U.age(state) < 18) return 0;
     const city = info(state);
     const base = city.tier === 1 ? 2800 : (city.tier === 2 ? 1900 : 1250);
-    const country = city.country === '日本' ? 1.18 : 1;
+    const country = Game.worldCulture.profile(city.country).cost;
     return Math.round(base * country * (state.assets.house ? 0.72 : 1));
   }
 
@@ -58,16 +58,19 @@
       if (current.tier === 1 && state.career.job) state.career.performance = U.clamp(state.career.performance + 1, 0, 100);
       if (current.tier === 1) state.stats.心情 = U.clamp(state.stats.心情 - 1, 0, 100);
       if (current.tier === 3) state.stats.健康 = U.clamp(state.stats.健康 + 1, 0, 100);
-      if (current.country === '日本') state.stats.魅力 = U.clamp(state.stats.魅力 + 1, 0, 100);
+      if (current.country !== '华夏') state.stats.魅力 = U.clamp(state.stats.魅力 + 1, 0, 100);
     }
   }
 
   function render(state) {
     const city = info(state);
     const familiarity = Math.round(state.cityLife.familiarity[city.city] || 0);
+    const local = Game.worldCulture.format(monthlyCost(state), city.country);
+    const etiquette = Game.worldCulture.profile(city.country).etiquette;
     return `<section class="city-profile"><div><span>${city.country || '华夏'} · ${city.province}</span>
-      <strong>${city.city}</strong><small>${traits(city).join(' · ')}</small></div>
+      <strong>${city.city}</strong><small>${traits(city).join(' · ')} · ${etiquette}</small></div>
       <dl><div><dt>月生活费</dt><dd>¥${monthlyCost(state).toLocaleString()}</dd></div>
+      <div><dt>当地货币</dt><dd>${local}</dd></div>
       <div><dt>城市熟悉</dt><dd>${familiarity}</dd></div><div><dt>城市声望</dt>
       <dd>${Math.round(state.cityLife.reputation)}</dd></div></dl></section>`;
   }

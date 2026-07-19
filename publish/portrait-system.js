@@ -26,7 +26,7 @@
   function findTarget(key) {
     const state = api.getState();
     if (key === 'player') return state.profile;
-    return [...state.family, ...state.contacts].find((person) => person.id === key) || null;
+    return Game.people.find(state, key);
   }
 
   function description(state, target, key, custom) {

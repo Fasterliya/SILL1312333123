@@ -117,6 +117,9 @@
     state.legacy.inheritedMoney += inherited;
     state.family = normalizeFamily(state, heir, record, oldProfile);
     state.contacts = [];
+    state.matchmaking = { candidates: [] };
+    state.travel = { activeId: null, encounters: [], journey: null,
+      history: state.travel.history || [] };
     state.name = heir.name;
     state.gender = heir.gender;
     state.playerBornAt = heir.birthMonth;

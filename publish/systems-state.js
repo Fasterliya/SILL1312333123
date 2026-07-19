@@ -24,7 +24,22 @@
   }
 
   function ensure(state) {
-    state.version = 10;
+    const sourceVersion = Number(state.version) || 1;
+    state.matchmaking ||= { candidates: [] };
+    state.matchmaking.candidates = Array.isArray(state.matchmaking.candidates) ? state.matchmaking.candidates : [];
+    state.travel ||= { activeId: null };
+    state.travel.encounters = Array.isArray(state.travel.encounters) ? state.travel.encounters : [];
+    state.travel.history = Array.isArray(state.travel.history) ? state.travel.history.slice(-20) : [];
+    state.travel.journey ||= null;
+    if (sourceVersion < 11) {
+      const candidates = state.contacts.filter((person) => (
+        person.relation === '相亲对象' && person.id !== state.romance?.partnerId
+      ));
+      candidates.forEach((person) => { person.phoneUnlocked = false; });
+      state.matchmaking.candidates.push(...candidates);
+      state.contacts = state.contacts.filter((person) => !candidates.includes(person));
+    }
+    state.version = 11;
     state.playerBornAt = Number.isFinite(state.playerBornAt) ? state.playerBornAt : 0;
     state.generation = Math.max(1, Math.floor(Number(state.generation) || 1));
     state.profile.birthMonth = state.playerBornAt;
@@ -55,8 +70,7 @@
     state.career.skills ||= {};
     state.career.projects = Array.isArray(state.career.projects) ? state.career.projects.slice(-12) : [];
     state.career.burnout = Math.max(0, Math.min(100, Number(state.career.burnout) || 0));
-    state.family.forEach((person) => ensurePerson(state, person));
-    state.contacts.forEach((person) => ensurePerson(state, person));
+    Game.people.all(state).forEach((person) => ensurePerson(state, person));
     return state;
   }
 

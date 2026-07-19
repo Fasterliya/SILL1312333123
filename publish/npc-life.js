@@ -73,6 +73,7 @@
 
   function appearance(person, age) {
     const girl = person.gender === '女';
+    const sailorPreference = girl && age >= 12 && age <= 30 && Math.random() < 0.36;
     const schoolTops = girl
       ? ['水手服迷你裙', '水手服过膝裙', '西式制服百褶裙', '针织背心衬衫套装']
       : ['西式制服长裤', '学院西装长裤套装', '领带衬衫直筒裤', '校园运动外套'];
@@ -83,8 +84,10 @@
     else if (age < 22) tops = ['校园休闲', '复古学院背带裙', '棒球夹克校服套装'];
     else if (age >= 60) tops = ['舒适棉麻', '针织开衫', '北欧针织冬装'];
     else if (person.job) tops = ['通勤正装', '职业衬衫西装裤', '单排扣西装套装', '品质日常'];
+    if (sailorPreference) tops = ['水手服迷你裙'];
     person.clothing.top = U.random(tops);
-    person.clothing.socks = age < 3 ? '婴儿袜' : (age < 18 ? '白色中筒袜' : '短棉袜');
+    person.clothing.socks = sailorPreference ? '白色连裤袜'
+      : (age < 3 ? '婴儿袜' : (age < 18 ? '白色中筒袜' : '短棉袜'));
     person.clothing.shoes = age < 3 ? '婴儿软底鞋' : (age < 7 ? '魔术贴童鞋' : U.random(['帆布鞋', '白色运动鞋', '乐福鞋']));
     Game.geneticsGrowth.applyAppearance(person, person.gender, age);
   }
@@ -104,7 +107,7 @@
   }
 
   function update(state) {
-    [...state.family, ...state.contacts].forEach((person) => {
+    Game.people.all(state).forEach((person) => {
       if (person.status === '健康') updatePerson(state, person);
     });
   }

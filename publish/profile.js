@@ -38,7 +38,10 @@
       ['品质日常', '短棉袜', '乐福鞋'],
       ['舒适棉麻', '羊毛袜', '舒适布鞋'],
     ];
-    const values = styles[phase];
+    let values = styles[phase];
+    if (state.gender === '女' && [3, 4].includes(phase) && Math.random() < 0.34) {
+      values = ['水手服迷你裙', '白色连裤袜', '乐福鞋'];
+    }
     p.clothing = { top: values[0], socks: values[1], shoes: values[2] };
     p.styleStage = phase;
   }
@@ -111,7 +114,7 @@
     const key = field.startsWith('clothing.') ? field.split('.')[1] : field;
     if (!optionsFor(key)?.some((item) => item.name === nextValue)) return false;
     const state = api.getState();
-    const target = [...state.family, ...state.contacts].find((person) => person.id === targetId);
+    const target = Game.people.find(state, targetId);
     if (!target) return false;
     if (Game.cosplayCatalog.overrides(target, field)) return false;
     if (field.startsWith('clothing.')) target.clothing[key] = nextValue;

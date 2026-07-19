@@ -48,7 +48,7 @@
   function render() {
     const state = api.getState();
     const profile = activeTargetId
-      ? [...state.family, ...state.contacts].find((person) => person.id === activeTargetId)
+      ? Game.people.find(state, activeTargetId)
       : state.profile;
     if (!profile) return Game.navigation.closeDetail();
     const years = activeTargetId ? Game.content.personAge(state, profile) : Game.content.age(state);
@@ -82,7 +82,7 @@
     if (!labels[field] || !optionsFor(keyFor(field))) return;
     const state = api.getState();
     const profile = targetId
-      ? [...state.family, ...state.contacts].find((person) => person.id === targetId)
+      ? Game.people.find(state, targetId)
       : state.profile;
     if (!profile || Game.cosplayCatalog.overrides(profile, field)) {
       Game.view.showToast('当前造型由COS服覆盖，取消COS后可以编辑', 'warning');

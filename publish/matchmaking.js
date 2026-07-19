@@ -9,26 +9,28 @@
     if (state.romance.partnerId) return { ok: false, message: '已有稳定关系，不需要刷新相亲名单' };
     if (state.money < 500) return { ok: false, message: '整理相亲名单需要 ¥500' };
     state.money -= 500;
-    state.contacts = state.contacts.filter((item) => item.relation !== '相亲对象');
+    state.matchmaking.candidates = [];
     for (let index = 0; index < 10; index += 1) {
       const person = U.person('相亲对象', U.random(Game.nameSystem.surnames()), U.between(-4, 8), null, state.playerBornAt);
-      if (state.location.country === '日本') person.name = Game.worldData.japaneseName(person.gender);
+      Game.worldCulture.applyPerson(person, state.location.country);
+      U.setUniqueName(state, person, Game.worldCulture.profile(state.location.country).locale);
       person.affection = U.between(38, 58);
-      person.phoneUnlocked = true;
+      person.phoneUnlocked = false;
       person.metCity = state.location.city;
       Game.npcLife.syncGrowth(state, person);
-      state.contacts.push(person);
+      state.matchmaking.candidates.push(person);
     }
     return { ok: true, message: '新的相亲名单已经整理好' };
   }
 
   function render(state) {
     if (U.age(state) < 20) return '<p class="empty-state">20岁后开放相亲活动。</p>';
-    const matches = state.contacts.filter((item) => item.relation === '相亲对象');
+    const matches = state.matchmaking.candidates;
     const head = `<section class="list-guide"><strong>城市相亲会</strong><span>见面、约会并培养好感，关系成熟后可以告白。</span></section>
-      <button class="wide-action" data-create-matches>刷新10位相亲对象 · ¥500</button>`;
+      <button class="wide-action" data-create-matches>刷新10位相亲对象 · ¥500
+      · ${Game.worldCulture.format(500, state.location.country)}</button>`;
     return head + (matches.length ? matches.map((item) => (
-      Game.social.card(item, [['chat', '聊天'], ['date', '约会']])
+      Game.social.card(item, [['chat', '聊天'], ['date', '约会'], ['exchange', '加联系人']])
     )).join('') : '<p class="empty-state">点击上方按钮生成本地相亲名单。</p>');
   }
 

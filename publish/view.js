@@ -6,7 +6,7 @@
   const ids = [
     'profileName', 'profileMeta', 'ageValue', 'stageValue', 'moneyValue', 'lifeDate',
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
-    'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'travelPanel',
+    'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'travelPanel', 'journeyPanel',
     'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
@@ -157,6 +157,7 @@
     el.careerPanel.innerHTML = Game.careerView.renderCareer(state, money);
     el.cityPanel.innerHTML = Game.careerView.renderCities(state);
     el.travelPanel.innerHTML = Game.travelSystem.render(state);
+    el.journeyPanel.innerHTML = Game.journeySystem.render(state);
     el.propertyPanel.innerHTML = properties(state);
     el.stockPanel.innerHTML = stocks(state);
     el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);

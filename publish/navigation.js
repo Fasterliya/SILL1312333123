@@ -57,7 +57,7 @@
   }
 
   function findCharacter(state, id) {
-    return [...state.family, ...state.contacts].find((person) => person.id === id) || null;
+    return Game.people.find(state, id);
   }
 
   function detailActions(state, person) {
@@ -128,7 +128,8 @@
       ${Game.relationshipMemory.render(person)}</div>
       <details class="record-section npc-editor"><summary><span>编辑角色外观</span>
       <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}</div></details>
-      <section class="detail-actions">${detailActions(state, person)}</section>`;
+      <details class="interaction-menu detail-interactions"><summary>互动选项</summary>
+      <div class="interaction-options">${detailActions(state, person)}</div></details>`;
   }
 
   function openCharacter(id) {

@@ -17,6 +17,7 @@
     const target = Math.max(30, count || 32);
     for (let index = existing.length; index < target; index += 1) {
       const person = U.person('同学', U.random(C.surnames), U.between(-1, 1));
+      U.setUniqueName(state, person);
       person.school = school;
       person.educationName = school;
       person.educationStage = state.education.schoolStage;
@@ -98,10 +99,8 @@
     const accessible = person.school === state.education.school || person.phoneUnlocked
       || ['相亲对象', '路人', '恋人'].includes(person.relation);
     if (!accessible) return { ok: false, message: '毕业前没有留下联系方式' };
-    if (person.lastInteractionMonth === state.totalMonths) return { ok: false, message: '本月已经互动过' };
     const romantic = romance(state, person, type);
     if (romantic) {
-      person.lastInteractionMonth = state.totalMonths;
       person.interactions += 1;
       return romantic;
     }
@@ -119,7 +118,6 @@
     const action = actions[type] || actions.chat;
     if (!spend(state, action[0])) return { ok: false, message: `这次互动需要 ¥${action[0]}` };
     if (type === 'exchange' && person.affection < 42) return { ok: false, message: '再熟悉一些后更容易交换联系方式' };
-    person.lastInteractionMonth = state.totalMonths;
     person.interactions += 1;
     person.affection = U.clamp(person.affection + action[1], 0, 100);
     state.stats.心情 = U.clamp(state.stats.心情 + action[2], 0, 100);

@@ -42,7 +42,9 @@
       return;
     }
     if (age < 20 || person.job || Math.random() > (age >= 22 ? 0.86 : 0.35)) return;
-    const job = U.random(C.jobs.filter((item) => age >= 22 || item.need <= 58));
+    const job = U.random(C.jobs.filter((item) => (
+      (age >= 22 || item.need <= 58) && (!item.recommendedGender || item.recommendedGender === person.gender)
+    )));
     person.job = job.name;
     person.company = job.company || '城市企业';
     person.careerCity = job.cities?.length ? U.random(job.cities) : (person.metCity || state.location.city);

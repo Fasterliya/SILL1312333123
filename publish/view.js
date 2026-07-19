@@ -107,9 +107,11 @@
       `<span>${name}<b>${score}</b></span>`
     )).join('') : '<p class="empty-state">还没有考试记录。</p>';
     const track = state.education.track
-      ? `${state.education.track} + ${state.education.electives.join('、')}` : '尚未选科';
+      ? [state.education.track, ...state.education.electives].join(' + ') : '尚未选科';
     return `<div class="detail-row"><span>当前阶段</span><b>${U.gradeLabel(state)}</b></div>
       <div class="detail-row"><span>学校</span><b>${state.education.school}</b></div>
+      <div class="detail-row"><span>教育路径</span><b>${state.education.path || '-'}</b></div>
+      <div class="detail-row"><span>高中类型</span><b>${state.education.highSchoolType || '-'}</b></div>
       <div class="detail-row"><span>学校类型</span><b>${state.education.universityType || '-'}</b></div>
       <div class="detail-row"><span>专业/选科</span><b>${state.education.major || track}</b></div>
       <div class="detail-row"><span>学习积累</span><b>${state.education.study}</b></div>
@@ -140,7 +142,7 @@
     el.profileName.textContent = state.name;
     el.profileMeta.textContent = `${state.gender} · ${state.location.country || '华夏'} ${state.location.city}`;
     el.ageValue.textContent = `${years}岁${state.totalMonths % 12}月`;
-    el.stageValue.textContent = U.stage(years).name;
+    el.stageValue.textContent = state.education.schoolStage === 'workforce' ? '职业起步' : U.stage(years).name;
     el.moneyValue.textContent = money(state.money);
     el.lifeDate.textContent = `${state.year}年${state.month}月`;
     el.statGrid.innerHTML = statCards(state);
@@ -150,8 +152,8 @@
     el.phoneList.innerHTML = Game.social.renderPhone(state);
     el.matchmakingList.innerHTML = Game.matchmaking.render(state);
     el.educationPanel.innerHTML = education(state);
-    el.careerPanel.innerHTML = Game.careerSystem.renderCareer(state, money);
-    el.cityPanel.innerHTML = Game.careerSystem.renderCities(state);
+    el.careerPanel.innerHTML = Game.careerView.renderCareer(state, money);
+    el.cityPanel.innerHTML = Game.careerView.renderCities(state);
     el.travelPanel.innerHTML = Game.travelSystem.render(state);
     el.propertyPanel.innerHTML = properties(state);
     el.stockPanel.innerHTML = stocks(state);

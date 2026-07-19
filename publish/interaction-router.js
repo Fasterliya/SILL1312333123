@@ -64,20 +64,27 @@
   function handleCareer(event, state) {
     const filter = event.target.closest('[data-job-filter]');
     if (filter) {
-      Game.careerSystem.setJobFilter(filter.dataset.jobFilter);
+      Game.careerView.setJobFilter(filter.dataset.jobFilter);
       api.refresh();
       return true;
     }
     const cityFilter = event.target.closest('[data-city-filter]');
     if (cityFilter) {
-      Game.careerSystem.setCityFilter(cityFilter.dataset.cityFilter);
+      Game.careerView.setCityFilter(cityFilter.dataset.cityFilter);
       api.refresh();
       return true;
     }
     const work = event.target.closest('[data-work-action]');
     if (work) return finish(Game.careerSystem.work(state, work.dataset.workAction)), true;
-    const job = event.target.closest('[data-job]');
-    if (job) return finish(Game.careerSystem.apply(state, job.dataset.job)), true;
+    const detail = event.target.closest('[data-job-detail]');
+    if (detail) return Game.careerView.openJob(state, detail.dataset.jobDetail), true;
+    const apply = event.target.closest('[data-job-apply]');
+    if (apply) {
+      const result = Game.careerSystem.apply(state, apply.dataset.jobApply);
+      finish(result);
+      if (result.ok) Game.navigation.closeDetail();
+      return true;
+    }
     const city = event.target.closest('[data-city]');
     if (city) {
       if (root.confirm(`确定迁居${city.dataset.city}吗？当前非自由职业会结束。`)) {

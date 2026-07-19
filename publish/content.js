@@ -6,7 +6,26 @@
   const random = (list) => list[Math.floor(Math.random() * list.length)];
   const between = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const makeName = (surname) => (surname || random(C.surnames)) + random(C.givenNames);
+  const makeName = (surname) => {
+    if (!surname && C.fullNames?.length && Math.random() < 0.65) return random(C.fullNames);
+    return (surname || random(C.surnames)) + random(C.givenNames);
+  };
+
+  function setUniqueName(state, person) {
+    const used = (name) => [...state.family, ...state.contacts].some((item) => item.name === name);
+    const fixed = C.fullNames?.find((name) => !used(name));
+    if (fixed) {
+      person.name = fixed;
+      return;
+    }
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      const candidate = makeName(random(C.surnames));
+      if (!used(candidate)) {
+        person.name = candidate;
+        return;
+      }
+    }
+  }
 
   function clothing(top) {
     return { top: top || '品质日常', socks: '短棉袜', shoes: '白色运动鞋' };
@@ -15,7 +34,8 @@
   function person(relation, surname, age, gender) {
     return {
       id: `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
-      name: makeName(surname),
+      name: !['父亲', '母亲', '哥哥', '姐姐', '弟弟', '妹妹', '儿子', '女儿'].includes(relation)
+        && C.fullNames?.length && Math.random() < 0.55 ? random(C.fullNames) : makeName(surname),
       relation,
       gender: gender || random(['男', '女']),
       baseAge: age,
@@ -33,7 +53,6 @@
       customPrompt: '',
       metCity: '',
       interactions: 0,
-      lastInteractionMonth: -1,
       phoneUnlocked: false,
       school: '',
       educationName: '',
@@ -105,7 +124,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 5,
+      version: 6,
       updatedAt: new Date().toISOString(),
       name: makeName(surname),
       surname,
@@ -123,17 +142,17 @@
       contacts: [],
       education: {
         study: 0, track: null, electives: [], school: '家中', schoolStage: 'home',
+        highSchoolType: null, vocationalMajor: null, path: '基础教育',
         university: null, universityType: null, major: null, graduated: false, exams: [],
       },
       career: {
         job: null, jobId: null, company: null, salary: 0, level: 0, exp: 0,
-        performance: 0, lastWorkMonth: -1, lastPromotionMonth: -12, applications: [],
+        performance: 0, lastPromotionMonth: -12, applications: [],
       },
       romance: { partnerId: null, married: false, pendingBirth: 0 },
       assets: { house: null, mortgage: 0, stocks: stockState(), businesses: [], vehicles: [] },
-      travel: { activeId: null, lastMonth: -1 },
+      travel: { activeId: null },
       pendingDecision: null,
-      monthActionTaken: false,
       gameOver: false,
       logs: [log('呱呱坠地', `你出生在${location[0]}${location[1]}，父母为你取名${surname}家新生命。`, 'milestone', 0)],
     };
@@ -151,15 +170,17 @@
 
   function gradeLabel(state) {
     const years = age(state);
+    if (state.education.schoolStage === 'workforce') return '职业起步';
     if (years >= 6 && years <= 11) return `小学${years - 5}年级`;
     if (years >= 12 && years <= 14) return `初中${years - 11}年级`;
+    if (years >= 15 && years <= 17 && state.education.schoolStage === 'vocational') return `职高${years - 14}年级`;
     if (years >= 15 && years <= 17) return `高中${years - 14}年级`;
     if (years >= 18 && years <= 21 && state.education.university) return `大学${years - 17}年级`;
     return stage(years).name;
   }
 
   Game.content = Object.freeze({
-    random, between, clamp, makeName, clothing, stockState, person, log,
+    random, between, clamp, makeName, setUniqueName, clothing, stockState, person, log,
     createState, age, stage, personAge, gradeLabel,
   });
 }(window));

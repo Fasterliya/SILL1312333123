@@ -27,20 +27,34 @@
   C.jobs.forEach((job) => {
     [job.company, job.industry] = companyMap[job.id] || ['城市企业', '综合'];
     job.cities ||= [];
+    job.education ??= job.need >= 70 ? 3 : (job.need >= 55 ? 1 : 0);
+    job.minAge ??= 18;
+    job.freelance ??= job.id === 'freelance';
   });
   C.jobs.push(
-    { id: 'nurse', name: '护理师', company: '安宁医疗中心', industry: '医疗', salary: 7600, need: 58, category: '社交', majors: ['临床医学'], tier: 3, cities: [] },
-    { id: 'lab', name: '实验室研究员', company: '华科生命研究院', industry: '科技', salary: 13800, need: 82, category: '科学', majors: ['数据科学', '临床医学'], tier: 2, cities: ['北京', '上海', '深圳', '杭州'] },
-    { id: 'translator', name: '中日翻译', company: '海桥文化', industry: '传媒', salary: 10500, need: 70, category: '文学', majors: ['教育学', '数字媒体'], tier: 2, cities: ['上海', '东京', '大阪', '京都'] },
-    { id: 'animator', name: '动画原画师', company: '青空动画', industry: '创意', salary: 11800, need: 76, category: '艺术', majors: ['数字媒体'], tier: 2, cities: ['上海', '成都', '东京', '大阪'] },
-    { id: 'robotics', name: '机器人工程师', company: '未来机械', industry: '科技', salary: 18200, need: 86, category: '科学', majors: ['智能制造', '机电技术'], tier: 1, cities: ['深圳', '上海', '东京', '横滨'] },
-    { id: 'gamejp', name: '游戏开发工程师', company: '樱岛互动', industry: '游戏', salary: 16500, need: 82, category: '科学', majors: ['计算机科学', '数字媒体'], tier: 1, cities: ['东京', '大阪', '福冈'] },
-    { id: 'shrine', name: '神社文化专员', company: '古都文化社', industry: '文化', salary: 7200, need: 58, category: '文学', majors: ['教育学', '现代服务'], tier: 3, cities: ['京都', '东京'] },
-    { id: 'tourguide', name: '国际旅行顾问', company: '远行旅业', industry: '服务', salary: 7800, need: 55, category: '社交', majors: ['现代服务', '工商管理'], tier: 3, cities: [] },
-    { id: 'fashion', name: '服装搭配师', company: '织梦时尚', industry: '创意', salary: 8600, need: 64, category: '艺术', majors: ['数字媒体'], tier: 2, cities: ['上海', '杭州', '东京', '大阪'] },
-    { id: 'rail', name: '轨道交通调度员', company: '都市轨道集团', industry: '交通', salary: 9200, need: 68, category: '科学', majors: ['智能制造', '机电技术'], tier: 2, cities: [] },
-    { id: 'professor', name: '大学助教', company: '城市大学', industry: '教育', salary: 9000, need: 78, category: '文学', majors: ['教育学', '计算机科学', '法学'], tier: 2, cities: [] },
-    { id: 'psych', name: '心理咨询助理', company: '心语成长中心', industry: '医疗', salary: 8200, need: 70, category: '社交', majors: ['教育学', '临床医学'], tier: 2, cities: [] },
+    { id: 'nurse', name: '护理师', company: '安宁医疗中心', industry: '医疗', salary: 7600, need: 58, category: '社交', majors: ['临床医学'], education: 2, tier: 3, cities: [] },
+    { id: 'lab', name: '实验室研究员', company: '华科生命研究院', industry: '科技', salary: 13800, need: 82, category: '科学', majors: ['数据科学', '临床医学'], education: 3, tier: 2, cities: ['北京', '上海', '深圳', '杭州'] },
+    { id: 'translator', name: '中日翻译', company: '海桥文化', industry: '传媒', salary: 10500, need: 70, category: '文学', majors: ['教育学', '数字媒体'], education: 2, tier: 2, cities: ['上海', '东京', '大阪', '京都'] },
+    { id: 'animator', name: '动画原画师', company: '青空动画', industry: '创意', salary: 11800, need: 76, category: '艺术', majors: ['数字媒体'], education: 2, tier: 2, cities: ['上海', '成都', '东京', '大阪'] },
+    { id: 'robotics', name: '机器人工程师', company: '未来机械', industry: '科技', salary: 18200, need: 86, category: '科学', majors: ['智能制造', '机电技术'], education: 3, tier: 1, cities: ['深圳', '上海', '东京', '横滨'] },
+    { id: 'gamejp', name: '游戏开发工程师', company: '樱岛互动', industry: '游戏', salary: 16500, need: 82, category: '科学', majors: ['计算机科学', '数字媒体'], education: 3, tier: 1, cities: ['东京', '大阪', '福冈'] },
+    { id: 'shrine', name: '神社文化专员', company: '古都文化社', industry: '文化', salary: 7200, need: 58, category: '文学', majors: ['教育学', '现代服务'], education: 1, tier: 3, cities: ['京都', '东京'] },
+    { id: 'tourguide', name: '国际旅行顾问', company: '远行旅业', industry: '服务', salary: 7800, need: 55, category: '社交', majors: ['现代服务', '工商管理'], education: 1, tier: 3, cities: [] },
+    { id: 'fashion', name: '服装搭配师', company: '织梦时尚', industry: '创意', salary: 8600, need: 64, category: '艺术', majors: ['数字媒体'], education: 1, tier: 2, cities: ['上海', '杭州', '东京', '大阪'] },
+    { id: 'rail', name: '轨道交通调度员', company: '都市轨道集团', industry: '交通', salary: 9200, need: 68, category: '科学', majors: ['智能制造', '机电技术'], education: 1, tier: 2, cities: [] },
+    { id: 'professor', name: '大学助教', company: '城市大学', industry: '教育', salary: 9000, need: 78, category: '文学', majors: ['教育学', '计算机科学', '法学'], education: 3, tier: 2, cities: [] },
+    { id: 'psych', name: '心理咨询助理', company: '心语成长中心', industry: '医疗', salary: 8200, need: 70, category: '社交', majors: ['教育学', '临床医学'], education: 2, tier: 2, cities: [] },
+    { id: 'auto', name: '汽车维修技师', company: '迅驰汽车工坊', industry: '技能服务', salary: 7200, need: 48, category: '科学', majors: ['机电技术'], education: 1, tier: 3, cities: [] },
+    { id: 'cnc', name: '数控设备操作员', company: '精工制造中心', industry: '技能服务', salary: 7800, need: 52, category: '科学', majors: ['机电技术'], education: 1, tier: 3, cities: [] },
+    { id: 'beauty', name: '美妆造型师', company: '映彩造型工作室', industry: '技能服务', salary: 6800, need: 50, category: '艺术', majors: ['现代服务'], education: 1, tier: 3, cities: [] },
+    { id: 'pastry', name: '西点烘焙师', company: '晨光烘焙工房', industry: '技能服务', salary: 6500, need: 46, category: '艺术', majors: ['现代服务'], education: 1, tier: 3, cities: [] },
+    { id: 'vtuber', name: '虚拟主播', company: '个人虚拟频道', industry: '内容创作', salary: 8800, need: 58, category: '社交', majors: [], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
+    { id: 'subscriber', name: '福利姬（成年写真创作者）', company: '成年写真订阅频道', industry: '内容创作', salary: 9200, need: 60, category: '艺术', majors: [], education: 1, tier: 3, cities: [], freelance: true, adultOnly: true, recommendedGender: '女' },
+    { id: 'portraitblog', name: '写真博主', company: '个人影像频道', industry: '内容创作', salary: 7600, need: 54, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
+    { id: 'styleblog', name: '穿搭博主', company: '个人穿搭频道', industry: '内容创作', salary: 8200, need: 56, category: '艺术', majors: ['数字媒体', '现代服务'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
+    { id: 'coser', name: '职业Coser', company: '个人角色创作室', industry: '内容创作', salary: 8500, need: 58, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
+    { id: 'illustrator', name: '自由插画师', company: '个人插画工作室', industry: '内容创作', salary: 7800, need: 62, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true },
+    { id: 'convention', name: '漫展活动执行', company: '次元城市会展', industry: '会展活动', salary: 7000, need: 50, category: '社交', majors: ['现代服务', '数字媒体'], education: 1, tier: 3, cities: [] },
   );
 
   C.houses.push(

@@ -32,7 +32,6 @@
     item.customPrompt ||= '';
     item.metCity ||= '';
     item.interactions ||= 0;
-    item.lastInteractionMonth ??= -1;
     item.phoneUnlocked ??= false;
     item.school ||= '';
     item.educationName ||= item.school || '';
@@ -70,7 +69,7 @@
 
   function upgradeState(state) {
     if (!state) return U.createState();
-    state.version = 5;
+    state.version = 6;
     state.location.country ||= C.cities.find((city) => city.city === state.location.city)?.country || '华夏';
     state.hometown ||= { ...state.location };
     state.hometown.country ||= '华夏';
@@ -93,19 +92,21 @@
       mother.childrenCount = Math.max(mother.childrenCount, childCount);
     }
     state.education.schoolStage ||= 'home';
+    state.education.highSchoolType ??= null;
+    state.education.vocationalMajor ??= null;
+    state.education.path ||= state.education.university ? '大学教育' : '基础教育';
     state.education.universityType ??= null;
     state.education.graduated ??= false;
     state.career.jobId ??= null;
     state.career.company ??= null;
     state.career.performance ??= 0;
-    state.career.lastWorkMonth ??= -1;
     state.career.lastPromotionMonth ??= -12;
     state.career.applications ||= [];
     state.assets ||= { house: null, mortgage: 0, stocks: {} };
     state.assets.businesses ||= [];
     state.assets.vehicles ||= [];
     fillStocks(state);
-    state.travel ||= { activeId: null, lastMonth: -1 };
+    state.travel ||= { activeId: null };
     return state;
   }
 

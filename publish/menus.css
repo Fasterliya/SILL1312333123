@@ -58,14 +58,16 @@
 
 .portrait-panel {
   display: grid;
-  grid-template-columns: minmax(118px, 42%) 1fr;
+  grid-template-columns: 1fr;
   gap: 14px;
-  align-items: end;
+  align-items: start;
 }
 
 .portrait-slot {
   width: 100%;
+  max-width: 270px;
   aspect-ratio: 2 / 3;
+  margin: 0 auto;
   padding: 0;
   overflow: hidden;
   border: 1px solid #d7d3c6;
@@ -345,7 +347,11 @@
 
 @media (max-width: 360px) {
   .portrait-panel {
-    grid-template-columns: 112px 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .portrait-slot {
+    max-width: 235px;
   }
 
   .job-card,

@@ -14,6 +14,9 @@
     const years = U.age(state);
     if (years <= 11) return C.subjectCaps.primary;
     if (years <= 14) return C.subjectCaps.middle;
+    if (state.education.schoolStage === 'vocational') {
+      return { 语文: 150, 数学: 150, 英语: 150, 专业技能: 300 };
+    }
     const selected = [state.education.track || '物理', ...(state.education.electives.length
       ? state.education.electives : ['化学', '生物'])];
     return Object.assign({}, C.subjectCaps.highBase,
@@ -51,15 +54,19 @@
     } else if (years === 15) {
       const result = exam(state, '中考');
       state.pendingDecision = { type: 'highSchool', score: result.total };
-    } else if (years === 16 && !state.education.track) {
+    } else if (years === 16 && !state.education.track && state.education.schoolStage !== 'vocational') {
       state.pendingDecision = { type: 'track' };
     } else if (years === 18 && !state.education.university) {
-      if (!state.education.track) {
-        state.education.track = '物理';
-        state.education.electives = ['化学', '生物'];
+      if (state.education.schoolStage === 'vocational') {
+        state.pendingDecision = { type: 'vocationalExit' };
+      } else {
+        if (!state.education.track) {
+          state.education.track = '物理';
+          state.education.electives = ['化学', '生物'];
+        }
+        const result = exam(state, '高考');
+        state.pendingDecision = { type: 'volunteer', score: result.total };
       }
-      const result = exam(state, '高考');
-      state.pendingDecision = { type: 'volunteer', score: result.total };
     } else if (years === 22 && state.education.university && !state.education.graduated) {
       Game.social.archiveSchool(state);
       addLog(state, '大学毕业', `你从${state.education.university}毕业，获得${state.education.major}专业学历。`, 'milestone');
@@ -162,7 +169,6 @@
       state.year += 1;
       state.stats.健康 = U.clamp(state.stats.健康 - (U.age(state) > 55 ? 2 : 0), 0, 100);
     }
-    state.monthActionTaken = false;
     Game.profile.updateGrowth(state);
     Game.npcLife.update(state);
     finances(state);

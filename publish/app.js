@@ -35,10 +35,7 @@
   }
 
   function activity(type) {
-    if (state.monthActionTaken || state.gameOver) {
-      Game.view.showToast('本月已经安排过主要活动', 'warning');
-      return;
-    }
+    if (state.gameOver) return;
     const map = {
       study: ['专注学习', '你认真学习，为下一次考试积累实力。', ['智力', 2], ['心情', -2]],
       sport: ['锻炼身体', '一次痛快的运动让身体更有力量。', ['健康', 3], ['心情', 1]],
@@ -51,7 +48,6 @@
       state.stats[name] = U.clamp(state.stats[name] + delta, 0, 100);
     });
     if (type === 'study') state.education.study += 7;
-    state.monthActionTaken = true;
     Game.lifeDirector.addLog(state, item[0], item[1], 'good');
     Game.view.showToast(item[0], 'good');
     refresh();

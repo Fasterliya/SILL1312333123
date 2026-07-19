@@ -57,6 +57,30 @@
     )).join('');
   }
 
+  function enterWorkforce(current, path) {
+    Game.social.archiveSchool(current);
+    current.education.university = null;
+    current.education.universityType = null;
+    current.education.major = current.education.vocationalMajor || null;
+    current.education.graduated = true;
+    current.education.school = '已毕业';
+    current.education.schoolStage = 'workforce';
+    current.education.path = path;
+    Game.lifeDirector.addLog(current, '进入职业社会', `你完成${path}阶段，开始直接寻找工作机会。`, 'milestone');
+  }
+
+  function enrollUniversity(current, school) {
+    current.education.university = school.name;
+    current.education.universityType = school.type;
+    current.education.major = school.major;
+    current.education.graduated = false;
+    current.education.path = school.type === '高职专科' ? '高职升学' : '大学教育';
+    Game.social.enterSchool(current, school.name, 'university', 6);
+    const city = C.cities.find((item) => item.city === school.city);
+    if (city) current.location = { province: city.province, city: city.city, country: city.country };
+    Game.lifeDirector.addLog(current, '大学录取', `你被${school.name}${school.major}专业录取，前往${school.city}求学。`, 'milestone');
+  }
+
   function decide(value) {
     const current = state();
     const decision = current.pendingDecision;
@@ -65,7 +89,13 @@
       const school = C.highSchools.find((item) => `${current.hometown.city}${item.suffix}` === value)
         || C.highSchools[C.highSchools.length - 1];
       const schoolName = `${current.hometown.city}${school.suffix}`;
-      Game.social.enterSchool(current, schoolName, 'high', 5);
+      const vocational = school.program === 'vocational';
+      Game.social.enterSchool(current, schoolName, vocational ? 'vocational' : 'high', 5);
+      current.education.highSchoolType = school.type;
+      current.education.vocationalMajor = vocational ? school.major : null;
+      current.education.path = vocational ? `职业高中 · ${school.major}` : '普通高中';
+      current.education.track = vocational ? '职教' : null;
+      current.education.electives = [];
       Game.lifeDirector.addLog(current, '高中录取', `你填报并被${schoolName}录取，学校类型为${school.type}。`, 'milestone');
     } else if (decision.type === 'track') {
       const [track, electives] = value.split('|');
@@ -73,14 +103,11 @@
       current.education.electives = electives.split(',');
       Game.lifeDirector.addLog(current, '完成选科', `你选择了${track}，再选${electives.replace(',', '、')}。`, 'milestone');
     } else if (decision.type === 'volunteer') {
-      const school = C.universities.find((item) => item.name === value);
-      current.education.university = school.name;
-      current.education.universityType = school.type;
-      current.education.major = school.major;
-      Game.social.enterSchool(current, school.name, 'university', 6);
-      const city = C.cities.find((item) => item.city === school.city);
-      if (city) current.location = { province: city.province, city: city.city, country: city.country };
-      Game.lifeDirector.addLog(current, '大学录取', `你被${school.name}${school.major}专业录取，前往${school.city}求学。`, 'milestone');
+      if (value === 'workforce') enterWorkforce(current, '普通高中毕业');
+      else enrollUniversity(current, C.universities.find((item) => item.name === value));
+    } else if (decision.type === 'vocationalExit') {
+      if (value === 'vocational-work') enterWorkforce(current, `职高${current.education.vocationalMajor || '技能'}专业毕业`);
+      else enrollUniversity(current, C.universities.find((item) => item.name === '城市职业学院'));
     }
     current.pendingDecision = null;
     done();
@@ -98,7 +125,7 @@
       options = C.highSchools.filter((item) => d.score >= item.min)
         .map((item) => ({
           value: `${current.hometown.city}${item.suffix}`,
-          label: `${current.hometown.city}${item.suffix} · ${item.type} · 线${item.min}`,
+          label: `${current.hometown.city}${item.suffix} · ${item.type}${item.major ? ` · ${item.major}` : ''} · 线${item.min}`,
         }));
       if (!options.length) {
         const school = C.highSchools[C.highSchools.length - 1];
@@ -113,10 +140,17 @@
       })));
     } else if (d.type === 'volunteer') {
       Game.view.el.decisionTitle.textContent = `高考 ${d.score} 分，填报志愿`;
-      Game.view.el.decisionText.textContent = '可选择达到投档线的院校与专业。';
+      Game.view.el.decisionText.textContent = '可选择达到投档线的院校，也可以高中毕业后直接进入岗位市场。';
       options = C.universities.filter((item) => d.score >= item.min)
         .map((item) => ({ value: item.name, label: `${item.name} · ${item.type} · ${item.major} · ${item.city}` }));
-      if (!options.length) options = [{ value: '城市职业学院', label: '城市职业学院 · 高职专科 · 机电技术 · 郑州' }];
+      options.push({ value: 'workforce', label: '不升大学 · 直接就业与自由职业' });
+    } else if (d.type === 'vocationalExit') {
+      Game.view.el.decisionTitle.textContent = '职高毕业去向';
+      Game.view.el.decisionText.textContent = `你完成了${current.education.vocationalMajor || '职业技能'}学习，可以直接就业或继续读高职。`;
+      options = [
+        { value: 'vocational-work', label: '直接就业 · 技能岗位与自由职业' },
+        { value: 'vocational-college', label: '高职升学 · 城市职业学院' },
+      ];
     }
     Game.view.el.decisionBody.innerHTML = options.map((item) => (
       `<button data-choice="${item.value}">${item.label}</button>`

@@ -4,9 +4,6 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const C = Game.config;
   const U = Game.content;
-  let jobFilter = '全部';
-  let cityFilter = '全部';
-
   function cityInfo(state) {
     return C.cities.find((item) => item.city === state.location.city)
       || { city: state.location.city, province: state.location.province, country: '华夏', tier: 3, cost: 6000 };
@@ -30,8 +27,27 @@
   function ability(state, job) {
     const majorMatch = job.majors.includes(state.education.major) ? 18 : 0;
     const personality = job.category === '社交' && ['外向', '乐观', '热血'].includes(state.profile.personality) ? 6 : 0;
+    const audience = job.recommendedGender === state.gender ? 8 : 0;
     return state.stats.智力 * 0.55 + state.stats.魅力 * 0.2 + state.education.study * 0.12
-      + traitBoost(state, job.category) + majorMatch + personality;
+      + traitBoost(state, job.category) + majorMatch + personality + audience;
+  }
+
+  function qualification(state) {
+    if (!state.education.graduated) return 0;
+    if (!state.education.university) return 1;
+    return state.education.universityType === '高职专科' ? 2 : 3;
+  }
+
+  function qualificationLabel(level) {
+    return ['未完成全日制学业', '高中/职高', '高职专科', '本科及以上'][level] || '未知';
+  }
+
+  function requirementLabel(level) {
+    return ['不限学历', '高中/职高', '高职专科', '本科及以上'][level] || '未知';
+  }
+
+  function eligible(state, job) {
+    return U.age(state) >= (job.minAge || 18) && qualification(state) >= (job.education || 0);
   }
 
   function apply(state, jobId) {
@@ -39,8 +55,7 @@
     if (state.education.university && !state.education.graduated) return { ok: false, message: '完成大学学业后才能全职求职' };
     const job = board(state).find((item) => item.id === jobId);
     if (!job) return { ok: false, message: '当前城市没有这个岗位' };
-    const repeated = state.career.applications.some((item) => item.jobId === jobId && item.month === state.totalMonths);
-    if (repeated) return { ok: false, message: '本月已经投递过这个岗位' };
+    if (!eligible(state, job)) return { ok: false, message: `该职位要求${requirementLabel(job.education || 0)}` };
     const chance = U.clamp(0.18 + (ability(state, job) - job.need) / 105, 0.08, 0.92);
     const accepted = Math.random() < chance;
     state.career.applications.push({
@@ -59,7 +74,6 @@
     state.career.level = 0;
     state.career.exp = 0;
     state.career.performance = 10;
-    state.career.lastWorkMonth = -1;
     state.career.lastPromotionMonth = state.totalMonths - 6;
     Game.lifeDirector.addLog(state, '获得工作', `你加入${job.company}担任${job.name}。`, 'milestone');
     return { ok: true, message: `${job.company}录取了你` };
@@ -68,21 +82,25 @@
   function work(state, type) {
     if (!state.career.job) return { ok: false, message: '当前没有工作' };
     if (type === 'promotion') return applyPromotion(state);
-    if (state.career.lastWorkMonth === state.totalMonths) return { ok: false, message: '本月已经完成过工作行动' };
     const actions = {
-      focus: [8, 5, -3, 0, '专注完成关键任务'],
-      network: [5, 3, 1, 2, '主动结识同事与合作伙伴'],
-      train: [4, 8, -1, 2, '参加培训并提升专业能力'],
-      overtime: [12, 7, -6, 0, '加班冲刺重要项目'],
+      focus: [8, 5, -3, 0, '专注完成关键任务', 0, 0],
+      network: [5, 3, 1, 2, '主动结识同事与合作伙伴', 0, 0],
+      train: [4, 8, -1, 2, '参加培训并提升专业能力', 0, 0],
+      overtime: [12, 7, -6, 0, '加班冲刺重要项目', 0, 0],
+      create: [8, 7, 2, 1, '发布了一组新作品', 350, 80],
+      stream: [7, 6, -1, 1, '完成了一场直播', 520, 60],
+      sponsor: [10, 5, -2, 0, '完成一次品牌合作', 900, 150],
+      convention: [12, 8, 4, 1, '参加城市漫展并经营个人展位', 680, 260],
     };
-    const [performance, exp, mood, intelligence, label] = actions[type] || actions.focus;
-    state.career.lastWorkMonth = state.totalMonths;
+    const [performance, exp, mood, intelligence, label, income, cost] = actions[type] || actions.focus;
+    if (state.money < cost) return { ok: false, message: `这项工作行动需要 ¥${cost}` };
+    state.money += income - cost;
     state.career.performance = U.clamp(state.career.performance + performance, 0, 100);
     state.career.exp += exp;
     state.stats.心情 = U.clamp(state.stats.心情 + mood, 0, 100);
     state.stats.智力 = U.clamp(state.stats.智力 + intelligence, 0, 100);
     Game.lifeDirector.addLog(state, '职场行动', label, 'good');
-    return { ok: true, message: `${label}，绩效达到 ${state.career.performance}` };
+    return { ok: true, message: `${label}，绩效达到 ${state.career.performance}${income ? `，收入 ¥${income}` : ''}` };
   }
 
   function applyPromotion(state) {
@@ -107,11 +125,12 @@
     if (!city || city.city === state.location.city) return { ok: false, message: '你已经在这座城市' };
     if (state.money < city.cost) return { ok: false, message: `迁居需要 ¥${city.cost.toLocaleString()}` };
     state.money -= city.cost;
-    if (state.career.job && state.career.jobId !== 'freelance') {
+    const currentJob = C.jobs.find((item) => item.id === state.career.jobId);
+    if (state.career.job && !currentJob?.freelance) {
       Game.lifeDirector.addLog(state, '离开原岗位', `迁居让你结束了${state.career.company || ''}${state.career.job}的工作。`, 'normal');
       Object.assign(state.career, {
         job: null, jobId: null, company: null, salary: 0, exp: 0,
-        performance: 0, lastWorkMonth: -1, lastPromotionMonth: -12,
+        performance: 0, lastPromotionMonth: -12,
       });
     }
     state.location = { province: city.province, city: city.city, country: city.country };
@@ -119,49 +138,7 @@
     return { ok: true, message: `已迁居${city.city}` };
   }
 
-  function filterChips(values, selected, attr) {
-    return `<nav class="filter-chips">${values.map((value) => (
-      `<button class="${selected === value ? 'active' : ''}" ${attr}="${value}">${value}</button>`
-    )).join('')}</nav>`;
-  }
-
-  function renderCareer(state, money) {
-    const current = state.career.job ? `<section class="career-current"><span>${state.career.company || '当前单位'}</span>
-      <strong>${state.career.job} · L${state.career.level + 1}</strong><b>${money(state.career.salary)}/月</b>
-      <small>绩效 ${state.career.performance} · 经验 ${state.career.exp}</small></section>
-      <div class="work-actions">${[['focus', '专注工作'], ['network', '经营人脉'], ['train', '技能培训'],
-        ['overtime', '项目加班'], ['promotion', '申请晋升']].map(([id, label]) => (
-        `<button data-work-action="${id}">${label}</button>`)).join('')}</div>`
-      : '<p class="empty-state">当前没有工作，可以筛选公司并投递职位。</p>';
-    const filters = ['全部', '适配', ...new Set(board(state).map((job) => job.industry))];
-    if (!filters.includes(jobFilter)) jobFilter = '全部';
-    const jobs = board(state).filter((job) => jobFilter === '全部' || job.industry === jobFilter
-      || (jobFilter === '适配' && (job.majors.includes(state.education.major) || traitBoost(state, job.category))));
-    return `${current}${filterChips(filters, jobFilter, 'data-job-filter')}<div class="market-title">${state.location.city} · ${jobs.length}个职位</div>`
-      + (jobs.length ? jobs.map((job) => {
-        const chance = Math.round(U.clamp(0.18 + (ability(state, job) - job.need) / 105, 0.08, 0.92) * 100);
-        return `<article class="job-card"><div><strong>${job.name}</strong>
-          <span>${job.company} · ${job.industry} · 录取率${chance}%</span></div>
-          <b>¥${job.salary.toLocaleString()}</b><button data-job="${job.id}">投递</button></article>`;
-      }).join('') : '<p class="empty-state">当前筛选没有可投递职位。</p>');
-  }
-
-  function renderCities(state) {
-    const filters = ['全部', '华夏', '日本', '核心城市', '低成本'];
-    const cities = C.cities.filter((city) => cityFilter === '全部' || city.country === cityFilter
-      || (cityFilter === '核心城市' && city.tier === 1) || (cityFilter === '低成本' && city.cost <= 9000));
-    return filterChips(filters, cityFilter, 'data-city-filter') + cities.map((city) => (
-      `<article class="city-row ${city.city === state.location.city ? 'current' : ''}">
-        <div><strong>${city.city}</strong><span>${city.country} · ${city.province} · ${city.tier === 1 ? '核心城市' : '发展城市'}</span></div>
-        <b>¥${city.cost.toLocaleString()}</b>
-        <button data-city="${city.city}" ${city.city === state.location.city ? 'disabled' : ''}>迁居</button></article>`
-    )).join('');
-  }
-
-  function setJobFilter(value) { jobFilter = value; }
-  function setCityFilter(value) { cityFilter = value; }
-
   Game.careerSystem = Object.freeze({
-    board, apply, work, move, renderCareer, renderCities, setJobFilter, setCityFilter,
+    board, ability, qualification, qualificationLabel, requirementLabel, eligible, apply, work, move,
   });
 }(window));

@@ -43,12 +43,8 @@
     const state = api.getState();
     const person = state.family.find((item) => item.id === id);
     if (!person || person.status === '已故') return;
-    if (person.lastInteractionMonth === state.totalMonths) {
-      return Game.view.showToast('本月已经和这位角色互动过', 'warning');
-    }
     const action = type || 'chat';
     if (['confess', 'date', 'propose'].includes(action)) {
-      person.lastInteractionMonth = state.totalMonths;
       person.interactions += 1;
       const result = romantic(state, person, action);
       return finish(result.message, result.ok ? 'good' : 'warning');
@@ -63,7 +59,6 @@
     const [cost, gain, mood, text] = options[action] || options.chat;
     if (state.money < cost) return Game.view.showToast(`这次互动需要 ¥${cost}`, 'warning');
     state.money -= cost;
-    person.lastInteractionMonth = state.totalMonths;
     person.interactions += 1;
     person.affection = U.clamp(person.affection + U.between(gain - 2, gain + 2), 0, 100);
     state.stats.心情 = U.clamp(state.stats.心情 + mood, 0, 100);

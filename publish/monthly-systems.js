@@ -14,6 +14,7 @@
     Game.relationshipMemory.monthly(state);
     Game.parenting.monthly(state);
     Game.healthSystem.monthly(state);
+    Game.npcFashion.monthly(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

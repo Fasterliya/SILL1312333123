@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="./social-world.css">
   <link rel="stylesheet" href="./market.css">
   <link rel="stylesheet" href="./civic.css">
+  <link rel="stylesheet" href="./hunter-chat.css">
   <script src="./config.js" defer></script>
   <script src="./special-characters.js" defer></script>
   <script src="./name-catalog.js" defer></script>
@@ -47,6 +48,8 @@
   <script src="./people.js" defer></script>
   <script src="./world-culture.js" defer></script>
   <script src="./social-world.js" defer></script>
+  <script src="./npc-fashion.js" defer></script>
+  <script src="./hunter-mode.js" defer></script>
   <script src="./systems-state.js" defer></script>
   <script src="./state-upgrade.js" defer></script>
   <script src="./life-events.js" defer></script>
@@ -67,6 +70,7 @@
   <script src="./portrait-age-prompt.js" defer></script>
   <script src="./portrait-prompt.js" defer></script>
   <script src="./portrait-system.js" defer></script>
+  <script src="./character-chat.js" defer></script>
   <script src="./profile.js" defer></script>
   <script src="./social.js" defer></script>
   <script src="./role-book.js" defer></script>
@@ -154,6 +158,8 @@
           <button data-open-module="roleBookSubpage" data-module-title="人物册"><b>人</b><span><strong>人物册</strong><small>查看当前城市、同窗与异地旧识</small></span><i>›</i></button>
           <button data-open-module="roleArchive" data-module-title="角色档案"><b>档</b><span><strong>角色档案</strong><small>立绘、成长信息、性格与特质</small></span><i>›</i></button>
           <button data-open-module="roleAppearance" data-module-title="外观与穿着"><b>装</b><span><strong>外观与穿着</strong><small>发型、气质及三部位穿搭</small></span><i>›</i></button>
+          <button data-open-module="hunterModeSubpage" data-module-title="特殊模式"><b>猎</b><span><strong>特殊模式</strong><small>开启或关闭皮物猎手</small></span><i>›</i></button>
+          <button data-open-module="possessedSubpage" data-module-title="皮物列表"><b>皮</b><span><strong>皮物列表</strong><small>查看已夺取的人生与立绘</small></span><i>›</i></button>
         </div>
       </div>
 
@@ -229,6 +235,14 @@
           <div class="fold-content"><div class="profile-editor" id="profileEditor"></div></div>
         </details>
       </div>
+      <div class="module-view" id="hunterModeSubpage"><section class="panel">
+        <div class="panel-title"><h2>特殊模式</h2><span>皮物猎手</span></div>
+        <div id="hunterModePanel"></div>
+      </section></div>
+      <div class="module-view" id="possessedSubpage"><section class="panel">
+        <div class="panel-title"><h2>皮物列表</h2><span>人生角色与立绘档案</span></div>
+        <div id="possessedList"></div>
+      </section></div>
       <div class="module-view" id="familySubpage"><section class="panel">
         <div class="panel-title"><h2>家庭关系</h2><span>点击头像查看详情</span></div>
         <div id="familyList"></div>

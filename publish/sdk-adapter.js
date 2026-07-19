@@ -77,6 +77,14 @@
     return result;
   }
 
+  async function complete(options) {
+    if (!sdk()?.completions) throw Object.assign(new Error('当前环境不支持AI对话'), {
+      code: 'SDK_UNAVAILABLE',
+      retryable: false,
+    });
+    return sdk().completions(options);
+  }
+
   Game.sdkAdapter = Object.freeze({
     isOnline: () => Boolean(sdk()),
     progress,
@@ -85,6 +93,7 @@
     kvGet,
     kvPut,
     kvDelete,
+    complete,
     drawGenerate,
     drawGenerateModels,
   });

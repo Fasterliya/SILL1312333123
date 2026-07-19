@@ -39,7 +39,9 @@
   function makeWorker(state, job, rank, relation) {
     const age = Math.max(20, U.age(state) + U.between(rank >= 2 ? 3 : -4, rank >= 2 ? 16 : 8));
     const person = U.person(relation, U.random(Game.nameSystem.surnames()), age, null, state.totalMonths);
-    U.setUniqueName(state, person);
+    const culture = Game.worldCulture.populationCulture(state.location.country);
+    Game.worldCulture.applyPerson(person, culture);
+    U.setUniqueName(state, person, Game.worldCulture.profile(culture).locale);
     assign(state, person, job, rank, relation);
     Game.npcLife.syncGrowth(state, person);
     return addWorld(state, person);

@@ -1,16 +1,16 @@
 (function initCityPopulation(root) {
   'use strict';
   const Game = root.LifeGame = root.LifeGame || {};
-  const U = Game.content;
-  const POPULATION_SIZE = 100;
+  const U = Game.content, POPULATION_SIZE = 100;
   function cityInfo(name) { return Game.config.cities.find((item) => item.city === name)
     || { city: name, country: '华夏', tier: 3 }; }
   function cultureFor(city, index) {
-    const visitors = ['日本', '韩国', '新加坡', '法国', '英国', '美国'];
-    if (city.country === '华夏') return index < 94 ? '华夏' : visitors[index % visitors.length];
-    if (index < 88) return city.country;
-    if (index < 96) return '华夏';
-    return visitors.filter((item) => item !== city.country)[index % 5];
+    const visitors = ['日本', '韩国', '新加坡', '法国', '英国', '美国'], slot = index % POPULATION_SIZE;
+    if (city.country === '华夏') return slot < 94 ? '华夏' : visitors[slot % visitors.length];
+    if (city.country === '日本') return slot < 95 ? '日本' : '华夏';
+    if (slot < 88) return city.country;
+    if (slot < 96) return '华夏';
+    return visitors.filter((item) => item !== city.country)[slot % 5];
   }
   function residentName(culture, gender, index, cityIndex) {
     const locale = Game.worldCulture.profile(culture).locale;

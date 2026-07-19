@@ -79,12 +79,14 @@
 
   function detailActions(state, person) {
     if (person.status === '已故') return '<button disabled>追忆</button>';
+    if (person.skinCaptured) return '<button disabled>人生已夺取</button>';
+    const hunter = Game.hunterMode.detailAction(state, person);
     if (state.family.some((item) => item.id === person.id)) {
-      return Game.familySystem.detailActions(state, person).map(([type, label]) => (
+      return hunter + Game.familySystem.detailActions(state, person).map(([type, label]) => (
         `<button data-detail-family="${escape(person.id)}" data-family-action="${type}">${label}</button>`
       )).join('');
     }
-    return Game.social.detailActions(state, person).map(([type, label]) => (
+    return hunter + Game.social.detailActions(state, person).map(([type, label]) => (
       `<button data-detail-contact="${escape(person.id)}" data-contact-action="${type}">${label}</button>`
     )).join('');
   }
@@ -153,7 +155,8 @@
       ${section('人生状态', '学业、职业与家庭', life, false)}
       ${Game.familyLinks.render(state, person)}
       ${Game.workplace.personSection(state, person)}
-      ${Game.relationshipMemory.render(person)}</div>
+      ${Game.relationshipMemory.render(person)}
+      ${Game.characterChat.render(state, person)}</div>
       <details class="record-section npc-editor"><summary><span>编辑角色外观</span>
       <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}</div></details>
       <details class="interaction-menu detail-interactions"><summary>互动选项</summary>

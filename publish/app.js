@@ -133,6 +133,8 @@
       Game.roleBook.configure({ getState: () => state });
       Game.marketView.configure({ getState: () => state, save });
       Game.navigation.configure({ getState: () => state, save });
+      Game.hunterMode.configure({ getState: () => state, refresh, save });
+      Game.characterChat.configure({ getState: () => state, refresh, save });
       Game.appearance.configure({ getState: () => state });
       Game.actions.configure({ getState: () => state, refresh, save });
       Game.familySystem.configure({ getState: () => state, refresh, save });

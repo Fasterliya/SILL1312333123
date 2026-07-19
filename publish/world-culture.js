@@ -56,5 +56,12 @@
     return person;
   }
 
-  Game.worldCulture = Object.freeze({ profiles, profile, localAmount, format, applyPerson });
+  function populationCulture(country) {
+    if (country === '日本') return Math.random() < 0.95 ? '日本' : '华夏';
+    return Math.random() < 0.9 ? country : '华夏';
+  }
+
+  Game.worldCulture = Object.freeze({
+    profiles, profile, localAmount, format, applyPerson, populationCulture,
+  });
 }(window));

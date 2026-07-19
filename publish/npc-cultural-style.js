@@ -51,7 +51,7 @@
     person.namePreference = preference;
     person.culturePreference = '日本文化';
     rename(state, person);
-    const cycle = Math.floor(state.totalMonths / 12);
+    const cycle = Math.floor(state.totalMonths / 36);
     if (person.culturalStyleCycle === cycle) return;
     person.culturalStyleCycle = cycle;
     japaneseStyle(person, age);

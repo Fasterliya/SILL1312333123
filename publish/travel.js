@@ -26,22 +26,22 @@
     return ids.map((id) => Game.people.find(state, id)).filter(Boolean);
   }
 
-  function createEncounter(state, place) {
-    const person = U.person('路人', U.random(Game.nameSystem.surnames()), U.between(-5, 8), null, state.playerBornAt);
-    person.affection = U.between(25, 42);
-    person.metCity = `${state.location.city}${place.name}`;
-    Game.worldCulture.applyPerson(person, state.location.country);
-    U.setUniqueName(state, person, Game.worldCulture.profile(state.location.country).locale);
-    if (place.name === '城市漫展') {
-      person.job = U.random(['职业Coser', '虚拟主播', '动画原画师', '漫展活动执行']);
-      person.clothing.top = U.random(['舞台演出礼服', '毕业袴套装', '复古灯笼袖长裙']);
-    } else if (place.name === '创作者市集') {
-      person.job = U.random(['写真博主', '穿搭博主', '自由插画师', '商业摄影师']);
-    } else if (place.kind === 'landmark') {
-      person.job = U.random(['本地向导', '旅行摄影师', '文化场馆职员', '城市规划师']);
-    }
-    Game.npcLife.syncGrowth(state, person);
-    return person;
+  function shuffled(list) {
+    return list.map((item) => ({ item, order: Math.random() }))
+      .sort((a, b) => a.order - b.order).map((entry) => entry.item);
+  }
+
+  function encounterResidents(state, place) {
+    const residents = Game.socialWorld.cityPeople(state, state.location.city)
+      .filter((person) => person.status === '健康');
+    if (place.name === '城市漫展') Game.npcFashion.prepareConvention(state, residents);
+    const cosers = place.name === '城市漫展'
+      ? shuffled(residents.filter((person) => person.cosplay && person.cosplay !== '无')) : [];
+    const unknown = shuffled(residents.filter((person) => (
+      !cosers.includes(person) && !person.phoneUnlocked && person.interactions < 1
+    )));
+    const known = shuffled(residents.filter((person) => !cosers.includes(person) && !unknown.includes(person)));
+    return [...cosers, ...unknown, ...known].slice(0, 3);
   }
 
   function unavailable(state, place) {
@@ -60,13 +60,9 @@
     const discount = state.assets.vehicles.length ? 0.5 : 1;
     const cost = Math.round(place.cost * discount);
     Game.economy.spend(state, cost);
-    const previous = new Set([...(state.travel.activeIds || []), state.travel.activeId].filter(Boolean));
-    state.travel.encounters = state.travel.encounters.filter((item) => !previous.has(item.id));
-    const people = Array.from({ length: 3 }, () => {
-      const person = createEncounter(state, place);
-      state.travel.encounters.push(person);
-      return person;
-    });
+    state.travel.encounters = [];
+    const people = encounterResidents(state, place);
+    if (!people.length) return { ok: false, message: '当前城市暂时没有可遇见的居民' };
     state.travel.activeIds = people.map((person) => person.id);
     state.travel.activeId = state.travel.activeIds[0];
     state.stats.心情 = U.clamp(state.stats.心情 + place.mood, 0, 100);
@@ -77,11 +73,14 @@
       city: state.location.city, place: place.name, kind: place.kind, month: state.totalMonths,
     });
     state.travel.localHistory = state.travel.localHistory.slice(0, 20);
+    people.forEach((person) => {
+      person.metCity ||= `${state.location.city}${place.name}`;
+    });
     const names = people.map((person) => person.name).join('、');
     const title = place.kind === 'landmark' ? '城市景观旅途' : '街头相遇';
     Game.lifeDirector.addLog(state, title, `你在${place.name}游览并遇见了${names}。`, 'good');
     return { ok: true, message: Game.economy.message(
-      state, `游览${place.name}，心情 +${place.mood}，遇见3位新角色`,
+      state, `游览${place.name}，心情 +${place.mood}，遇见${people.length}位本地角色`,
     ) };
   }
 
@@ -106,14 +105,14 @@
       Game.social.card(person, [
         ['chat', '交谈'], ['meal', '请客'], ...(person.phoneUnlocked ? [] : [['exchange', '留联系方式']]),
       ])
-    )).join('') : '<p class="empty-state">选择一个目的地，一次会遇到3位新的具体角色。</p>';
+    )).join('') : '<p class="empty-state">选择一个目的地，会从当前城市的真实居民中遇见角色。</p>';
     return `<section class="list-guide"><strong>${state.location.country} · ${state.location.city}</strong>
       <span>${vehicle}。${recent ? `最近游览：${recent.city}${recent.place}。` : '从城市景观开始认识当地。'}</span></section>
       ${section('城市景观与景区', `${landmarks.length}处当地目的地 · 默认展开`,
     landmarks.map((place) => choice(state, place)).join('') || '<p class="empty-state">当地景观资料整理中。</p>', true)}
       ${section('日常街区', `${neighborhoods.length}种日常与创作者活动`,
     neighborhoods.map((place) => choice(state, place)).join(''), false)}
-      ${section('本次相遇', people.length ? `${people.length}位新角色` : '游览后出现',
+      ${section('本次相遇', people.length ? `${people.length}位本地角色` : '游览后出现',
     encounter, people.length > 0)}`;
   }
 

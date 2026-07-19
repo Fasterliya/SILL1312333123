@@ -151,6 +151,8 @@
 
   function updatePerson(state, person) {
     const age = U.personAge(state, person);
+    Game.npcFashion.ensurePerson(state, person);
+    const firstUpdate = person.lastLifeUpdateAge === null;
     const previousEducation = `${person.educationStage}|${person.educationName}`;
     education(state, person, age);
     const educationChanged = previousEducation !== `${person.educationStage}|${person.educationName}`;
@@ -162,7 +164,7 @@
     person.lastLifeUpdateAge = age;
     career(state, person, age);
     relationships(state, person, age);
-    appearance(person, age);
+    if (person.gender !== '女' || age < 18 || firstUpdate) appearance(person, age);
     Game.npcCulturalStyle.update(state, person, age);
     syncGrowth(state, person);
   }

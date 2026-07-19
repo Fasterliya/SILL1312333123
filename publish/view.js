@@ -8,6 +8,7 @@
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
     'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'governmentPanel', 'travelPanel', 'journeyPanel',
     'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
+    'hunterModePanel', 'possessedList',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
     'decisionBody', 'monthBtn', 'yearBtn', 'toast', 'tabPages',
@@ -117,8 +118,10 @@
   function render(state) {
     currentCountry = state.location.country || '华夏';
     const years = U.age(state);
-    el.profileName.textContent = state.name;
-    el.profileMeta.textContent = `${state.gender} · ${state.location.country || '华夏'} ${state.location.city}`;
+    const activeSkin = Game.hunterMode.active(state);
+    el.profileName.textContent = activeSkin?.name || state.name;
+    el.profileMeta.textContent = activeSkin ? `夺舍身份 · ${activeSkin.gender} · ${activeSkin.personality}`
+      : `${state.gender} · ${state.location.country || '华夏'} ${state.location.city}`;
     el.ageValue.textContent = `${years}岁${(state.totalMonths - state.playerBornAt) % 12}月`;
     el.stageValue.textContent = Game.timeSystem.stageLabel(state);
     el.moneyValue.textContent = money(state.money);
@@ -138,6 +141,7 @@
     el.travelPanel.innerHTML = Game.travelSystem.render(state);
     el.journeyPanel.innerHTML = Game.journeySystem.render(state);
     Game.roleBook.render(state);
+    Game.hunterMode.render(state);
     el.propertyPanel.innerHTML = properties(state);
     el.stockPanel.innerHTML = Game.marketView.render(state);
     el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);

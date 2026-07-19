@@ -7,6 +7,7 @@
     return [
       state.matchmaking?.candidates || [],
       state.travel?.encounters || [],
+      state.specialModes?.possessed || [],
     ];
   }
 

@@ -29,6 +29,10 @@
       from: Game.nameSystem.normalizeName(item.from, person.gender, culture),
       to: Game.nameSystem.normalizeName(item.to, person.gender, culture),
     })) : [];
+    person.aiChat = person.aiChat && typeof person.aiChat === 'object' ? person.aiChat : {};
+    person.aiChat.messages = Array.isArray(person.aiChat.messages) ? person.aiChat.messages.slice(-10) : [];
+    person.aiChat.lastAction ||= '';
+    Game.npcFashion.ensurePerson(state, person);
     person.surname ||= Game.familyNaming.surnameOf(person, '', person.culture || state.hometown?.country);
     if (child) {
       person.upbringing ||= { care: 50, education: 20, independence: 20, health: 60 };
@@ -49,6 +53,7 @@
     state.travel.localHistory = Array.isArray(state.travel.localHistory) ? state.travel.localHistory.slice(-20) : [];
     state.travel.journey ||= null;
     state.worldPeople = Array.isArray(state.worldPeople) ? state.worldPeople : [];
+    Game.hunterMode.ensure(state);
     if (sourceVersion < 11) {
       const candidates = state.contacts.filter((person) => (
         person.relation === '相亲对象' && person.id !== state.romance?.partnerId
@@ -57,7 +62,7 @@
       state.matchmaking.candidates.push(...candidates);
       state.contacts = state.contacts.filter((person) => !candidates.includes(person));
     }
-    state.version = 22;
+    state.version = 23;
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {

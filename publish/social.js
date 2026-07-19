@@ -13,7 +13,8 @@
     const target = Math.max(30, count || 32);
     for (let index = existing.length; index < target; index += 1) {
       const person = U.person('同学', U.random(Game.nameSystem.surnames()), U.between(-1, 1), null, state.playerBornAt);
-      U.setUniqueName(state, person);
+      const culture = Game.worldCulture.populationCulture(state.location.country);
+      Game.worldCulture.applyPerson(person, culture); U.setUniqueName(state, person, Game.worldCulture.profile(culture).locale);
       person.school = school;
       person.educationName = school;
       person.educationStage = state.education.schoolStage;
@@ -188,11 +189,9 @@
     else if (person.relation === '相亲对象') actions.push(['date', '约会']);
     return actions;
   }
-
   function setClassFilter(value) {
     if (['全部', '好友', '高好感', '内向', '外向'].includes(value)) classFilter = value;
   }
-
   Game.social = Object.freeze({
     archiveSchool, enterSchool, createClassmates, currentClassmates, phoneContacts,
     interact, renderSchool, renderPhone, detailActions, setClassFilter, card,

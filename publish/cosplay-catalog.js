@@ -101,10 +101,11 @@
     ['停云', '红金狐族商旅礼服、棕色长发、狐耳狐尾与折扇元素'],
   ].map(([name, prompt]) => make('星穹铁道', name, prompt));
 
+  const wuwa = Array.isArray(Game.cosplayWuwa) ? Game.cosplayWuwa : [];
   const items = [{
     name: '无', series: '基础', character: '无', prompt: '', tags: ['基础'],
     minAge: 0, maxAge: 120, personalities: [], temperaments: [],
-  }, ...touhou, ...starRail];
+  }, ...touhou, ...starRail, ...wuwa];
   const find = (name) => items.find((item) => item.name === name) || items[0];
   const covered = new Set(['hairColor', 'hairstyle', 'clothing.top', 'clothing.socks', 'clothing.shoes']);
 

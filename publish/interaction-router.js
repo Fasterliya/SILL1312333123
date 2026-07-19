@@ -32,6 +32,14 @@
   }
 
   function handleRelations(event, state) {
+    const style = event.target.closest('[data-parenting-style]');
+    if (style) return finish(Game.parenting.setStyle(state, style.dataset.parentingStyle)), true;
+    const parenting = event.target.closest('[data-parenting-child]');
+    if (parenting) {
+      return finish(Game.parenting.act(
+        state, parenting.dataset.parentingChild, parenting.dataset.parentingAction,
+      )), true;
+    }
     const family = event.target.closest('[data-detail-family], [data-person]');
     if (family) {
       Game.familySystem.interact(

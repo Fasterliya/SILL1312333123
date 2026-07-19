@@ -24,6 +24,9 @@
   <script src="./content.js" defer></script>
   <script src="./systems-state.js" defer></script>
   <script src="./state-upgrade.js" defer></script>
+  <script src="./life-events.js" defer></script>
+  <script src="./relationship-memory.js" defer></script>
+  <script src="./parenting.js" defer></script>
   <script src="./sdk-adapter.js" defer></script>
   <script src="./storage.js" defer></script>
   <script src="./portrait-gallery.js" defer></script>
@@ -108,6 +111,7 @@
       <div class="page" id="relationsPage">
         <div class="module-directory">
           <button data-open-module="familySubpage" data-module-title="家庭"><b>家</b><span><strong>家庭</strong><small>父母、兄弟姐妹、配偶与儿女</small></span><i>›</i></button>
+          <button data-open-module="parentingSubpage" data-module-title="养育"><b>育</b><span><strong>养育</strong><small>陪伴、教育、自主与健康成长</small></span><i>›</i></button>
           <button data-open-module="schoolSubpage" data-module-title="同窗"><b>同</b><span><strong>同窗</strong><small>当前学校中的同学与关系</small></span><i>›</i></button>
           <button data-open-module="phoneSubpage" data-module-title="手机联系"><b>联</b><span><strong>手机联系</strong><small>毕业后仍可联系的旧同学</small></span><i>›</i></button>
           <button data-open-module="matchmakingSubpage" data-module-title="城市相亲"><b>缘</b><span><strong>城市相亲</strong><small>筛选对象、约会、告白与结婚</small></span><i>›</i></button>
@@ -172,6 +176,10 @@
         <div class="panel-title"><h2>家庭关系</h2><span>点击头像查看详情</span></div>
         <div id="familyList"></div>
         <button class="wide-action" id="childPlanBtn" type="button">计划孩子</button>
+      </section></div>
+      <div class="module-view" id="parentingSubpage"><section class="panel">
+        <div class="panel-title"><h2>子女成长</h2><span>长期养育</span></div>
+        <div id="parentingPanel"></div>
       </section></div>
       <div class="module-view" id="schoolSubpage"><section class="panel">
         <div class="panel-title"><h2>当前同窗</h2><span>点击头像查看详情</span></div>

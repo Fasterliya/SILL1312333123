@@ -85,6 +85,12 @@
     const current = state();
     const decision = current.pendingDecision;
     if (!decision) return;
+    if (decision.type === 'lifeEvent') {
+      const result = Game.lifeEvents.resolve(current, value);
+      current.pendingDecision = null;
+      Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
+      return done();
+    }
     if (decision.type === 'highSchool') {
       const school = C.highSchools.find((item) => `${current.hometown.city}${item.suffix}` === value)
         || C.highSchools[C.highSchools.length - 1];
@@ -118,6 +124,16 @@
     const d = current.pendingDecision;
     Game.view.el.decision.hidden = !d;
     if (!d) return;
+    if (d.type === 'lifeEvent') {
+      const content = Game.lifeEvents.render(current);
+      if (!content) return;
+      Game.view.el.decisionTitle.textContent = content.title;
+      Game.view.el.decisionText.textContent = content.text;
+      Game.view.el.decisionBody.innerHTML = content.options.map((item) => (
+        `<button data-choice="${item.value}">${item.label}</button>`
+      )).join('');
+      return;
+    }
     let options = [];
     if (d.type === 'highSchool') {
       Game.view.el.decisionTitle.textContent = `中考 ${d.score} 分，填报本地高中`;

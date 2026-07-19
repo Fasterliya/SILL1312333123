@@ -65,6 +65,7 @@
       }
       state.romance.partnerId = person.id;
       person.relation = '恋人';
+      Game.relationshipMemory.record(state, person, '关系', '确认了恋爱关系', 12, -4);
       Game.lifeDirector.addLog(state, '恋爱开始', `你与${person.name}确认了恋爱关系。`, 'milestone');
       return { ok: true, message: `${person.name}接受了你的告白` };
     }
@@ -75,6 +76,7 @@
       if (!spend(state, 220)) return { ok: false, message: '约会至少需要 ¥220' };
       person.affection = U.clamp(person.affection + U.between(6, 10), 0, 100);
       state.stats.心情 = U.clamp(state.stats.心情 + 5, 0, 100);
+      Game.relationshipMemory.record(state, person, '约会', '共同度过了一次约会', 7, -2);
       return { ok: true, message: `约会很愉快，好感达到 ${person.affection}` };
     }
     if (type !== 'propose') return null;
@@ -89,6 +91,7 @@
     person.relation = '配偶';
     state.contacts = state.contacts.filter((item) => item.id !== person.id);
     if (!state.family.some((item) => item.id === person.id)) state.family.push(person);
+    Game.relationshipMemory.record(state, person, '家庭', '共同组建了家庭', 16, -8);
     Game.lifeDirector.addLog(state, '步入婚姻', `你与${person.name}组成了家庭。`, 'milestone');
     return { ok: true, message: '求婚成功，你们结婚了' };
   }
@@ -127,6 +130,7 @@
       if (person.relation === '路人') person.relation = '朋友';
     } else if (person.affection >= 75 && person.relation === '同学') person.relation = '好友';
     Game.lifeDirector.addLog(state, `与${person.name}互动`, action[3], 'good');
+    Game.relationshipMemory.record(state, person, '日常互动', action[3], Math.max(2, action[1] - 2), -1);
     return { ok: true, message: `${person.name}的好感提升到 ${person.affection}` };
   }
 

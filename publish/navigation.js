@@ -124,7 +124,8 @@
       <div class="record-stack">${section('基本档案', '身份与成长', identity, true)}
       ${section('外貌表现', '当前实际外观', looks, false)}
       ${section('遗传信息', 'DNA 与成长倾向', inherited, false)}
-      ${section('人生状态', '学业、职业与家庭', life, false)}</div>
+      ${section('人生状态', '学业、职业与家庭', life, false)}
+      ${Game.relationshipMemory.render(person)}</div>
       <details class="record-section npc-editor"><summary><span>编辑角色外观</span>
       <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}</div></details>
       <section class="detail-actions">${detailActions(state, person)}</section>`;

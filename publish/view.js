@@ -7,7 +7,7 @@
     'profileName', 'profileMeta', 'ageValue', 'stageValue', 'moneyValue', 'lifeDate',
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
     'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'travelPanel',
-    'propertyPanel', 'stockPanel', 'industryPanel',
+    'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
     'decisionBody', 'monthBtn', 'yearBtn', 'actionStrip', 'toast', 'tabPages',
@@ -151,6 +151,7 @@
     el.classmatesList.innerHTML = Game.social.renderSchool(state);
     el.phoneList.innerHTML = Game.social.renderPhone(state);
     el.matchmakingList.innerHTML = Game.matchmaking.render(state);
+    el.parentingPanel.innerHTML = Game.parenting.render(state);
     el.educationPanel.innerHTML = education(state);
     el.careerPanel.innerHTML = Game.careerView.renderCareer(state, money);
     el.cityPanel.innerHTML = Game.careerView.renderCities(state);

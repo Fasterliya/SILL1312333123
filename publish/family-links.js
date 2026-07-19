@@ -103,7 +103,9 @@
       const relation = relative.id === person.spouseId ? '配偶'
         : ((person.childIds || []).includes(relative.id) ? '子女' : '父母');
       return `<button class="relation-link" type="button" data-character-id="${relative.id}">
-        <span>${relation}</span><strong>${relative.name}</strong><small>${relative.currentCity || '去向未明'} · 查看档案</small></button>`;
+        <span class="relation-avatar">${Game.portraitSystem.avatar(relative)}</span>
+        <span class="relation-kind">${relation}</span><strong>${relative.name}</strong>
+        <small>${relative.currentCity || '去向未明'} · 查看档案</small></button>`;
     }).join('') : '<p class="empty-state">家庭成员资料尚未建立。</p>';
     return `<details class="record-section" open><summary><span>家庭成员</span>
       <small>可继续查看配偶与儿女</small></summary><div class="relation-links">${rows}</div></details>`;

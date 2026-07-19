@@ -1,0 +1,212 @@
+.person,
+.contact-card {
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  align-items: center;
+}
+
+.person-avatar {
+  width: 72px;
+  height: 88px;
+  min-width: 72px;
+  min-height: 88px;
+  overflow: hidden;
+  border: 2px solid #d6b869;
+  border-radius: 8px;
+  background: #eee3c8;
+  box-shadow: 0 3px 10px rgba(44, 55, 51, 0.14);
+  color: #315f58;
+  font: 700 24px serif;
+}
+
+.person-avatar img,
+.person-avatar .deceased-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+}
+
+.person-avatar img {
+  object-fit: cover;
+  object-position: 50% 20%;
+}
+
+.person-avatar:active,
+.skin-avatar:active,
+.relation-link:active {
+  transform: translateY(1px);
+}
+
+.person-main strong,
+.contact-main strong,
+.directory-person strong {
+  font: 700 16px serif;
+}
+
+.person-main span,
+.contact-main span {
+  display: block;
+  margin: 5px 0 8px;
+  line-height: 1.5;
+}
+
+.person .interaction-menu,
+.contact-card .interaction-menu {
+  grid-column: 1 / -1;
+}
+
+.directory-list {
+  gap: 10px;
+}
+
+.directory-person {
+  grid-template-columns: 72px minmax(0, 1fr) 52px;
+  gap: 12px;
+  min-height: 112px;
+  padding: 11px;
+}
+
+.directory-person span,
+.directory-person small {
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.skin-card {
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  gap: 12px;
+  min-height: 116px;
+}
+
+.skin-avatar {
+  width: 72px;
+  height: 90px;
+  border: 2px solid #d6b869;
+  border-radius: 8px;
+  background: #eee3c8;
+  box-shadow: 0 3px 10px rgba(44, 55, 51, 0.14);
+  color: #315f58;
+  font: 700 24px serif;
+}
+
+.skin-avatar img {
+  border-radius: 6px;
+  object-position: 50% 20%;
+}
+
+.relation-link {
+  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  gap: 2px 10px;
+  min-height: 82px;
+  padding: 8px 10px;
+}
+
+.relation-link .relation-avatar {
+  grid-row: 1 / 4;
+  width: 58px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #d6b869;
+  border-radius: 7px;
+  background: #eee3c8;
+  color: #315f58;
+  font: 700 20px serif;
+}
+
+.relation-avatar img,
+.relation-avatar .deceased-avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.relation-avatar img {
+  display: block;
+  object-fit: cover;
+  object-position: 50% 20%;
+}
+
+.relation-link .relation-kind {
+  grid-row: auto;
+  align-self: auto;
+  color: #a04439;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.relation-link strong {
+  font: 700 14px serif;
+}
+
+.growth-card {
+  grid-template-columns: 68px minmax(0, 1fr);
+  align-items: center;
+}
+
+.growth-card .person-avatar {
+  width: 68px;
+  height: 84px;
+  min-width: 68px;
+  min-height: 84px;
+}
+
+.growth-main {
+  min-width: 0;
+}
+
+.growth-main strong {
+  font: 700 15px serif;
+}
+
+.growth-main span {
+  display: block;
+  margin-top: 6px;
+  line-height: 1.45;
+}
+
+.growth-card .growth-actions {
+  grid-column: 1 / -1;
+}
+
+.deceased-avatar i {
+  right: 3px;
+  bottom: 3px;
+  padding: 3px 5px;
+  font-size: 9px;
+}
+
+@media (max-width: 420px) {
+  .person,
+  .contact-card {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .person-avatar {
+    width: 64px;
+    height: 80px;
+    min-width: 64px;
+    min-height: 80px;
+  }
+
+  .directory-person {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .directory-person .directory-open,
+  .skin-card > button:last-child {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .skin-card {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .skin-avatar {
+    width: 64px;
+    height: 80px;
+  }
+}

@@ -119,7 +119,9 @@
 
   function personLink(person, label) {
     return `<button class="relation-link" type="button" data-character-id="${person.id}">
-      <span>${label}</span><strong>${person.name}</strong><small>${person.job || person.departmentName}</small></button>`;
+      <span class="relation-avatar">${Game.portraitSystem.avatar(person)}</span>
+      <span class="relation-kind">${label}</span><strong>${person.name}</strong>
+      <small>${person.job || person.departmentName}</small></button>`;
   }
 
   function render(state) {

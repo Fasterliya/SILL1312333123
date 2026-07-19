@@ -87,7 +87,9 @@
     )).join('');
     const cards = children(state).map((child) => {
       const up = child.upbringing;
-      return `<article class="growth-card"><div><strong>${child.name} · ${U.personAge(state, child)}岁</strong>
+      return `<article class="growth-card"><button class="person-avatar" type="button"
+        data-character-id="${child.id}" aria-label="查看${child.name}详情">${Game.portraitSystem.avatar(child)}</button>
+        <div class="growth-main"><strong>${child.name} · ${U.personAge(state, child)}岁</strong>
         <span>关爱 ${Math.round(up.care)} · 学业 ${Math.round(up.education)} · 自主 ${Math.round(up.independence)} · 健康 ${Math.round(up.health)}</span></div>
         <div class="growth-actions">${detailActions(child).map(([type, label]) => (
           `<button data-parenting-child="${child.id}" data-parenting-action="${type.slice(7)}">${label}</button>`

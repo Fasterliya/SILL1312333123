@@ -161,7 +161,8 @@
 
   function avatar(person) {
     const image = safeImage(person.portraitUrl);
-    const content = image ? `<img src="${escape(image)}" alt="">` : escape(person.name.slice(-1));
+    const content = image ? `<img src="${escape(image)}" alt="" loading="lazy" decoding="async">`
+      : escape(person.name.slice(-1));
     return person.status === '已故'
       ? `<span class="deceased-avatar">${content}<i>已故</i></span>` : content;
   }

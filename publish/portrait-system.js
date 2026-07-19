@@ -5,6 +5,11 @@
   const drawing = new Set();
   const latest = new Map();
   const errors = new Map();
+  const irohaNegative = [
+    'multiple people, two people, 2girls, 2boys, group, crowd, twins, clone, duplicate character',
+    'extra person, extra face, extra body, split screen, collage',
+    'lowres, worst quality, low quality, blurry, bad anatomy, bad hands, text, watermark',
+  ].join(', ');
   let api = null;
 
   function escape(value) {
@@ -86,6 +91,7 @@
         prompt: description(state, target, key, custom, model),
         dimension: '2:3',
         model,
+        ...(model === 'iroha' ? { negativePrompt: irohaNegative } : {}),
       });
       if (latest.get(key) !== requestId || findTarget(key) !== target) return;
       if (!Game.portraitGallery.add(key, result, custom)) throw new Error('绘图结果没有有效图片');

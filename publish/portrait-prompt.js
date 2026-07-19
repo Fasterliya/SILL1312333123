@@ -160,6 +160,9 @@
     const appearance = appearanceLines(state, target, player);
     const customText = clean(custom);
     const intent = Game.portraitIntent.analyze(customText);
+    const subjectRules = model === 'iroha'
+      ? ['solo, exactly one character, one person only', 'single subject, no companions, no duplicate character']
+      : ['solo, single character'];
     const defaultPose = appearance.years < 18 ? 'full body neutral pose' : 'standing pose';
     const poseLines = intent.action
       ? [intent.action, 'natural full-body composition adapted to the requested action']
@@ -171,6 +174,7 @@
       ? `PRIMARY PLAYER DIRECTION, must follow exactly: ${intent.direction}`
       : `(${intent.direction}:1.8)`;
     const parts = [
+      ...subjectRules,
       ...quality,
       customText ? customLine : '',
       'full body',

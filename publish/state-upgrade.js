@@ -117,6 +117,13 @@
     state.travel ||= { activeId: null };
     state.travel.encounters = (state.travel.encounters || [])
       .map((item) => fillPerson(item, state.updatedAt));
+    const encounterIds = new Set(state.travel.encounters.map((item) => item.id));
+    const activeIds = Array.isArray(state.travel.activeIds)
+      ? state.travel.activeIds : [state.travel.activeId];
+    state.travel.activeIds = activeIds.filter((id, index, list) => (
+      typeof id === 'string' && encounterIds.has(id) && list.indexOf(id) === index
+    )).slice(0, 3);
+    state.travel.activeId = state.travel.activeIds[0] || null;
     const father = state.family.find((item) => item.relation === '父亲');
     const mother = state.family.find((item) => item.relation === '母亲');
     if (father && mother) {

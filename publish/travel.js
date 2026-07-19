@@ -13,20 +13,13 @@
     ['创作者市集', 180, '插画、手作、写真与穿搭创作者在这里交流。'],
   ];
 
-  function activePerson(state) {
-    return Game.people.find(state, state.travel.activeId);
+  function activePeople(state) {
+    const ids = state.travel.activeIds?.length
+      ? state.travel.activeIds : [state.travel.activeId].filter(Boolean);
+    return ids.map((id) => Game.people.find(state, id)).filter(Boolean);
   }
 
-  function roam(state, areaName) {
-    const area = areas.find((entry) => entry[0] === areaName);
-    if (!area) return { ok: false, message: '没有这个街区' };
-    if (areaName === '夜间食街' && U.age(state) < 18) return { ok: false, message: '成年后才能前往夜间食街' };
-    if (['城市漫展', '创作者市集'].includes(areaName) && U.age(state) < 12) {
-      return { ok: false, message: '12岁后可以独立参加创作者活动' };
-    }
-    const discount = state.assets.vehicles.length ? 0.5 : 1;
-    const cost = Math.round(area[1] * discount);
-    Game.economy.spend(state, cost);
+  function createEncounter(state, areaName) {
     const person = U.person('路人', U.random(Game.nameSystem.surnames()), U.between(-5, 8), null, state.playerBornAt);
     person.affection = U.between(25, 42);
     person.metCity = `${state.location.city}${areaName}`;
@@ -39,24 +32,46 @@
       person.job = U.random(['写真博主', '穿搭博主', '自由插画师', '商业摄影师']);
     }
     Game.npcLife.syncGrowth(state, person);
-    state.travel.encounters = state.travel.encounters.filter((item) => item.id !== state.travel.activeId);
-    state.travel.encounters.push(person);
-    state.travel.activeId = person.id;
+    return person;
+  }
+
+  function roam(state, areaName) {
+    const area = areas.find((entry) => entry[0] === areaName);
+    if (!area) return { ok: false, message: '没有这个街区' };
+    if (areaName === '夜间食街' && U.age(state) < 18) return { ok: false, message: '成年后才能前往夜间食街' };
+    if (['城市漫展', '创作者市集'].includes(areaName) && U.age(state) < 12) {
+      return { ok: false, message: '12岁后可以独立参加创作者活动' };
+    }
+    const discount = state.assets.vehicles.length ? 0.5 : 1;
+    const cost = Math.round(area[1] * discount);
+    Game.economy.spend(state, cost);
+    const previous = new Set([...(state.travel.activeIds || []), state.travel.activeId].filter(Boolean));
+    state.travel.encounters = state.travel.encounters.filter((item) => !previous.has(item.id));
+    const people = Array.from({ length: 3 }, () => {
+      const person = createEncounter(state, areaName);
+      state.travel.encounters.push(person);
+      return person;
+    });
+    state.travel.activeIds = people.map((person) => person.id);
+    state.travel.activeId = state.travel.activeIds[0];
     state.stats.心情 = U.clamp(state.stats.心情 + 3, 0, 100);
-    Game.lifeDirector.addLog(state, '街头相遇', `你在${areaName}遇见了${person.name}。`, 'good');
-    return { ok: true, message: Game.economy.message(state, `你在${areaName}遇见了${person.name}`) };
+    const names = people.map((person) => person.name).join('、');
+    Game.lifeDirector.addLog(state, '街头相遇', `你在${areaName}遇见了${names}。`, 'good');
+    return { ok: true, message: Game.economy.message(state, `你在${areaName}遇见了3位新角色`) };
   }
 
   function render(state) {
-    const person = activePerson(state);
+    const people = activePeople(state);
     const vehicle = state.assets.vehicles.length ? '拥有座驾，街区交通费减半' : '购买座驾可让街区交通费减半';
     const buttons = areas.map(([name, cost, description]) => (
       `<button class="travel-choice" data-roam-area="${name}"><span><strong>${name}</strong>
       <small>${description}</small></span><b>¥${state.assets.vehicles.length ? Math.round(cost / 2) : cost}</b></button>`
     )).join('');
-    const encounter = person ? `<h3>最近相遇</h3>${Game.social.card(person, [
-      ['chat', '交谈'], ['meal', '请客'], ...(person.phoneUnlocked ? [] : [['exchange', '留联系方式']]),
-    ])}` : '<p class="empty-state">选择一个街区，可能遇到新的具体角色。</p>';
+    const encounter = people.length ? `<h3>本次相遇 · ${people.length}人</h3>${people.map((person) => (
+      Game.social.card(person, [
+        ['chat', '交谈'], ['meal', '请客'], ...(person.phoneUnlocked ? [] : [['exchange', '留联系方式']]),
+      ])
+    )).join('')}` : '<p class="empty-state">选择一个街区，一次会遇到3位新的具体角色。</p>';
     return `<section class="list-guide"><strong>${state.location.country} · ${state.location.city}</strong>
       <span>${vehicle}。街区与创作者活动可以自由探索。</span></section>
       <div class="travel-grid">${buttons}</div>${encounter}`;

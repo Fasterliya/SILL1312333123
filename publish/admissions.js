@@ -28,8 +28,7 @@
     )).join('');
   }
 
-  function selectors(schools) {
-    const countries = ['全部', ...unique(C.universities.map((school) => school.country))];
+  function filterOptions() {
     const countrySchools = filters.country === '全部' ? C.universities
       : C.universities.filter((school) => school.country === filters.country);
     const cities = ['全部', ...unique(countrySchools.map((school) => school.city))];
@@ -39,15 +38,20 @@
     const majors = ['全部', ...unique(scoped.flatMap((school) => school.majors))];
     if (!types.includes(filters.type)) filters.type = '全部';
     if (!majors.includes(filters.major)) filters.major = '全部';
+    return { cities, types, majors };
+  }
+
+  function selectors(schools, available) {
+    const countries = ['全部', ...unique(C.universities.map((school) => school.country))];
     return `<div class="admission-selectors">
       <label><span>国家/地区</span><select data-admission-filter="country">
       ${optionList(countries, filters.country)}</select></label>
       <label><span>城市</span><select data-admission-filter="city">
-      ${optionList(cities, filters.city)}</select></label>
+      ${optionList(available.cities, filters.city)}</select></label>
       <label><span>院校类型</span><select data-admission-filter="type">
-      ${optionList(types, filters.type)}</select></label>
+      ${optionList(available.types, filters.type)}</select></label>
       <label><span>专业方向</span><select data-admission-filter="major">
-      ${optionList(majors, filters.major)}</select></label>
+      ${optionList(available.majors, filters.major)}</select></label>
       <label><span>显示范围</span><select data-admission-filter="status">
       ${optionList(['可填报', '全部院校'], filters.status)}</select></label>
       <div><span>筛选结果</span><strong>${schools.length} 所</strong></div></div>`;
@@ -83,12 +87,13 @@
 
   function render(state, score) {
     reset(score);
+    const available = filterOptions();
     const schools = filtered(score);
     const guide = `<section class="admission-guide"><strong>高考 ${score} 分</strong>
       <span>先筛选国家、城市和专业，再展开院校卡片选择具体专业。海外录取后会迁居当地学习。</span></section>`;
     const cards = schools.length ? schools.map((school) => card(school, score)).join('')
       : '<p class="empty-state">当前筛选没有符合条件的院校，请调整筛选范围。</p>';
-    return `${guide}${selectors(schools)}<div class="admission-list">${cards}</div>
+    return `${guide}${selectors(schools, available)}<div class="admission-list">${cards}</div>
       <button class="admission-workforce" data-choice="workforce">不升大学 · 直接进入职业社会</button>`;
   }
 

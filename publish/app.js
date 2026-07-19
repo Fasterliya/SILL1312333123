@@ -72,7 +72,7 @@
     Game.portraitSystem.cancelAll();
     Game.portraitGallery.close();
     await Game.storage.reset();
-    state = U.createState();
+    state = Game.stateUpgrade.upgradeState(U.createState());
     Game.navigation.closeModule();
     Game.profile.updateGrowth(state);
     Game.npcLife.update(state);

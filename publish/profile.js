@@ -71,7 +71,7 @@
   }
 
   function value(profile, field) {
-    return field.startsWith('clothing.') ? profile.clothing[field.split('.')[1]] : profile[field];
+    return Game.cosplayCatalog.effectiveValue(profile, field);
   }
 
   function optionsFor(key) {
@@ -83,7 +83,8 @@
     Game.portraitSystem.renderPlayer(state, elements);
     elements.profileFacts.innerHTML = [
       ['年龄', `${U.age(state)}岁${state.totalMonths % 12}月`], ['身高', `${p.height.toFixed(1)} cm`],
-      ['体重', `${p.weight.toFixed(1)} kg`], ['发色', p.hairColor], ['发型', p.hairstyle], ['气质', p.temperament],
+      ['体重', `${p.weight.toFixed(1)} kg`], ['COS服', p.cosplay],
+      ['发色', value(p, 'hairColor')], ['发型', value(p, 'hairstyle')], ['气质', p.temperament],
     ].map(([label, text]) => `<div><span>${label}</span><b>${text}</b></div>`).join('');
     elements.traitGrid.innerHTML = [['性格', p.personality], ['特质', p.trait]]
       .map(([label, text]) => `<div><span>${label}</span><strong>${text}</strong></div>`).join('');
@@ -91,10 +92,12 @@
       cosplay: 'COS服', hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
       'clothing.top': '身穿', 'clothing.socks': '袜子', 'clothing.shoes': '鞋',
     };
-    elements.profileEditor.innerHTML = editable.map((field) => (
-      `<button class="selector-row" data-selector-field="${field}"><span>${labels[field]}</span>
-        <strong>${value(p, field)}</strong><b aria-hidden="true">›</b></button>`
-    )).join('');
+    elements.profileEditor.innerHTML = editable.map((field) => {
+      const covered = Game.cosplayCatalog.overrides(p, field);
+      return `<button class="selector-row" data-selector-field="${field}" ${covered ? 'disabled' : ''}>
+        <span>${labels[field]}</span><strong>${value(p, field)}</strong>
+        <b aria-hidden="true">${covered ? '覆' : '›'}</b></button>`;
+    }).join('');
   }
 
   function edit(field, nextValue) {
@@ -102,6 +105,7 @@
     const key = field.startsWith('clothing.') ? field.split('.')[1] : field;
     if (!optionsFor(key)?.some((item) => item.name === nextValue)) return false;
     const state = api.getState();
+    if (Game.cosplayCatalog.overrides(state.profile, field)) return false;
     if (field.startsWith('clothing.')) state.profile.clothing[key] = nextValue;
     else state.profile[field] = nextValue;
     if (field === 'bodyType') updateGrowth(state);
@@ -118,6 +122,7 @@
     const state = api.getState();
     const target = [...state.family, ...state.contacts].find((person) => person.id === targetId);
     if (!target) return false;
+    if (Game.cosplayCatalog.overrides(target, field)) return false;
     if (field.startsWith('clothing.')) target.clothing[key] = nextValue;
     else target[field] = nextValue;
     if (field === 'bodyType') Game.npcLife.syncGrowth(state, target);

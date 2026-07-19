@@ -97,7 +97,7 @@
     ['椒丘', '红白狐族医师装、粉色长发、狐耳与羽扇元素'],
     ['真理医生', '蓝紫学者礼服、深蓝短发、石膏头像与书卷元素'],
     ['加拉赫', '黑棕调饮师马甲、棕色乱发、酒杯与猎犬元素'],
-    ['彦卿', '蓝白少年剑士服、金色短发、飞剑与冰纹元素'],
+    ['彦卿', '蓝白剑士服、金色短发、飞剑与冰纹元素'],
     ['停云', '红金狐族商旅礼服、棕色长发、狐耳狐尾与折扇元素'],
   ].map(([name, prompt]) => make('星穹铁道', name, prompt));
 
@@ -106,6 +106,27 @@
     minAge: 0, maxAge: 120, personalities: [], temperaments: [],
   }, ...touhou, ...starRail];
   const find = (name) => items.find((item) => item.name === name) || items[0];
+  const covered = new Set(['hairColor', 'hairstyle', 'clothing.top', 'clothing.socks', 'clothing.shoes']);
 
-  Game.cosplayCatalog = Object.freeze({ items: Object.freeze(items), find });
+  function overrides(profile, field) {
+    return find(profile?.cosplay).name !== '无' && covered.has(field);
+  }
+
+  function effectiveValue(profile, field) {
+    const cosplay = find(profile?.cosplay);
+    if (cosplay.name === '无' || !covered.has(field)) {
+      return field.startsWith('clothing.') ? profile.clothing[field.split('.')[1]] : profile[field];
+    }
+    return {
+      hairColor: `${cosplay.character}角色假发发色`,
+      hairstyle: `${cosplay.character}角色假发造型`,
+      'clothing.top': `${cosplay.character}完整COS服`,
+      'clothing.socks': `${cosplay.character}腿部服饰`,
+      'clothing.shoes': `${cosplay.character}COS鞋靴`,
+    }[field];
+  }
+
+  Game.cosplayCatalog = Object.freeze({
+    items: Object.freeze(items), find, overrides, effectiveValue,
+  });
 }(window));

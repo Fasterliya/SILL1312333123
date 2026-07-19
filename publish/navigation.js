@@ -74,7 +74,7 @@
   }
 
   function characterHtml(state, person) {
-    const clothes = person.clothing || {};
+    const effective = (field) => Game.cosplayCatalog.effectiveValue(person, field);
     const labels = {
       cosplay: 'COS服', hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
       'clothing.top': '身穿', 'clothing.socks': '袜子', 'clothing.shoes': '鞋',
@@ -90,16 +90,15 @@
       ['婚姻', person.npcMarried ? `已婚 · ${person.spouseName || '伴侣'}` : '未婚'],
       ['子女', `${person.childrenCount || 0}人`],
       ['COS服', person.cosplay || '无'],
-      ['发色', person.hairColor], ['发型', person.hairstyle], ['气质', person.temperament],
-      ['身材', person.bodyType], ['身穿', clothes.top || '-'], ['袜子', clothes.socks || '-'],
-      ['鞋', clothes.shoes || '-'], ['好感', person.affection], ['互动次数', person.interactions],
+      ['发色', effective('hairColor')], ['发型', effective('hairstyle')], ['气质', person.temperament],
+      ['身材', person.bodyType], ['身穿', effective('clothing.top')], ['袜子', effective('clothing.socks')],
+      ['鞋', effective('clothing.shoes')], ['好感', person.affection], ['互动次数', person.interactions],
     ];
     const editor = Object.entries(labels).map(([field, label]) => {
-      const key = field.startsWith('clothing.') ? field.split('.')[1] : field;
-      const value = field.startsWith('clothing.') ? clothes[key] : person[key];
-      return `<button class="selector-row" data-selector-field="${field}"
+      const covered = Game.cosplayCatalog.overrides(person, field);
+      return `<button class="selector-row" data-selector-field="${field}" ${covered ? 'disabled' : ''}
         data-selector-target="${escape(person.id)}"><span>${label}</span>
-        <strong>${escape(value || '-')}</strong><b aria-hidden="true">›</b></button>`;
+        <strong>${escape(effective(field) || '-')}</strong><b aria-hidden="true">${covered ? '覆' : '›'}</b></button>`;
     }).join('');
     return `${Game.portraitSystem.npcHtml(state, person)}<section class="character-hero">
       <div class="character-avatar">${escape(person.name.slice(-1))}</div>

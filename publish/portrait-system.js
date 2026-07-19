@@ -29,20 +29,36 @@
     return [...state.family, ...state.contacts].find((person) => person.id === key) || null;
   }
 
+  function neutral(value) {
+    return String(value || '')
+      .replace(/婴儿软底鞋/g, '柔软底鞋').replace(/婴儿连体衣/g, '柔软连体衣')
+      .replace(/婴儿袜/g, '柔软棉袜').replace(/胎毛短发/g, '柔软短发')
+      .replace(/儿童短发/g, '自然短发').replace(/彩色童装/g, '彩色休闲装')
+      .replace(/幼小/g, '娇小')
+      .replace(/未成年|成年人|婴儿|幼儿|儿童|少年|少女|青年|中年|老年|成年/g, '')
+      .replace(/[零一二三四五六七八九十百两〇\d]{1,4}\s*(?:周?岁|years? old|year-old)/gi, '')
+      .replace(/\b(?:age|aged)\s*[:：=]?\s*\d{1,3}\b/gi, '')
+      .replace(/\b\d{1,3}\s*(?:y\/o|yo|yrs?\.?\s*old)\b/gi, '')
+      .replace(/\b(?:young|teenage|elderly|adult|child)\b/gi, '')
+      .replace(/(?:年龄|年纪)\s*[:：为是]?\s*[^，。；;]{0,12}/g, '')
+      .replace(/半身照|半身像|大头照|头像照|胸像|人物特写|局部特写|只拍上半身|上半身(?:照|像)?|腰部?以上|膝盖?以上|膝上构图|七分身|裁(?:掉|切)脚部?|脚部不入镜|不拍脚/g, '完整全身照')
+      .replace(/\b(?:close[- ]?up|headshot|bust shot|half[- ]body|upper[- ]body|waist[- ]up|knee[- ]up|cowboy shot|three[- ]quarter shot|cropped (?:feet|legs|body))\b/gi, 'full body')
+      .replace(/\s{2,}/g, ' ').trim();
+  }
+
   function description(state, target, key, custom) {
     const player = key === 'player';
-    const age = player ? Game.content.age(state) : Game.content.personAge(state, target);
     const gender = player ? state.gender : target.gender;
     const weighted = custom ? `，(${custom}:1.8)` : '';
     const size = `${Number(target.height || 0).toFixed(1)}cm，${Number(target.weight || 0).toFixed(1)}kg`;
-    const style = '仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和服装褶皱质感，重绘一个全新角色。不得复制图1的人物身份、五官、发型、服装、姿势、摄影器材、文字框、台词、标志或构图。';
-    const direction = '动作、姿势、取景、构图与场景背景优先遵循玩家附加提示词；玩家未指定时采用自然人物构图与协调环境。符合真实年龄，健康自然，全年龄，非性感，禁止文字、水印、对话框和摄影器材。';
+    const style = '仅参考图1的清透日系商业插画画风、细腻线稿、高明度粉彩配色、柔和赛璐璐光影、空气感渐变、发丝高光和材质细节，重绘一个全新角色。不得复制图1人物的身份、五官、现有造型、姿势、摄影器材、文字框、台词、标志或构图。';
+    const direction = '必须为完整全身照，人物从头顶到鞋底全部入镜，双手双脚可见，不裁切身体。动作可以站、坐或躺，姿势、取景与场景背景优先遵循玩家附加提示词；未指定时采用自然全身构图与协调环境。健康自然、克制得体、非性感，禁止文字、水印、对话框和摄影器材。';
     const cosplay = Game.cosplayCatalog.find(target.cosplay);
     if (cosplay.name !== '无') {
-      return `${style}现代同人COS写真风格角色插画，${gender}性，${age}岁，身高约${Number(target.height || 0).toFixed(1)}cm，${target.bodyType}身材，${target.temperament}气质。高还原扮演${cosplay.name}，${cosplay.prompt}，呈现角色主题假发、服装、配饰和道具的精致COS质感，不使用被绘角色原本的发色、发型、日常服装、性格或特质信息${weighted}。${direction}`;
+      return `${style}现代同人COS写真风格角色插画，${gender}性，身高约${Number(target.height || 0).toFixed(1)}cm，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质。高还原扮演${cosplay.name}，${neutral(cosplay.prompt)}。发色、发型、整套服装、腿部服饰、鞋靴、配饰和道具全部采用上述COS部件，不混入被绘角色原本的发型发色或日常穿着${weighted}。${direction}`;
     }
-    const clothes = `${target.clothing.top}、${target.clothing.socks}、${target.clothing.shoes}`;
-    return `${style}现代人生模拟游戏角色插画，${gender}性，${age}岁，身高体重约${size}，${target.hairColor}${target.hairstyle}，${target.bodyType}身材，${target.temperament}气质，${target.personality}性格，${target.trait}特质，穿${clothes}${weighted}。${direction}`;
+    const clothes = [target.clothing.top, target.clothing.socks, target.clothing.shoes].map(neutral).join('、');
+    return `${style}现代人生模拟游戏角色插画，${gender}性，身高体重约${size}，${neutral(target.hairColor)}${neutral(target.hairstyle)}，${neutral(target.bodyType)}身材，${neutral(target.temperament)}气质，${neutral(target.personality)}性格，${neutral(target.trait)}特质，穿${clothes}${weighted}。${direction}`;
   }
 
   async function retryDraw(input) {
@@ -78,7 +94,7 @@
     const target = findTarget(key);
     if (!target) return;
     if (key !== 'player') Game.npcLife.syncGrowth(api.getState(), target);
-    const custom = String(rawCustom || '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, 120);
+    const custom = neutral(String(rawCustom || '').replace(/[\u0000-\u001f]/g, ' ')).slice(0, 120);
     target.customPrompt = custom;
     drawing.add(key);
     errors.delete(key);

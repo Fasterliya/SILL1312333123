@@ -80,6 +80,14 @@
 
   function open(field, targetId) {
     if (!labels[field] || !optionsFor(keyFor(field))) return;
+    const state = api.getState();
+    const profile = targetId
+      ? [...state.family, ...state.contacts].find((person) => person.id === targetId)
+      : state.profile;
+    if (!profile || Game.cosplayCatalog.overrides(profile, field)) {
+      Game.view.showToast('当前造型由COS服覆盖，取消COS后可以编辑', 'warning');
+      return;
+    }
     activeField = field;
     activeTargetId = targetId || '';
     activeFilter = field === 'cosplay' ? '全部' : '适龄';

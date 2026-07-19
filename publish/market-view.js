@@ -80,6 +80,7 @@
     api?.save();
     const facts = [
       ['当前股价', money(stock.price)], ['本月变动', money(stock.price - stock.previous)],
+      ['基础估值', money(stock.basePrice)], ['市场景气', `${stock.outlook >= 0 ? '+' : ''}${stock.outlook.toFixed(1)}%`],
       ['月营收', money(stock.revenue)], ['月利润', money(stock.profit)],
       ['经营增长', `${stock.growth.toFixed(1)}%`], ['经营风险', `${stock.risk}/10`],
       ['市场卖盘', `${stock.availableShares.toLocaleString()}股`], ['总股本', `${stock.totalShares.toLocaleString()}股`],

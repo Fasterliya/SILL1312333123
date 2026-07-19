@@ -93,10 +93,12 @@
     spouse.name = heir.spouseName;
     spouse.affection = 72;
     state.family.push(spouse);
+    const identity = Game.familyNaming.forPlayer(state, spouse);
     for (let index = 0; index < Math.min(3, heir.childrenCount || 0); index += 1) {
       const gender = U.random(['男', '女']);
-      const child = U.person(gender === '男' ? '儿子' : '女儿', state.surname,
+      const child = U.person(gender === '男' ? '儿子' : '女儿', identity.surname,
         Math.max(0, U.personAge(state, heir) - 24 - index * 2), gender, state.totalMonths);
+      Game.familyNaming.assign(state, child, identity);
       Game.genetics.inheritInto(child, gender, state.profile, spouse, `legacy-child-${child.id}`);
       Game.systemsState.ensurePerson(state, child);
       state.family.push(child);
@@ -121,6 +123,7 @@
     state.travel = { activeId: null, encounters: [], journey: null,
       history: state.travel.history || [] };
     state.name = heir.name;
+    state.surname = heir.surname || Game.familyNaming.surnameOf(heir, state.surname, heir.culture);
     state.gender = heir.gender;
     state.playerBornAt = heir.birthMonth;
     state.profile = clone(heir);

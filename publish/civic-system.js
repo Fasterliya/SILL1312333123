@@ -64,6 +64,7 @@
     const previousName = state.name;
     state.surname = nextSurname;
     state.name = Game.nameSystem.makeName(nextSurname, state.gender, locale);
+    state.profile.name = state.name;
     state.civic.identityCulture = country;
     const partner = Game.people.find(state, state.romance?.partnerId);
     if (partner) partner.spouseName = state.name;
@@ -88,11 +89,17 @@
     }).join('');
   }
 
+  function formerNames(state) {
+    return [...new Set([state.civic.birthName, ...state.civic.nameHistory.map((item) => item.from)]
+      .filter((name) => name && name !== state.name))];
+  }
+
   function render(state) {
     ensure(state);
     const household = state.civic.household;
     const adult = U.age(state) >= 18;
     const history = state.civic.nameHistory.at(-1);
+    const former = formerNames(state);
     const surnames = surnameOptions(state).map((surname) => (
       `<button data-civic-surname="${surname}" ${adult ? '' : 'disabled'}>${surname}</button>`
     )).join('');
@@ -102,6 +109,7 @@
         <div><span>当前居住</span><strong>${state.location.country} · ${state.location.city}</strong></div>
         <div><span>户口所在地</span><strong>${household.country} · ${household.city}</strong></div>
         <div><span>登记姓名</span><strong>${state.name}</strong></div>
+        <div><span>曾用名</span><strong>${former.join('、') || '无'}</strong></div>
         <div><span>姓名文化</span><strong>${state.civic.identityCulture}</strong></div>
       </div>
       ${history ? `<p class="civic-history">最近变更：${history.from} → ${history.to}</p>` : ''}

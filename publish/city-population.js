@@ -8,7 +8,6 @@
       city: name, country: '华夏', tier: 3,
     };
   }
-
   function cultureFor(city, index) {
     const visitors = ['日本', '韩国', '新加坡', '法国', '英国', '美国'];
     if (city.country === '华夏') return index < 94 ? '华夏' : visitors[index % visitors.length];
@@ -16,7 +15,6 @@
     if (index < 96) return '华夏';
     return visitors.filter((item) => item !== city.country)[index % 5];
   }
-
   function residentName(culture, gender, index, cityIndex) {
     const locale = Game.worldCulture.profile(culture).locale;
     const data = Game.nameSystem.cultures[locale] || Game.nameSystem.cultures['zh-CN'];
@@ -26,7 +24,6 @@
     const given = names[Math.floor(rank / data.surnames.length) % names.length];
     return ['en-US', 'en-GB', 'fr-FR'].includes(locale) ? `${given} ${family}` : family + given;
   }
-
   function jobFor(cityName, index, age) {
     if (age < 22 || age > 64) return null;
     const local = Game.config.jobs.filter((job) => !job.freelance && job.cities?.includes(cityName));
@@ -34,7 +31,6 @@
     const source = local.length && index % 4 !== 0 ? local : general;
     return source.length ? source[(index * 7) % source.length] : null;
   }
-
   function createRecord(state, city, index, cityIndex) {
     const gender = index % 2 ? '女' : '男';
     const age = 2 + ((index * 7 + cityIndex * 5) % 67);
@@ -55,9 +51,9 @@
       w: null,
       k: 0,
       f: gender === '女' ? Game.demography.baseFertility(`resident-${cityIndex}-${index}`) : null,
+      x: null, o: null,
     };
   }
-
   function compactRecord(record) {
     if (record?.i) return record;
     if (!record || typeof record !== 'object') return null;
@@ -67,9 +63,9 @@
       a: record.affection, j: record.jobId || '', m: record.marriedTo || null,
       w: record.marriedAtMonth || null, k: record.childrenCount || 0,
       f: record.gender === '女' ? record.fertilityBase : null,
+      x: record.namePreference || null, o: record.birthName || null,
     };
   }
-
   function ensure(state) {
     state.socialWorld ||= {};
     state.socialWorld.cityArchives ||= {};
@@ -84,7 +80,6 @@
     state.socialWorld.populationVersion = 1;
     return state.socialWorld.cityArchives;
   }
-
   function applyCareer(person, record, cityName) {
     const age = Math.floor((person.populationMonth - record.b) / 12);
     const job = Game.config.jobs.find((item) => item.id === record.j);
@@ -115,12 +110,16 @@
       populationMonth: state.totalMonths, npcMarried: Boolean(record.m),
       spouseId: record.m, childrenCount: record.k,
       fertilityBase: record.f ?? (record.g === '女' ? Game.demography.baseFertility(record.i) : null),
+      birthName: record.o || record.n, namePreference: record.x || '',
+      culturePreference: record.x ? '日本文化' : '', nameCulture: record.x ? '日本' : '',
+      nameHistory: record.o && record.o !== record.n
+        ? [{ from: record.o, to: record.n, country: '日本', reason: '主动采用日本姓名' }] : [],
     });
     person.spouseName = records.find((item) => item.i === record.m)?.n || '';
-    applyCareer(person, record, cityName);
-    Game.npcLife.updatePerson(state, person);
     Game.worldCulture.applyPerson(person, record.c);
     person.name = record.n;
+    applyCareer(person, record, cityName);
+    Game.npcLife.updatePerson(state, person);
     Game.systemsState.ensurePerson(state, person);
     return person;
   }
@@ -134,6 +133,7 @@
     record.m = person.spouseId || record.m;
     record.k = Math.max(record.k || 0, person.childrenCount || 0);
     if (person.gender === '女') record.f = person.fertilityBase;
+    record.n = person.name; record.x = person.namePreference || null; record.o = person.birthName || null;
   }
 
   function compact(state, activeCity) {

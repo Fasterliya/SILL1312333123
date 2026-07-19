@@ -98,6 +98,9 @@
     };
     const identity = [
       ['关系', person.relation], ['年龄', `${U.personAge(state, person)}岁`], ['性别', person.gender],
+      ['曾用名', [...new Set([person.birthName, ...(person.nameHistory || []).map((item) => item.from)]
+        .filter((name) => name && name !== person.name))].join('、') || '无'],
+      ['文化偏好', person.culturePreference || '无特别倾向'],
       ['身高', `${Number(person.height || 0).toFixed(1)} cm`],
       ['体重', `${Number(person.weight || 0).toFixed(1)} kg`],
       ['成长身高', `${Number(person.maxHeight || 0).toFixed(1)} cm`],

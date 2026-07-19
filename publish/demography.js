@@ -132,13 +132,11 @@
     const chance = clamp(0.025 + Math.max(0, age - 30) * 0.003 + childCount(state, woman) * 0.006, 0.02, 0.08);
     return Math.random() < chance ? 2 : 1;
   }
-
   function twinCountAt(age, children) {
     const chance = clamp(0.025 + Math.max(0, age - 30) * 0.003
       + Math.max(0, children) * 0.006, 0.02, 0.08);
     return Math.random() < chance ? 2 : 1;
   }
-
   function rollMonthlyConception(state) {
     if (!state.romance.married || state.romance.pendingBirth > 0) return null;
     if (state.romance.conceptionCooldown > 0) {
@@ -164,9 +162,11 @@
       : Game.people.find(state, state.romance.pendingBirthMotherId);
     const previousBirths = mother ? childCount(state, mother) : 0;
     const children = [];
+    const identity = Game.familyNaming.forPlayer(state, partner);
     for (let index = 0; index < babies; index += 1) {
       const relation = U.random(['儿子', '女儿']);
-      const child = U.person(relation, state.surname, 0, relation === '儿子' ? '男' : '女', state.totalMonths);
+      const child = U.person(relation, identity.surname, 0, relation === '儿子' ? '男' : '女', state.totalMonths);
+      Game.familyNaming.assign(state, child, identity);
       Object.assign(child, {
         bornAt: state.totalMonths, birthMonth: state.totalMonths, affection: 80,
         temperament: '懵懂', bodyType: '幼小', hairstyle: '胎毛短发',

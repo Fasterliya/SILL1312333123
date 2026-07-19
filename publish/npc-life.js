@@ -155,6 +155,7 @@
     education(state, person, age);
     const educationChanged = previousEducation !== `${person.educationStage}|${person.educationName}`;
     if (person.lastLifeUpdateAge === age && !educationChanged) {
+      Game.npcCulturalStyle.update(state, person, age);
       syncGrowth(state, person);
       return;
     }
@@ -162,6 +163,7 @@
     career(state, person, age);
     relationships(state, person, age);
     appearance(person, age);
+    Game.npcCulturalStyle.update(state, person, age);
     syncGrowth(state, person);
   }
 

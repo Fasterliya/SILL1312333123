@@ -39,11 +39,10 @@
     const age = Math.max(0, parentAge - marriedAt - 1 - index * 2);
     const gender = U.random(['男', '女']);
     const culture = person.culture || spouse.culture || state.location.country || '华夏';
-    const locale = Game.worldCulture.profile(culture).locale;
-    const child = U.person('角色子女', '', age, gender, state.totalMonths);
+    const identity = Game.familyNaming.forParents(state, person, spouse);
+    const child = U.person('角色子女', identity.surname, age, gender, state.totalMonths);
     Game.worldCulture.applyPerson(child, culture);
-    U.setUniqueName(state, child, locale);
-    child.culture = culture;
+    Game.familyNaming.assign(state, child, identity);
     child.parentIds = [person.id, spouse.id];
     child.currentCity = person.currentCity;
     child.homeCity = person.currentCity || person.homeCity;

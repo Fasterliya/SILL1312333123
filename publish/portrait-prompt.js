@@ -155,27 +155,32 @@
     return lines.filter((line) => !line.endsWith(': '));
   }
 
-  function build(state, target, key, custom) {
+  function build(state, target, key, custom, model) {
     const player = key === 'player';
     const appearance = appearanceLines(state, target, player);
-    const pose = appearance.years < 18 ? 'full body neutral pose' : 'standing pose';
     const customText = clean(custom);
+    const intent = Game.portraitIntent.analyze(customText);
+    const defaultPose = appearance.years < 18 ? 'full body neutral pose' : 'standing pose';
+    const poseLines = intent.action
+      ? [intent.action, 'natural full-body composition adapted to the requested action']
+      : [defaultPose, 'front view', 'slightly dynamic pose', 'looking at viewer',
+        'natural gesture', 'elegant posture', 'empty relaxed hands'];
+    const finalLighting = intent.scene
+      ? lighting.filter((line) => line !== 'clean background') : lighting;
+    const customLine = model === 'iroha'
+      ? `PRIMARY PLAYER DIRECTION, must follow exactly: ${intent.direction}`
+      : `(${intent.direction}:1.8)`;
     const parts = [
       ...quality,
+      customText ? customLine : '',
       'full body',
-      pose,
+      ...poseLines,
       'character centered',
-      'front view',
-      'slightly dynamic pose',
-      'looking at viewer',
-      'natural gesture',
-      'elegant posture',
-      'empty relaxed hands',
+      intent.scene ? `environment: ${intent.scene}` : '',
       ...appearance.lines,
       ...clothingLines(target),
-      customText ? `(${customText}:1.8)` : '',
       ...characterStyle,
-      ...lighting,
+      ...finalLighting,
     ].filter(Boolean);
     return parts.join(',\n').slice(0, 1950);
   }

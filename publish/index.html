@@ -41,6 +41,7 @@
   <script src="./draw-settings.js" defer></script>
   <script src="./storage.js" defer></script>
   <script src="./portrait-gallery.js" defer></script>
+  <script src="./portrait-intent.js" defer></script>
   <script src="./portrait-prompt.js" defer></script>
   <script src="./portrait-system.js" defer></script>
   <script src="./profile.js" defer></script>
@@ -165,8 +166,8 @@
         <section class="panel portrait-panel">
           <button class="portrait-slot" id="portraitSlot" type="button" title="查看立绘大图" aria-label="查看立绘大图"></button>
           <div class="portrait-actions"><p id="portraitStatus"></p>
-            <label class="prompt-field"><span>附加提示词 · 权重1.8</span>
-              <input id="portraitPromptInput" maxlength="120" placeholder="例如：戴金丝眼镜、手持书本"></label>
+            <label class="prompt-field"><span>附加提示词 · 动作与场景优先</span>
+              <input id="portraitPromptInput" maxlength="120" placeholder="例如：躺在床上，卧室夜景"></label>
             <button id="generatePortraitBtn" type="button">生成角色立绘</button></div>
         </section>
         <details class="fold-section" open>

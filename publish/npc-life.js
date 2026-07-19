@@ -97,10 +97,12 @@
   function relationships(state, person, age) {
     if (['父亲', '母亲', '配偶'].includes(person.relation)) return;
     if (state.romance.partnerId === person.id || person.relation === '恋人') return;
+    if (person.populationResident) return;
     if (!person.npcMarried && age >= 24 && Math.random() < Math.min(0.22, 0.055 + (age - 24) * 0.009)) {
       person.npcMarried = true;
       person.npcMarriedAtAge = age;
-      person.spouseName = U.makeName('', person.gender === '男' ? '女' : '男');
+      const locale = Game.worldCulture.profile(person.culture || state.location.country).locale;
+      person.spouseName = U.makeName('', person.gender === '男' ? '女' : '男', locale);
     }
     if (person.spouseId && person.id > person.spouseId) return;
     if (!person.npcMarried || age < 25 || age > 45 || person.childrenCount >= 3) return;
@@ -161,5 +163,5 @@
     });
   }
 
-  Game.npcLife = Object.freeze({ update, updateGrowth, syncGrowth });
+  Game.npcLife = Object.freeze({ update, updatePerson, updateGrowth, syncGrowth });
 }(window));

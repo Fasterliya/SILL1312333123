@@ -13,7 +13,7 @@
       etiquette: '多语言环境，重视规则、效率与跨文化表达' },
     法国: { locale: 'fr-FR', code: 'EUR', symbol: '€', rate: 7.8, cost: 1.42,
       etiquette: '重视问候、个人边界、餐桌节奏与文化表达' },
-    英国: { locale: 'en-US', code: 'GBP', symbol: '£', rate: 9.2, cost: 1.5,
+    英国: { locale: 'en-GB', code: 'GBP', symbol: '£', rate: 9.2, cost: 1.5,
       etiquette: '重视排队、克制表达、准时与私人空间' },
     美国: { locale: 'en-US', code: 'USD', symbol: '$', rate: 7.2, cost: 1.45,
       etiquette: '表达直接，重视个人选择、预约与清晰沟通' },

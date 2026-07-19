@@ -13,9 +13,13 @@
   function makeSpouse(state, person) {
     const age = U.personAge(state, person);
     const gender = person.gender === '男' ? '女' : '男';
+    const culture = person.culture || state.location.country || '华夏';
+    const locale = Game.worldCulture.profile(culture).locale;
     const spouse = U.person('角色家属', '', Math.max(20, age + U.between(-3, 3)), gender, state.totalMonths);
+    Game.worldCulture.applyPerson(spouse, culture);
     if (person.spouseName) spouse.name = person.spouseName;
-    U.setUniqueName(state, spouse);
+    U.setUniqueName(state, spouse, locale);
+    spouse.culture = culture;
     spouse.npcMarried = true;
     spouse.npcMarriedAtAge = person.npcMarriedAtAge;
     spouse.spouseId = person.id;
@@ -34,7 +38,12 @@
     const marriedAt = person.npcMarriedAtAge || Math.max(22, parentAge - 2);
     const age = Math.max(0, parentAge - marriedAt - 1 - index * 2);
     const gender = U.random(['男', '女']);
-    const child = U.person('角色子女', person.name.slice(0, 1), age, gender, state.totalMonths);
+    const culture = person.culture || spouse.culture || state.location.country || '华夏';
+    const locale = Game.worldCulture.profile(culture).locale;
+    const child = U.person('角色子女', '', age, gender, state.totalMonths);
+    Game.worldCulture.applyPerson(child, culture);
+    U.setUniqueName(state, child, locale);
+    child.culture = culture;
     child.parentIds = [person.id, spouse.id];
     child.currentCity = person.currentCity;
     child.homeCity = person.currentCity || person.homeCity;

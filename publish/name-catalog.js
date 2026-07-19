@@ -21,9 +21,9 @@
       ],
     },
     'ja-JP': {
-      surnames: ['佐藤', '铃木', '高桥', '田中', '伊藤', '渡边', '山本', '中村', '小林', '加藤'],
-      male: ['悠真', '莲', '拓海', '直树', '翔太', '悠斗', '和也', '大辅', '健太', '凉介'],
-      female: ['葵', '凛', '结衣', '阳菜', '美月', '千夏', '樱', '美咲', '七海', '玲奈'],
+      surnames: ['佐藤', '铃木', '高桥', '田中', '伊藤', '渡边', '山本', '中村', '小林', '加藤', '吉田', '山田'],
+      male: ['悠真', '莲', '拓海', '直树', '翔太', '悠斗', '和也', '大辅', '健太', '凉介', '隼人', '诚'],
+      female: ['葵', '凛', '结衣', '阳菜', '美月', '千夏', '樱', '美咲', '七海', '玲奈', '真由', '彩香'],
     },
     'ko-KR': {
       surnames: ['金', '李', '朴', '崔', '郑', '姜', '赵', '尹'],
@@ -31,9 +31,14 @@
       female: ['智恩', '秀妍', '书妍', '多恩', '允儿', '海仁', '彩英', '恩彩'],
     },
     'en-US': {
-      surnames: ['Smith ', 'Johnson ', 'Brown ', 'Miller ', 'Davis ', 'Wilson '],
-      male: ['Alex', 'Daniel', 'Ethan', 'Julian', 'Noah', 'Ryan'],
-      female: ['Emma', 'Olivia', 'Chloe', 'Grace', 'Mia', 'Sophie'],
+      surnames: ['Smith', 'Johnson', 'Brown', 'Miller', 'Davis', 'Wilson', 'Moore', 'Taylor', 'Clark', 'Lewis', 'Walker', 'Hall'],
+      male: ['Alex', 'Daniel', 'Ethan', 'Julian', 'Noah', 'Ryan', 'Lucas', 'Owen', 'Miles', 'Henry', 'Caleb', 'Nathan'],
+      female: ['Emma', 'Olivia', 'Chloe', 'Grace', 'Mia', 'Sophie', 'Ava', 'Lucy', 'Nora', 'Ella', 'Zoe', 'Claire'],
+    },
+    'en-GB': {
+      surnames: ['Smith', 'Jones', 'Taylor', 'Brown', 'Williams', 'Wilson', 'Evans', 'Thomas', 'Roberts', 'Walker', 'Wright', 'Hall'],
+      male: ['Oliver', 'George', 'Arthur', 'Harry', 'Jack', 'Oscar', 'Charlie', 'Theo', 'Alfie', 'Henry', 'Leo', 'James'],
+      female: ['Amelia', 'Isla', 'Florence', 'Lily', 'Freya', 'Alice', 'Sophie', 'Emily', 'Grace', 'Charlotte', 'Lucy', 'Ruby'],
     },
     'fr-FR': {
       surnames: ['Martin ', 'Bernard ', 'Dubois ', 'Thomas ', 'Robert ', 'Petit '],
@@ -47,14 +52,16 @@
 
   function makeName(surname, gender, culture) {
     const data = cultures[culture || 'zh-CN'] || cultures['zh-CN'];
-    return (surname || random(data.surnames)) + random(poolFor(gender, culture) || data.male);
+    const family = surname || random(data.surnames);
+    const given = random(poolFor(gender, culture) || data.male);
+    return ['en-US', 'en-GB', 'fr-FR'].includes(culture) ? `${given} ${family}` : family + given;
   }
 
   function setUnique(state, person, culture) {
     const used = new Set([state.name, ...(Game.people ? Game.people.all(state) : [...state.family, ...state.contacts])].map((item) => (
       typeof item === 'string' ? item : item?.name
     )));
-    for (let attempt = 0; attempt < 24; attempt += 1) {
+    for (let attempt = 0; attempt < 64; attempt += 1) {
       const candidate = makeName('', person.gender, culture);
       if (!used.has(candidate)) {
         person.name = candidate;

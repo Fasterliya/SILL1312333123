@@ -83,6 +83,13 @@
     if (decision.type === 'highSchool') {
       const school = C.highSchools.find((item) => `${current.hometown.city}${item.suffix}` === value)
         || C.highSchools[C.highSchools.length - 1];
+      const line = Game.schoolLines.highSchoolLine(current, school);
+      const hasEligible = C.highSchools.some((item) => (
+        decision.score >= Game.schoolLines.highSchoolLine(current, item)
+      ));
+      if (decision.score < line && hasEligible) {
+        return Game.view.showToast('中考分数未达到该校当年录取线', 'warning');
+      }
       const schoolName = `${current.hometown.city}${school.suffix}`;
       const vocational = school.program === 'vocational';
       Game.social.enterSchool(current, schoolName, vocational ? 'vocational' : 'high', 5);
@@ -134,15 +141,17 @@
     let options = [];
     if (d.type === 'highSchool') {
       Game.view.el.decisionTitle.textContent = `中考 ${d.score} 分，填报本地高中`;
-      Game.view.el.decisionText.textContent = `户籍地为${current.hometown.city}，可填报达到录取线的本地学校。`;
-      options = C.highSchools.filter((item) => d.score >= item.min)
+      const paper = Game.schoolLines.examContext(current, 'middle');
+      Game.view.el.decisionText.textContent = `${paper.year}年${paper.area}卷${paper.label}，录取线结合当地教育资源动态调整。`;
+      options = C.highSchools.filter((item) => d.score >= Game.schoolLines.highSchoolLine(current, item))
         .map((item) => ({
           value: `${current.hometown.city}${item.suffix}`,
-          label: `${current.hometown.city}${item.suffix} · ${item.type}${item.major ? ` · ${item.major}` : ''} · 线${item.min}`,
+          label: `${current.hometown.city}${item.suffix} · ${item.type}${item.major ? ` · ${item.major}` : ''} · 线${Game.schoolLines.highSchoolLine(current, item)}`,
         }));
       if (!options.length) {
         const school = C.highSchools[C.highSchools.length - 1];
-        options = [{ value: `${current.hometown.city}${school.suffix}`, label: `${current.hometown.city}${school.suffix} · ${school.type}` }];
+        options = [{ value: `${current.hometown.city}${school.suffix}`,
+          label: `${current.hometown.city}${school.suffix} · ${school.type} · 补录通道` }];
       }
     } else if (d.type === 'track') {
       Game.view.el.decisionTitle.textContent = '高考选科';

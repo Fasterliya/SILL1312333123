@@ -108,6 +108,7 @@
       Game.portraitGallery.configure({ getState: () => state, refresh, save });
       Game.portraitSystem.configure({ getState: () => state, refresh, save });
       Game.drawSettings.configure({ getState: () => state, save });
+      Game.schoolLines.configure({ getState: () => state, refresh });
       Game.navigation.configure({ getState: () => state });
       Game.appearance.configure({ getState: () => state });
       Game.actions.configure({ getState: () => state, refresh, save });

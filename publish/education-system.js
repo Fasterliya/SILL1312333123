@@ -102,19 +102,21 @@
   }
 
   function schoolQuality(state) {
-    if (state.education.schoolStage === 'primary') return 58;
-    if (state.education.schoolStage === 'middle') return 62;
-    if (state.education.schoolStage === 'vocational') return 56;
-    return { 省级示范: 78, 市级重点: 70, 公办普通: 61, 综合高中: 54 }[
-      state.education.highSchoolType
-    ] || 60;
+    const stageQuality = state.education.schoolStage === 'primary' ? 58
+      : (state.education.schoolStage === 'middle' ? 62
+        : (state.education.schoolStage === 'vocational' ? 56 : ({
+          省级示范: 78, 市级重点: 70, 公办普通: 61, 综合高中: 54,
+        }[state.education.highSchoolType] || 60)));
+    const cityQuality = Game.schoolLines.cityResource(state.location.city);
+    return Math.round(stageQuality * 0.72 + cityQuality * 0.28);
   }
 
   function exam(state, label, subjects) {
     const item = ensure(state);
     const scores = {};
-    const difficulty = state.education.schoolStage === 'primary' ? 0.03
-      : (state.education.schoolStage === 'middle' ? 0.06 : 0.1);
+    const paper = Game.schoolLines.examProfile(state, label);
+    const difficulty = paper?.penalty ?? (state.education.schoolStage === 'primary' ? 0.03
+      : (state.education.schoolStage === 'middle' ? 0.06 : 0.1));
     Object.entries(subjects).forEach(([subject, cap]) => {
       const condition = state.stats.健康 / 100 * 0.05 + state.stats.心情 / 100 * 0.04
         + U.clamp(state.health.sleep / 8, 0.55, 1.1) * 0.03;
@@ -129,6 +131,7 @@
     const total = Object.values(scores).reduce((sum, value) => sum + value, 0);
     const maximum = Object.values(subjects).reduce((sum, value) => sum + value, 0);
     const record = { label, age: U.age(state), scores, total, maximum,
+      paperDifficulty: paper?.label || null, paperDifficultyIndex: paper?.difficulty || null,
       readiness: Math.round(readiness(state)), date: `${state.year}.${state.month}` };
     item.exams.unshift(record);
     item.exams = item.exams.slice(0, 12);
@@ -137,7 +140,8 @@
     item.study = Math.round(item.preparation);
     const strong = total / maximum >= 0.78;
     state.stats.心情 = clamp(state.stats.心情 + (strong ? 4 : -3));
-    Game.lifeDirector.addLog(state, label, `总分 ${total}/${maximum}，考前准备度 ${record.readiness}。`,
+    const paperText = paper ? `，${paper.area}卷${paper.label}` : '';
+    Game.lifeDirector.addLog(state, label, `总分 ${total}/${maximum}${paperText}，考前准备度 ${record.readiness}。`,
       strong ? 'good' : 'normal');
     return record;
   }
@@ -169,7 +173,7 @@
         `<button data-education-action="${id}" ${used || !enrolled(state) ? 'disabled' : ''}>
         <strong>${action[5]}</strong><small>${action[0] ? `¥${action[0]}` : '自主安排'}</small></button>`)).join('')}</div>
       <h3>${latest ? `${latest.label} · ${latest.total}/${latest.maximum || '-'}` : '考试成绩'}</h3>
-      <div class="score-grid">${scores}</div>`;
+      <div class="score-grid">${scores}</div>${Game.schoolLines.render(state)}`;
   }
 
   Game.educationSystem = Object.freeze({

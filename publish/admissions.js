@@ -57,28 +57,31 @@
       <div><span>筛选结果</span><strong>${schools.length} 所</strong></div></div>`;
   }
 
-  function filtered(score) {
+  function filtered(state, score) {
     return C.universities.filter((school) => (
       (filters.country === '全部' || school.country === filters.country)
       && (filters.city === '全部' || school.city === filters.city)
       && (filters.type === '全部' || school.type === filters.type)
       && (filters.major === '全部' || school.majors.includes(filters.major))
-      && (filters.status === '全部院校' || score >= school.min)
-    )).sort((a, b) => b.min - a.min || a.name.localeCompare(b.name, 'zh-CN'));
+      && (filters.status === '全部院校' || score >= Game.schoolLines.universityLine(state, school))
+    )).sort((a, b) => Game.schoolLines.universityLine(state, b)
+      - Game.schoolLines.universityLine(state, a) || a.name.localeCompare(b.name, 'zh-CN'));
   }
 
   function token(school, major) {
     return `university|${school.id}|${encodeURIComponent(major)}`;
   }
 
-  function card(school, score) {
-    const eligible = score >= school.min;
-    const gap = eligible ? `高于投档线 ${score - school.min} 分` : `还差 ${school.min - score} 分`;
+  function card(state, school, score) {
+    const line = Game.schoolLines.universityLine(state, school);
+    const resource = Game.schoolLines.institutionResource(school);
+    const eligible = score >= line;
+    const gap = eligible ? `高于投档线 ${score - line} 分` : `还差 ${line - score} 分`;
     return `<details class="admission-card ${eligible ? '' : 'locked'}">
       <summary><div><strong>${escape(school.name)}</strong>
       <span>${escape(school.country)} · ${escape(school.city)} · ${escape(school.type)}</span></div>
-      <b>${school.min}分</b></summary>
-      <div class="admission-detail"><p>${gap} · 学制${school.durationMonths / 12}年</p>
+      <b>${line}分</b></summary>
+      <div class="admission-detail"><p>${gap} · 教育资源${resource}（${Game.schoolLines.resourceLabel(resource)}） · 学制${school.durationMonths / 12}年</p>
       <div class="major-options">${school.majors.map((major) => (
         `<button data-choice="${escape(token(school, major))}" ${eligible ? '' : 'disabled'}>
         <strong>${escape(major)}</strong><small>${eligible ? '选择该专业并确认入学' : '分数未达到投档线'}</small></button>`
@@ -88,10 +91,11 @@
   function render(state, score) {
     reset(score);
     const available = filterOptions();
-    const schools = filtered(score);
-    const guide = `<section class="admission-guide"><strong>高考 ${score} 分</strong>
-      <span>先筛选国家、城市和专业，再展开院校卡片选择具体专业。海外录取后会迁居当地学习。</span></section>`;
-    const cards = schools.length ? schools.map((school) => card(school, score)).join('')
+    const schools = filtered(state, score);
+    const paper = Game.schoolLines.examContext(state, 'high');
+    const guide = `<section class="admission-guide"><strong>高考 ${score} 分 · ${paper.area}卷${paper.label}</strong>
+      <span>${paper.year}年动态投档线已结合卷面难度、生源地竞争和学校教育资源。海外录取后会迁居当地学习。</span></section>`;
+    const cards = schools.length ? schools.map((school) => card(state, school, score)).join('')
       : '<p class="empty-state">当前筛选没有符合条件的院校，请调整筛选范围。</p>';
     return `${guide}${selectors(schools, available)}<div class="admission-list">${cards}</div>
       <button class="admission-workforce" data-choice="workforce">不升大学 · 直接进入职业社会</button>`;
@@ -116,7 +120,7 @@
     const selected = resolve(value);
     if (!selected) return { ok: false, message: '院校或专业选择已经失效' };
     const { school, major } = selected;
-    if (!bypassScore && (state.pendingDecision?.score || 0) < school.min) {
+    if (!bypassScore && (state.pendingDecision?.score || 0) < Game.schoolLines.universityLine(state, school)) {
       return { ok: false, message: '高考分数未达到该校投档线' };
     }
     Object.assign(state.education, {

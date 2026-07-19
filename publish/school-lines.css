@@ -1,0 +1,131 @@
+.school-lines {
+  margin-top: 16px;
+  border: 1px solid #d7d6cc;
+  background: #fffdf7;
+}
+
+.school-lines > header {
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #e4e1d7;
+  background: #eef2eb;
+}
+
+.school-lines header span,
+.school-lines header strong,
+.school-lines header b {
+  display: block;
+}
+
+.school-lines header span {
+  color: #6b7571;
+  font-size: 10px;
+}
+
+.school-lines header strong {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.school-lines header b {
+  max-width: 48%;
+  color: #315f58;
+  font-size: 10px;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.school-lines nav {
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.school-lines nav button {
+  min-height: 40px;
+  border: 1px solid #d8d8d0;
+  background: #f4f1e8;
+  color: #56625e;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.school-lines nav button.active {
+  border-color: #315f58;
+  background: #315f58;
+  color: #fff;
+}
+
+.line-legend {
+  padding: 0 10px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  color: #717a76;
+  font-size: 9px;
+}
+
+.school-line-list {
+  max-height: 310px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid #e4e1d7;
+}
+
+.line-row {
+  min-height: 58px;
+  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid #ece9df;
+}
+
+.line-row:last-child {
+  border-bottom: 0;
+}
+
+.line-row > div {
+  min-width: 0;
+}
+
+.line-row strong,
+.line-row span,
+.line-row b,
+.line-row small {
+  display: block;
+}
+
+.line-row strong {
+  font-size: 12px;
+}
+
+.line-row span {
+  margin-top: 4px;
+  overflow: hidden;
+  color: #6c7571;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-row > div:last-child {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.line-row b {
+  color: #bd3d33;
+  font-size: 13px;
+}
+
+.line-row small {
+  margin-top: 4px;
+  color: #62706b;
+  font-size: 9px;
+}

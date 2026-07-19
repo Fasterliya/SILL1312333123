@@ -144,6 +144,7 @@
   function handle(event) {
     if (Game.portraitGallery.handleClick(event)) return;
     if (Game.appearance.handleClick(event)) return;
+    if (Game.drawSettings.handleClick(event)) return;
     if (handlePortrait(event) || handleNavigation(event)) return;
     const state = api.getState();
     if (handleRelations(event, state) || handleCareer(event, state) || handleLifeSystems(event, state)) return;

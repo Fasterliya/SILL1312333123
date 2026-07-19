@@ -57,6 +57,10 @@
     }[err?.code] || '生成失败，点击按钮可以重试';
   }
 
+  function modelNote() {
+    return `文生图 · ${Game.drawSettings.label(api.getState())} · 自定义描述权重1.8`;
+  }
+
   async function generate(key, rawCustom) {
     if (drawing.has(key)) return;
     if (drawing.size >= 2) {
@@ -80,7 +84,7 @@
       const result = await retryDraw({
         prompt: description(state, target, key, custom),
         dimension: '2:3',
-        model: 'anime',
+        model: Game.drawSettings.selected(state),
       });
       if (latest.get(key) !== requestId || findTarget(key) !== target) return;
       if (!Game.portraitGallery.add(key, result, custom)) throw new Error('绘图结果没有有效图片');
@@ -103,7 +107,7 @@
       : `<div class="portrait-empty"><b>${escape(name.slice(-1))}</b><span>尚未生成立绘</span></div>`;
     return `<button class="portrait-slot ${npc ? 'npc-portrait-slot' : ''}" ${slotAttr}
       type="button" aria-label="查看${escape(name)}的立绘大图">${slot}</button>
-      <div class="portrait-actions"><p>${waiting ? '角色立绘生成中，预计约30-60秒' : (errors.get(key) || '文生图固定画风 · 自定义描述权重1.8')}</p>
+      <div class="portrait-actions"><p>${waiting ? '角色立绘生成中，预计约30-60秒' : (errors.get(key) || modelNote())}</p>
       <label class="prompt-field"><span>附加提示词 · 权重1.8</span>
       <input maxlength="120" value="${escape(target.customPrompt)}" ${npc ? 'data-npc-prompt' : 'id="portraitPromptInput"'}
         placeholder="例如：戴金丝眼镜、手持书本"></label>
@@ -123,7 +127,7 @@
       Game.portraitGallery.remove('player', image);
     }, { once: true });
     elements.portraitStatus.textContent = waiting ? '角色立绘生成中，预计约30-60秒'
-      : (errors.get('player') || '文生图固定画风 · 自定义描述权重1.8');
+      : (errors.get('player') || modelNote());
     elements.portraitSlot.disabled = false;
     elements.generatePortraitBtn.disabled = waiting;
     elements.generatePortraitBtn.textContent = waiting ? '生成中…约30-60秒' : (image ? '重新生成立绘' : '生成角色立绘');

@@ -95,6 +95,7 @@
       Game.profile.configure({ getState: () => state, refresh, save });
       Game.portraitGallery.configure({ getState: () => state, refresh, save });
       Game.portraitSystem.configure({ getState: () => state, refresh, save });
+      Game.drawSettings.configure({ getState: () => state, save });
       Game.navigation.configure({ getState: () => state });
       Game.appearance.configure({ getState: () => state });
       Game.actions.configure({ getState: () => state, refresh, save });
@@ -108,6 +109,7 @@
       bind();
       refresh();
       save();
+      Game.drawSettings.load();
       Game.sdkAdapter.progress('runtime_initializing', '人生档案已建立');
       root.requestAnimationFrame(() => {
         Game.sdkAdapter.progress('first_frame', '可以开始人生');

@@ -158,6 +158,7 @@
     el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);
     el.healthPanel.innerHTML = Game.healthSystem.render(state);
     el.legacyPanel.innerHTML = Game.legacySystem.render(state);
+    Game.drawSettings.render(state);
     Game.profile.render(state, el);
     Game.navigation.refreshDetail();
     const partner = [...state.family, ...state.contacts].find((item) => item.id === state.romance.partnerId);

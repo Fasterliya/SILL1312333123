@@ -124,7 +124,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 11,
+      version: 12,
       updatedAt: new Date().toISOString(),
       name: makeName(surname, gender),
       surname,
@@ -153,6 +153,7 @@
       assets: { house: null, mortgage: 0, stocks: stockState(), businesses: [], vehicles: [] },
       matchmaking: { candidates: [] },
       travel: { activeId: null, encounters: [], journey: null, history: [] },
+      settings: { drawModel: 'anime' },
       routine: { actionMonth: 0, fatigue: 0, actions: { study: 0, sport: 0, social: 0, rest: 0 } },
       pendingDecision: null,
       gameOver: false,

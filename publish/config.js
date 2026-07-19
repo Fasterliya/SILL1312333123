@@ -2,7 +2,7 @@
   'use strict';
 
   const config = {
-    version: 11,
+    version: 12,
     title: '华夏人生',
     storageKey: 'huaxia-life:v1',
     startYear: 2026,

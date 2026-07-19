@@ -57,6 +57,21 @@
     return result;
   }
 
+  async function drawGenerateModels() {
+    if (!sdk()?.draw?.generateModels) throw Object.assign(new Error('当前环境无法读取绘画模型'), {
+      code: 'SDK_UNAVAILABLE',
+      retryable: false,
+    });
+    const result = await sdk().draw.generateModels();
+    if (!result || !Array.isArray(result.models)) {
+      throw Object.assign(new Error('绘画模型列表无效'), {
+        code: 'INVALID_MODEL_LIST',
+        retryable: true,
+      });
+    }
+    return result;
+  }
+
   Game.sdkAdapter = Object.freeze({
     isOnline: () => Boolean(sdk()),
     progress,
@@ -65,5 +80,6 @@
     kvGet,
     kvPut,
     drawGenerate,
+    drawGenerateModels,
   });
 }(window));

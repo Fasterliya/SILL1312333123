@@ -78,15 +78,15 @@
 
   function finances(state) {
     const years = U.age(state);
+    state.money += Game.assetsSystem.monthlyIncome(state);
     if (state.career.job) {
       const taxRate = state.career.salary > 20000 ? 0.12 : 0.06;
       const net = Math.round(state.career.salary * (1 - taxRate));
       state.money += net;
       state.career.exp += 1;
       if (state.career.exp % 24 === 0) {
-        state.career.level += 1;
-        state.career.salary = Math.round(state.career.salary * 1.16);
-        addLog(state, '职场晋升', `你的月薪提升到 ¥${state.career.salary.toLocaleString()}。`, 'good');
+        state.career.performance = U.clamp(state.career.performance + 8, 0, 100);
+        addLog(state, '年度工作评价', '长期经验让你的绩效积累有所提升，可以考虑申请晋升。', 'good');
       }
     } else if (years >= 6 && years < 22) {
       state.money += years < 12 ? 30 : (years < 18 ? 120 : 500);
@@ -130,6 +130,10 @@
         const child = U.person(relation, state.surname, 0, relation === '儿子' ? '男' : '女');
         child.bornAt = state.totalMonths;
         child.affection = 80;
+        child.temperament = '懵懂';
+        child.bodyType = '幼小';
+        child.hairstyle = '胎毛短发';
+        child.clothing = { top: '婴儿连体衣', socks: '婴儿袜', shoes: '婴儿软底鞋' };
         state.family.push(child);
         addLog(state, '新生命降临', `${child.name}出生了，你成为了${state.gender === '男' ? '父亲' : '母亲'}。`, 'milestone');
       }

@@ -14,7 +14,7 @@
   function valid(value) {
     return Boolean(
       value
-      && [1, 2, 3].includes(value.version)
+      && [1, 2, 3, 4].includes(value.version)
       && typeof value.name === 'string'
       && Number.isInteger(value.totalMonths)
       && value.totalMonths >= 0

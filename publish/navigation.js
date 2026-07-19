@@ -63,12 +63,12 @@
   function detailActions(state, person) {
     if (state.family.some((item) => item.id === person.id)) {
       const disabled = person.status === '已故' ? 'disabled' : '';
-      return `<button data-detail-family="${escape(person.id)}" ${disabled}>${person.status === '已故' ? '追忆' : '互动'}</button>`;
+      if (disabled) return `<button disabled>追忆</button>`;
+      return Game.familySystem.detailActions(state, person).map(([type, label]) => (
+        `<button data-detail-family="${escape(person.id)}" data-family-action="${type}">${label}</button>`
+      )).join('');
     }
-    const inSchool = person.school === state.education.school;
-    if (!inSchool && !person.phoneUnlocked) return '';
-    const actions = inSchool ? [['chat', '聊天'], ['study', '共学'], ['hangout', '结伴']] : [['phone', '联系']];
-    return actions.map(([type, label]) => (
+    return Game.social.detailActions(state, person).map(([type, label]) => (
       `<button data-detail-contact="${escape(person.id)}" data-contact-action="${type}">${label}</button>`
     )).join('');
   }
@@ -83,7 +83,7 @@
       ['身材', person.bodyType], ['身穿', clothes.top || '-'], ['袜子', clothes.socks || '-'],
       ['鞋', clothes.shoes || '-'], ['好感', person.affection], ['互动次数', person.interactions],
     ];
-    return `<section class="character-hero">
+    return `${Game.portraitSystem.npcHtml(state, person)}<section class="character-hero">
       <div class="character-avatar">${escape(person.name.slice(-1))}</div>
       <div><p>${escape(person.relation)}</p><h3>${escape(person.name)}</h3>
       <span>${escape(person.personality)} · ${escape(person.trait)}</span></div></section>

@@ -67,80 +67,27 @@
     });
   }
 
-  function contactClick(event) {
-    const button = event.target.closest('[data-contact]');
-    if (button) finish(Game.social.interact(state, button.dataset.contact, button.dataset.contactAction));
-  }
-
-  function assetClick(event) {
-    const stock = event.target.closest('[data-stock]');
-    const house = event.target.closest('[data-house]');
-    if (stock) Game.actions.trade(stock.dataset.stock, stock.dataset.trade);
-    if (house) Game.actions.buyHouse(Number(house.dataset.house));
-  }
-
-  function globalClick(event) {
-    if (Game.appearance.handleClick(event)) return;
-    const module = event.target.closest('[data-open-module]');
-    if (module) {
-      Game.navigation.openModule(module.dataset.openModule, module.dataset.moduleTitle);
-      return;
-    }
-    const selector = event.target.closest('[data-selector-field]');
-    if (selector) {
-      Game.appearance.open(selector.dataset.selectorField);
-      return;
-    }
-    const avatar = event.target.closest('[data-character-id]');
-    if (avatar) {
-      Game.navigation.openCharacter(avatar.dataset.characterId);
-      return;
-    }
-    const family = event.target.closest('[data-detail-family]');
-    if (family) {
-      Game.actions.interact(family.dataset.detailFamily);
-      return;
-    }
-    const contact = event.target.closest('[data-detail-contact]');
-    if (contact) {
-      finish(Game.social.interact(state, contact.dataset.detailContact, contact.dataset.contactAction));
-    }
-  }
-
   function bind() {
     Game.view.el.monthBtn.addEventListener('click', () => advance(1));
     Game.view.el.yearBtn.addEventListener('click', () => advance(12));
     Game.view.el.actionStrip.addEventListener('click', (event) => activity(event.target.closest('[data-activity]')?.dataset.activity));
-    Game.view.el.familyList.addEventListener('click', (event) => Game.actions.interact(event.target.closest('[data-person]')?.dataset.person));
-    Game.view.el.classmatesList.addEventListener('click', contactClick);
-    Game.view.el.phoneList.addEventListener('click', contactClick);
-    Game.view.el.propertyPanel.addEventListener('click', assetClick);
-    Game.view.el.stockPanel.addEventListener('click', assetClick);
-    Game.view.el.careerPanel.addEventListener('click', (event) => {
-      const job = event.target.closest('[data-job]');
-      if (job) finish(Game.careerSystem.apply(state, job.dataset.job));
-    });
-    Game.view.el.cityPanel.addEventListener('click', (event) => {
-      const city = event.target.closest('[data-city]');
-      if (!city || !root.confirm(`确定迁居${city.dataset.city}吗？当前非自由职业会结束。`)) return;
-      finish(Game.careerSystem.move(state, city.dataset.city));
-    });
     Game.view.el.decisionBody.addEventListener('click', (event) => {
       const choice = event.target.closest('[data-choice]');
       if (choice) Game.actions.decide(choice.dataset.choice);
     });
     Game.view.el.tabs.addEventListener('click', switchTabs);
-    document.addEventListener('click', globalClick);
-    Game.view.el.generatePortraitBtn.addEventListener('click', Game.profile.generate);
-    Game.view.el.portraitSlot.addEventListener('click', Game.profile.generate);
-    Game.view.el.childPlanBtn.addEventListener('click', Game.actions.planChild);
+    document.addEventListener('click', Game.interactionRouter.handle);
+    const generate = () => Game.portraitSystem.generatePlayer(Game.view.el.portraitPromptInput.value);
+    Game.view.el.generatePortraitBtn.addEventListener('click', generate);
+    Game.view.el.portraitSlot.addEventListener('click', generate);
+    Game.view.el.childPlanBtn.addEventListener('click', Game.familySystem.planChild);
     Game.view.el.resetBtn.addEventListener('click', reset);
     root.addEventListener('resize', Game.view.drawHero);
   }
 
   async function reset() {
     if (!root.confirm('确定重新开始一段人生吗？当前存档会被覆盖。')) return;
-    Game.profile.cancel();
+    Game.portraitSystem.cancelAll();
     await Game.storage.reset();
     state = U.createState();
     Game.navigation.closeModule();
@@ -153,17 +100,22 @@
     try {
       Game.view.init();
       Game.navigation.init();
-      state = U.upgradeState(await Game.storage.load());
+      state = Game.stateUpgrade.upgradeState(await Game.storage.load());
       Game.profile.configure({ getState: () => state, refresh, save });
+      Game.portraitSystem.configure({ getState: () => state, refresh, save });
       Game.navigation.configure({ getState: () => state });
       Game.appearance.configure({ getState: () => state });
       Game.actions.configure({ getState: () => state, refresh, save });
+      Game.familySystem.configure({ getState: () => state, refresh, save });
+      Game.interactionRouter.configure({ getState: () => state, refresh, save, finish });
       Game.profile.updateGrowth(state);
-      if (!['家中', '已毕业'].includes(state.education.school) && !state.contacts.length) {
-        Game.social.enterSchool(state, state.education.school, state.education.schoolStage, 5);
+      const beforeContacts = state.contacts.length;
+      if (!['家中', '已毕业'].includes(state.education.school)) {
+        Game.social.createClassmates(state, state.education.school, 32);
       }
       bind();
       refresh();
+      if (state.contacts.length !== beforeContacts) save();
       Game.sdkAdapter.progress('runtime_initializing', '人生档案已建立');
       root.requestAnimationFrame(() => {
         Game.sdkAdapter.progress('first_frame', '可以开始人生');

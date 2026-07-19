@@ -152,6 +152,7 @@
   margin: 12px -12px 0;
   padding: 10px 12px max(10px, env(safe-area-inset-bottom));
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   border-top: 1px solid #d7d6ce;
   background: #fffdf6;
@@ -163,7 +164,8 @@
 
 .detail-actions button {
   min-height: 46px;
-  flex: 1;
+  min-width: 92px;
+  flex: 1 1 92px;
   border-radius: 5px;
   background: #315f58;
   color: white;

@@ -6,9 +6,10 @@
   const ids = [
     'profileName', 'profileMeta', 'ageValue', 'stageValue', 'moneyValue', 'lifeDate',
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
-    'educationPanel', 'careerPanel', 'cityPanel', 'propertyPanel', 'stockPanel',
+    'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'travelPanel',
+    'propertyPanel', 'stockPanel', 'industryPanel',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
-    'profileEditor', 'traitGrid', 'decision', 'decisionTitle', 'decisionText',
+    'portraitPromptInput', 'profileEditor', 'traitGrid', 'decision', 'decisionTitle', 'decisionText',
     'decisionBody', 'monthBtn', 'yearBtn', 'actionStrip', 'toast', 'tabPages',
     'tabs', 'heroCanvas', 'resetBtn', 'childPlanBtn',
   ];
@@ -87,13 +88,17 @@
 
   function familyCards(state) {
     const summary = `<div class="detail-row family-wealth"><span>原生家庭资产</span><b>${money(state.familyWealth)}</b></div>`;
-    return summary + state.family.map((item) => `
+    return summary + state.family.map((item) => {
+      const label = relationAction(item, state);
+      const type = { 告白: 'confess', 求婚: 'propose', 约会: 'date' }[label] || 'chat';
+      return `
       <article class="person"><button class="person-avatar" type="button"
-        data-character-id="${item.id}" aria-label="查看${item.name}详情">${item.name.slice(-1)}</button>
+        data-character-id="${item.id}" aria-label="查看${item.name}详情">${Game.portraitSystem.avatar(item)}</button>
         <div class="person-main"><strong>${item.name}</strong>
         <span>${item.relation} · ${U.personAge(state, item)}岁 · ${item.personality} · ${item.trait}${item.job ? ` · ${item.job}` : ''}</span>
         <div class="affection"><i style="width:${item.affection}%"></i></div></div>
-        <button data-person="${item.id}" ${item.status === '已故' ? 'disabled' : ''}>${item.status === '已故' ? '追忆' : relationAction(item, state)}</button></article>`).join('');
+        <button data-person="${item.id}" data-person-action="${type}" ${item.status === '已故' ? 'disabled' : ''}>${item.status === '已故' ? '追忆' : label}</button></article>`;
+    }).join('');
   }
 
   function education(state) {
@@ -133,7 +138,7 @@
   function render(state) {
     const years = U.age(state);
     el.profileName.textContent = state.name;
-    el.profileMeta.textContent = `${state.gender} · ${state.location.province}${state.location.city}`;
+    el.profileMeta.textContent = `${state.gender} · ${state.location.country || '华夏'} ${state.location.city}`;
     el.ageValue.textContent = `${years}岁${state.totalMonths % 12}月`;
     el.stageValue.textContent = U.stage(years).name;
     el.moneyValue.textContent = money(state.money);
@@ -143,14 +148,17 @@
     el.familyList.innerHTML = familyCards(state);
     el.classmatesList.innerHTML = Game.social.renderSchool(state);
     el.phoneList.innerHTML = Game.social.renderPhone(state);
+    el.matchmakingList.innerHTML = Game.matchmaking.render(state);
     el.educationPanel.innerHTML = education(state);
     el.careerPanel.innerHTML = Game.careerSystem.renderCareer(state, money);
     el.cityPanel.innerHTML = Game.careerSystem.renderCities(state);
+    el.travelPanel.innerHTML = Game.travelSystem.render(state);
     el.propertyPanel.innerHTML = properties(state);
     el.stockPanel.innerHTML = stocks(state);
+    el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);
     Game.profile.render(state, el);
     Game.navigation.refreshDetail();
-    const partner = state.family.find((item) => item.id === state.romance.partnerId);
+    const partner = [...state.family, ...state.contacts].find((item) => item.id === state.romance.partnerId);
     el.childPlanBtn.disabled = !state.romance.married || partner?.status !== '健康' || Boolean(state.romance.pendingBirth);
     el.childPlanBtn.textContent = state.romance.pendingBirth ? `期待新生命 · ${state.romance.pendingBirth}个月` : '计划孩子';
     el.monthBtn.disabled = Boolean(state.pendingDecision || state.gameOver);

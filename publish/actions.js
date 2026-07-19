@@ -15,52 +15,6 @@
     api.save();
   }
 
-  function interact(id) {
-    const current = state();
-    const person = current.family.find((item) => item.id === id);
-    if (!person) return;
-    if (person.lastInteractionMonth === current.totalMonths) {
-      Game.view.showToast('本月已经和这位家人互动过', 'warning');
-      return;
-    }
-    person.lastInteractionMonth = current.totalMonths;
-    person.interactions += 1;
-    const partner = current.romance.partnerId === id;
-    if (person.relation === '朋友' && person.affection >= 68 && !current.romance.partnerId) {
-      current.romance.partnerId = id;
-      person.relation = '恋人';
-      Game.lifeDirector.addLog(current, '恋爱开始', `你向${person.name}表达心意，你们开始认真交往。`, 'milestone');
-    } else if (partner && !current.romance.married && person.affection >= 80) {
-      const legalAge = current.gender === '男' ? 22 : 20;
-      if (U.age(current) < legalAge) {
-        return Game.view.showToast(`${legalAge}岁后才能登记结婚`, 'warning');
-      }
-      if (current.money < 20000) return Game.view.showToast('准备婚礼至少需要 ¥20,000', 'warning');
-      current.money -= 20000;
-      current.romance.married = true;
-      person.relation = '配偶';
-      Game.lifeDirector.addLog(current, '步入婚姻', `你与${person.name}举办了婚礼，组成新的家庭。`, 'milestone');
-    } else {
-      person.affection = U.clamp(person.affection + U.between(4, 8), 0, 100);
-      current.stats.心情 = U.clamp(current.stats.心情 + 2, 0, 100);
-      Game.lifeDirector.addLog(current, `与${person.name}相处`, '你们分享了近况，彼此关系更加亲近。', 'good');
-    }
-    done();
-  }
-
-  function planChild() {
-    const current = state();
-    if (!current.romance.married) return Game.view.showToast('结婚后才能共同计划孩子', 'warning');
-    const partner = current.family.find((item) => item.id === current.romance.partnerId);
-    if (!partner || partner.status !== '健康') return Game.view.showToast('当前家庭状态无法计划孩子', 'warning');
-    if (current.romance.pendingBirth) return Game.view.showToast('新生命已经在期待中', 'warning');
-    if (current.money < 8000) return Game.view.showToast('养育准备金至少需要 ¥8,000', 'warning');
-    current.money -= 8000;
-    current.romance.pendingBirth = 9;
-    Game.lifeDirector.addLog(current, '家庭计划', '你们开始期待一个新生命，预计九个月后迎来变化。', 'milestone');
-    done();
-  }
-
   function trade(name, mode) {
     const current = state();
     if (U.age(current) < 18) return Game.view.showToast('成年后才能进入股票市场', 'warning');
@@ -125,7 +79,7 @@
       current.education.major = school.major;
       Game.social.enterSchool(current, school.name, 'university', 6);
       const city = C.cities.find((item) => item.city === school.city);
-      if (city) current.location = { province: city.province, city: city.city };
+      if (city) current.location = { province: city.province, city: city.city, country: city.country };
       Game.lifeDirector.addLog(current, '大学录取', `你被${school.name}${school.major}专业录取，前往${school.city}求学。`, 'milestone');
     }
     current.pendingDecision = null;
@@ -174,6 +128,6 @@
   }
 
   Game.actions = Object.freeze({
-    configure, interact, planChild, trade, buyHouse, decide, renderHouseActions, renderDecision,
+    configure, trade, buyHouse, decide, renderHouseActions, renderDecision,
   });
 }(window));

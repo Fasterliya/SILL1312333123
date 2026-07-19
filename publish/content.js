@@ -8,15 +8,6 @@
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const makeName = (surname) => (surname || random(C.surnames)) + random(C.givenNames);
 
-  function traitFromLegacy(interests) {
-    if (!interests || typeof interests !== 'object') return random(C.traits);
-    const strongest = Object.entries(interests).sort((a, b) => b[1] - a[1])[0]?.[0];
-    return {
-      科学: '好奇', 文学: '敏感', 艺术: '浪漫',
-      运动: '勇敢', 社交: '随和', 商业: '务实',
-    }[strongest] || random(C.traits);
-  }
-
   function clothing(top) {
     return { top: top || '品质日常', socks: '短棉袜', shoes: '白色运动鞋' };
   }
@@ -37,6 +28,10 @@
       bodyType: random(C.appearance.bodyType.slice(1)),
       hairstyle: random(C.appearance.hairstyle.slice(2, 9)),
       clothing: clothing(random(C.appearance.top.slice(3, 10))),
+      portraitUrl: null,
+      portraitTaskId: null,
+      customPrompt: '',
+      metCity: '',
       interactions: 0,
       lastInteractionMonth: -1,
       phoneUnlocked: false,
@@ -68,6 +63,7 @@
       styleStage: -1,
       portraitUrl: null,
       portraitTaskId: null,
+      customPrompt: '',
     };
   }
 
@@ -86,16 +82,21 @@
     const family = [father, mother];
     if (Math.random() < 0.28) {
       const relation = random(['哥哥', '姐姐']);
-      family.push(person(relation, surname, between(2, 8), relation === '哥哥' ? '男' : '女'));
+      const sibling = person(relation, surname, between(2, 8), relation === '哥哥' ? '男' : '女');
+      sibling.temperament = '童真';
+      sibling.bodyType = '幼小';
+      sibling.hairstyle = '儿童短发';
+      sibling.clothing = { top: '彩色童装', socks: '短棉袜', shoes: '魔术贴童鞋' };
+      family.push(sibling);
     }
     return {
-      version: 3,
+      version: 4,
       updatedAt: new Date().toISOString(),
       name: makeName(surname),
       surname,
       gender,
-      location: { province: location[0], city: location[1] },
-      hometown: { province: location[0], city: location[1] },
+      location: { province: location[0], city: location[1], country: '华夏' },
+      hometown: { province: location[0], city: location[1], country: '华夏' },
       year: C.startYear,
       month: C.startMonth,
       totalMonths: 0,
@@ -109,57 +110,18 @@
         study: 0, track: null, electives: [], school: '家中', schoolStage: 'home',
         university: null, universityType: null, major: null, graduated: false, exams: [],
       },
-      career: { job: null, jobId: null, salary: 0, level: 0, exp: 0, applications: [] },
+      career: {
+        job: null, jobId: null, company: null, salary: 0, level: 0, exp: 0,
+        performance: 0, lastWorkMonth: -1, lastPromotionMonth: -12, applications: [],
+      },
       romance: { partnerId: null, married: false, pendingBirth: 0 },
-      assets: { house: null, mortgage: 0, stocks: stockState() },
+      assets: { house: null, mortgage: 0, stocks: stockState(), businesses: [], vehicles: [] },
+      travel: { activeId: null, lastMonth: -1 },
       pendingDecision: null,
       monthActionTaken: false,
       gameOver: false,
       logs: [log('呱呱坠地', `你出生在${location[0]}${location[1]}，父母为你取名${surname}家新生命。`, 'milestone', 0)],
     };
-  }
-
-  function fillPerson(item) {
-    item.personality ||= random(C.personalities);
-    item.trait ||= traitFromLegacy(item.interests);
-    delete item.interests;
-    item.hairColor ||= random(C.appearance.hairColor.slice(0, 4));
-    item.temperament ||= random(C.appearance.temperament.slice(4));
-    item.bodyType ||= random(C.appearance.bodyType.slice(1));
-    item.hairstyle ||= random(C.appearance.hairstyle.slice(2, 9));
-    item.clothing ||= clothing(item.outfit);
-    delete item.outfit;
-    item.interactions ||= 0;
-    item.lastInteractionMonth ??= -1;
-    item.phoneUnlocked ??= false;
-    item.school ||= '';
-    return item;
-  }
-
-  function upgradeState(state) {
-    if (!state) return createState();
-    state.version = 3;
-    state.hometown ||= { ...state.location };
-    state.profile ||= profile();
-    state.profile.trait ||= traitFromLegacy(state.profile.interests);
-    delete state.profile.interests;
-    state.profile.clothing ||= clothing(state.profile.outfit);
-    state.profile.clothing.top ||= state.profile.outfit || '品质日常';
-    state.profile.clothing.socks ||= '短棉袜';
-    state.profile.clothing.shoes ||= '白色运动鞋';
-    delete state.profile.outfit;
-    delete state.stats.体魄;
-    state.profile.portraitUrl ??= null;
-    state.profile.portraitTaskId ??= null;
-    state.family = (state.family || []).map(fillPerson);
-    state.contacts = (state.contacts || []).map(fillPerson);
-    state.education.schoolStage ||= 'home';
-    state.education.universityType ??= null;
-    state.education.graduated ??= false;
-    state.career.jobId ??= null;
-    state.career.applications ||= [];
-    state.assets.stocks ||= stockState();
-    return state;
   }
 
   const age = (state) => Math.floor(state.totalMonths / 12);
@@ -182,7 +144,7 @@
   }
 
   Game.content = Object.freeze({
-    random, between, clamp, makeName, traitFromLegacy, person, log,
-    createState, upgradeState, age, stage, personAge, gradeLabel,
+    random, between, clamp, makeName, clothing, stockState, person, log,
+    createState, age, stage, personAge, gradeLabel,
   });
 }(window));

@@ -9,19 +9,28 @@
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./menus.css">
   <link rel="stylesheet" href="./screens.css">
+  <link rel="stylesheet" href="./systems.css">
   <script src="./config.js" defer></script>
+  <script src="./world-data.js" defer></script>
   <script src="./appearance-catalog.js" defer></script>
   <script src="./content.js" defer></script>
+  <script src="./state-upgrade.js" defer></script>
   <script src="./sdk-adapter.js" defer></script>
   <script src="./storage.js" defer></script>
+  <script src="./portrait-system.js" defer></script>
   <script src="./profile.js" defer></script>
   <script src="./social.js" defer></script>
+  <script src="./matchmaking.js" defer></script>
+  <script src="./family-system.js" defer></script>
   <script src="./career.js" defer></script>
+  <script src="./travel.js" defer></script>
+  <script src="./assets-system.js" defer></script>
   <script src="./ai-director.js" defer></script>
   <script src="./navigation.js" defer></script>
   <script src="./appearance.js" defer></script>
   <script src="./view.js" defer></script>
   <script src="./actions.js" defer></script>
+  <script src="./interaction-router.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
@@ -84,6 +93,7 @@
           <button data-open-module="familySubpage" data-module-title="家庭"><b>家</b><span><strong>家庭</strong><small>父母、兄弟姐妹、配偶与儿女</small></span><i>›</i></button>
           <button data-open-module="schoolSubpage" data-module-title="同窗"><b>同</b><span><strong>同窗</strong><small>当前学校中的同学与关系</small></span><i>›</i></button>
           <button data-open-module="phoneSubpage" data-module-title="手机联系"><b>联</b><span><strong>手机联系</strong><small>毕业后仍可联系的旧同学</small></span><i>›</i></button>
+          <button data-open-module="matchmakingSubpage" data-module-title="城市相亲"><b>缘</b><span><strong>城市相亲</strong><small>筛选对象、约会、告白与结婚</small></span><i>›</i></button>
         </div>
       </div>
 
@@ -92,6 +102,7 @@
           <button data-open-module="studySubpage" data-module-title="学习"><b>学</b><span><strong>学习</strong><small>学校、考试成绩与升学进度</small></span><i>›</i></button>
           <button data-open-module="careerSubpage" data-module-title="求职"><b>职</b><span><strong>求职</strong><small>浏览岗位并承担录取风险</small></span><i>›</i></button>
           <button data-open-module="citySubpage" data-module-title="迁居"><b>迁</b><span><strong>迁居</strong><small>前往其他城市寻找不同机会</small></span><i>›</i></button>
+          <button data-open-module="travelSubpage" data-module-title="街区旅途"><b>游</b><span><strong>街区旅途</strong><small>上街探索并遇到新的角色</small></span><i>›</i></button>
         </div>
       </div>
 
@@ -99,6 +110,7 @@
         <div class="module-directory">
           <button data-open-module="propertySubpage" data-module-title="房产"><b>房</b><span><strong>房产</strong><small>查看住房、首付与月供</small></span><i>›</i></button>
           <button data-open-module="stockSubpage" data-module-title="股票"><b>股</b><span><strong>股票</strong><small>查看行情并买卖持仓</small></span><i>›</i></button>
+          <button data-open-module="industrySubpage" data-module-title="产业与座驾"><b>产</b><span><strong>产业与座驾</strong><small>经营现金流与购买交通工具</small></span><i>›</i></button>
         </div>
       </div>
     </section>
@@ -119,6 +131,8 @@
         <section class="panel portrait-panel">
           <button class="portrait-slot" id="portraitSlot" type="button" title="生成或重绘角色立绘" aria-label="生成或重绘角色立绘"></button>
           <div class="portrait-actions"><p id="portraitStatus"></p>
+            <label class="prompt-field"><span>附加提示词 · 权重1.8</span>
+              <input id="portraitPromptInput" maxlength="120" placeholder="例如：戴金丝眼镜、手持书本"></label>
             <button id="generatePortraitBtn" type="button">生成角色立绘</button></div>
         </section>
         <section class="panel">
@@ -147,6 +161,10 @@
         <div class="panel-title"><h2>手机联系人</h2><span>历史同窗</span></div>
         <div id="phoneList"></div>
       </section></div>
+      <div class="module-view" id="matchmakingSubpage"><section class="panel">
+        <div class="panel-title"><h2>城市相亲</h2><span>成年关系</span></div>
+        <div id="matchmakingList"></div>
+      </section></div>
       <div class="module-view" id="studySubpage"><section class="panel">
         <div class="panel-title"><h2>教育经历</h2><span>学业与考试</span></div>
         <div id="educationPanel"></div>
@@ -159,6 +177,10 @@
         <div class="panel-title"><h2>城市迁移</h2><span>城市列表</span></div>
         <div id="cityPanel"></div>
       </section></div>
+      <div class="module-view" id="travelSubpage"><section class="panel">
+        <div class="panel-title"><h2>街区旅途</h2><span>每月一次</span></div>
+        <div id="travelPanel"></div>
+      </section></div>
       <div class="module-view" id="propertySubpage"><section class="panel">
         <div class="panel-title"><h2>房产配置</h2><span>首付与月供</span></div>
         <div id="propertyPanel"></div>
@@ -166,6 +188,10 @@
       <div class="module-view" id="stockSubpage"><section class="panel">
         <div class="panel-title"><h2>股票市场</h2><span>每月价格波动</span></div>
         <div id="stockPanel"></div>
+      </section></div>
+      <div class="module-view" id="industrySubpage"><section class="panel">
+        <div class="panel-title"><h2>产业与座驾</h2><span>长期资产</span></div>
+        <div id="industryPanel"></div>
       </section></div>
     </div>
   </section>

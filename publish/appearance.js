@@ -3,7 +3,7 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const catalog = Game.appearanceCatalog;
-  const filters = ['适龄', '全部', '校园', '休闲', '运动', '正式', '文艺', '保暖'];
+  const filters = ['适龄', '全部', '校园', '休闲', '运动', '正式', '文艺', '保暖', '和风', '传统', '短发', '长发', '旅行'];
   const labels = {
     hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
     'clothing.top': '身穿', 'clothing.socks': '袜子', 'clothing.shoes': '鞋',

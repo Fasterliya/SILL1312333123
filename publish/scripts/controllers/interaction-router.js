@@ -134,6 +134,21 @@
     }
     const bankRepay = event.target.closest('[data-bank-repay]');
     if (bankRepay) return finish(Game.bankSystem?.repayLoan(state, bankRepay.dataset.bankRepay) || { ok: false }), true;
+    const psych = event.target.closest('[data-psych-action]');
+    if (psych) {
+      const result = psych.dataset.psychAction === 'rehab'
+        ? Game.psychology.rehab(state)
+        : Game.psychology.reduceGuilt(state, psych.dataset.psychMethod);
+      return finish(result), true;
+    }
+    if (event.target.closest('[data-criminal-blackmarket]')) {
+      return finish(Game.criminalSystem.enterBlackMarket(state)), true;
+    }
+    const frequency = event.target.closest('[data-npc-frequency]');
+    if (frequency) {
+      Game.npcInitiative.changeFrequency(state, frequency.dataset.npcFrequency);
+      return finish({ ok: true, message: 'NPC主动事件频率已更新' }), true;
+    }
     const companyFire = event.target.closest('[data-company-fire]');
     if (companyFire) return finish(Game.companySystem?.fireEmployee(state, companyFire.dataset.companyId, companyFire.dataset.employeeId) || { ok: false }), true;
     return false;
@@ -174,7 +189,14 @@
     const vehicle = event.target.closest('[data-vehicle]');
     if (vehicle) return finish(Game.assetsSystem.buyVehicle(state, vehicle.dataset.vehicle)), true;
     const bankAction = event.target.closest('[data-bank-action]');
-    if (bankAction) return finish(Game.bankSystem?.applyLoan(state, bankAction.dataset.bankAction, Number(bankAction.dataset.loanAmount)) || { ok: false }), true;
+    if (bankAction) {
+      const action = bankAction.dataset.bankAction;
+      if (action === 'repay') return finish(Game.bankSystem.repayLoan(state, bankAction.dataset.bankValue)), true;
+      if (action === 'welfare') return finish(Game.bankSystem.welfare(state)), true;
+      const amount = root.prompt('输入贷款金额：', '10000');
+      if (amount !== null) finish(Game.bankSystem.applyLoan(state, bankAction.dataset.bankType, Number(amount)));
+      return true;
+    }
     const companyAction = event.target.closest('[data-company-action]');
     if (companyAction) {
       const action = companyAction.dataset.companyAction;
@@ -191,12 +213,14 @@
 
   function handle(event) {
     if (Game.relationshipPanel?.handleClick?.(event)) return;
-    if (Game.npcInitiative?.handleEventClick?.(event)) return;
-    if (Game.undergroundIdol?.handleClick?.(event)) return;
-    if (Game.careerPanels?.handleClick?.(event)) return;
+    if (Game.subjectPanel?.handleClick?.(event)) return;
+    if (Game.companySystem?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.undergroundIdol?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.careerPanelActions?.handleClick?.(event)) return;
+    if (Game.careerPanels?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.encounterSystem?.handleClick?.(event)) return;
-    if (Game.brothelSystem?.handleClick?.(event)) return;
-    if (Game.hookupSystem?.handleClick?.(event)) return;
+    if (Game.brothelSystem?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.hookupSystem?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.idolSystem?.handleClick?.(event)) return;
     if (Game.familyConflict?.handleClick?.(event)) return;
     if (Game.travelInteractions?.handleClick?.(event)) return;

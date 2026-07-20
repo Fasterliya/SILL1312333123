@@ -9,6 +9,7 @@
     'quickStudyPanel',
     'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'governmentPanel', 'travelPanel', 'journeyPanel',
     'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
+    'statusPanel', 'financePanel', 'npcEventContainer',
     'hunterModePanel', 'possessedList',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
@@ -138,7 +139,8 @@
     el.phoneList.innerHTML = Game.social.renderPhone(state);
     el.matchmakingList.innerHTML = Game.matchmaking.render(state);
     el.parentingPanel.innerHTML = Game.parenting.render(state);
-    el.educationPanel.innerHTML = Game.educationSystem.render(state);
+    el.educationPanel.innerHTML = Game.educationSystem.render(state)
+      + (Game.subjectPanel?.render(state) || '');
     el.careerPanel.innerHTML = Game.careerView.renderCareer(state, money);
     el.cityPanel.innerHTML = Game.careerView.renderCities(state);
     el.governmentPanel.innerHTML = Game.civicSystem.render(state);
@@ -150,6 +152,10 @@
     el.stockPanel.innerHTML = Game.marketView.render(state);
     el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);
     el.healthPanel.innerHTML = Game.healthSystem.render(state);
+    el.statusPanel.innerHTML = Game.systemHub.renderStatus(state);
+    el.financePanel.innerHTML = Game.systemHub.renderFinance(state);
+    Game.npcInitiative.setStateRef(state);
+    el.npcEventContainer.innerHTML = Game.npcInitiative.renderEventBadge(state);
     el.legacyPanel.innerHTML = Game.legacySystem.render(state);
     Game.drawSettings.render(state);
     Game.profile.render(state, el);

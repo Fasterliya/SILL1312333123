@@ -817,9 +817,8 @@
       }, 300);
     }
     /* trigger save/refresh */
-    try {
-      if (typeof window.refreshGame === 'function') window.refreshGame();
-    } catch (_) { /* ignore */ }
+    Game._refresh?.();
+    Game._save?.();
   }
 
   function openSheet() {

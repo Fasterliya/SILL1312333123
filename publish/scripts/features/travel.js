@@ -49,7 +49,7 @@
 
     if (Game.staminaSystem) {
       var staminaCost = placeName === '红灯区' ? 35 : 20;
-      var st = Game.staminaSystem.spend(state, cost);
+      var st = Game.staminaSystem.spend(state, staminaCost);
       if (!st.ok) return st;
     }
 
@@ -87,7 +87,7 @@
     state.stats.心情 = U.clamp(state.stats.心情 + (effect.mood || 0), 0, 100);
     state.stats.魅力 = U.clamp(state.stats.魅力 + (effect.charm || 0), 0, 100);
     state.stats.智力 = U.clamp(state.stats.智力 + (effect.intelligence || 0), 0, 100);
-    state.stats.健康 = U.clamp(state.stats.健康 + (effect.health || 0), 0, 100);
+    state.stats.健康 = U.clamp(state.stats.健康 + (effect.health || effect.健康 || 0), 0, 100);
     state.cityLife.reputation = U.clamp(state.cityLife.reputation + (effect.reputation || 0), 0, 100);
     ts.score += effect.score || 0;
 

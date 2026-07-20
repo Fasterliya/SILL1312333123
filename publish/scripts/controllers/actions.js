@@ -39,6 +39,12 @@
     const current = state();
     const decision = current.pendingDecision;
     if (!decision) return;
+    const systemResult = Game.systemDecisions?.resolve(current, value);
+    if (systemResult) {
+      Game.view.showToast(systemResult.message, systemResult.ok ? 'good' : 'warning');
+      if (systemResult.ok) done();
+      return;
+    }
     if (['lifeEvent', 'succession'].includes(decision.type)) {
       const system = decision.type === 'lifeEvent' ? Game.lifeEvents : Game.legacySystem;
       const result = system.resolve(current, value);
@@ -101,6 +107,15 @@
     const d = current.pendingDecision;
     Game.view.el.decision.hidden = !d;
     if (!d) return;
+    const systemContent = Game.systemDecisions?.content(current);
+    if (systemContent) {
+      Game.view.el.decisionTitle.textContent = systemContent.title;
+      Game.view.el.decisionText.textContent = systemContent.text;
+      Game.view.el.decisionBody.innerHTML = systemContent.options.map((item) => (
+        `<button data-choice="${item.value}">${item.label}</button>`
+      )).join('');
+      return;
+    }
     if (['lifeEvent', 'succession'].includes(d.type)) {
       const content = d.type === 'lifeEvent' ? Game.lifeEvents.render(current) : Game.legacySystem.renderDecision(current);
       if (!content) {

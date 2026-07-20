@@ -5,6 +5,16 @@
 
   function ensure(state) {
     state.romance.partners = state.romance.partners && Array.isArray(state.romance.partners) ? state.romance.partners : [];
+    if (state.romance.partnerId && !state.romance.partners.some(function(p) {
+      return p.id === state.romance.partnerId;
+    })) {
+      state.romance.partners.push({
+        id: state.romance.partnerId,
+        type: state.romance.married ? '配偶' : '恋人',
+        jealousy: 0,
+        startMonth: state.totalMonths,
+      });
+    }
     return state.romance;
   }
 
@@ -55,11 +65,19 @@
       if (person) {
         var result = Game.social.interact(state, personId, 'date');
         if (Game._refresh) Game._refresh();
+        if (Game._save) Game._save();
         if (result && result.ok) Game.view.showToast('与' + person.name + '约会完成', 'good');
       }
     } else if (action === 'breakup') {
+      var former = Game.people.find(state, personId);
       removePartner(state, personId);
+      if (former && former.relation === '恋人') former.relation = '前恋人';
+      if (state.romance.partnerId === personId) {
+        state.romance.partnerId = null;
+        state.romance.married = false;
+      }
       if (Game._refresh) Game._refresh();
+      if (Game._save) Game._save();
       Game.view.showToast('关系已结束', 'normal');
     }
     return true;

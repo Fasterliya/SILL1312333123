@@ -32,6 +32,7 @@
   function schoolMilestones(state) {
     const years = U.age(state);
     const stage = state.education.schoolStage;
+    if (Game.examSystem?.duringExam(state)) return;
     if (stage === 'university'
       && Game.timeSystem.educationElapsed(state) >= state.education.durationMonths) {
       Game.social.archiveSchool(state);
@@ -73,9 +74,12 @@
 
   function regularExam(state) {
     const years = U.age(state);
+    if (Game.examSystem?.duringExam(state)) return;
     if (years < 6 || years > 17 || ![1, 6].includes(state.month)) return;
     if ((years === 15 || years === 18) && state.month === 6) return;
-    exam(state, state.month === 1 ? '期末考试' : '期中考试');
+    const label = state.month === 1 ? '期末考试' : '期中考试';
+    const result = exam(state, label);
+    if (Game.examSystem) Game.examSystem.conductExam(state, label, result);
   }
 
   function finances(state) {
@@ -160,6 +164,7 @@
     while (advanced < months && !state.pendingDecision && !state.gameOver) {
       tick(state);
       advanced += 1;
+      Game.examSystem?.checkReveal(state);
     }
     return { state, requested: months, advanced, interrupted: advanced < months };
   }

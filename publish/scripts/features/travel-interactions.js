@@ -5,6 +5,7 @@
 
   function notify(result, successTone) {
     Game._refresh();
+    Game._save?.();
     if (result.ok) Game.view.showToast(result.message, result.finished ? 'good' : (successTone || 'normal'));
     else Game.view.showToast(result.message, 'warning');
   }

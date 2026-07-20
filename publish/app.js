@@ -55,6 +55,11 @@
         s.stamina.current = s.stamina.max;
         if(s.education.fastForwardTarget&&s.totalMonths>=s.education.fastForwardTarget) Game.educationFastForward.complete(s);
       }
+      Game.examSystem?.checkReveal(s);
+      if(s.pendingDecision||s.gameOver){
+        s.timeSpeed=0;
+        break;
+      }
     }
     refresh(); save();
   }
@@ -203,6 +208,7 @@
       /* Expose state accessors for encounter/hookup/brothel systems */
       Game._getState = () => state;
       Game._refresh = refresh;
+      Game._save = save;
       Game._setTimeSpeed = setTimeSpeed;
       startTimeLoop();
       refresh();

@@ -34,6 +34,7 @@
     Game.stockDirector?.monthly(state);
     Game.undergroundIdol?.monthly(state);
     Game.universityLife?.monthly(state);
+    Game.lifeResumeSync?.monthly(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

@@ -12,7 +12,7 @@
   };
 
   function getStageSubjects(state) {
-    var stage = state.education.stage;
+    var stage = state.education.schoolStage;
     var map = Object.assign({}, STAGE_SUBJECTS[stage] || STAGE_SUBJECTS.primary);
     if (stage === 'high') {
       var track = state.education.track;
@@ -127,21 +127,17 @@
   }
 
   function handleClick(event) {
-    var target = event.target;
-    while (target && target !== event.currentTarget) {
-      var subject = target.getAttribute && target.getAttribute('data-learn-subject');
-      if (subject) {
-        var state = Game.state;
-        if (!state) return;
-        var result = learnSubject(state, subject);
-        if (result && result.message) {
-          Game.toast && Game.toast.show(result.message);
-        }
-        Game.ui && Game.ui.refresh && Game.ui.refresh();
-        return;
-      }
-      target = target.parentNode;
-    }
+    var target = event.target.closest('[data-learn-subject]');
+    if (!target) return false;
+    var state = Game._getState ? Game._getState() : null;
+    if (!state) return false;
+    var subject = target.dataset.learnSubject;
+    var result = learnSubject(state, subject);
+    if (result.ok && Game.studyEvents) Game.studyEvents.maybeTrigger(state, subject);
+    Game._refresh && Game._refresh();
+    Game._save && Game._save();
+    Game.view && Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
+    return true;
   }
 
   Game.subjectPanel = Object.freeze({

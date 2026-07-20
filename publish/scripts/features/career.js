@@ -83,11 +83,13 @@
   }
 
   function apply(state, jobId) {
-    if (U.age(state) < 18) return { ok: false, message: '成年后才能正式求职' };
-    if (state.health?.retired) return { ok: false, message: '当前已办理退休，不再参加全职招聘' };
-    if (state.education.university && !state.education.graduated) return { ok: false, message: '完成大学学业后才能全职求职' };
     const job = board(state).find((item) => item.id === jobId);
     if (!job) return { ok: false, message: '当前城市没有这个岗位' };
+    if (U.age(state) < (job.minAge || 18)) {
+      return { ok: false, message: `${job.minAge || 18}岁后才能申请这个岗位` };
+    }
+    if (state.health?.retired) return { ok: false, message: '当前已办理退休，不再参加全职招聘' };
+    if (state.education.university && !state.education.graduated) return { ok: false, message: '完成大学学业后才能全职求职' };
     if (!eligible(state, job)) return { ok: false, message: `该职位要求${requirementLabel(job.education || 0)}` };
     const chance = U.clamp(0.18 + (ability(state, job) - job.need) / 105, 0.08, 0.92);
     const accepted = Math.random() < chance;
@@ -120,6 +122,12 @@
     else Game.workplace.join(state, employerJob);
     Game.creatorCareer.onJobChange(state);
     Game.idolSystem?.onJobChange(state);
+    if (job.id === 'idol-underground') {
+      const underground = Game.undergroundIdol.ensure(state);
+      underground.active = true;
+      underground.stage = underground.stage || 'trainee';
+      underground.agencyName ||= employer;
+    }
     Game.lifeDirector.addLog(state, '获得工作', `你加入${employer}担任${job.name}。`, 'milestone');
     return { ok: true, message: `${employer}录取了你` };
   }

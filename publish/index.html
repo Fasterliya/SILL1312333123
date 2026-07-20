@@ -105,9 +105,11 @@
   <script src="./scripts/features/stock-director.js" defer></script>
   <script src="./scripts/features/idol-underground.js" defer></script>
   <script src="./scripts/ui/career-panels.js" defer></script>
+  <script src="./scripts/ui/career-panel-actions.js" defer></script>
   <script src="./scripts/features/stamina-system.js" defer></script>
   <script src="./scripts/ui/subject-panel.js" defer></script>
   <script src="./scripts/ui/life-resume.js" defer></script>
+  <script src="./scripts/features/life-resume-sync.js" defer></script>
   <script src="./scripts/features/relationship-panel.js" defer></script>
   <script src="./scripts/features/exam-system.js" defer></script>
   <script src="./scripts/features/study-events.js" defer></script>
@@ -129,11 +131,12 @@
   <script src="./scripts/ui/market-view.js" defer></script>
   <script src="./scripts/ui/life-loop.js" defer></script>
   <script src="./ai-director.js" defer></script>
-  <script src="./scripts/ui/life-resume.js" defer></script>
   <script src="./scripts/ui/navigation.js" defer></script>
   <script src="./scripts/ui/appearance.js" defer></script>
+  <script src="./scripts/ui/system-hub.js" defer></script>
   <script src="./view.js" defer></script>
   <script src="./scripts/controllers/admissions.js" defer></script>
+  <script src="./scripts/controllers/system-decisions.js" defer></script>
   <script src="./scripts/controllers/actions.js" defer></script>
   <script src="./scripts/controllers/extended-interactions.js" defer></script>
   <script src="./scripts/controllers/interaction-router.js" defer></script>
@@ -216,6 +219,7 @@
           <button data-open-module="studySubpage" data-module-title="学习"><b>学</b><span><strong>学习</strong><small>学校、考试成绩与升学进度</small></span><i>›</i></button>
           <button data-open-module="careerSubpage" data-module-title="求职"><b>职</b><span><strong>求职</strong><small>浏览岗位并承担录取风险</small></span><i>›</i></button>
           <button data-open-module="healthSubpage" data-module-title="健康"><b>康</b><span><strong>健康</strong><small>健康检测、疾病治疗与整容</small></span><i>›</i></button>
+          <button data-open-module="statusSubpage" data-module-title="状态与风险"><b>险</b><span><strong>状态与风险</strong><small>心理、犯罪记录与NPC主动事件</small></span><i>›</i></button>
           <button data-open-module="citySubpage" data-module-title="迁居"><b>迁</b><span><strong>迁居</strong><small>前往其他城市寻找不同机会</small></span><i>›</i></button>
           <button data-open-module="governmentSubpage" data-module-title="市政府"><b>政</b><span><strong>市政府</strong><small>户口迁移、登记姓名与当地文化</small></span><i>›</i></button>
           <button data-open-module="travelSubpage" data-module-title="街区旅途"><b>游</b><span><strong>街区旅途</strong><small>上街探索，一次遇到三位新角色</small></span><i>›</i></button>
@@ -228,6 +232,7 @@
           <button data-open-module="propertySubpage" data-module-title="不动产"><b>房</b><span><strong>不动产</strong><small>购入、还贷、市值与出售</small></span><i>›</i></button>
           <button data-open-module="stockSubpage" data-module-title="股票"><b>股</b><span><strong>股票</strong><small>查看行情并买卖持仓</small></span><i>›</i></button>
           <button data-open-module="industrySubpage" data-module-title="产业与座驾"><b>产</b><span><strong>产业与座驾</strong><small>经营现金流与购买交通工具</small></span><i>›</i></button>
+          <button data-open-module="financeSubpage" data-module-title="金融与企业"><b>企</b><span><strong>金融与企业</strong><small>贷款、福利、公司经营与董事会</small></span><i>›</i></button>
           <button data-open-module="legacySubpage" data-module-title="家庭延续"><b>承</b><span><strong>家庭延续</strong><small>代际记录、下一代、房产与资金</small></span><i>›</i></button>
         </div>
       </div>
@@ -309,6 +314,7 @@
         <div class="panel-title"><h2>健康</h2><span>检测、治疗与整容</span></div>
         <div id="healthPanel"></div>
       </section></div>
+      <div class="module-view" id="statusSubpage"><div id="statusPanel"></div></div>
       <div class="module-view" id="citySubpage"><section class="panel">
         <div class="panel-title"><h2>城市迁移</h2><span>城市列表</span></div>
         <div id="cityPanel"></div>
@@ -337,6 +343,7 @@
         <div class="panel-title"><h2>产业与座驾</h2><span>长期资产</span></div>
         <div id="industryPanel"></div>
       </section></div>
+      <div class="module-view" id="financeSubpage"><div id="financePanel"></div></div>
       <div class="module-view" id="legacySubpage"><section class="panel">
         <div class="panel-title"><h2>家庭延续</h2><span>多代人生</span></div>
         <div id="legacyPanel"></div>
@@ -379,5 +386,6 @@
   </div>
   <div class="toast" id="toast" role="status" hidden></div>
   <div id="encounterOverlayContainer"></div>
+  <div id="npcEventContainer"></div>
 </body>
 </html>

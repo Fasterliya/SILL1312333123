@@ -17,6 +17,7 @@
       if (person.affection < 68) return { ok: false, message: '好感达到68后更适合告白' };
       state.romance.partnerId = person.id;
       person.relation = '恋人';
+      Game.relationshipPanel?.addPartner(state, person.id, '恋人');
       Game.relationshipMemory.record(state, person, '关系', '确认了恋爱关系', 12, -4);
       Game.lifeDirector.addLog(state, '恋爱开始', `你与${person.name}确认了恋爱关系。`, 'milestone');
       return { ok: true, message: '告白成功，你们开始交往' };
@@ -39,6 +40,8 @@
     Game.economy.spend(state, 20000);
     state.romance.married = true;
     person.relation = '配偶';
+    Game.relationshipPanel?.removePartner(state, person.id);
+    Game.relationshipPanel?.addPartner(state, person.id, '配偶');
     Object.assign(person, {
       npcMarried: true, npcMarriedAtAge: U.personAge(state, person),
       spouseId: state.profile.id, spouseName: state.name,

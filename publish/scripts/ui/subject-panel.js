@@ -4,6 +4,14 @@
   var Game = root.LifeGame = root.LifeGame || {};
   var U = Game.content;
 
+  function escape(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function(char) {
+      return {
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      }[char];
+    });
+  }
+
   var STAGE_SUBJECTS = {
     primary: { '语文': 100, '数学': 100, '英语': 100, '科学': 100 },
     middle: { '语文': 130, '数学': 130, '英语': 130, '政治': 50, '历史': 50, '物理': 100, '化学': 100 },
@@ -115,11 +123,11 @@
       var examScore = data.examScore || 0;
 
       html += '<div class="subject-card">'
-        + '<div class="subject-name">' + sub + ' <span class="subject-max">' + U.safe(maxScore) + '分</span></div>'
+        + '<div class="subject-name">' + escape(sub) + ' <span class="subject-max">' + maxScore + '分</span></div>'
         + '<div class="subject-stars">' + starStr + '</div>'
         + '<div class="progress-bar"><i style="width:' + pct + '%"></i><span>' + hours + '/200h</span></div>'
         + '<div class="subject-exam">上次考试: ' + examScore + '分</div>'
-        + '<button class="btn-learn" data-learn-subject="' + U.safe(sub) + '">学习 -15体</button>'
+        + '<button class="btn-learn" data-learn-subject="' + escape(sub) + '">学习 -15体</button>'
         + '</div>';
     }
     html += '</div>';

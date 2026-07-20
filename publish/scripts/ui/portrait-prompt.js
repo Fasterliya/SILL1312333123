@@ -97,15 +97,18 @@
   function appearanceLines(state, target, player) {
     const years = ageFor(state, target, player);
     const height = Number(target.height || 0);
-    const protectedAge = years <= 18;
+    const selectedAgeStage = Game.portraitAgePrompt.resolve(years, target.portraitAgeStage);
+    const protectedAge = years <= 18 || Game.portraitAgePrompt.isProportion(selectedAgeStage);
+    const hideExactAge = protectedAge || Game.portraitAgePrompt.valid(target.portraitAgeStage);
     const marks = [target.molePosition, target.freckles, target.distinctiveFeature]
       .filter((item) => item && !String(item).startsWith('无')).map(clean).filter(Boolean).join(', ');
     const identity = [
       `gender: ${player ? Game.hunterMode.identity(state).gender : target.gender}`,
-      protectedAge ? '' : `age: ${years} years old`,
+      hideExactAge ? '' : `age: ${years} years old`,
       `body_type: ${clean(target.bodyType)}, ${clean(target.bodyFrame)}`,
       `height: ${height.toFixed(1)} cm`,
-        ...Game.portraitAgePrompt.lines(years, player ? Game.hunterMode.identity(state).gender : target.gender),
+        ...Game.portraitAgePrompt.lines(years,
+          player ? Game.hunterMode.identity(state).gender : target.gender, target.portraitAgeStage),
     ];
     return {
       years,

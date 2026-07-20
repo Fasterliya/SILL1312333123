@@ -92,7 +92,7 @@
       const state = api.getState();
       const model = Game.drawSettings.selected(state);
       const years = key === 'player' ? Game.content.age(state) : Game.content.personAge(state, target);
-      const ageNegative = Game.portraitAgePrompt.negative(years);
+      const ageNegative = Game.portraitAgePrompt.negative(years, target.portraitAgeStage);
       const result = await retryDraw({
         prompt: description(state, target, key, custom, model),
         dimension: '2:3',

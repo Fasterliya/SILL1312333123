@@ -40,7 +40,7 @@
       portraitUrl: null,
       portraitTaskId: null,
       portraitGallery: [],
-      customPrompt: '',
+      customPrompt: '', portraitAgeStage: null,
       metCity: '', currentCity: '', homeCity: '',
       interactions: 0,
       phoneUnlocked: false,
@@ -88,7 +88,7 @@
       portraitUrl: null,
       portraitTaskId: null,
       portraitGallery: [],
-      customPrompt: '',
+      customPrompt: '', portraitAgeStage: null,
     };
     if (father && mother) Game.genetics.inheritInto(created, gender, father, mother, 'player-founder');
     else Game.genetics.founder(created, gender, 'player-founder', false);

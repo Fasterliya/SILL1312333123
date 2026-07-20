@@ -80,6 +80,73 @@
     if (person.populationResident && !person.job) return;
     const available = person.educationStage === 'workforce' || person.educationStage === 'graduate';
     if (age < 18 || !available || person.job || Math.random() > (age >= 22 ? 0.88 : 0.72)) return;
+
+    /* ---- weighted career selection for female NPCs ---- */
+    if (person.gender === '女') {
+      const charm = person.charm || 50;
+      const intelligence = Game.genetics?.growthModel
+        ? 50 : 50; /* approximate: use education level as proxy */
+      const eduLevel = person.educationLevel || 0;
+      const isYoung = age >= 18 && age <= 28;
+      const isPetite = ['娇小纤细', '小胸'].includes(person.bodyType || '');
+      const isCute = ['青涩', '灵动', '明快'].includes(person.temperament || '');
+      const hasCosplayInterest = (person.fashion?.cosplayInterest || 0) > 40;
+      const hasProstituteFlag = person.sexWork?.isProstitute;
+
+      /* Build weighted job pool */
+      const pool = [];
+      const jobs = C.jobs.filter((item) => (
+        (item.education || 0) <= eduLevel
+        && (!item.adultOnly || age >= 18)
+        && (!item.recommendedGender || item.recommendedGender === person.gender)
+      ));
+
+      const weighted = jobs.map((job) => {
+        let weight = 100;
+        if (hasProstituteFlag && job.id === 'prostitute') weight = 400;
+        else if (job.id === 'prostitute' && isYoung && eduLevel <= 1) weight = charm > 55 ? 180 : 120;
+        else if (job.id === 'welfare' && isYoung && isCute) weight = charm > 50 ? 200 : 140;
+        else if (job.id === 'welfare' && isYoung && isPetite) weight = 160;
+        else if (job.id === 'idoltrainee' && isYoung && age <= 20 && charm > 55) weight = 180;
+        else if (job.id === 'idol' && isYoung && charm > 60 && (person.fashion?.cosplayInterest || 0) > 30) weight = 150;
+        else if (job.id === 'coser' && hasCosplayInterest) weight = 170;
+        else if (job.id === 'vtuber' && isCute && isYoung) weight = 130;
+        else if (job.id === 'beautyblog' && charm > 55) weight = 120;
+        return { job, weight };
+      });
+      const totalWeight = weighted.reduce((s, w) => s + w.weight, 0);
+      let cursor = Math.random() * totalWeight;
+      const chosen = weighted.find((w) => (cursor -= w.weight) < 0);
+      if (chosen) {
+        const job = chosen.job;
+        const id = job.id;
+        person.job = job.name;
+        person.company = job.company || '城市企业';
+        person.companyId = job.companyId || '';
+        person.departmentId = Game.workplace.departmentId(job);
+        person.departmentName = Game.workplace.departmentName(job);
+        person.careerRank = age >= 35 ? 2 : (age >= 27 ? 1 : 0);
+        person.careerCity = job.cities?.length ? U.random(job.cities) : (person.metCity || state.location.city);
+
+        /* Init NPC idol state */
+        if (id === 'idoltrainee' || id === 'idol') {
+          person.npcIdol = person.npcIdol || {
+            stage: id === 'idoltrainee' ? 'trainee' : 'debuted',
+            fans: U.between(100, id === 'idol' ? 5000 : 500),
+            trainingMonths: id === 'idol' ? U.between(12, 36) : 0,
+            debutAge: age,
+          };
+        }
+        /* Tag prostitute */
+        if (id === 'prostitute') {
+          person.sexWork.isProstitute = true;
+          person.sexWork.brothelVisits = person.sexWork.brothelVisits || 0;
+        }
+        return;
+      }
+    }
+
+    /* fallback: standard random selection for male NPCs or if weighted pool empty */
     const job = U.random(C.jobs.filter((item) => (
       (item.education || 0) <= person.educationLevel
       && (!item.adultOnly || age >= 18)

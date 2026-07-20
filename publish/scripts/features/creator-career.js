@@ -3,10 +3,11 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
-  const ids = new Set(['vtuber', 'beautyblog', 'styleblog', 'portraitblog']);
+  const ids = new Set(['vtuber', 'beautyblog', 'styleblog', 'portraitblog', 'welfare']);
   const labels = {
     vtuber: '虚拟主播频道', beautyblog: '美妆频道',
     styleblog: '穿搭频道', portraitblog: '影像频道',
+    welfare: '福利频道',
   };
 
   function isCreator(state) {
@@ -42,6 +43,7 @@
       beautyblog: ['妆容', '测评', '教程', '护肤', '平价'],
       styleblog: ['穿搭', '通勤', '显高', '约会', '换季'],
       portraitblog: ['摄影', '构图', '写真', '街拍', '幕后'],
+      welfare: ['写真', '福利', '限定', '日常', '互动'],
     }[state.career.jobId] || [];
     const keyword = topics.some((word) => title.includes(word)) ? 18 : 0;
     const length = title.length >= 8 && title.length <= 24 ? 12 : 3;
@@ -101,20 +103,45 @@
     return { ok: true, message: `广告合作完成，收入${Game.view.money(income)}` };
   }
 
-  function privateDeal(state) {
-    const creator = ensure(state);
-    if (creator.followers < 5000) return { ok: false, message: '粉丝达到5000后才会出现私人商务邀约' };
-    if (state.totalMonths - creator.lastPrivateMonth < 6) return { ok: false, message: '私人合作邀约至少间隔6个月' };
-    creator.lastPrivateMonth = state.totalMonths;
-    const income = Math.round(3000 + creator.followers * 0.16);
-    state.money += income;
-    creator.scandalRisk = U.clamp(creator.scandalRisk + 22, 0, 100);
-    creator.brandTrust = U.clamp(creator.brandTrust - 5, 0, 100);
-    Game.relationshipSecrets.addPlayerSecret(
-      state, '未披露私人合作', '接受了一次没有向观众公开具体条件的私人商务邀约',
-    );
-    return { ok: true, message: `私人合作带来${Game.view.money(income)}，但公开风险上升` };
+  function generateSponsor(state) {
+    const gender = state.gender === '女' ? '男' : '女';
+    const age = U.between(28, 55);
+    const sponsor = U.person('金主', U.random(Game.nameSystem.surnames()), age, gender, state.totalMonths);
+    Game.worldCulture.applyPerson(sponsor, state.location.country);
+    U.setUniqueName(state, sponsor, Game.worldCulture.profile(state.location.country).locale);
+    sponsor.metCity = state.location.city;
+    sponsor.currentCity = state.location.city;
+    sponsor.affection = U.between(42, 62);
+    sponsor.wealth = U.between(500000, 5000000);
+    sponsor.sponsorType = true;
+    if (!state.worldPeople.some((p) => p.id === sponsor.id)) state.worldPeople.push(sponsor);
+    return sponsor;
   }
+
+  function hookup(state) {
+    const creator = ensure(state);
+    const isWelfare = state.career.jobId === 'welfare';
+    const minFollowers = isWelfare ? 1000 : 5000;
+    const label = isWelfare ? '金主约会' : '约炮';
+    if (creator.followers < minFollowers) {
+      return { ok: false, message: `粉丝达到${minFollowers}后才能收到${label}邀约` };
+    }
+    if (state.totalMonths - creator.lastPrivateMonth < 6) {
+      return { ok: false, message: `${label}至少间隔6个月` };
+    }
+    creator.lastPrivateMonth = state.totalMonths;
+    creator.scandalRisk = U.clamp(creator.scandalRisk + 10, 0, 100);
+    creator.brandTrust = U.clamp(creator.brandTrust - 3, 0, 100);
+    /* Delegate to hookup system for multi-stage encounter */
+    const playerRole = (state.career.jobId === 'welfare' || state.gender === '女') ? 'provider' : 'client';
+    const result = Game.hookupSystem.start(state, null, playerRole);
+    if (result.ok) {
+      Game.view.showToast(`${label}开始`, 'good');
+    }
+    return result;
+  }
+
+  function privateDeal(state) { return hookup(state); }
 
   function community(state) {
     const creator = ensure(state);
@@ -162,11 +189,11 @@
       ${state.career.jobId === 'vtuber' ? '<button data-creator-action="live">开启直播</button>' : ''}
       <button data-creator-action="community">经营社群</button>
       <button data-creator-action="sponsor">承接广告</button>
-      <button data-creator-action="private">私人合作</button></div>
+      <button data-creator-action="private">${state.career.jobId === 'welfare' ? '金主约会' : '约炮'}</button></div>
       <div class="creator-videos">${videos || '<p class="empty-state">频道还没有发布内容。</p>'}</div></section>`;
   }
 
   Game.creatorCareer = Object.freeze({
-    isCreator, ensure, onJobChange, publish, livestream, sponsor, privateDeal, community, monthly, render,
+    isCreator, ensure, onJobChange, publish, livestream, sponsor, privateDeal, hookup, generateSponsor, community, monthly, render,
   });
 }(window));

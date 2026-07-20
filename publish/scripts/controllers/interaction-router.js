@@ -135,6 +135,10 @@
         state, action.dataset.healthAction, action.dataset.healthValue,
       )), true;
     }
+    const surgery = event.target.closest('[data-surgery]');
+    if (surgery) {
+      return finish(Game.plasticSurgery?.perform(state, surgery.dataset.surgery) || { ok: false, message: '手术系统不可用' }), true;
+    }
     return false;
   }
 
@@ -157,6 +161,7 @@
     if (journeyStart) return finish(Game.journeySystem.start(state, journeyStart.dataset.journeyStart)), true;
     const journeyChoice = event.target.closest('[data-journey-choice]');
     if (journeyChoice) return finish(Game.journeySystem.choose(state, journeyChoice.dataset.journeyChoice)), true;
+    if (Game.travelSystem?.handleClick(event)) return true;
     const roam = event.target.closest('[data-roam-area]');
     if (roam) return finish(Game.travelSystem.roam(state, roam.dataset.roamArea)), true;
     const propertyBuy = event.target.closest('[data-property-buy]');
@@ -175,6 +180,12 @@
   }
 
   function handle(event) {
+    if (Game.encounterSystem?.handleClick(event)) return;
+    if (Game.brothelSystem?.handleClick(event)) return;
+    if (Game.hookupSystem?.handleClick(event)) return;
+    if (Game.idolSystem?.handleClick(event)) return;
+    if (Game.familyConflict?.handleClick(event)) return;
+    if (Game.travelSystem?.handleClick(event)) return;
     if (Game.portraitGallery.handleClick(event)) return;
     if (Game.characterChat.handleClick(event)) return;
     if (Game.hunterMode.handleClick(event)) return;

@@ -89,6 +89,8 @@
     state.stats.心情 = U.clamp(state.stats.心情 + 6, 0, 100);
     const player = { ...state.profile, id: playerId, name: state.name, gender: state.gender };
     schedulePregnancy(state, player, person, record);
+    state.romance.affairCount = Math.max(0, Number(state.romance.affairCount) || 0) + 1;
+    Game.familyConflict?.addSuspicion(state, 8, `与${person.name}的亲密关系让配偶感到不安`);
     Game.lifeDirector.addLog(state, '未公开的关系', `你与${person.name}开始保持低调往来。`, 'normal');
     return { ok: true, message: `你与${person.name}建立了隐秘关系` };
   }
@@ -179,6 +181,45 @@
     expose(state);
   }
 
+  function brothelEncounter(state, player, woman) {
+    const data = ensure(state);
+    const record = {
+      id: `brothel-${state.totalMonths}-${Math.random().toString(36).slice(2, 7)}`,
+      kind: '青楼寻欢', participants: [player.id, woman.id], startedAt: state.totalMonths,
+      known: false, exposed: false, note: `你在红灯区与${woman.name}有了一段露水情缘`,
+    };
+    data.records.push(record);
+    data.records = data.records.slice(-60);
+    schedulePregnancy(state, player, woman, record);
+    return record;
+  }
+
+  function addHookRecord(state, sponsor, kind) {
+    const data = ensure(state);
+    const record = {
+      id: `hookup-${state.totalMonths}-${Math.random().toString(36).slice(2, 7)}`,
+      kind, participants: [playerId, sponsor.id], startedAt: state.totalMonths,
+      known: true, exposed: false, note: `你与金主${sponsor.name}保持着未公开的关系`,
+    };
+    data.records.push(record);
+    data.records = data.records.slice(-60);
+    return record;
+  }
+
+  function addEncounterRecord(state, partner, mode, spermAmount) {
+    const data = ensure(state);
+    const kind = mode === 'brothel' ? '青楼寻欢' : (mode === 'hookup' ? '私密约会' : '奇遇交欢');
+    const record = {
+      id: `encounter-${state.totalMonths}-${Math.random().toString(36).slice(2, 7)}`,
+      kind, participants: ['player-profile', partner.id], startedAt: state.totalMonths,
+      known: mode === 'hookup', exposed: false,
+      note: `一次${kind}留下了${spermAmount}%的精液量`,
+    };
+    data.records.push(record);
+    data.records = data.records.slice(-60);
+    return record;
+  }
+
   function addPlayerSecret(state, kind, note) {
     return addRecord(state, { kind, participants: [playerId], known: true, note });
   }
@@ -194,6 +235,7 @@
   }
 
   Game.relationshipSecrets = Object.freeze(
-    { ensure, available, start, monthly, addPlayerSecret, archivePlayer },
+    { ensure, available, start, monthly, addPlayerSecret, archivePlayer,
+      brothelEncounter, addHookRecord, addEncounterRecord, schedulePregnancy },
   );
 }(window));

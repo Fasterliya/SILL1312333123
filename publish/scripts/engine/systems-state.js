@@ -33,6 +33,13 @@
     person.aiChat.messages = Array.isArray(person.aiChat.messages) ? person.aiChat.messages.slice(-10) : [];
     person.aiChat.lastAction ||= '';
     Game.npcFashion.ensurePerson(state, person);
+    person.sexWork = person.sexWork && typeof person.sexWork === 'object' ? person.sexWork : {};
+    if (person.gender === '女') {
+      person.prostitute = person.prostitute && typeof person.prostitute === 'object' ? person.prostitute : {};
+      person.hookupHistory = Array.isArray(person.hookupHistory) ? person.hookupHistory.slice(-12) : [];
+      person.hymenIntact = person.hymenIntact !== undefined ? person.hymenIntact : true;
+      person.cosmeticProcedures = Array.isArray(person.cosmeticProcedures) ? person.cosmeticProcedures.slice(-8) : [];
+    }
     person.surname ||= Game.familyNaming.surnameOf(person, '', person.culture || state.hometown?.country);
     if (child) {
       person.upbringing ||= { care: 50, education: 20, independence: 20, health: 60 };
@@ -89,6 +96,18 @@
     state.health.pension = Math.max(0, Number(state.health.pension) || 0);
     state.health.retired = Boolean(state.health.retired);
     state.health.careLevel = Math.max(0, Math.min(100, Number(state.health.careLevel) || 0));
+    state.health.diseases = Array.isArray(state.health.diseases) ? state.health.diseases : [];
+    state.health.stdHistory = Array.isArray(state.health.stdHistory) ? state.health.stdHistory : [];
+    state.health.lastCheckupMonth = Number.isFinite(state.health.lastCheckupMonth) ? state.health.lastCheckupMonth : -12;
+    state.health.cosmeticProcedures = Array.isArray(state.health.cosmeticProcedures) ? state.health.cosmeticProcedures.slice(-8) : [];
+    state.romance.suspicion = Number.isFinite(state.romance.suspicion) ? state.romance.suspicion : 0;
+    state.romance.affairCount = Math.max(0, Number(state.romance.affairCount) || 0);
+    state.idol = state.idol && typeof state.idol === 'object' ? state.idol : {
+      active: false, stage: 'trainee', fans: 0, trainingMonths: 0,
+      skills: { dance: 0, vocal: 0, expression: 0 },
+      lastEvaluationMonth: -6, lastHandshakeMonth: -3, scandals: [],
+      agencyName: '', producerTrust: 50, producerAbuse: 0, careerExtended: false,
+    };
     state.cityLife ||= { familiarity: {}, reputation: 0, residenceMonths: 0, lastCity: state.location.city };
     state.cityLife.familiarity ||= {};
     state.cityLife.reputation = Math.max(0, Math.min(100, Number(state.cityLife.reputation) || 0));
@@ -137,6 +156,18 @@
     Game.householdSystem.ensure(state);
     Game.relationshipSecrets.ensure(state);
     Game.creatorCareer.ensure(state);
+    state.encounter = state.encounter && typeof state.encounter === 'object' ? state.encounter : {
+      active: false, mode: '', partnerId: null, playerRole: 'client',
+      femaleStamina: 100, femaleStaminaMax: 100, arousal: 0, orgasmCount: 0,
+      climaxThreshold: 75, semenGauge: 0, maxSemen: 100,
+      position: '正常位', positionsTried: [], actionLog: [],
+    };
+    state.brothelStage = state.brothelStage && typeof state.brothelStage === 'object' ? state.brothelStage : {
+      active: false, placeId: null, stage: 0, partnerId: null, score: 0,
+    };
+    state.hookupStage = state.hookupStage && typeof state.hookupStage === 'object' ? state.hookupStage : {
+      active: false, stage: 0, sponsorId: null, style: '', score: 0,
+    };
     return state;
   }
 

@@ -158,6 +158,8 @@
     const code = codeFor(loci, maxHeight);
     target.genetics = { version: 1, code, loci, maxHeight, mutations, expressed: expression(loci, maxHeight, code) };
     apply(target, target.genetics.expressed, false);
+    cosmeticInheritance(target, leftParent);
+    cosmeticInheritance(target, rightParent);
     return target;
   }
 
@@ -182,5 +184,23 @@
     return target.genetics;
   }
 
-  Game.genetics = Object.freeze({ founder, ensure, inheritInto });
+  function cosmeticInheritance(child, mother) {
+    if (!mother || mother.gender !== '女') return;
+    const procedures = mother.cosmeticProcedures || [];
+    if (!procedures.length) return;
+    const U = Game.content;
+    child.genetics ||= {};
+    child.genetics.loci ||= {};
+    procedures.forEach((proc) => {
+      if (proc.type === 'breast' || proc.type === 'breastreduction') {
+        child.genetics.loci.BRST = (child.genetics.loci.BRST || 50) + U.between(-3, 3);
+      } else if (proc.type === 'liposuction') {
+        child.genetics.loci.BFRM = (child.genetics.loci.BFRM || 50) + U.between(-2, 4);
+      } else if (proc.type === 'facial') {
+        child.genetics.loci.FACE = (child.genetics.loci.FACE || 50) + U.between(-5, 5);
+      }
+    });
+  }
+
+  Game.genetics = Object.freeze({ founder, ensure, inheritInto, cosmeticInheritance });
 }(window));

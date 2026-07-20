@@ -58,6 +58,10 @@
     { id: 'portraitblog', name: '写真博主', company: '个人影像频道', industry: '内容创作', salary: 7600, need: 54, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
     { id: 'styleblog', name: '穿搭博主', company: '个人穿搭频道', industry: '内容创作', salary: 8200, need: 56, category: '艺术', majors: ['数字媒体', '现代服务'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
     { id: 'coser', name: '职业Coser', company: '个人角色创作室', industry: '内容创作', salary: 8500, need: 58, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
+    { id: 'welfare', name: '福利姬', company: '个人福利频道', industry: '内容创作', salary: 9500, need: 48, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
+    { id: 'prostitute', name: '妓女', company: '风月场所', industry: '风俗业', salary: 12000, need: 35, category: '社交', majors: [], education: 0, tier: 3, cities: [], freelance: false, recommendedGender: '女', adultOnly: true },
+    { id: 'idoltrainee', name: '偶像练习生', company: '偶像事务所', industry: '娱乐业', salary: 1500, need: 45, category: '艺术', majors: [], education: 0, tier: 3, cities: ['北京', '上海', '深圳', '成都', '长沙', '首尔', '东京'], freelance: false, recommendedGender: '女', adultOnly: false, minAge: 12 },
+    { id: 'idol', name: '偶像艺人', company: '偶像事务所', industry: '娱乐业', salary: 8000, need: 55, category: '艺术', majors: ['数字媒体'], education: 1, tier: 2, cities: ['北京', '上海', '深圳', '成都', '长沙', '首尔', '东京'], freelance: false, recommendedGender: '女', adultOnly: false, minAge: 16 },
     { id: 'illustrator', name: '自由插画师', company: '个人插画工作室', industry: '内容创作', salary: 7800, need: 62, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true },
     { id: 'convention', name: '漫展活动执行', company: '次元城市会展', industry: '会展活动', salary: 7000, need: 50, category: '社交', majors: ['现代服务', '数字媒体'], education: 1, tier: 3, cities: [] },
   );

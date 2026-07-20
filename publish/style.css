@@ -273,3 +273,44 @@ button:disabled {
   color: #8c918d;
   font-size: 10px;
 }
+
+/* ---- encounter overlay ---- */
+.encounter-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(12, 12, 14, 0.96);
+  color: #e8ddd0; display: flex; flex-direction: column;
+  padding: 16px; overflow-y: auto;
+  font-family: inherit;
+}
+.encounter-header { text-align: center; margin-bottom: 12px; }
+.encounter-header span { font-size: 11px; color: #b8a088; display: block; }
+.encounter-header strong { font-size: 18px; color: #d46a6a; }
+.encounter-bars { margin-bottom: 10px; }
+.encounter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.encounter-bar label { font-size: 11px; width: 42px; color: #b8a088; flex-shrink: 0; }
+.encounter-bar em { font-size: 10px; color: #a09080; font-style: normal; width: 48px; text-align: right; }
+.bar-track { flex: 1; height: 8px; background: #2a2520; border-radius: 4px; display: block; overflow: hidden; }
+.bar-track b { display: block; height: 100%; background: #d46a6a; border-radius: 4px; transition: width .3s; }
+.bar-track b.warning { background: #d4a04a; }
+.bar-track b.critical { background: #d44a4a; animation: pulse-bar .6s infinite; }
+.bar-track b.near-climax { background: #e880d0; animation: glow-bar .4s infinite; }
+@keyframes pulse-bar { 0%,100%{opacity:1} 50%{opacity:.5} }
+@keyframes glow-bar { 0%,100%{box-shadow:0 0 6px #e880d0} 50%{box-shadow:0 0 14px #e880d0} }
+.encounter-hud { display: flex; justify-content: center; gap: 24px; margin-bottom: 10px; }
+.encounter-hud span { font-size: 12px; color: #d4a04a; }
+.encounter-positions { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; justify-content: center; }
+.encounter-pos { padding: 8px 12px; border: 1px solid #3a3028; border-radius: 6px;
+  background: #1a1815; color: #c8b8a0; font-size: 12px; cursor: pointer; }
+.encounter-pos.active { border-color: #d46a6a; color: #d46a6a; background: #2a1a1a; }
+.encounter-pos.tried { border-color: #4a3a2a; }
+.encounter-pos:disabled { opacity: .4; cursor: not-allowed; }
+.encounter-log { flex: 1; overflow-y: auto; max-height: 40vh; }
+.encounter-log p { margin: 4px 0; padding: 6px 10px; border-radius: 4px;
+  background: rgba(255,255,255,.03); font-size: 12px; line-height: 1.5; color: #c8b8a0; }
+.encounter-log p small { display: block; font-size: 10px; color: #806050; margin-bottom: 2px; }
+.encounter-log p.encounter-orgasm { background: rgba(212,106,106,.12); border-left: 2px solid #d46a6a;
+  color: #e8c0c0; font-weight: 600; }
+.encounter-log p.encounter-finish { background: rgba(180,140,100,.08); border-left: 2px solid #b48c64; }
+.encounter-finish-btn { width: 100%; padding: 12px; margin-top: 10px;
+  background: #2a1a1a; border: 1px solid #6a3a3a; border-radius: 8px;
+  color: #d46a6a; font-size: 14px; cursor: pointer; }

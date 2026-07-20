@@ -144,6 +144,9 @@
         Game.social.createClassmates(state, state.education.school, 32);
       }
       bind();
+      /* Expose state accessors for encounter/hookup/brothel systems */
+      Game._getState = () => state;
+      Game._refresh = refresh;
       refresh();
       save();
       Game.saveManager.load();

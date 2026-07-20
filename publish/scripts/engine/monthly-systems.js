@@ -19,6 +19,12 @@
     Game.creatorCareer.monthly(state);
     Game.healthSystem.monthly(state);
     Game.npcFashion.monthly(state);
+    Game.encounterSystem?.ensure(state);
+    Game.brothelSystem?.ensure(state);
+    Game.hookupSystem?.ensure(state);
+    Game.idolSystem?.monthly(state);
+    Game.npcCareerLife?.monthly(state);
+    Game.familyConflict?.monthly(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

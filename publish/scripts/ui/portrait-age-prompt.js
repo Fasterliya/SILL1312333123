@@ -3,7 +3,29 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
 
-  function profile(years) {
+  function style50(gender) {
+    const identity = gender === '女'
+      ? 'elegant mature lady, refined wealthy madam, sophisticated mature feminine charm'
+      : 'elegant mature gentleman, refined wealthy bearing, sophisticated mature charm';
+    return [
+      `age_style_50: (clearly 50-69 years old:1.4), ${identity}`,
+      'aging_details_50: subtle forehead lines, crow feet, nasolabial folds, mature skin, poised upper-class presence',
+      'age_scope_50: age only face, skin and posture; keep art style, hair and complete cosplay outfit unchanged',
+    ];
+  }
+
+  function style70(gender) {
+    const identity = gender === '女'
+      ? 'elegant elderly lady, aristocratic grandmother, graceful mature feminine charm'
+      : 'elegant elderly gentleman, aristocratic grandfather, graceful mature dignity';
+    return [
+      `age_style_70: (clearly elderly 70+ years old:1.5), ${identity}`,
+      'aging_details_70: pronounced natural wrinkles, forehead lines, crow feet, nasolabial folds, softened jaw, dignified healthy presence',
+      'age_scope_70: age only face, skin and posture; keep art style, hair and complete cosplay outfit unchanged',
+    ];
+  }
+
+  function profile(years, gender) {
     if (years <= 2) return [
       '3-3.5 heads tall', 'large round head, very short rounded limbs, tiny hands and feet',
       'soft compact proportions, fully covered comfortable clothing',
@@ -41,8 +63,10 @@
     return [];
   }
 
-  function lines(years) {
-    const details = profile(years);
+  function lines(years, gender) {
+    if (years >= 70) return style70(gender);
+    if (years >= 50) return style50(gender);
+    const details = profile(years, gender);
     if (!details.length) return [];
     return [
       `body_proportion: ${details[0]}`,
@@ -52,6 +76,14 @@
   }
 
   function negative(years) {
+    if (years >= 70) return [
+      'young adult, youthful face, teenage appearance, baby face',
+      'smooth unlined skin, ageless face, middle-aged face',
+    ].join(', ');
+    if (years >= 50) return [
+      'young adult, youthful face, teenage appearance, baby face',
+      'smooth unlined skin, ageless face',
+    ].join(', ');
     if (years >= 19) return '';
     const common = [
       'overdeveloped anatomy', 'overly sharp facial structure', 'exaggerated body development',

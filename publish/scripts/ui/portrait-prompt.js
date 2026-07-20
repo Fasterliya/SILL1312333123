@@ -105,7 +105,7 @@
       protectedAge ? '' : `age: ${years} years old`,
       `body_type: ${clean(target.bodyType)}, ${clean(target.bodyFrame)}`,
       `height: ${height.toFixed(1)} cm`,
-        ...Game.portraitAgePrompt.lines(years),
+        ...Game.portraitAgePrompt.lines(years, player ? Game.hunterMode.identity(state).gender : target.gender),
     ];
     return {
       years,

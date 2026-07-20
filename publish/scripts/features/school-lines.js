@@ -142,12 +142,13 @@
   }
 
   function universityList(state, score, country, localOnly) {
-    return C.universities.filter((school) => school.country === country
+    const international = country === 'international';
+    return C.universities.filter((school) => (international ? school.country !== '华夏' : school.country === country)
       && (!localOnly || school.city === state.location.city))
       .map((school) => ({ school, line: universityLine(state, school) }))
       .sort((a, b) => b.line - a.line || a.school.name.localeCompare(b.school.name, 'zh-CN'))
       .map(({ school, line }) => lineRow(school.name,
-        `${school.city} · ${school.type} · ${school.majors.join(' / ')}`, line, score,
+        `${school.country} · ${school.city} · ${school.type} · ${school.majors.join(' / ')}`, line, score,
         institutionResource(school))).join('');
   }
 
@@ -155,7 +156,7 @@
     const target = selectedTarget(state);
     const age = targetAge(state, target);
     const score = predictedScore(state, target);
-    const country = scope === 'china' ? '华夏' : (scope === 'japan' ? '日本' : state.location.country);
+    const country = scope === 'china' ? '华夏' : (scope === 'international' ? 'international' : state.location.country);
     const localUniversities = age >= 15;
     const list = scope === 'local'
       ? (localUniversities ? universityList(state, score, country, true) : highSchoolList(state, score))
@@ -172,17 +173,17 @@
       <div class="line-targets">${targetButtons}</div><nav>
       <button class="${scope === 'local' ? 'active' : ''}" data-school-line-scope="local">当地学校</button>
       <button class="${scope === 'china' ? 'active' : ''}" data-school-line-scope="china">中国高校</button>
-      <button class="${scope === 'japan' ? 'active' : ''}" data-school-line-scope="japan">日本高校</button></nav>
+      <button class="${scope === 'international' ? 'active' : ''}" data-school-line-scope="international">国际高校</button></nav>
       <div class="line-legend"><span>依据孩子能力、学习习惯与家庭教育投入预测</span>
       <span>分数线随当前城市、年份、卷面难度和学校资源变化</span></div>
-      <div class="school-line-list">${list || '<p class="line-empty">当前城市暂无对应学校。</p>'}</div></section>`;
+      <div class="school-line-list">${list || '<p class="line-empty">当前范围暂无对应学校。</p>'}</div></section>`;
   }
 
   function handleClick(event) {
     const scopeButton = event.target.closest('[data-school-line-scope]');
     const targetButton = event.target.closest('[data-school-line-target]');
     if (!scopeButton && !targetButton) return false;
-    if (scopeButton && ['local', 'china', 'japan'].includes(scopeButton.dataset.schoolLineScope)) {
+    if (scopeButton && ['local', 'china', 'international'].includes(scopeButton.dataset.schoolLineScope)) {
       scope = scopeButton.dataset.schoolLineScope;
     }
     if (targetButton) targetId = targetButton.dataset.schoolLineTarget;

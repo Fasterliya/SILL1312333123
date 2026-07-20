@@ -2,8 +2,8 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const catalog = Game.geneticsCatalog;
-  const keys = Object.keys(catalog.loci);
+  const catalog = () => Game.geneticsCatalog;
+  const keys = () => Object.keys(catalog().loci);
 
   function hash(text) {
     let value = 2166136261;
@@ -60,8 +60,8 @@
   function expression(loci, maxHeight, code) {
     const rng = seeded(code);
     const expressed = {};
-    keys.forEach((key) => {
-      const definition = catalog.loci[key];
+    keys().forEach((key) => {
+      const definition = catalog().loci[key];
       const [left, right] = loci[key];
       if (left.value === right.value) expressed[key] = left.value;
       else if (left.dominance !== right.dominance) {
@@ -77,7 +77,7 @@
   }
 
   function codeFor(loci, maxHeight) {
-    const raw = keys.map((key) => loci[key].map((item) => item.value).join('/')).join('|');
+    const raw = keys().map((key) => loci[key].map((item) => item.value).join('/')).join('|');
     return `DNA-${hash(`${raw}|${maxHeight.join('/')}`).toString(36).toUpperCase()}`;
   }
 
@@ -94,14 +94,14 @@
   function founder(target, gender, seed, preserve) {
     const rng = seeded(seed || `${target.name}-${target.id}`);
     const loci = {};
-    keys.forEach((key) => {
-      const definition = catalog.loci[key];
+    keys().forEach((key) => {
+      const definition = catalog().loci[key];
       const current = existing(target, key);
       const matched = definition.values.find((item) => item.value === current);
       loci[key] = [allele(matched || weighted(definition, rng)), allele(weighted(definition, rng))];
     });
     if (gender === '女' && rng() < 0.32) {
-      const petite = catalog.loci.bodyFrame.values.find((item) => item.value === '娇小骨架');
+      const petite = catalog().loci.bodyFrame.values.find((item) => item.value === '娇小骨架');
       loci.bodyFrame = [allele(petite), allele(petite)];
     }
     const base = gender === '男' ? 175 : 164;
@@ -110,9 +110,9 @@
     const code = codeFor(loci, maxHeight);
     const genetics = { version: 1, code, loci, maxHeight, mutations: [], expressed: expression(loci, maxHeight, code) };
     if (preserve) {
-      keys.forEach((key) => {
+      keys().forEach((key) => {
         const current = existing(target, key);
-        if (catalog.loci[key].values.some((item) => item.value === current)) genetics.expressed[key] = current;
+        if (catalog().loci[key].values.some((item) => item.value === current)) genetics.expressed[key] = current;
       });
       genetics.expressed.maxHeight = currentHeight;
     }
@@ -123,7 +123,7 @@
 
   function mutate(input, definition, rng, mutations, key) {
     const original = { ...input };
-    if (rng() >= catalog.mutationRate) return original;
+    if (rng() >= catalog().mutationRate) return original;
     const choices = definition.values.filter((item) => item.value !== original.value);
     const changed = allele(choices[Math.floor(rng() * choices.length)] || definition.values[0]);
     mutations.push({ trait: key, from: original.value, to: changed.value });
@@ -136,8 +136,8 @@
     ensure(rightParent, rightParent.gender || gender, `${seed}-right`, true);
     const loci = {};
     const mutations = [];
-    keys.forEach((key) => {
-      const definition = catalog.loci[key];
+    keys().forEach((key) => {
+      const definition = catalog().loci[key];
       loci[key] = [
         mutate(pick(leftParent.genetics.loci[key], rng), definition, rng, mutations, key),
         mutate(pick(rightParent.genetics.loci[key], rng), definition, rng, mutations, key),
@@ -162,7 +162,7 @@
   }
 
   function ensure(target, gender, seed, preserve) {
-    const valid = target.genetics?.loci && keys.every((key) => (
+    const valid = target.genetics?.loci && keys().every((key) => (
       Array.isArray(target.genetics.loci[key])
       && target.genetics.loci[key].length === 2
       && target.genetics.loci[key].every((item) => (

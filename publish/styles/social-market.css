@@ -1,0 +1,407 @@
+.directory-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.directory-person {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 52px;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid #dedcd2;
+  border-radius: 7px;
+  background: #fffdf7;
+}
+
+.directory-person > div {
+  min-width: 0;
+}
+
+.directory-person strong,
+.directory-person span,
+.directory-person small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.directory-person strong {
+  color: #263b37;
+  font-size: 13px;
+}
+
+.directory-person span,
+.directory-person small {
+  margin-top: 3px;
+  color: #737a75;
+  font-size: 10px;
+}
+
+.directory-open {
+  min-width: 52px;
+  min-height: 36px;
+  border-radius: 5px;
+  background: #edf3ef;
+  color: #315f58;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.relation-links {
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+}
+
+.relation-link {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 3px 8px;
+  padding: 9px 10px;
+  text-align: left;
+  border: 1px solid #dedcd2;
+  border-radius: 6px;
+  background: #fffdf7;
+}
+
+.relation-link span {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: #a04439;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.relation-link strong {
+  color: #263b37;
+  font-size: 12px;
+}
+
+.relation-link small {
+  color: #737a75;
+  font-size: 10px;
+}
+
+.workplace-player-link {
+  padding: 10px;
+  border-left: 3px solid #315f58;
+  background: #edf3ef;
+}
+
+.workplace-player-link span,
+.workplace-player-link strong {
+  display: block;
+  font-size: 11px;
+}
+
+.workplace-player-link span {
+  color: #737a75;
+}
+
+.workplace-player-link strong {
+  margin-top: 3px;
+  color: #263b37;
+}
+.market-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.market-summary div {
+  padding: 8px;
+  background: #fff;
+}
+
+.market-summary span,
+.market-summary small {
+  color: #66726f;
+  font-size: 10px;
+}
+
+.market-summary strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 15px;
+}
+
+.market-summary > small {
+  grid-column: 1 / -1;
+}
+
+.market-filters {
+  max-height: 94px;
+  overflow-y: auto;
+}
+
+.market-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.market-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 76px;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #dedbd0;
+  background: #fffdf7;
+}
+
+.market-main {
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  color: #263b37;
+  text-align: left;
+}
+
+.market-main span,
+.market-main strong,
+.market-main small,
+.market-quote span,
+.market-quote small {
+  display: block;
+}
+
+.market-main span,
+.market-main small,
+.market-quote span,
+.market-quote small {
+  color: #737a75;
+  font-size: 9px;
+}
+
+.market-main strong {
+  margin: 4px 0;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.market-quote {
+  text-align: right;
+}
+
+.market-quote strong {
+  font-size: 14px;
+}
+
+.market-quote .up {
+  color: #b43c32;
+}
+
+.market-quote .down {
+  color: #2f7467;
+}
+
+.market-actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 7px;
+}
+
+.market-actions button,
+.stock-trade-grid button {
+  min-height: 44px;
+  background: #315f58;
+  color: white;
+  font-size: 10px;
+}
+
+.company-stock-head {
+  padding: 14px;
+  border-left: 4px solid #c23b32;
+  background: #fff8eb;
+}
+
+.company-stock-head span {
+  color: #737a75;
+  font-size: 10px;
+}
+
+.company-stock-head h3 {
+  margin: 5px 0;
+}
+
+.company-stock-head strong {
+  color: #a04439;
+  font-size: 20px;
+}
+
+.stock-chart {
+  width: 100%;
+  margin: 10px 0;
+  background: #f6f5ef;
+}
+
+.stock-chart line {
+  stroke: #c8ccc6;
+  stroke-width: 1;
+}
+
+.stock-chart polyline {
+  fill: none;
+  stroke: #315f58;
+  stroke-width: 3;
+}
+
+.stock-trade-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin: 12px 0;
+}
+
+.board-section {
+  margin-top: 14px;
+}
+
+.board-player {
+  padding: 10px;
+  border-left: 3px solid #c23b32;
+  background: #fff3e3;
+}
+
+.board-player span,
+.board-player strong,
+.board-player small {
+  display: block;
+}
+
+.board-player span,
+.board-player small {
+  color: #737a75;
+  font-size: 10px;
+}
+
+.board-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.board-list button {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 3px 8px;
+  padding: 9px;
+  border: 1px solid #dedbd0;
+  background: #fffdf7;
+  text-align: left;
+}
+
+.board-list span {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: #a04439;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.board-list strong,
+.board-list small {
+  font-size: 10px;
+}
+
+.board-list small {
+  color: #737a75;
+}
+.civic-summary {
+  margin: 12px 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid #ddd9cd;
+  background: #f8f5eb;
+}
+
+.civic-summary > div {
+  min-width: 0;
+  min-height: 62px;
+  padding: 10px;
+  border-right: 1px solid #e2ded2;
+  border-bottom: 1px solid #e2ded2;
+}
+
+.civic-summary > div:nth-child(2n) {
+  border-right: 0;
+}
+
+.civic-summary > div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.civic-summary span,
+.civic-summary strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.civic-summary span {
+  color: #747b76;
+  font-size: 9px;
+}
+
+.civic-summary strong {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.civic-city-list {
+  max-height: 420px;
+  padding: 0 10px 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.surname-grid {
+  padding: 0 10px 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.surname-grid button {
+  min-width: 0;
+  border: 1px solid #c8d4d0;
+  border-radius: 4px;
+  background: #edf3ef;
+  color: #315f58;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.civic-history,
+.civic-note {
+  color: #6f7671;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.civic-history {
+  margin: -3px 0 12px;
+  padding: 8px 10px;
+  border-left: 3px solid #bd3d33;
+  background: #f8ecdf;
+}
+
+.civic-note {
+  margin: 0;
+  padding: 0 10px 12px;
+}
+
+@media (max-width: 360px) {
+  .surname-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

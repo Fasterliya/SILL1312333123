@@ -1,0 +1,465 @@
+.admission-guide {
+  padding: 12px;
+  border-left: 4px solid #c23b32;
+  background: #f4efe2;
+}
+
+.admission-guide strong,
+.admission-guide span {
+  display: block;
+}
+
+.admission-guide strong {
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+
+.admission-guide span {
+  color: #66726f;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.admission-selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admission-selectors label,
+.admission-selectors > div {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid #dbd8cd;
+  background: #fff;
+}
+
+.admission-selectors span {
+  display: block;
+  margin-bottom: 4px;
+  color: #68716e;
+  font-size: 9px;
+}
+
+.admission-selectors select {
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: #263b37;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admission-selectors strong {
+  font-size: 14px;
+}
+
+.admission-list {
+  display: grid;
+  gap: 7px;
+}
+
+.admission-card {
+  border: 1px solid #d7d5cb;
+  background: #fffdf7;
+}
+
+.admission-card > summary {
+  min-height: 54px;
+  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.admission-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admission-card summary div,
+.admission-card summary strong,
+.admission-card summary span {
+  min-width: 0;
+  display: block;
+}
+
+.admission-card summary strong {
+  font-size: 13px;
+}
+
+.admission-card summary span {
+  margin-top: 4px;
+  color: #69736f;
+  font-size: 10px;
+}
+
+.admission-card summary > b {
+  flex: 0 0 auto;
+  color: #c23b32;
+  font-size: 12px;
+}
+
+.admission-card.locked {
+  opacity: 0.68;
+}
+
+.admission-detail {
+  padding: 0 11px 11px;
+  border-top: 1px solid #ece8dc;
+}
+
+.admission-detail p {
+  margin: 8px 0;
+  color: #65706c;
+  font-size: 10px;
+}
+
+.major-options {
+  display: grid;
+  gap: 6px;
+}
+
+.decision-body .major-options button {
+  min-height: 44px;
+  background: #eef3ec;
+}
+
+.major-options strong,
+.major-options small {
+  display: block;
+}
+
+.major-options small {
+  margin-top: 3px;
+  color: #68716e;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.decision-body .admission-workforce {
+  border-color: #9eaaa6;
+  background: #eef0ed;
+}
+
+@media (max-width: 360px) {
+  .admission-selectors {
+    grid-template-columns: 1fr;
+  }
+}
+.school-lines {
+  margin-top: 16px;
+  border: 1px solid #d7d6cc;
+  background: #fffdf7;
+}
+
+.school-lines > header {
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #e4e1d7;
+  background: #eef2eb;
+}
+
+.school-lines header span,
+.school-lines header strong,
+.school-lines header b {
+  display: block;
+}
+
+.school-lines header span {
+  color: #6b7571;
+  font-size: 10px;
+}
+
+.school-lines header strong {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.school-lines header b {
+  max-width: 48%;
+  color: #315f58;
+  font-size: 10px;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.school-lines nav {
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.school-lines nav button {
+  min-height: 40px;
+  border: 1px solid #d8d8d0;
+  background: #f4f1e8;
+  color: #56625e;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.school-lines nav button.active {
+  border-color: #315f58;
+  background: #315f58;
+  color: #fff;
+}
+
+.line-targets {
+  padding: 8px 8px 0;
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+}
+
+.line-targets button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid #d8d8d0;
+  background: #fff;
+  color: #596560;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.line-targets button.active {
+  border-color: #bd3d33;
+  background: #fff3e3;
+  color: #a9342d;
+}
+
+.line-legend {
+  padding: 0 10px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  color: #717a76;
+  font-size: 9px;
+}
+
+.school-line-list {
+  max-height: 310px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid #e4e1d7;
+}
+
+.line-row {
+  min-height: 58px;
+  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid #ece9df;
+}
+
+.line-row.safe {
+  border-left: 3px solid #315f58;
+}
+
+.line-row.ready {
+  border-left: 3px solid #5d8d78;
+}
+
+.line-row.reach {
+  border-left: 3px solid #d69a3a;
+}
+
+.line-row.locked {
+  border-left: 3px solid #b9b9b1;
+  opacity: 0.68;
+}
+
+.line-row:last-child {
+  border-bottom: 0;
+}
+
+.line-row > div {
+  min-width: 0;
+}
+
+.line-row strong,
+.line-row span,
+.line-row b,
+.line-row small {
+  display: block;
+}
+
+.line-empty {
+  margin: 0;
+  padding: 22px 12px;
+  color: #6c7571;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 360px) {
+  .school-lines nav {
+    gap: 4px;
+  }
+
+  .school-lines nav button {
+    padding: 6px 3px;
+    font-size: 10px;
+  }
+}
+
+.line-row strong {
+  font-size: 12px;
+}
+
+.line-row span {
+  margin-top: 4px;
+  overflow: hidden;
+  color: #6c7571;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-row > div:last-child {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.line-row b {
+  color: #bd3d33;
+  font-size: 13px;
+}
+
+.line-row small {
+  margin-top: 4px;
+  color: #62706b;
+  font-size: 9px;
+}
+.save-overview {
+  padding: 13px;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.save-overview span,
+.save-overview strong,
+.save-overview small {
+  display: block;
+}
+
+.save-overview span,
+.save-overview small {
+  color: #64706c;
+  font-size: 10px;
+}
+
+.save-overview strong {
+  margin: 4px 0;
+  font-size: 16px;
+}
+
+.save-overview small + small {
+  margin-top: 3px;
+}
+
+.save-toolbar {
+  margin: 10px 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-toolbar button,
+.save-slot button {
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid #d5d7cf;
+  background: #fff;
+  color: #2d4943;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.save-slots {
+  display: grid;
+  gap: 8px;
+}
+
+.save-slots.busy {
+  opacity: 0.68;
+}
+
+.save-slot {
+  padding: 12px;
+  border: 1px solid #d9d7cd;
+  background: #fffdf7;
+}
+
+.save-slot.empty {
+  border-style: dashed;
+}
+
+.save-slot header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.save-slot header strong {
+  font-size: 13px;
+}
+
+.save-slot header span {
+  color: #66726e;
+  font-size: 9px;
+}
+
+.save-slot p {
+  margin: 8px 0 4px;
+  color: #44534f;
+  font-size: 11px;
+}
+
+.save-slot small {
+  color: #7a817e;
+  font-size: 9px;
+}
+
+.save-slot > div {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.save-slot button:first-child {
+  border-color: #315f58;
+  background: #315f58;
+  color: #fff;
+}
+
+.save-slot button.danger {
+  border-color: #d9b4af;
+  color: #a7352d;
+}
+
+.save-state {
+  margin: 0;
+  padding: 24px 12px;
+  border: 1px dashed #d3d5ce;
+  color: #66726e;
+  font-size: 11px;
+  text-align: center;
+}
+
+.save-state.error {
+  color: #a7352d;
+}

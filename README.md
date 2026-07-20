@@ -20,10 +20,21 @@ blank/
 ├── README.md
 ├── CUSTOMIZATION.md
 ├── AGENTS.md
+├── src/
+│   └── styles/          # 可维护的样式源码
+├── tools/
+│   └── build-styles.sh # 生成发布样式包
 └── publish/
     ├── index.html
     ├── config.js
     ├── content.js
+    ├── scripts/
+    │   ├── data/
+    │   ├── engine/
+    │   ├── features/
+    │   ├── ui/
+    │   └── controllers/
+    ├── styles/          # 浏览器实际加载的样式包
     ├── sdk-adapter.js
     ├── storage.js
     ├── ai-director.js
@@ -31,6 +42,9 @@ blank/
     ├── app.js
     └── style.css
 ```
+
+修改 `src/styles/` 后执行 `sh tools/build-styles.sh`。发布页只加载 9 个功能样式包和
+根级基础样式，减少阻塞样式请求；脚本仍使用 `defer` 并保持原有执行顺序。
 
 `content.js` 把 `config.js` 中的内容文案投影成可替换的只读内容包，不复制平台逻辑。`index.html` 按上面的模块顺序加载脚本，`app.js` 始终最后加载并只负责启动、事件绑定和模块编排。
 

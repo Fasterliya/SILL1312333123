@@ -55,7 +55,7 @@
       if (!spouse || record.i > spouse.i || record.k >= 3) return;
       const woman = record.g === '女' ? record : spouse;
       const womanAge = age(state, woman);
-      if (womanAge < 20 || womanAge > 49) return;
+      if (womanAge < 20) return;
       const yearsMarried = (state.totalMonths - (record.w || state.totalMonths)) / 12;
       const chance = Game.demography.fertilityAt(woman.f
         ?? Game.demography.baseFertility(woman.i), womanAge, record.k);

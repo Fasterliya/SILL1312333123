@@ -40,14 +40,6 @@
     state.romance.pendingBirthMotherId ||= null;
     state.romance.conceptionCooldown = Math.max(0, Number(state.romance.conceptionCooldown) || 0);
   }
-  function agePenalty(age) {
-    if (age < 18) return 100;
-    if (age <= 28) return 0;
-    if (age <= 32) return age - 28;
-    if (age <= 35) return 4 + (age - 32) * 2;
-    if (age <= 39) return 10 + (age - 35) * 4;
-    return 26 + (age - 39) * 8;
-  }
   function playerChildren(state) {
     return state.family.filter((person) => ['儿子', '女儿'].includes(person.relation)).length;
   }
@@ -61,11 +53,12 @@
   function fertility(state, woman) {
     ensureWoman(woman);
     if (!woman || woman.gender !== '女') return 0;
-    return clamp(Math.round(woman.fertilityBase - agePenalty(womanAge(state, woman))
-      - childCount(state, woman) * 4), 0, 100);
+    if (womanAge(state, woman) < 18) return 0;
+    return clamp(Math.round(woman.fertilityBase - childCount(state, woman) * 4), 0, 100);
   }
   function fertilityAt(base, age, children) {
-    return clamp(Math.round((Number.isFinite(base) ? base : 23) - agePenalty(age)
+    if (age < 18) return 0;
+    return clamp(Math.round((Number.isFinite(base) ? base : 23)
       - Math.max(0, Number(children) || 0) * 4), 0, 100);
   }
   function coupleWomen(state, partner) {

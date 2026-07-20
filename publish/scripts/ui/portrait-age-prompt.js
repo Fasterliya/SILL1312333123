@@ -2,56 +2,56 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const minorStyles = Object.freeze([
+  const proportionStyles = Object.freeze([
     {
       max: 2,
       lines: [
-        'minor_age_stage_1: clearly 0-2 years old, age-accurate infant or toddler appearance',
-        'body_proportion: 3-3.5 heads tall, oversized round head, tiny compact torso',
-        'anatomy_details: full cheeks, almost no visible neck, very short rounded limbs, tiny hands and feet',
-        'presentation: fully clothed, comfortable age-appropriate clothing, neutral natural pose, non-suggestive',
+        'proportion_stage_1: compact 3-3.5 heads tall silhouette',
+        'facial_structure: oversized round head, full cheeks, very short soft jawline, almost no visible neck',
+        'anatomy_details: tiny compact torso, very short rounded limbs, tiny hands and feet',
+        'presentation: fully clothed, comfortable modest clothing, neutral natural pose',
       ],
-      negative: 'older child, adolescent, adult proportions, long limbs, sharp jaw, visible muscle, heavy makeup, revealing clothing, suggestive pose',
+      negative: 'elongated silhouette, long limbs, sharp angular jaw, broad shoulders, pronounced muscle definition',
     },
     {
       max: 6,
       lines: [
-        'minor_age_stage_2: clearly 3-6 years old, age-accurate young child appearance',
-        'body_proportion: 3.5-4.5 heads tall, large round head, short compact torso',
-        'anatomy_details: round face, soft cheeks, short jaw, narrow shoulders, short limbs, small hands and feet',
-        'presentation: fully clothed, modest child clothing, relaxed playful posture, neutral and non-suggestive',
+        'proportion_stage_2: compact 3.5-4.5 heads tall silhouette',
+        'facial_structure: large round head, soft cheeks, short jawline, narrow neck',
+        'anatomy_details: short compact torso, narrow shoulders, short limbs, small hands and feet',
+        'presentation: fully clothed, comfortable modest clothing, relaxed natural posture',
       ],
-      negative: 'infant proportions, teenage appearance, adult proportions, long legs, sharp mature face, broad shoulders, heavy makeup, revealing clothing, suggestive pose',
+      negative: 'extremely oversized head, overly elongated silhouette, long legs, sharp angular jaw, broad shoulders, pronounced muscle definition',
     },
     {
       max: 10,
       lines: [
-        'minor_age_stage_3: clearly 7-10 years old, age-accurate school-age child appearance',
-        'body_proportion: 4.5-5 heads tall, compact balanced torso, narrow shoulders',
-        'anatomy_details: softly rounded face, short jaw, gradually longer limbs, small hands and feet, no muscle definition',
-        'presentation: fully clothed, modest coordinated clothing, lively natural posture, neutral and non-suggestive',
+        'proportion_stage_3: balanced 4.5-5 heads tall silhouette',
+        'facial_structure: softly rounded face, short jawline, gentle cheek contours',
+        'anatomy_details: compact balanced torso, narrow shoulders, gradually longer limbs, small hands and feet',
+        'presentation: fully clothed, modest coordinated clothing, lively natural posture',
       ],
-      negative: 'infant proportions, teenage appearance, adult curves, adult musculature, overly long legs, sharp mature face, heavy makeup, revealing clothing, suggestive pose',
+      negative: 'extremely oversized head, overly elongated silhouette, exaggerated body shape, pronounced musculature, sharp angular face',
     },
     {
       max: 14,
       lines: [
-        'minor_age_stage_4: clearly 11-14 years old, age-accurate early adolescent appearance',
-        'body_proportion: 5-6 heads tall, lean compact frame, slender gradually lengthening limbs',
-        'anatomy_details: soft youthful face, lightly defined jaw, subtle shoulders and pelvis, restrained physical development',
-        'presentation: fully clothed, modest age-appropriate clothing, natural reserved posture, neutral and non-suggestive',
+        'proportion_stage_4: lean 5-6 heads tall silhouette',
+        'facial_structure: soft facial contours, lightly defined jawline, balanced feature spacing',
+        'anatomy_details: compact frame, slender lengthening limbs, subtle shoulder and pelvis lines',
+        'presentation: fully clothed, modest coordinated clothing, natural reserved posture',
       ],
-      negative: 'infant proportions, fully adult anatomy, exaggerated curves, emphasized musculature, glamour styling, heavy makeup, revealing clothing, fetish styling, suggestive pose',
+      negative: 'extremely oversized head, very short limbs, exaggerated body shape, broad shoulders, emphasized musculature, sharp angular face',
     },
     {
       max: 18,
       lines: [
-        'minor_age_stage_5: clearly 15-18 years old, age-accurate older adolescent appearance',
-        'body_proportion: 6-7 heads tall, balanced elongated proportions, natural shoulder line',
-        'anatomy_details: youthful facial structure, clear but soft jawline, restrained anatomy, minimal muscle definition',
-        'presentation: fully clothed, modest contemporary clothing, bright natural expression, neutral and non-suggestive',
+        'proportion_stage_5: balanced 6-7 heads tall silhouette',
+        'facial_structure: clear soft facial contours, gently defined jawline, balanced feature spacing',
+        'anatomy_details: naturally elongated limbs, balanced torso, natural shoulder line, minimal muscle definition',
+        'presentation: fully clothed, modest contemporary clothing, bright natural expression',
       ],
-      negative: 'childlike toddler proportions, fully mature adult appearance, exaggerated curves, emphasized musculature, glamour styling, heavy makeup, revealing clothing, fetish styling, suggestive pose',
+      negative: 'extremely oversized head, very short rounded limbs, exaggerated body shape, broad shoulders, emphasized musculature, harsh angular face',
     },
   ]);
 
@@ -77,27 +77,27 @@
     ];
   }
 
-  function minorStyle(years) {
-    return minorStyles.find((style) => years <= style.max) || null;
+  function proportionStyle(years) {
+    return proportionStyles.find((style) => years <= style.max) || null;
   }
 
   function lines(years, gender) {
     if (years >= 70) return style70(gender);
     if (years >= 50) return style50(gender);
-    return minorStyle(years)?.lines || [];
+    return proportionStyle(years)?.lines || [];
   }
 
   function negative(years) {
     if (years >= 70) return [
-      'young adult, youthful face, teenage appearance, baby face',
-      'smooth unlined skin, ageless face, middle-aged face',
+      'insufficient facial aging, overly smooth unlined skin',
+      'faint wrinkles, firm unsoftened jawline, ageless facial rendering',
     ].join(', ');
     if (years >= 50) return [
-      'young adult, youthful face, teenage appearance, baby face',
-      'smooth unlined skin, ageless face',
+      'insufficient facial aging, overly smooth unlined skin',
+      'missing forehead lines, missing nasolabial folds, ageless facial rendering',
     ].join(', ');
     if (years >= 19) return '';
-    return minorStyle(years)?.negative || '';
+    return proportionStyle(years)?.negative || '';
   }
 
   Game.portraitAgePrompt = Object.freeze({ lines, negative });

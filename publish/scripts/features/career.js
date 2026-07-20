@@ -103,12 +103,18 @@
       Game.lifeDirector.addLog(state, '求职未录取', `${employer}婉拒了${job.name}申请。`, 'normal');
       return { ok: false, message: `${employer}未录取，参考概率 ${Math.round(chance * 100)}%` };
     }
+    if (state.career.job && state.career.jobId !== job.id) {
+      Game.careerHistory?.add(state, {
+        kind: 'leave', title: `离开${state.career.company || '原单位'}`, detail: `结束${state.career.job}工作`,
+      });
+    }
     state.career.job = job.name;
     state.career.jobId = job.id;
     state.career.company = employer;
-    state.career.salary = Math.round(job.salary * Game.cityLife.salaryFactor(state));
+    const internshipBonus = state.career._internshipBonus && !state.career._internshipBonusUsed;
+    state.career.salary = Math.round(job.salary * Game.cityLife.salaryFactor(state) * (internshipBonus ? 1.3 : 1));
     state.career.level = 0;
-    state.career.exp = 0;
+    state.career.exp = internshipBonus ? 24 : 0;
     state.career.performance = 10;
     state.career.lastPromotionMonth = state.totalMonths - 6;
     state.career.management = false;
@@ -117,6 +123,8 @@
     state.career.lastTitleMonth = state.totalMonths - 12;
     state.career.lastRaiseMonth = state.totalMonths - 6;
     state.career.lastAutoRaiseMonth = state.totalMonths;
+    state.career.jobStartMonth = state.totalMonths;
+    if (internshipBonus) state.career._internshipBonusUsed = true;
     const employerJob = { ...job, company: employer, companyId: job.companyId || `local-${state.location.city}-${job.id}` };
     if (job.freelance) Game.workplace.leave(state);
     else Game.workplace.join(state, employerJob);
@@ -129,6 +137,8 @@
       underground.agencyName ||= employer;
     }
     Game.lifeDirector.addLog(state, '获得工作', `你加入${employer}担任${job.name}。`, 'milestone');
+    Game.careerHistory?.add(state, { kind: 'hire', title: `加入${employer}`,
+      detail: `担任${job.name}`, company: employer, salary: state.career.salary });
     return { ok: true, message: `${employer}录取了你` };
   }
 
@@ -168,6 +178,8 @@
     const currentJob = C.jobs.find((item) => item.id === state.career.jobId);
     if (state.career.job && !currentJob?.freelance) {
       Game.lifeDirector.addLog(state, '离开原岗位', `迁居让你结束了${state.career.company || ''}${state.career.job}的工作。`, 'normal');
+      Game.careerHistory?.add(state, { kind: 'leave',
+        title: `离开${state.career.company || '原单位'}`, detail: `结束${state.career.job}工作` });
       Object.assign(state.career, {
         job: null, jobId: null, company: null, salary: 0, exp: 0,
         performance: 0, lastPromotionMonth: -12, management: false, titleTrack: 'staff', titleRank: 0,

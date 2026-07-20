@@ -217,6 +217,7 @@
     if (Game.subjectPanel?.handleClick?.(event)) return;
     if (Game.companySystem?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.undergroundIdol?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.economicCareerActions?.handleClick?.(event)) return;
     if (Game.careerPanelActions?.handleClick?.(event)) return;
     if (Game.careerPanels?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.encounterSystem?.handleClick?.(event)) return;

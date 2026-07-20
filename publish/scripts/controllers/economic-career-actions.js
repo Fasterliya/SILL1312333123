@@ -170,12 +170,16 @@
     if (!state) return false;
     const sexWork = event.target.closest('[data-economic-action]');
     if (sexWork) {
-      finish(sexWorkAction(state, sexWork));
+      const result = sexWorkAction(state, sexWork);
+      if (result?.ok) Game.specialCareerRanks?.sync(state);
+      finish(result);
       return true;
     }
     const market = event.target.closest('[data-economic-market]');
     if (market) {
-      finish(marketAction(state, market));
+      const result = marketAction(state, market);
+      if (result?.ok) Game.specialCareerRanks?.sync(state);
+      finish(result);
       return true;
     }
     return false;

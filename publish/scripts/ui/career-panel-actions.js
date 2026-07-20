@@ -5,6 +5,8 @@
 
   function finish(result) {
     if (!result) return;
+    const state = Game._getState?.();
+    if (result.ok && state) Game.specialCareerRanks?.sync(state);
     Game._refresh?.();
     Game._save?.();
     Game.view.showToast(result.message, result.ok ? 'good' : 'warning');

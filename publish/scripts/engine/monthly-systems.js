@@ -36,6 +36,7 @@
     Game.undergroundIdol?.monthly(state);
     Game.universityLife?.monthly(state);
     Game.lifeResumeSync?.monthly(state);
+    Game.specialCareerRanks?.sync(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

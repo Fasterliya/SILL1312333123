@@ -98,8 +98,21 @@
   }
 
   function render(state) {
-    syncLegacy(state);
-    return legacy.render(state);
+    if (!Game.subjectPanel.isStudent(state)) return legacy.render(state);
+    const item = syncLegacy(state);
+    const latest = item.exams[0];
+    const scores = latest ? Object.entries(latest.scores).map(([name, score]) => (
+      `<span>${name}<b>${score}</b></span>`
+    )).join('') : '<p class="empty-state">成绩公布后会显示各科分数。</p>';
+    return `<section class="study-summary"><div><span>${Game.content.gradeLabel(state)}</span>
+      <strong>${state.education.school}</strong><small>${state.education.path || '全日制学习'}</small></div>
+      <dl><div><dt>科目掌握度</dt><dd>${Math.round(readiness(state))}</dd></div>
+      <div><dt>学习疲劳</dt><dd>${Math.round(state.education.burnout || 0)}</dd></div>
+      <div><dt>睡眠时长</dt><dd>${state.health.sleep || 0}小时</dd></div>
+      <div><dt>综合成绩</dt><dd>${state.education.examScore || '待公布'}</dd></div></dl></section>
+      <h3>${latest ? `${latest.label} · ${latest.total}/${latest.maximum}` : '考试成绩'}</h3>
+      <div class="score-grid">${scores}</div>${Game.schoolLines.render(state)}
+      <div class="study-actions"><button data-education-action="dropout" class="danger">辍学</button></div>`;
   }
 
   Game.educationSystem = Object.freeze({

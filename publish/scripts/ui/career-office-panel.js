@@ -116,6 +116,10 @@
   }
 
   function routePanel(state, money) {
+    if (state.career.jobId === 'pimp') {
+      return `<div class="career-special-stack">${Game.specialCareerRanks.render(state)}
+        ${legacy.routePanel(state, money)}</div>`;
+    }
     return !state.career.jobId || usesLegacyPanel(state)
       ? legacy.routePanel(state, money) : officePanel(state, money);
   }

@@ -63,7 +63,8 @@
   }
 
   function sexWork(state) {
-    return `<div class="career-special-stack">${appointments(state)}${patrons(state)}${health(state)}
+    return `<div class="career-special-stack">${Game.specialCareerRanks.render(state)}
+      ${appointments(state)}${patrons(state)}${health(state)}
       <section class="career-panel"><div class="panel-title"><h2>职业履历</h2>
       <span>入职与重要节点</span></div>${Game.careerHistory.render(state)}</section></div>`;
   }
@@ -81,7 +82,8 @@
         <button data-economic-market="use" data-item-id="${item.id}"${stock ? '' : ' disabled'}>使用</button>
       </article>`;
     }).join('');
-    return `<div class="career-special-stack"><section class="career-panel black-market"><div class="panel-title">
+    return `<div class="career-special-stack">${Game.specialCareerRanks.render(state)}
+      <section class="career-panel black-market"><div class="panel-title">
       <h2>黑市仓库</h2><span>犯罪记录${state.criminal?.record || 0}</span></div>
       <div class="black-market-items">${rows}</div>
       <div class="system-actions"><button data-economic-market="sell-all">批量出售库存</button></div>

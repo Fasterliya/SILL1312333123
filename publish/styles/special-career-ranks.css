@@ -1,0 +1,40 @@
+.career-rank-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  padding: 12px;
+  border-left: 4px solid var(--ui-gold);
+  background: #fff8e8;
+}
+
+.career-rank-banner small,
+.career-rank-banner strong,
+.career-rank-banner span {
+  display: block;
+}
+
+.career-rank-banner small {
+  color: var(--ui-muted);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.career-rank-banner strong {
+  margin-top: 3px;
+  font: 700 17px serif;
+}
+
+.career-rank-banner span {
+  margin-top: 4px;
+  color: var(--ui-muted);
+  font-size: 10px;
+}
+
+.career-rank-banner > b {
+  color: var(--ui-red);
+  font-size: 18px;
+}
+
+.career-rank-banner .progress-bar {
+  grid-column: 1 / -1;
+}

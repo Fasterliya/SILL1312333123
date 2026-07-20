@@ -29,6 +29,7 @@
     const industry = job.industry || '';
     if (['科技', '游戏'].includes(industry)) return '科技';
     if (industry === '金融') return '金融';
+    if (industry === '文职') return '文职';
     if (industry === '医疗') return '医疗';
     if (industry === '教育') return '教育';
     if (industry === '法律') return '法律';

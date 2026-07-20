@@ -44,6 +44,16 @@
         `开始从事${state.career.company ? `${state.career.company}的` : ''}${job}`,
       );
     }
+    if ((state.criminal?.record || 0) > 0) {
+      Game.lifeResume.recordEvent(
+        state, profile, '犯罪', `累计犯罪记录${state.criminal.record}`,
+      );
+    }
+    if ((state.criminal?.arrests || 0) > 0) {
+      Game.lifeResume.recordEvent(
+        state, profile, '被捕', `累计被捕${state.criminal.arrests}次`,
+      );
+    }
     (state.criminal?.jailHistory || []).forEach((entry) => {
       Game.lifeResume.recordEvent(
         state,
@@ -79,6 +89,11 @@
         '地下偶像坠落',
         `离开地下舞台并转为${underground.fellTo === 'welfare' ? '福利姬' : '风俗业'}`,
       );
+    }
+    if (state.idol?.stage === 'debuted') {
+      Game.lifeResume.recordEvent(state, profile, '偶像出道', '进入正规事务所正式出道');
+    } else if (state.idol?.stage === 'retired') {
+      Game.lifeResume.recordEvent(state, profile, '偶像退役', '结束正规偶像生涯');
     }
     profile._resumePlayerBackfilled = true;
   }

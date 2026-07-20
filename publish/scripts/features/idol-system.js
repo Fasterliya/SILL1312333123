@@ -32,7 +32,10 @@
     if (!Core.isIdolJob(state.career.jobId)) return '';
     const idol = Core.ensure(state);
     const stages = { trainee: '练习生', debuted: '已出道', retired: '已退役' };
-    const securityText = Core.securityActive(state, idol) ? '续聘安保' : '聘请安保';
+    const securityActive = Core.securityActive(state, idol);
+    const securityMonths = securityActive
+      ? Math.max(1, idol.securityUntilMonth - state.totalMonths + 1) : 0;
+    const securityText = securityActive ? '续聘安保' : '聘请安保';
     return `<section class="creator-card idol-card">
       <header><div><span>${idol.agencyName || ''} · ${stages[idol.stage] || ''}</span>
         <strong>${idol.fans.toLocaleString()} 粉丝</strong></div>
@@ -42,6 +45,8 @@
         <span>声乐 <b>${idol.skills.vocal}</b></span>
         <span>表情 <b>${idol.skills.expression}</b></span>
         <span>制作人信任 <b>${Math.round(idol.producerTrust)}</b></span>
+        <span>恋爱合约 <b>${idol.loveBanSigned ? '已签署' : '未签署'}</b></span>
+        <span>安保状态 <b>${securityActive ? `剩余${securityMonths}月` : '未启用'}</b></span>
       </div>
       <div class="creator-actions">
         <button data-idol-action="train" data-idol-skill="dance">训练舞蹈</button>
@@ -88,6 +93,7 @@
     const result = actionResult(state, button);
     if (result) {
       Game._refresh();
+      Game._save?.();
       Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
     }
     return true;

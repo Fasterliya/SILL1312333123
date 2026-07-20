@@ -65,7 +65,7 @@
   function clean(value) {
     const text = String(value || '')
       .replace(/婴儿软底鞋/g, '柔软底鞋').replace(/婴儿连体衣/g, '柔软连体衣')
-      .replace(/婴儿袜/g, '柔软棉袜').replace(/胎毛短发/g, '柔软短发')
+      .replace(/婴儿袜/g, '柔软婴儿袜').replace(/胎毛短发/g, '柔软短发')
       .replace(/儿童短发/g, '自然短发').replace(/彩色童装/g, '彩色休闲装')
       .replace(/学生装|校服/g, '简洁端庄套装').replace(/校园|学院/g, '经典')
       .replace(/水手服/g, '海军领套装').replace(/制服/g, '套装')
@@ -101,7 +101,7 @@
     const marks = [target.molePosition, target.freckles, target.distinctiveFeature]
       .filter((item) => item && !String(item).startsWith('无')).map(clean).filter(Boolean).join(', ');
     const identity = [
-      `gender: ${player ? state.gender : target.gender}`,
+      `gender: ${player ? Game.hunterMode.identity(state).gender : target.gender}`,
       protectedAge ? '' : `age: ${years} years old`,
       `body_type: ${clean(target.bodyType)}, ${clean(target.bodyFrame)}`,
       `height: ${height.toFixed(1)} cm`,

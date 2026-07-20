@@ -5,7 +5,7 @@
   const C = Game.config;
 
   function ageMonths(state) {
-    return Math.max(0, state.totalMonths - Number(state.playerBornAt || 0));
+    return Math.max(0, state.totalMonths - Game.hunterMode.identity(state).birthMonth);
   }
 
   function syncCalendar(state) {

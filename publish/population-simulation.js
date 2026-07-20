@@ -48,6 +48,10 @@
     const byId = new Map(records.map((record) => [record.i, record]));
     records.forEach((record) => {
       const spouse = byId.get(record.m);
+      if (age(state, record) >= 40 && record.k < 1) {
+        record.k = 1;
+        if (spouse) spouse.k = Math.max(1, spouse.k || 0);
+      }
       if (!spouse || record.i > spouse.i || record.k >= 3) return;
       const woman = record.g === '女' ? record : spouse;
       const womanAge = age(state, woman);

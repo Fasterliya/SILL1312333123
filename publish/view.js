@@ -81,20 +81,27 @@
   }
 
   function familyCards(state) {
-    const summary = `<div class="detail-row family-wealth"><span>原生家庭资产</span><b>${money(state.familyWealth)}</b></div>`;
+    const activeSkin = Game.hunterMode.active(state);
+    const members = activeSkin ? Game.hunterMode.socialPeople(state, activeSkin).map((link) => ({
+      ...link.person, relation: link.kind,
+    })) : state.family;
+    const summary = activeSkin
+      ? `<div class="detail-row family-wealth"><span>继承社会关系</span><b>${members.length}人</b></div>`
+      : `<div class="detail-row family-wealth"><span>原生家庭资产</span><b>${money(state.familyWealth)}</b></div>`;
     const partner = Game.people.find(state, state.romance.partnerId);
     const stats = Game.demography.conceptionStats(state, partner);
     const birthStatus = state.romance.pendingBirth
       ? `孕期剩余 ${state.romance.pendingBirth}个月${state.romance.pendingBabies === 2 ? ' · 双胞胎' : ''}`
       : (state.romance.conceptionCooldown > 0 ? `产后恢复 ${state.romance.conceptionCooldown}个月`
         : `月受孕率 ${stats.monthlyPercent}% · 连续12月累计 ${stats.annualPercent}%`);
-    const fertility = state.romance.married
+    const fertility = !activeSkin && state.romance.married
       ? `<div class="detail-row"><span>自然生育</span><b>${birthStatus}</b></div>` : '';
-    return summary + fertility + state.family.map((item) => {
-      const actions = item.status === '已故' ? '<button disabled>追忆</button>'
+    return summary + fertility + members.map((item) => {
+      const actions = activeSkin ? `<button data-character-id="${item.id}">查看档案</button>`
+        : (item.status === '已故' ? '<button disabled>追忆</button>'
         : Game.familySystem.detailActions(state, item).map(([type, label]) => (
           `<button data-detail-family="${item.id}" data-family-action="${type}">${label}</button>`
-        )).join('');
+        )).join(''));
       return `
       <article class="person"><button class="person-avatar" type="button"
         data-character-id="${item.id}" aria-label="查看${item.name}详情">${Game.portraitSystem.avatar(item)}</button>
@@ -111,11 +118,11 @@
   function render(state) {
     currentCountry = state.location.country || '华夏';
     const years = U.age(state);
-    const activeSkin = Game.hunterMode.active(state);
-    el.profileName.textContent = activeSkin?.name || state.name;
-    el.profileMeta.textContent = activeSkin ? `夺舍身份 · ${activeSkin.gender} · ${activeSkin.personality}`
+    const identity = Game.hunterMode.identity(state);
+    el.profileName.textContent = identity.name;
+    el.profileMeta.textContent = identity.skin ? `夺舍身份 · ${identity.gender} · ${identity.profile.personality}`
       : `${state.gender} · ${state.location.country || '华夏'} ${state.location.city}`;
-    el.ageValue.textContent = `${years}岁${(state.totalMonths - state.playerBornAt) % 12}月`;
+    el.ageValue.textContent = `${years}岁${Game.timeSystem.ageMonths(state) % 12}月`;
     el.stageValue.textContent = Game.timeSystem.stageLabel(state);
     el.moneyValue.textContent = money(state.money);
     el.moneyValue.classList.toggle('debt', state.money < 0);

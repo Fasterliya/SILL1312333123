@@ -99,6 +99,20 @@
     }
   }
 
+  function lifeExpectancy(state) {
+    const identity = Game.hunterMode.identity(state);
+    if (identity.skin) {
+      Game.mortality.ensurePerson(identity.skin);
+      return identity.skin.lifeExpectancyMonths;
+    }
+    if (!Number.isInteger(state.health.lifeExpectancyMonths)) {
+      state.health.lifeExpectancyMonths = Game.mortality.lifeMonths(
+        `player-${state.generation}-${state.profile.genetics?.code || state.name}`,
+      );
+    }
+    return state.health.lifeExpectancyMonths;
+  }
+
   function monthly(state) {
     const age = U.age(state);
     const critical = state.stats.健康 <= 0;
@@ -118,9 +132,8 @@
       if (Math.random() < risk) addCondition(state);
     }
     if (state.health.conditions.length) state.money -= price(state, 320 * state.health.conditions.length);
-    const risk = U.clamp((age - 78) * 0.0007 + (45 - state.stats.健康) * 0.001
-      + state.health.conditions.length * 0.0015, 0, 0.09);
-    if (critical || (age >= 72 && Math.random() < risk)) {
+    const reachedLifespan = Game.timeSystem.ageMonths(state) >= lifeExpectancy(state);
+    if (critical || reachedLifespan) {
       Game.legacySystem.prepareDeath(state, state.health.conditions.length ? '慢性疾病并发症' : '自然衰老');
     }
   }

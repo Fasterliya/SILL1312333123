@@ -45,7 +45,7 @@
     item.cosplay = Game.cosplayCatalog.find(item.cosplay).name;
     item.clothing ||= U.clothing(item.outfit);
     item.clothing.top ||= item.outfit || '品质日常';
-    item.clothing.socks ||= '短棉袜';
+    item.clothing.socks = Game.appearanceCatalog.normalizeSocks(item.clothing.socks);
     item.clothing.shoes ||= '白色运动鞋';
     delete item.outfit;
     item.portraitUrl ??= null;
@@ -94,7 +94,7 @@
     delete profile.interests;
     profile.clothing ||= U.clothing(profile.outfit);
     profile.clothing.top ||= profile.outfit || '品质日常';
-    profile.clothing.socks ||= '短棉袜';
+    profile.clothing.socks = Game.appearanceCatalog.normalizeSocks(profile.clothing.socks);
     profile.clothing.shoes ||= '白色运动鞋';
     delete profile.outfit;
     profile.portraitUrl ??= null;

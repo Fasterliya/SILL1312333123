@@ -47,16 +47,17 @@
 
   function render() {
     const state = api.getState();
+    const identity = Game.hunterMode.identity(state);
     const profile = activeTargetId
       ? Game.people.find(state, activeTargetId)
-      : state.profile;
+      : identity.profile;
     if (!profile) return Game.navigation.closeDetail();
     const years = activeTargetId ? Game.content.personAge(state, profile) : Game.content.age(state);
     const key = keyFor(activeField);
     const selected = currentValue(profile, activeField);
     const items = (optionsFor(key) || []).filter((entry) => visible(entry, years) && bodyMatches(entry, {
       ...profile,
-      gender: activeTargetId ? profile.gender : state.gender,
+      gender: activeTargetId ? profile.gender : identity.gender,
     }))
       .sort((a, b) => Number(recommended(b, profile, years)) - Number(recommended(a, profile, years)));
     const availableFilters = activeField === 'cosplay'
@@ -82,9 +83,10 @@
   function open(field, targetId) {
     if (!labels[field] || !optionsFor(keyFor(field))) return;
     const state = api.getState();
+    const identity = Game.hunterMode.identity(state);
     const profile = targetId
       ? Game.people.find(state, targetId)
-      : state.profile;
+      : identity.profile;
     if (!profile || Game.cosplayCatalog.overrides(profile, field)) {
       Game.view.showToast('当前造型由COS服覆盖，取消COS后可以编辑', 'warning');
       return;

@@ -10,7 +10,7 @@
   const setUniqueName = (state, person, culture) => Game.nameSystem.setUnique(state, person, culture);
 
   function clothing(top) {
-    return { top: top || '品质日常', socks: '短棉袜', shoes: '白色运动鞋' };
+    return { top: top || '品质日常', socks: '船袜', shoes: '白色运动鞋' };
   }
 
   function person(relation, surname, age, gender, anchorMonth) {
@@ -116,14 +116,14 @@
       sibling.temperament = '童真';
       sibling.bodyType = '幼小';
       sibling.hairstyle = '儿童短发';
-      sibling.clothing = { top: '彩色童装', socks: '短棉袜', shoes: '魔术贴童鞋' };
+      sibling.clothing = { top: '彩色童装', socks: '短袜', shoes: '魔术贴童鞋' };
       Game.genetics.inheritInto(sibling, sibling.gender, father, mother, `sibling-${sibling.id}`);
       family.push(sibling);
     }
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 24,
+      version: 25,
       updatedAt: new Date().toISOString(),
       name: makeName(surname, gender),
       surname,
@@ -169,7 +169,7 @@
     };
   }
 
-  const age = (state) => Math.max(0, Math.floor((state.totalMonths - Number(state.playerBornAt || 0)) / 12));
+  const age = (state) => Math.max(0, Math.floor((state.totalMonths - Game.hunterMode.identity(state).birthMonth) / 12));
   const stage = (years) => C.stages.find((item) => years <= item.max) || C.stages.at(-1);
 
   function personAge(state, item) {

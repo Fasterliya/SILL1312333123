@@ -30,7 +30,7 @@
 
   function findTarget(key) {
     const state = api.getState();
-    if (key === 'player') return state.profile;
+    if (key === 'player') return Game.hunterMode.identity(state).profile;
     return Game.people.find(state, key);
   }
 
@@ -134,12 +134,13 @@
   }
 
   function renderPlayer(state, elements) {
-    const target = state.profile;
+    const identity = Game.hunterMode.identity(state);
+    const target = identity.profile;
     const image = safeImage(target.portraitUrl);
     const waiting = drawing.has('player');
     elements.portraitSlot.innerHTML = image
-      ? `<img src="${escape(image)}" alt="${escape(state.name)}的角色立绘">`
-      : `<div class="portrait-empty"><b>${escape(state.name.slice(-1))}</b><span>尚未生成立绘</span></div>`;
+      ? `<img src="${escape(image)}" alt="${escape(identity.name)}的角色立绘">`
+      : `<div class="portrait-empty"><b>${escape(identity.name.slice(-1))}</b><span>尚未生成立绘</span></div>`;
     elements.portraitSlot.querySelector('img')?.addEventListener('error', () => {
       if (target.portraitUrl !== image) return;
       errors.set('player', '原立绘地址已失效，已切换其他缓存');

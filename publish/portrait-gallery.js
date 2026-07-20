@@ -24,7 +24,7 @@
 
   function targetFor(key) {
     const state = api.getState();
-    if (key === 'player') return state.profile;
+    if (key === 'player') return Game.hunterMode.identity(state).profile;
     return Game.people.find(state, key);
   }
 
@@ -52,7 +52,7 @@
     const target = targetFor(activeKey);
     if (!target) return close();
     const state = api.getState();
-    const name = activeKey === 'player' ? state.name : target.name;
+    const name = activeKey === 'player' ? Game.hunterMode.identity(state).name : target.name;
     const gallery = entries(target);
     const current = gallery.find((entry) => entry.url === target.portraitUrl) || gallery[0];
     if (current && current.url !== target.portraitUrl) selectActive(target, current);

@@ -95,7 +95,16 @@
     person.careerCity = job.cities?.length ? U.random(job.cities) : (person.metCity || state.location.city);
   }
 
+  function ensureChildByForty(state, person, age) {
+    if (age < 40 || person.childrenCount > 0 || person.status !== '健康') return;
+    person.childrenCount = 1;
+    if (person.gender === '女') person.birthsGiven = Math.max(1, Number(person.birthsGiven) || 0);
+    const spouse = Game.people.find(state, person.spouseId);
+    if (spouse) spouse.childrenCount = Math.max(1, Number(spouse.childrenCount) || 0);
+  }
+
   function relationships(state, person, age) {
+    ensureChildByForty(state, person, age);
     if (['父亲', '母亲', '配偶'].includes(person.relation)) return;
     if (state.romance.partnerId === person.id || person.relation === '恋人') return;
     if (person.populationResident) return;
@@ -132,7 +141,8 @@
       ? ['品质日常', '针织开衫', '针织开衫连衣裙', '宽松毛衣半身裙', '衬衫牛仔裤套装']
       : ['品质日常', '针织开衫', '衬衫牛仔裤套装'];
     if (age < 3) tops = ['婴儿连体衣'];
-    else if (age < 6) tops = ['彩色童装'];
+    else if (age < 6) tops = person.culture === '日本'
+      ? ['日式幼稚园制服'] : ['彩色童装', '日式幼稚园制服'];
     else if (age < 18) tops = schoolTops;
     else if (age < 22) tops = girl
       ? ['校园休闲', '复古学院背带裙', '针织开衫连衣裙', '棒球夹克校服套装']
@@ -144,7 +154,7 @@
     if (sailorPreference) tops = ['水手服迷你裙'];
     person.clothing.top = U.random(tops);
     person.clothing.socks = sailorPreference ? '白色连裤袜'
-      : (age < 3 ? '婴儿袜' : (age < 18 ? '白色中筒袜' : '短棉袜'));
+      : (age < 3 ? '婴儿袜' : (age < 18 ? '白色中筒袜' : '船袜'));
     person.clothing.shoes = age < 3 ? '婴儿软底鞋' : (age < 7 ? '魔术贴童鞋' : U.random(['帆布鞋', '白色运动鞋', '乐福鞋']));
     Game.geneticsGrowth.applyAppearance(person, person.gender, age);
   }

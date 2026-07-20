@@ -33,18 +33,50 @@
 
   function get(id) { return procedures[id] || null; }
 
-  function portraitProfile(state) {
-    return Game.hunterMode.identity(state).profile;
+  function portraitProfile(state, targetId) {
+    return targetId ? Game.people.find(state, targetId) : Game.hunterMode.identity(state).profile;
   }
 
-  function setPortraitStage(state, stageId) {
+  function setPortraitStage(state, stageId, targetId) {
     const option = Game.portraitAgePrompt.options.find((item) => item.id === stageId);
     if (!option) return { ok: false, message: '无效的绘画提示词阶段' };
-    portraitProfile(state).portraitAgeStage = option.id;
+    const profile = portraitProfile(state, targetId);
+    if (!profile) return { ok: false, message: '没有找到需要调整的角色' };
+    if (targetId && (profile.gender !== '女' || profile.status === '已故')) {
+      return { ok: false, message: '当前角色不能调整绘画阶段' };
+    }
+    profile.portraitAgeStage = option.id;
     return {
       ok: true,
-      message: `已免费切换为${option.label}并手动锁定，重新生成立绘后生效`,
+      message: `${targetId ? '该角色' : '当前角色'}已免费切换为${option.label}并锁定，重新生成立绘后生效`,
     };
+  }
+
+  function stageSelector(profile, years, actionPrefix, title) {
+    const manual = Game.portraitAgePrompt.valid(profile.portraitAgeStage)
+      ? profile.portraitAgeStage : null;
+    const automatic = Game.portraitAgePrompt.automatic(years);
+    const activeName = Game.portraitAgePrompt.options.find(
+      (item) => item.id === (manual || automatic),
+    )?.label || '默认成人风格';
+    const stages = Game.portraitAgePrompt.options.map((item) => {
+      const selected = manual === item.id;
+      const suggested = !manual && automatic === item.id;
+      return `<button class="portrait-stage-btn ${selected ? 'active' : (suggested ? 'automatic' : '')}"
+        data-surgery="${actionPrefix}${item.id}" aria-pressed="${selected}">
+        <strong>${item.label}</strong><small>${item.detail}</small>
+        <b>${selected ? '已锁定' : (suggested ? '自动' : '免费')}</b></button>`;
+    }).join('');
+    return `<section class="portrait-stage-picker"><header><div><strong>${title}</strong>
+      <small>当前：${manual ? '手动锁定' : '自动跟随'} · ${activeName}</small></div><b>免费</b></header>
+      <div class="portrait-stage-grid">${stages}</div>
+      <p>手动选择后不再随年龄自动变化；重新生成该角色立绘后生效。</p></section>`;
+  }
+
+  function renderNpcPortraitStages(state, person) {
+    if (!person || person.gender !== '女' || person.status === '已故') return '';
+    return stageSelector(person, U.personAge(state, person),
+      `npc-portrait:${encodeURIComponent(person.id)}:`, '绘画七阶段');
   }
 
   function applyChanges(state, proc) {
@@ -75,8 +107,11 @@
   }
 
   function perform(state, procedureId) {
-    if (String(procedureId).startsWith('portrait:')) {
-      return setPortraitStage(state, String(procedureId).slice(9));
+    const action = String(procedureId);
+    if (action.startsWith('portrait:')) return setPortraitStage(state, action.slice(9));
+    if (action.startsWith('npc-portrait:')) {
+      const [, targetId, stageId] = action.split(':');
+      return setPortraitStage(state, stageId, decodeURIComponent(targetId || ''));
     }
     const proc = procedures[procedureId];
     if (!proc) return { ok: false, message: '无效的手术选项' };
@@ -124,20 +159,9 @@
 
   function render(state) {
     const profile = portraitProfile(state);
-    const manual = Game.portraitAgePrompt.valid(profile.portraitAgeStage)
-      ? profile.portraitAgeStage : null;
-    const automatic = Game.portraitAgePrompt.automatic(U.age(state));
-    const activeName = Game.portraitAgePrompt.options.find(
-      (item) => item.id === (manual || automatic),
-    )?.label || '默认成人风格';
-    const stages = Game.portraitAgePrompt.options.map((item) => {
-      const selected = manual === item.id;
-      const suggested = !manual && automatic === item.id;
-      return `<button class="portrait-stage-btn ${selected ? 'active' : (suggested ? 'automatic' : '')}"
-        data-surgery="portrait:${item.id}" aria-pressed="${selected}">
-        <strong>${item.label}</strong><small>${item.detail}</small>
-        <b>${selected ? '已锁定' : (suggested ? '自动' : '免费')}</b></button>`;
-    }).join('');
+    const portraitStages = stageSelector(
+      profile, U.age(state), 'portrait:', '医院美容 · 绘画阶段',
+    );
     const items = list().map((proc) => {
       const disabled = proc.hymenOnly && state.gender !== '女';
       return `<button class="surgery-btn" data-surgery="${proc.id}" ${disabled ? 'disabled' : ''}>
@@ -153,15 +177,14 @@
 
     return `<details class="system-fold" open>
       <summary>整容手术 · ${list().length}项可选</summary>
-      <section class="portrait-stage-picker"><header><div><strong>医院美容 · 绘画阶段</strong>
-        <small>当前：${manual ? '手动锁定' : '自动跟随'} · ${activeName}</small></div><b>免费</b></header>
-        <div class="portrait-stage-grid">${stages}</div>
-        <p>手动选择后不再随年龄自动变化；只影响之后重新生成的角色立绘。</p></section>
+      ${portraitStages}
       <p class="system-note">共${list().length}项改造。手术会改变身体并提高魅力，失败时可能出现并发症。</p>
       <div class="surgery-grid">${items}</div>
       ${history ? `<div class="surgery-history"><h4>手术记录</h4>${history}</div>` : ''}
     </details>`;
   }
 
-  Game.plasticSurgery = Object.freeze({ list, get, perform, setPortraitStage, render });
+  Game.plasticSurgery = Object.freeze({
+    list, get, perform, setPortraitStage, renderNpcPortraitStages, render,
+  });
 }(window));

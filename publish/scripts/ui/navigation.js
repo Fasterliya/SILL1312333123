@@ -162,7 +162,8 @@
       ${Game.relationshipSecretsView.render(state, person)}
       ${Game.characterChat.render(state, person)}</div>
       <details class="record-section npc-editor"><summary><span>编辑角色外观</span>
-      <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}</div></details>
+      <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}
+      ${Game.plasticSurgery.renderNpcPortraitStages(state, person)}</div></details>
       <details class="interaction-menu detail-interactions"><summary>互动选项</summary>
       <div class="interaction-options">${detailActions(state, person)}</div></details>`;
   }

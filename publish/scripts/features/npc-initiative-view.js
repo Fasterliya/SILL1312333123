@@ -14,16 +14,6 @@
     }[char]));
   }
 
-  function badge(state) {
-    const count = Core.ensure(state).queue.length;
-    if (!count) return '';
-    return `<button class="event-queue-btn" type="button" data-npc-event-open
-      aria-label="打开NPC主动事件，${count}条待处理">
-      <span class="event-queue-icon" aria-hidden="true">信</span>
-      <span class="event-badge">${count > 99 ? '99+' : count}</span>
-    </button>`;
-  }
-
   function sheet(state) {
     const events = Core.ensure(state);
     const event = events.queue[0];
@@ -48,7 +38,7 @@
   }
 
   function render(state) {
-    return (Game.taskCenter?.render(state) || '') + badge(state) + sheet(state);
+    return (Game.taskCenter?.render(state) || '') + sheet(state);
   }
 
   function container() {
@@ -61,7 +51,6 @@
   }
 
   Game.npcInitiativeView = Object.freeze({
-    badge,
     render,
     refresh,
   });

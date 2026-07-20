@@ -15,6 +15,7 @@
     state.taskCenter.items = Array.isArray(state.taskCenter.items)
       ? state.taskCenter.items.slice(-30) : [];
     state.taskCenter.open = Boolean(state.taskCenter.open);
+    state.taskCenter.decisionOpen = Boolean(state.taskCenter.decisionOpen);
     return state.taskCenter;
   }
 
@@ -62,16 +63,16 @@
         month: state.totalMonths,
       });
     }
-    const npcCount = Game.npcInitiativeCore?.ensure(state).queue.length || 0;
-    if (npcCount) {
+    const npcQueue = Game.npcInitiativeCore?.ensure(state).queue || [];
+    npcQueue.forEach((event) => {
       result.push({
-        key: 'npc-events',
+        key: event.id,
         type: 'npc',
-        title: `NPC主动事件 · ${npcCount}条`,
-        text: '联系人、熟人或其他角色正在等待你的回应。',
-        month: state.totalMonths,
+        title: event.title || 'NPC主动事件',
+        text: event.text || '有人正在等待你的回应。',
+        month: Number.isFinite(event.month) ? event.month : state.totalMonths,
       });
-    }
+    });
     const underground = state.undergroundIdol?._pendingDecision;
     if (underground) {
       result.push({
@@ -124,10 +125,10 @@
 
   function render(state) {
     const all = items(state);
-    if (!all.length) return '';
     return `<button class="task-center-btn" type="button" data-task-open
       aria-label="打开待办事项，${all.length}项">
-      <span aria-hidden="true">待</span><b>${all.length > 99 ? '99+' : all.length}</b>
+      <span aria-hidden="true">✉</span>${all.length
+        ? `<b>${all.length > 99 ? '99+' : all.length}</b>` : ''}
     </button>${renderSheet(state, all)}`;
   }
 
@@ -149,6 +150,11 @@
       refresh(state);
       return true;
     }
+    if (event.target.closest('[data-decision-later]')) {
+      ensure(state).decisionOpen = false;
+      Game.actions.renderDecision();
+      return true;
+    }
     const button = event.target.closest('[data-task-action]');
     if (!button) return false;
     const type = button.dataset.taskAction;
@@ -160,6 +166,9 @@
       state.taskCenter.open = false;
       Game.view.showToast('继续推进时间，成绩公布后会自动生成升学待办', 'good');
     } else if (type === 'npc') {
+      const queue = Game.npcInitiativeCore.ensure(state).queue;
+      const index = queue.findIndex((item) => item.id === button.dataset.taskKey);
+      if (index > 0) queue.unshift(queue.splice(index, 1)[0]);
       state.taskCenter.open = false;
       Game.npcInitiative.openSheet(state);
       return true;
@@ -169,7 +178,7 @@
       Game.view.showToast('地下偶像邀约已定位到职业面板', 'good');
     } else if (type === 'decision') {
       state.taskCenter.open = false;
-      Game.actions.renderDecision();
+      Game.actions.renderDecision(true);
     }
     refresh(state);
     Game._save?.();

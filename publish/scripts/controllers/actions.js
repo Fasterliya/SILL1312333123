@@ -102,11 +102,15 @@
     done();
   }
 
-  function renderDecision() {
+  function renderDecision(open) {
     const current = state();
     const d = current.pendingDecision;
-    Game.view.el.decision.hidden = !d;
-    if (!d) return;
+    const center = Game.taskCenter?.ensure(current);
+    if (open && d && center) center.decisionOpen = true;
+    if (!d && center) center.decisionOpen = false;
+    const visible = Boolean(d && (!center || center.decisionOpen));
+    Game.view.el.decision.hidden = !visible;
+    if (!visible) return;
     const systemContent = Game.systemDecisions?.content(current);
     if (systemContent) {
       Game.view.el.decisionTitle.textContent = systemContent.title;

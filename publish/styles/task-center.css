@@ -7,12 +7,17 @@
   height: 44px;
   border: 1px solid #d6dbe3;
   border-radius: 50%;
-  background: #293d4f;
-  color: #fff;
+  background: #fff;
+  color: #293d4f;
   box-shadow: 0 4px 14px rgb(25 35 48 / 22%);
   display: grid;
   place-items: center;
   font-weight: 800;
+}
+
+.task-center-btn > span {
+  font-size: 21px;
+  line-height: 1;
 }
 
 .task-center-btn b {
@@ -121,4 +126,15 @@
 .task-center-close {
   width: 100%;
   margin-top: 12px;
+}
+
+.decision-later {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border: 1px solid #c9cec9;
+  border-radius: 6px;
+  background: #fff;
+  color: #53605b;
+  font-size: 12px;
 }

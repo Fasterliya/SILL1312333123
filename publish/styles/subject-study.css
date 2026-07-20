@@ -1,0 +1,72 @@
+.quick-study.subject-study {
+  padding: 12px;
+}
+
+.subject-study .subject-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-height: min(42dvh, 360px);
+  padding: 8px 2px 2px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.subject-study .subject-card {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #dedcd2;
+  border-radius: 6px;
+  background: #fffdf7;
+}
+
+.subject-study .subject-name {
+  color: #303b37;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.subject-study .subject-max {
+  float: right;
+  color: #7d857f;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.subject-study .subject-stars {
+  margin: 4px 0;
+  color: #c18a32;
+  font-size: 11px;
+}
+
+.subject-study .progress-bar {
+  margin-top: 6px;
+}
+
+.subject-study .subject-exam {
+  margin-top: 6px;
+  color: #6f7772;
+  font-size: 11px;
+}
+
+.subject-study .btn-learn {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  border: 1px solid #315f58;
+  border-radius: 6px;
+  background: #315f58;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.subject-study .btn-learn:active {
+  background: #244a45;
+}
+
+@media (max-width: 420px) {
+  .subject-study .subject-grid {
+    grid-template-columns: 1fr;
+  }
+}

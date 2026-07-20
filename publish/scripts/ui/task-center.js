@@ -82,6 +82,18 @@
         month: underground.month || state.totalMonths,
       });
     }
+    const exam = state.examState;
+    if (exam?.active) {
+      const remaining = Math.max(0, (exam.revealedDay || 0)
+        - ((state.totalMonths || 0) * 30 + (state.day || 1)));
+      result.push({
+        key: 'exam-result-wait',
+        type: 'wait',
+        title: `${exam.type || '考试'}成绩待公布`,
+        text: `预计${remaining || 1}天后公布完整成绩，时间推进后会自动揭晓。`,
+        month: state.totalMonths,
+      });
+    }
     return result;
   }
 
@@ -96,7 +108,7 @@
         <div><small>${item.month === state.totalMonths ? '本月' : `第${item.month}月`}</small>
           <strong>${escape(item.title)}</strong><p>${escape(item.text)}</p></div>
         <button type="button" data-task-action="${escape(item.type)}"
-          data-task-key="${escape(item.key)}">${item.type === 'notice' ? '确认' : '处理'}</button>
+          data-task-key="${escape(item.key)}">${item.type === 'notice' ? '确认' : (item.type === 'wait' ? '查看' : '处理')}</button>
       </article>`
     )).join('');
     return `<div class="task-center-overlay" data-task-close></div>
@@ -144,6 +156,9 @@
       ensure(state).items = state.taskCenter.items.filter(
         (item) => item.key !== button.dataset.taskKey,
       );
+    } else if (type === 'wait') {
+      state.taskCenter.open = false;
+      Game.view.showToast('继续推进时间，成绩公布后会自动生成升学待办', 'good');
     } else if (type === 'npc') {
       state.taskCenter.open = false;
       Game.npcInitiative.openSheet(state);

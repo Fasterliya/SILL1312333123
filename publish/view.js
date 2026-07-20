@@ -139,8 +139,7 @@
     el.phoneList.innerHTML = Game.social.renderPhone(state);
     el.matchmakingList.innerHTML = Game.matchmaking.render(state);
     el.parentingPanel.innerHTML = Game.parenting.render(state);
-    el.educationPanel.innerHTML = Game.educationSystem.render(state)
-      + (Game.subjectPanel?.render(state) || '');
+    el.educationPanel.innerHTML = Game.educationSystem.render(state);
     el.careerPanel.innerHTML = Game.careerView.renderCareer(state, money);
     el.cityPanel.innerHTML = Game.careerView.renderCities(state);
     el.governmentPanel.innerHTML = Game.civicSystem.render(state);

@@ -17,11 +17,17 @@
     middle: { '语文': 130, '数学': 130, '英语': 130, '政治': 50, '历史': 50, '物理': 100, '化学': 100 },
     high: { '语文': 150, '数学': 150, '英语': 150 },
     vocational: { '语文': 100, '数学': 100, '英语': 100, '专业技能': 150 },
+    university: { '专业核心': 100, '通识课程': 100, '外语': 100, '毕业论文': 100 },
   };
+
+  function isStudent(state) {
+    return ['primary', 'middle', 'high', 'vocational', 'university']
+      .includes(state.education.schoolStage);
+  }
 
   function getStageSubjects(state) {
     var stage = state.education.schoolStage;
-    var map = Object.assign({}, STAGE_SUBJECTS[stage] || STAGE_SUBJECTS.primary);
+    var map = Object.assign({}, STAGE_SUBJECTS[stage] || {});
     if (stage === 'high') {
       var track = state.education.track;
       if (track === '物理' || track === '历史') map[track] = 100;
@@ -63,8 +69,9 @@
   }
 
   function learnSubject(state, subject) {
+    if (!isStudent(state)) return { ok: false, message: '当前不在学生阶段' };
     var staminaResult = Game.staminaSystem && Game.staminaSystem.spend
-      ? Game.staminaSystem.spend(state, U.between(15, 20))
+      ? Game.staminaSystem.spend(state, 15)
       : null;
     if (staminaResult && !staminaResult.ok) return staminaResult;
 
@@ -96,6 +103,7 @@
   }
 
   function render(state) {
+    if (!isStudent(state)) return '';
     ensureSubjects(state);
     var map = getStageSubjects(state);
     var subjects = state.education.subjects;
@@ -134,6 +142,13 @@
     return html;
   }
 
+  function renderQuick(state) {
+    if (!isStudent(state)) return '';
+    var burnout = Math.round(state.education.burnout || 0);
+    return '<div class="quick-study subject-study"><header><strong>科目学习</strong>'
+      + '<span>疲劳 ' + burnout + '/100</span></header>' + render(state) + '</div>';
+  }
+
   function handleClick(event) {
     var target = event.target.closest('[data-learn-subject]');
     if (!target) return false;
@@ -150,9 +165,11 @@
 
   Game.subjectPanel = Object.freeze({
     getStageSubjects: getStageSubjects,
+    isStudent: isStudent,
     ensureSubjects: ensureSubjects,
     learnSubject: learnSubject,
     render: render,
+    renderQuick: renderQuick,
     handleClick: handleClick,
   });
 

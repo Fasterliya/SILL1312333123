@@ -51,6 +51,7 @@
       es.active = false;
       var total = es.result.total || 0;
       var max = es.result.maximum || 0;
+      Game.subjectEducation && Game.subjectEducation.applyResult(state, es.result);
       Game.lifeDirector.addLog(state, '成绩公布(全部)', es.type+'总分 '+total+'/'+max + (total/max>=0.78?' 考得很好！':' 还有进步空间。'), total/max>=0.78?'good':'normal');
       state.stats.心情 = U.clamp(state.stats.心情 + 10, 0, 100);
       if (es.type === '中考') state.pendingDecision = { type: 'highSchool', score: total };

@@ -34,7 +34,8 @@
     const stage = state.education.schoolStage;
     if (Game.examSystem?.duringExam(state)) return;
     if (stage === 'university'
-      && Game.timeSystem.educationElapsed(state) >= state.education.durationMonths) {
+      && Game.timeSystem.educationElapsed(state) >= state.education.durationMonths
+      && Game.universityLife?.canGraduate(state)) {
       Game.social.archiveSchool(state);
       addLog(state, '大学毕业', `你从${state.education.university}毕业，获得${state.education.major}专业学历。`, 'milestone');
       state.education.graduated = true;

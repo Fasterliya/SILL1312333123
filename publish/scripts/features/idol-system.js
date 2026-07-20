@@ -84,6 +84,25 @@
     return { ok: true, message: `考评${passed ? '通过' : '未通过'}，技能总和 ${total}` };
   }
 
+  function castingCouch(state) {
+    var idol = ensure(state);
+    if (idol.stage === 'trainee' || idol.stage === 'retired') return { ok: false, message: '出道的偶像才能面对潜规则' };
+    if (state.totalMonths - (idol.lastCastingMonth || -12) < 6) return { ok: false, message: '制作人邀约至少间隔6个月' };
+    idol.lastCastingMonth = state.totalMonths;
+    var chance = U.clamp(0.3 + idol.producerTrust / 200, 0.3, 0.85);
+    if (Math.random() > chance) { idol.producerTrust = U.clamp(idol.producerTrust - 8, 0, 100); return { ok: false, message: '制作人暂时没有新的邀约' }; }
+    var income = Math.round(15000 + idol.fans * 0.02);
+    state.money += income;
+    state.stats.心情 = U.clamp(state.stats.心情 + 6, 0, 100);
+    idol.producerAbuse += 1;
+    idol.producerTrust = U.clamp(idol.producerTrust - 5, 0, 100);
+    idol.careerExtended = true;
+    idol.scandals.push({ month: state.totalMonths, type: '潜规则', note: '与制作人进行了私下交易' });
+    idol.scandals = idol.scandals.slice(-8);
+    Game.lifeDirector.addLog(state, '潜规则', '制作人邀约带来' + Game.view.money(income) + '，你的偶像生涯可能因此延长。', 'normal');
+    return { ok: true, message: '潜规则完成，收入' + Game.view.money(income) + '，职业可能延长' };
+  }
+
   function handleClick(event) {
     const actionBtn = event.target.closest('[data-idol-action]');
     if (!actionBtn) return false;

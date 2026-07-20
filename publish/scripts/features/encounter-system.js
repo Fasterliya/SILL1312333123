@@ -224,6 +224,25 @@
     setFemaleMaxStamina(state, femalePartner);
 
     state.stats.心情 = U.clamp(state.stats.心情 + 3, 0, 100);
+    const openingTexts = {
+      brothel_client: [
+        `${partner.name}轻轻关上门，转身面对你。她解开外衣的扣子，露出里面的水手服。灯光下她的眼神既职业又带着一丝羞涩。`,
+        `${partner.name}为你倒了一杯温水，然后跪坐在床边。她低着头轻声问：'您想怎么样开始？'`,
+      ],
+      hookup_client: [
+        `${partner.name}已经在酒店房间等着了。她穿着你最喜欢的那套水手服，白色过膝袜在灯光下泛着柔和的光泽。`,
+        `房间里的灯光很暗。${partner.name}坐在床边，双腿并拢，双手规矩地放在膝盖上，像等待第一次约会的少女。`,
+      ],
+      hookup_provider: [
+        `你推门进入酒店房间。${partner.name}正在窗边等着，回头看到你时眼中闪过一丝赞许。`,
+        `${partner.name}坐在沙发上示意你过去。他的目光毫不掩饰地打量着你今天的装扮。`,
+      ],
+    };
+    const k = `${mode}_${playerRole}`;
+    const pool = openingTexts[k] || openingTexts.brothel_client;
+    state.encounter.actionLog.unshift({ position: '开场',
+      text: pool[state.encounter.actionLog.length % pool.length],
+      arousal: state.encounter.arousal, stamina: state.encounter.femaleStamina });
     Game.lifeDirector.addLog(state, '私密交欢',
       `你与${partner.name}开始了${mode === 'brothel' ? '一段露水情缘' : '一次私密约会'}。`, 'normal');
     return { ok: true, message: `与${partner.name}的交欢开始` };
@@ -234,9 +253,27 @@
     const pos = positions[posName];
     if (!pos) return { ok: false, message: '无效的体位选择' };
 
+    const prevPos = state.encounter.position;
     state.encounter.position = posName;
     if (!state.encounter.positionsTried.includes(posName)) {
       state.encounter.positionsTried.push(posName);
+      const nm = partnerName(state);
+      const transitions = {
+        '正常位→后入位': `你轻轻退出，将${nm}翻过身去。她顺从地跪趴好，腰肢塌出一道诱人的弧线。`,
+        '正常位→骑乘位': `你翻身躺下，扶着${nm}的腰让她坐上来。她红着脸跨过你，双手撑在你胸膛上。`,
+        '正常位→侧卧位': `你侧身将${nm}搂进怀里，从身后温柔地环住她。她的后背紧贴你的胸膛。`,
+        '后入位→正常位': `你退出后将${nm}翻过来面对你。她仰面躺下，眼神已经迷离。`,
+        '后入位→骑乘位': `你躺平后示意${nm}自己坐上来。她咬着下唇跨过你，缓缓沉下腰。`,
+        '骑乘位→正常位': `你翻身将${nm}压在身下接过主导权。她仰面看着你，双腿本能地缠上你的腰。`,
+        '骑乘位→后入位': `你从${nm}身下抽身，让她转身跪趴。她软软地照做了，腰线下沉得恰到好处。`,
+        '口交→正常位': `${nm}抬起眼看你，嘴角还残留着晶莹。你将她拉起来推倒在床上俯身压了上去。`,
+        '正常位→口交': `你退出后示意${nm}跪下。她顺从地伏在你腿间，双唇微张。`,
+      };
+      const tKey = `${prevPos}→${posName}`;
+      if (transitions[tKey]) {
+        state.encounter.actionLog.unshift({ position: '切换', text: transitions[tKey],
+          arousal: state.encounter.arousal, stamina: state.encounter.femaleStamina });
+      }
     }
 
     /* consume stamina */

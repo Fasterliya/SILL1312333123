@@ -105,10 +105,21 @@
         if (riskyJobs.includes(member.job) && U.personAge(state, member) >= 18) {
           /* notify if daughter/sister discovered */
           const key = `${member.id}-${member.job}`;
-          if (!notified[key] && ['女儿', '妹妹'].includes(member.relation)) {
+          if (!notified[key] && ['女儿', '妹妹', '母亲', '配偶', '姐姐'].includes(member.relation)) {
             notified[key] = true;
-            Game.lifeDirector.addLog(state, '家庭隐情',
-              `你发现${member.relation}${member.name}在城市里从事着${member.job}的工作，心情复杂。`, 'normal');
+            const discoveryTexts = {
+              女儿: { 妓女: `你偶然路过红灯区时看到了一个熟悉的身影——是女儿${member.name}。她穿着水手服站在店门口招揽客人。你的脚步钉在了地上。`,
+                福利姬: `朋友发来一个链接——女儿${member.name}在福利频道上发布着付费内容。你的手在颤抖。` },
+              妹妹: { 妓女: `城市很小。你在红灯区的巷子里看到了妹妹${member.name}。她别开脸不愿看你，你也说不出话。`,
+                福利姬: `妹妹${member.name}的社交账号粉丝比你想的多——内容让你沉默了很久。` },
+              母亲: { 妓女: `邻居隐晦地告诉你母亲${member.name}晚上在红灯区工作。你不知道该愤怒还是该悲伤。`,
+                福利姬: `帮母亲${member.name}修电脑时发现了她的账号——内容让你久久无法平静。` },
+              配偶: { 妓女: `朋友提醒你多关心配偶。你亲眼看到${member.name}走进了红灯区的会所。`,
+                福利姬: `手机相册里几张自拍让你起了疑心。你打开了${member.name}的粉丝频道。` },
+            };
+            const rd = discoveryTexts[member.relation] || {};
+            const logText = rd[member.job] || `你发现${member.relation}${member.name}在城市里从事着${member.job}的工作，心情复杂。`;
+            Game.lifeDirector.addLog(state, '家庭隐情', logText, 'normal');
           }
           /* parent's job affects children */
           const children = state.family.filter((p) =>

@@ -29,13 +29,18 @@
   function currentJob(state, money) {
     if (!state.career.job) return '<p class="empty-state">当前没有工作。先筛选方向，再打开职位详情确认应聘。</p>';
     const creator = Game.creatorCareer.isCreator(state);
-    const title = creator ? state.career.job : `${Game.careerGrowth.titleName(state)} · 薪级P${state.career.level + 1}`;
-    const detail = creator ? '频道收入随播放、粉丝与合作变化'
-      : `绩效 ${state.career.performance} · 经验 ${state.career.exp} · ${state.career.titleTrack === 'staff' ? '待选择晋升方向' : '已进入晋升序列'}`;
+    const idol = Game.idolSystem?.isIdolJob(state.career.jobId);
+    const specialJob = creator || idol;
+    const title = specialJob ? state.career.job
+      : `${Game.careerGrowth.titleName(state)} · 薪级P${state.career.level + 1}`;
+    const detail = idol ? '偶像生涯随粉丝、训练与考评变化'
+      : (creator ? '频道收入随播放、粉丝与合作变化'
+      : `绩效 ${state.career.performance} · 经验 ${state.career.exp} · ${state.career.titleTrack === 'staff' ? '待选择晋升方向' : '已进入晋升序列'}`);
     const base = `<section class="career-current"><span>${state.career.company || '当前单位'}</span>
       <strong>${title}</strong><b>${money(state.career.salary)}/月</b><small>${detail}</small></section>`;
-    return creator ? base + Game.creatorCareer.render(state)
-      : `${base}${workActions(state)}${Game.workplace.render(state)}${Game.careerSpecialties.render(state)}`;
+    if (idol) return base + (Game.idolSystem.render(state) || '');
+    if (creator) return base + Game.creatorCareer.render(state);
+    return `${base}${workActions(state)}${Game.workplace.render(state)}${Game.careerSpecialties.render(state)}`;
   }
 
   function companyDirectory(state) {

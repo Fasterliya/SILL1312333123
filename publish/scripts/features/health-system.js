@@ -64,7 +64,9 @@
     if (!def.fatal && !def.incurable) disease.healedAt = state.totalMonths;
     state.stats.健康 = U.clamp(state.stats.健康 + Math.max(4, def.severity * 3), 0, 100);
     const result = def.fatal || def.incurable ? '病情已得到控制' : '已经痊愈';
-    Game.lifeDirector.addLog(state, '疾病治疗', `${disease.name}${result}。`, 'good');
+    const treatTxt = def.fatal || def.incurable ? '病情已得到控制，体内的威胁暂时平息了。'
+      : `${disease.name}已被治愈。治疗费用虽然不菲，但健康是无价的。`;
+    Game.lifeDirector.addLog(state, '疾病治疗', treatTxt, 'good');
     return { ok: true, message: `${disease.name}${result}；${paymentText(payment)}` };
   }
 
@@ -85,9 +87,32 @@
     };
     state.health.diseases.push(disease);
     if (hasMonth(disease.discoveredAt)) {
-      const advice = def.incurable ? '不可痊愈，但不会致死，治疗后可以控制病情。'
-        : (def.fatal ? '需要尽快治疗。' : '可以治疗或等待自行恢复。');
-      Game.lifeDirector.addLog(state, '健康警报', `你患上了${def.name}，${advice}`, 'normal');
+      let text = '';
+      if (def.type === 'std') {
+        const m = { gonorrhea: '私处不适和异常分泌物让你警觉——淋病。这是性传播疾病，需要抗生素治疗。',
+          syphilis: '身上出现了不明皮疹，体检结果令人震惊——梅毒。严重的性病，必须尽快治疗。',
+          chlamydia: '隐约腹痛和排尿灼烧感——衣原体感染。轻度性病但放任不管会影响生育。',
+          hiv: '体检报告上那行字让你无法呼吸——HIV阳性。终身携带但不会发展成艾滋病。坚持治疗就不会因此死去。' };
+        text = m[disease.id] || `私处的不适最终迫使你去检查——${def.name}，一种性传播疾病。`;
+      } else if (def.type === 'common') {
+        const m = { cold: '鼻塞、喉咙痛、浑身无力——感冒了。休息或吃药就能恢复。',
+          flu: '高烧不退，浑身酸痛——流感来势汹汹，比普通感冒严重得多。',
+          gastritis: '胃部持续灼烧感让你吃不下饭。胃炎发作，需要调整饮食并治疗。',
+          insomnia: '连续多天辗转难眠，白天精神恍惚——失眠症正在消耗你的健康。' };
+        text = m[disease.id] || `身体不适——${def.name}。可以治疗或等待自愈。`;
+      } else if (def.type === 'chronic') {
+        const m = { hypertension: '最近总头晕耳鸣，血压远高于正常值——高血压。需要长期服药，不能指望自行痊愈。',
+          diabetes: '口干、多饮、体重下降——糖尿病的诊断让你意识到生活方式的代价。',
+          arthritis: '关节的僵硬和疼痛越来越频繁——关节炎。年龄带来的磨损需要药物缓解。',
+          heart: '胸口偶尔的闷痛终于让你去做了心电图——心脏病。致命的慢性病，不治疗随时可能发作。' };
+        text = m[disease.id] || `体检揭示了${def.name}——一种需要长期管理的慢性病。`;
+      } else {
+        const m = { cervicitis: '下腹隐痛和白带异常——宫颈炎。妇科感染需要及时治疗，否则影响生育。',
+          pid: '剧烈的下腹痛让你直不起腰——盆腔炎。严重的妇科感染，需要大剂量抗生素。',
+          fibroid: '月经量异常增多，B超发现子宫肌瘤。良性肿瘤但需要手术处理。' };
+        text = m[disease.id] || `妇科检查发现了${def.name}——需要积极治疗。`;
+      }
+      Game.lifeDirector.addLog(state, '健康警报', text, 'normal');
     }
     return disease;
   }
@@ -142,7 +167,20 @@
       if (!def.fatal && !def.incurable
         && state.totalMonths - disease.infectedAt >= def.selfHealMonths) {
         disease.healedAt = state.totalMonths;
-        Game.lifeDirector.addLog(state, '自行痊愈', `${disease.name}已经自行痊愈。`, 'good');
+        const healTexts = {
+          cold: '鼻涕不流了，喉咙也不再痛了。感冒痊愈，身体重新轻快起来。',
+          flu: '高烧终于退去，浑身不再酸痛。流感痊愈，你又能正常生活了。',
+          gastritis: '胃不再灼痛，食欲慢慢恢复。胃炎痊愈了。',
+          insomnia: '昨晚你第一次睡满了7个小时。失眠症终于远去。',
+          cervicitis: '所有症状都消失了，妇科复查确认宫颈炎已痊愈。',
+          pid: '剧烈的腹痛彻底消失。盆腔炎终于被身体打败了。',
+          fibroid: '术后恢复良好，子宫肌瘤已经切除干净。',
+          hypertension: '长期服药让血压回归正常范围。虽然不算"痊愈"，但病情已完全受控。',
+          diabetes: '规律的用药和饮食控制让血糖回到安全线内——你学会了与糖尿病共存。',
+          arthritis: '持续的理疗和药物让关节不再疼痛。老化的痕迹被暂时抚平了。',
+        };
+        const txt = healTexts[disease.id] || `${disease.name}已经完全恢复。身体回归了健康状态。`;
+        Game.lifeDirector.addLog(state, '康复', txt, 'good');
         return;
       }
       if (!hasMonth(disease.treatedAt)) {

@@ -170,7 +170,7 @@
       <button data-household-action="deposit" data-household-value="5000">存入5千</button></div>
       <div class="household-goals">${members.map((person) => (
         `<span><b>${person.name}</b>${ensurePerson(person).lifeGoal}</span>`
-      )).join('')}</div>${Game.relationshipSecretsView.summary(state)}</section>`;
+      )).join('')}</div>${Game.relationshipSecretsView.summary(state)}${Game.familyConflict?.render(state) || ''}</section>`;
   }
 
   Game.householdSystem = Object.freeze({ ensure, ensurePerson, setPolicy, act, monthly, render });

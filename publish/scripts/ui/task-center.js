@@ -102,7 +102,7 @@
     return [...dynamicItems(state), ...ensure(state).items];
   }
 
-  function renderSheet(state, all) {
+  function renderSheet(state, all = items(state)) {
     if (!ensure(state).open) return '';
     const rows = all.map((item) => (
       `<article class="task-center-row">
@@ -123,16 +123,18 @@
       </section>`;
   }
 
-  function render(state) {
-    const all = items(state);
-    return `<button class="task-center-btn" type="button" data-task-open
-      aria-label="打开待办事项，${all.length}项">
-      <span aria-hidden="true">✉</span>${all.length
-        ? `<b>${all.length > 99 ? '99+' : all.length}</b>` : ''}
-    </button>${renderSheet(state, all)}`;
+  function updateTrigger(state, all = items(state)) {
+    const button = document.querySelector('[data-task-open]');
+    if (!button) return;
+    const badge = button.querySelector('.task-center-count');
+    button.setAttribute('aria-label', `打开待办事项，${all.length}项`);
+    if (!badge) return;
+    badge.hidden = !all.length;
+    badge.textContent = all.length > 99 ? '99+' : String(all.length);
   }
 
   function refresh(state) {
+    updateTrigger(state);
     const host = document.getElementById('npcEventContainer');
     if (host) host.innerHTML = Game.npcInitiativeView.render(state);
   }
@@ -189,7 +191,8 @@
     ensure,
     add,
     items,
-    render,
+    render: renderSheet,
+    updateTrigger,
     handleClick,
   });
 }(window));

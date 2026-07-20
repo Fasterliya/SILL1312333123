@@ -47,6 +47,7 @@
 
   function refresh(state) {
     const host = container();
+    Game.taskCenter?.updateTrigger(state);
     if (host) host.innerHTML = render(state);
   }
 

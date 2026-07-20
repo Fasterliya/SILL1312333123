@@ -72,10 +72,10 @@
 }
 
 .task-center-btn {
-  border-color: #d3cfc3;
-  background: var(--ui-paper);
-  color: var(--ui-green);
-  box-shadow: 0 4px 14px rgb(38 59 55 / 16%);
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(30, 53, 51, 0.72);
+  color: #fff;
+  box-shadow: none;
 }
 
 .task-center-btn b {

@@ -154,6 +154,7 @@
     el.statusPanel.innerHTML = Game.systemHub.renderStatus(state);
     el.financePanel.innerHTML = Game.systemHub.renderFinance(state);
     Game.npcInitiative.setStateRef(state);
+    Game.taskCenter?.updateTrigger(state);
     el.npcEventContainer.innerHTML = Game.npcInitiative.renderEventBadge(state);
     el.legacyPanel.innerHTML = Game.legacySystem.render(state);
     Game.drawSettings.render(state);

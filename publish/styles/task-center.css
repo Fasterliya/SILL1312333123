@@ -1,15 +1,13 @@
 .task-center-btn {
-  position: fixed;
-  top: calc(env(safe-area-inset-top) + 12px);
-  right: calc(env(safe-area-inset-right) + 12px);
-  z-index: 510;
+  position: relative;
+  flex: 0 0 44px;
   width: 44px;
   height: 44px;
-  border: 1px solid #d6dbe3;
+  border: 1px solid rgba(255, 255, 255, 0.38);
   border-radius: 50%;
-  background: #fff;
-  color: #293d4f;
-  box-shadow: 0 4px 14px rgb(25 35 48 / 22%);
+  background: rgba(30, 53, 51, 0.72);
+  color: #fff;
+  box-shadow: none;
   display: grid;
   place-items: center;
   font-weight: 800;

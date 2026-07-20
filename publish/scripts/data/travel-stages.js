@@ -2,210 +2,95 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-
-  const stages = {
-    '商业街': [
-      { title: '步入商圈', text: '店铺林立，行人如织。橱窗里的商品琳琅满目。',
-        options: [['shop', '逛街购物放松心情', { cost: 260, mood: 5, score: 3 }],
-          ['observe', '坐在长椅上观察来往人群', { mood: 3, intelligence: 1, score: 2 }],
-          ['direct', '直奔目的地不浪费时间', { mood: 1, score: 1 }]] },
-      { title: '街区探索', text: '空气中飘着咖啡和烘焙的香气，各家店铺的音乐交织在一起。',
-        options: [['cafe', '走进街角咖啡馆小憩', { cost: 80, mood: 4, score: 3 }],
-          ['bookstore', '在书店消磨一段安静时光', { intelligence: 2, mood: 2, score: 2 }],
-          ['boutique', '逛逛精品店挑选小物件', { cost: 180, mood: 4, charm: 1, score: 3 }]] },
-      { title: '偶遇与收尾', text: '夕阳西斜，金色的光线铺满街道。是时候决定今天的收尾了。',
-        options: [['chat', '主动与坐在隔壁的人搭讪', { mood: 3, affection: 5, score: 4, meet: true }],
-          ['leave', '带着满足的心情自然离开', { mood: 4, score: 2 }]] },
-    ],
-    '城市公园': [
-      { title: '晨光入园', text: '晨雾未散，空气中带着草木特有的清香。',
-        options: [['jog', '换上运动装开始晨跑', { 健康: 3, mood: 3, score: 3 }],
-          ['lake', '沿着湖边慢慢散步', { mood: 5, score: 2 }],
-          ['lawn', '在草坪上铺开垫子休息', { mood: 4, score: 1 }]] },
-      { title: '园中活动', text: '渐渐热闹起来。远处有人在打太极，近处有人在喂鸽子。',
-        options: [['pigeon', '买一包鸽粮喂鸽子', { cost: 20, mood: 5, score: 2 }],
-          ['perform', '驻足观看街头艺人表演', { mood: 6, score: 3 }],
-          ['taichi', '加入太极队伍舒展身体', { 健康: 4, mood: 2, score: 4 }]] },
-      { title: '午后时光', text: '阳光透过树叶洒下斑驳的光影，长椅上零星坐着休息的人。',
-        options: [['chat', '与同在喂鸽子的人聊天', { mood: 3, affection: 4, score: 4, meet: true }],
-          ['read', '在树荫下独自看书', { intelligence: 2, mood: 4, score: 2 }]] },
-    ],
-    '书店街': [
-      { title: '书香门廊', text: '整条街都弥漫着纸张和油墨的气味，橱窗里展示着最新的出版物。',
-        options: [['new', '直奔新书区寻找最新出版', { intelligence: 3, mood: 2, score: 3 }],
-          ['used', '在旧书摊前流连翻阅', { cost: 40, intelligence: 2, mood: 4, score: 2 }],
-          ['magazine', '翻翻最新的杂志和期刊', { mood: 5, score: 1 }]] },
-      { title: '阅读时光', text: '书架之间的走廊安静而悠长，只有翻页的沙沙声。',
-        options: [['sit', '坐下来细细阅读一本好书', { intelligence: 4, mood: 5, score: 4 }],
-          ['club', '参加书店的读书分享会', { intelligence: 2, mood: 2, score: 3, meet: true }],
-          ['browse', '在各个书架间探索感兴趣的主题', { intelligence: 3, score: 2 }]] },
-      { title: '书店社交', text: '咖啡区飘来手冲的香气，几个人正在低声讨论着什么。',
-        options: [['talk', '与附近看书的人交流感受', { mood: 3, affection: 6, charm: 1, score: 4, meet: true }],
-          ['ask', '向店员请教推荐书目', { intelligence: 1, mood: 3, score: 2 }]] },
-    ],
-    '车站广场': [
-      { title: '人流之中', text: '来来往往的行人拖着行李匆匆而过，广播声和脚步声混成一片。',
-        options: [['watch', '坐在候车区观察来往人群', { intelligence: 1, mood: 3, score: 2 }],
-          ['coffee', '在站内咖啡店买杯咖啡等待', { cost: 60, mood: 4, score: 3 }],
-          ['timetable', '看看列车时刻表规划下次旅行', { intelligence: 2, score: 1 }]] },
-      { title: '候车时光', text: '广播一遍遍播报着车次信息，候车室里的陌生人各自消磨着时间。',
-        options: [['chat', '与邻座的旅人闲聊', { mood: 3, affection: 5, score: 4, meet: true }],
-          ['help', '主动帮迷路的游客指路', { charm: 2, reputation: 2, mood: 4, score: 3 }],
-          ['music', '戴上耳机听街头音乐', { cost: 30, mood: 5, score: 2 }]] },
-      { title: '月台告别', text: '一列列车缓缓进站，人群涌向月台。有人相聚，有人分离。',
-        options: [['memory', '留下一段候车室里的短暂回忆', { mood: 2, affection: 3, score: 3, meet: true }],
-          ['hurry', '匆匆离开赶去下一个目的地', { mood: 1, score: 1 }]] },
-    ],
-    '夜间食街': [
-      { title: '夜幕降临', text: '灯箱招牌一间间点亮，空气里弥漫着烧烤、油炸和甜品的味道。',
-        options: [['stall', '逛一圈尝尝各家小吃摊', { cost: 120, mood: 6, score: 3 }],
-          ['diner', '找一家深夜食堂坐下来', { cost: 200, mood: 5, score: 2 }],
-          ['bar', '拐进小酒馆喝一杯', { cost: 160, mood: 4, score: 2 }]] },
-      { title: '深夜滋味', text: '越夜越热闹，隔壁桌的对话声、后厨的翻炒声、杯盘的碰撞声汇成宵夜的交响。',
-        options: [['vendor', '与小吃摊摊主聊聊家常', { mood: 3, affection: 4, score: 3 }],
-          ['share', '与邻桌的人拼桌共食', { cost: 60, mood: 5, affection: 6, score: 4, meet: true }],
-          ['alone', '独享深夜美食的安宁', { mood: 7, score: 2 }]] },
-      { title: '宵夜尾声', text: '摊主开始收拾桌椅，街灯下只剩下零星的食客还在流连。',
-        options: [['tipsy', '微醺中与偶遇的人交换联系方式', { mood: 4, affection: 8, score: 4, meet: true }],
-          ['quiet', '安静起身告别这个满足的夜晚', { mood: 5, score: 3 }]] },
-    ],
-    '城市漫展': [
-      { title: '入场排队', text: '队伍蜿蜒了几个弯，Cosplayer和背着痛包的同好们在身边兴奋交谈。',
-        options: [['chat', '排队时与身后的同好搭话', { mood: 4, affection: 6, score: 4, meet: true }],
-          ['observe', '观察四周的Cosplay造型', { mood: 6, score: 3 }]] },
-      { title: '逛展区', text: '场馆里人山人海，同人摊位前人头攒动，官方展台搭得像小型演唱会。',
-        options: [['doujin', '在同人摊前淘本子和周边', { cost: 180, mood: 7, score: 4 }],
-          ['official', '去官方展台排队看限定展品', { mood: 5, score: 3 }],
-          ['photo', '在Cosplay区拍摄和与Coser合影', { cost: 80, mood: 8, charm: 1, score: 5, meet: true }]] },
-      { title: '舞台活动', text: '大屏幕上播放着预告片，台下挤满了挥舞着应援棒的粉丝。',
-        options: [['watch', '坐进观众席认真观看演出', { mood: 6, score: 3 }],
-          ['game', '参加舞台互动游戏赢奖品', { mood: 8, charm: 2, score: 5 }],
-          ['backstage', '想办法溜到后台附近', { mood: 4, score: 2 }]] },
-      { title: '散场', text: '广播已经开始播报闭馆通知，人流缓慢地向出口移动。',
-        options: [['exchange', '与今天认识的同好互加好友', { mood: 4, affection: 10, score: 5, meet: true }],
-          ['club', '加入某个主题粉丝社团', { mood: 5, reputation: 3, score: 4 }]] },
-    ],
-    '创作者市集': [
-      { title: '逛摊', text: '每个摊位都展示着创作者的心血——插画、写真集、手作饰品、独立杂志。',
-        options: [['art', '仔细欣赏插画摊位的作品', { mood: 5, intelligence: 1, score: 3 }],
-          ['photo', '翻阅独立摄影师的写真集', { mood: 4, score: 2 }],
-          ['craft', '看手作摊位的各种小物件', { cost: 100, mood: 6, score: 3 }]] },
-      { title: '交流', text: '摊主们热情地介绍着自己的创作理念，周围充满了艺术和灵感的碰撞。',
-        options: [['creator', '与摊主聊聊创作背后的故事', { mood: 5, affection: 7, score: 5, meet: true }],
-          ['support', '买下喜欢的作品支持创作者', { cost: 260, mood: 7, score: 4 }],
-          ['idea', '留下合作意向和联系方式', { mood: 3, reputation: 3, score: 3 }]] },
-      { title: '收摊', text: '市集接近尾声，夕阳洒在收摊的人群身上，气氛变得柔和而温情。',
-        options: [['contact', '与新认识的朋友交换联系方式', { mood: 4, affection: 8, score: 5, meet: true }],
-          ['inspire', '带着满满的灵感离开', { mood: 6, intelligence: 2, score: 3 }]] },
-    ],
-    '浅草与浅草寺': [
-      { title: '穿过雷门', text: '巨大的红灯笼悬在雷门下，游客沿着参道缓缓汇入浅草老街。',
-        options: [['photo', '在雷门前记录街景', { mood: 5, charm: 1, score: 3 }],
-          ['observe', '观察门楼与两侧雕像', { intelligence: 2, mood: 3, score: 3 }],
-          ['guide', '向当地人询问参拜路线', { mood: 3, affection: 4, score: 4, meet: true }]] },
-      { title: '漫步仲见世', text: '仲见世商店街飘着米果与人形烧的香气，传统招牌一路延伸到宝藏门。',
-        options: [['snack', '品尝浅草传统点心', { cost: 80, mood: 6, score: 3 }],
-          ['souvenir', '挑选一件江户风纪念品', { cost: 160, mood: 5, charm: 1, score: 4 }],
-          ['history', '阅读沿途的街区历史介绍', { intelligence: 3, score: 3 }]] },
-      { title: '本堂参拜', text: '香炉的烟气在本堂前缓缓升起，钟声与人群低语让气氛安静下来。',
-        options: [['pray', '依照礼仪认真参拜', { mood: 7, reputation: 2, score: 5 }],
-          ['fortune', '抽一支御神签留作纪念', { cost: 40, mood: 5, score: 4 }],
-          ['leave', '沿着下町街巷悠闲返程', { mood: 5, health: 1, score: 3 }]] },
-    ],
-    '红灯区': [
-      { title: '踏入烟花巷', text: '霓虹灯映照着狭窄的巷子。穿着暴露的女性倚在门框上，空气里飘着廉价香水和酒精的气味。',
-        options: [['premium', '径直走进最高档的会所', { cost: 800, mood: 2, score: 3 }],
-          ['browse', '先在巷子里转转观察各家', { mood: 5, score: 2 }],
-          ['direct', '直接选最近的店面进去', { cost: 400, mood: 3, score: 1 }]] },
-      { title: '选择对象', text: '几位女性向你投来目光，各有风韵——有的穿着水手服，有的穿着高开叉旗袍，有的娇小如学生。',
-        options: [['young', '选择最年轻娇小的那位', { mood: 6, cost: 200, score: 4 }],
-          ['cute', '选择穿着可爱的制服少女', { mood: 5, cost: 150, score: 3 }],
-          ['mature', '选择气质成熟的那位', { mood: 3, cost: 100, score: 2 }]] },
-      { title: '房中私语', text: '她带你进入房间。淡淡的熏香和昏黄的灯光让人放松。',
-        options: [['gentle', '温柔地和她聊聊天先放松', { affection: 10, mood: 3, score: 3 }],
-          ['direct', '不多废话直接开始正事', { mood: 5, score: 2 }],
-          ['gift', '先送上小礼物讨她欢心', { cost: 300, affection: 15, mood: 6, score: 5 }]] },
-    ],
-    '故宫与景山': [
-      { title: '走过午门', text: '朱红的宫墙和高大的门楼从正面压过来，古都中轴线的威严让人不自觉放慢了脚步。',
-        options: [['guide', '租一个讲解器了解故宫历史', { cost: 40, intelligence: 3, score: 3 }],
-          ['photo', '在午门前拍照记录', { mood: 3, charm: 1, score: 2 }],
-          ['wander', '抛开地图随意漫步宫中', { mood: 5, score: 2 }]] },
-      { title: '穿越宫殿群', text: '太和殿的金瓦在日光下耀眼，宫院深深，游客的喧闹中仍透出旧朝的静谧。',
-        options: [['palace', '仔细端详太和殿内的陈设', { intelligence: 2, mood: 3, score: 3 }],
-          ['garden', '拐进御花园在古柏下小憩', { mood: 6, health: 1, score: 4 }],
-          ['history', '跟旁边一位历史系学生讨论', { intelligence: 3, affection: 5, score: 4, meet: true }]] },
-      { title: '登上景山', text: '从万春亭俯瞰故宫全景，中轴线如画卷般展开。夕阳把宫殿琉璃瓦染成金色。',
-        options: [['view', '静静欣赏京城中轴线全景', { mood: 8, score: 5 }],
-          ['chat', '和旁边的游客观景闲聊', { mood: 4, affection: 4, score: 3, meet: true }],
-          ['leave', '沿山路缓缓而下', { mood: 5, health: 2, score: 4 }]] },
-    ],
-    '外滩与黄浦江': [
-      { title: '外滩漫步', text: '万国建筑群沿江岸一字排开，对岸陆家嘴的天际线在暮色中逐渐亮起灯火。',
-        options: [['walk', '沿江岸步道慢慢走', { mood: 5, health: 1, score: 3 }],
-          ['photo', '拍下经典的外滩天际线', { mood: 4, charm: 2, score: 2 }],
-          ['ask', '向路边一位本地人问老上海的故事', { intelligence: 1, mood: 3, affection: 4, score: 4, meet: true }]] },
-      { title: '江边夜色', text: '黄浦江上渡轮缓缓驶过，两岸灯火倒映江面，城市的呼吸在夜色中更加清晰。',
-        options: [['ferry', '搭渡轮横穿黄浦江', { cost: 80, mood: 7, score: 4 }],
-          ['bar', '在江边酒吧靠窗而坐', { cost: 180, mood: 5, score: 3 }],
-          ['silence', '找一个安静的角落看江水', { mood: 6, score: 3 }]] },
-      { title: '夜风中的道别', text: '江风渐凉，游人开始散去。外滩钟楼敲响了整点。',
-        options: [['chat', '与刚才聊过的本地人交换联系方式', { mood: 3, affection: 6, score: 4, meet: true }],
-          ['leave', '带着浦江夜景的余韵离开', { mood: 5, score: 3 }]] },
-    ],
-    '涩谷十字路口': [
-      { title: '站在十字路口', text: '全世界最繁忙的路口——绿灯亮起的瞬间，四面八方的人潮如潮水般涌过。巨幅电子屏包围着你。',
-        options: [['cross', '加入人潮穿行十字路口', { mood: 6, score: 3 }],
-          ['watch', '从星巴克二楼俯瞰人潮', { cost: 50, mood: 4, score: 2 }],
-          ['observe', '观察周围行人的穿搭与步伐', { intelligence: 1, mood: 3, score: 2 }]] },
-      { title: '深入街区', text: '从大路拐进小巷，潮牌店、唱片行、隐蔽的拉面馆挤在狭窄的巷子里。',
-        options: [['shop', '逛潮牌店和古着店', { cost: 300, mood: 6, charm: 1, score: 4 }],
-          ['ramen', '钻进巷子深处拉面馆', { cost: 80, mood: 6, score: 3 }],
-          ['music', '在唱片行淘一张日本老碟', { cost: 120, mood: 5, intelligence: 1, score: 3 }]] },
-      { title: '涩谷之夜', text: '夜幕落下后涩谷变成另一个世界。居酒屋的红灯笼和夜店的低音在空气中交错。',
-        options: [['live', '走进一间地下Livehouse看演出', { cost: 260, mood: 8, score: 5 }],
-          ['chat', '在居酒屋里与邻座的东京人聊天', { cost: 120, mood: 5, affection: 6, score: 4, meet: true }],
-          ['alone', '站在忠犬八公像前感受夜晚的人流', { mood: 4, score: 3 }]] },
-    ],
-    '秋叶原电器街': [
-      { title: '电器街入口', text: '从JR秋叶原站出来，街边的招牌眼花缭乱——电器、动漫、女仆咖啡厅的看板娘在招手。',
-        options: [['explore', '直接冲进最大的电器店', { mood: 4, score: 2 }],
-          ['plan', '先拿一份秋叶原地图规划路线', { intelligence: 1, mood: 2, score: 2 }],
-          ['maid', '被女仆咖啡厅的看板娘吸引进去', { cost: 160, mood: 7, score: 4 }]] },
-      { title: '宅物淘宝', text: '中古手办店、同人志专门店、游戏机厅——每一层楼都是新世界。',
-        options: [['figure', '在中古手办店淘稀有品', { cost: 500, mood: 8, score: 5 }],
-          ['game', '钻进复古游戏机厅打一场', { cost: 60, mood: 7, score: 3 }],
-          ['doujin', '与同人志店员聊喜欢的作品', { mood: 5, affection: 6, score: 4, meet: true }]] },
-      { title: '宅街散场', text: '店铺陆续打烊，霓虹灯还在闪烁。回程电车上多了几个提着大袋子的阿宅。',
-        options: [['exchange', '与今天认识的同好交换Line', { mood: 4, affection: 8, score: 4, meet: true }],
-          ['leave', '提着满手的战利品满载而归', { mood: 6, score: 3 }]] },
-    ],
+  const localMeta = {
+    商业街: ['店铺橱窗、咖啡香与来往行人', 'market'],
+    城市公园: ['湖畔草木、晨练人群与安静长椅', 'nature'],
+    书店街: ['新书架、旧书摊与阅读交流区', 'culture'],
+    车站广场: ['车次广播、短暂停留的旅人与月台灯光', 'urban'],
+    夜间食街: ['深夜摊档、热锅香气与拼桌食客', 'night'],
+    城市漫展: ['同人摊位、舞台活动与装扮同好', 'theme'],
+    创作者市集: ['插画、摄影、手作摊位与创作交流', 'culture'],
+    红灯区: ['霓虹巷道、会所与成人夜间消费', 'night'],
   };
 
-  function landmarkFallback(placeName) {
-    return [
-      { title: `抵达${placeName}`, text: `你来到${placeName}入口，先观察周围环境并规划游览路线。`,
-        options: [['view', '寻找最佳视角欣赏景观', { mood: 5, score: 3 }],
-          ['learn', '阅读现场介绍了解背景', { intelligence: 2, score: 3 }],
-          ['ask', '向附近游客询问推荐路线', { mood: 3, score: 3, meet: true }]] },
-      { title: '深入游览', text: '沿着主要路线继续前行，建筑、街景与当地生活逐渐展现在眼前。',
-        options: [['walk', '慢慢步行探索每个角落', { health: 1, mood: 4, score: 4 }],
-          ['photo', '拍下最有代表性的景色', { charm: 1, mood: 4, score: 3 }],
-          ['rest', '在休息区停留片刻', { mood: 5, score: 2 }]] },
-      { title: '结束行程', text: '游览接近尾声，你准备带着今天的见闻返回日常生活。',
-        options: [['memory', '整理照片并记录见闻', { intelligence: 1, mood: 5, score: 4 }],
-          ['chat', '与同路游客聊聊感受', { mood: 4, affection: 4, score: 4, meet: true }],
-          ['return', '从容返程休息', { mood: 4, health: 1, score: 3 }]] },
+  const routeCopy = {
+    heritage: [['辨认历史入口', '先读建筑格局，再决定从哪条轴线深入。'], ['走进遗存核心', '旧建筑与城市记忆在细节里逐渐清晰。'], ['登临回望', '在离开前把历史景观与今日城市放在一起看。']],
+    shrine: [['整理参访礼序', '入口、参道与礼仪提示让脚步自然慢下来。'], ['穿过仪式空间', '香火、林荫与传统建筑形成安静的秩序。'], ['带走一份平静', '人群渐散，适合为这次参访做最后选择。']],
+    garden: [['选择园中路线', '水面、廊桥与花木把不同方向分隔开来。'], ['深入园景', '转过一段曲径，视野和声音都发生变化。'], ['在出口前停留', '最后一段景色适合休息、记录或结识同路人。']],
+    waterside: [['靠近水岸', '风向、步道与远处轮廓决定了今天的游览节奏。'], ['沿水线探索', '桥梁、船影和岸边生活不断变换。'], ['等到光线变化', '临近返程，水面与城市呈现出另一种层次。']],
+    mountain: [['判断登行路线', '坡度、天气和体力决定你能看到多少风景。'], ['抵达半程节点', '视野打开，但继续向上需要更稳定的状态。'], ['完成高处收束', '山风与远景给这段行程留下明确终点。']],
+    nature: [['进入生态区域', '先观察环境，再选择轻松或深入的路线。'], ['寻找自然细节', '植物、动物与地形让行程不只是走马观花。'], ['安静结束观察', '离开前可以整理发现，也可以帮助身边游客。']],
+    museum: [['规划参观重点', '展线很多，先决定把注意力放在哪里。'], ['细看核心展陈', '展品之间的联系开始构成完整故事。'], ['完成观展笔记', '出口前的回顾会决定这次参观留下什么。']],
+    culture: [['寻找创作线索', '作品、街景与创作者正在共同讲述这里。'], ['参与现场交流', '主动提问会获得更多信息，也可能带来新关系。'], ['整理灵感离场', '把零散感受变成可带走的见闻。']],
+    theme: [['制定体验顺序', '热门项目、限定活动和排队时间需要取舍。'], ['投入核心体验', '现场节奏加快，选择会直接影响收获。'], ['赶上闭场活动', '最后的演出或互动是提高评价的机会。']],
+    market: [['从摊位间选路', '香气、叫卖声与地方商品同时争夺注意力。'], ['深入品尝交流', '消费、询问和分享会带来不同结果。'], ['在街口收尾', '带走战利品、故事或新联系方式。']],
+    night: [['适应夜间节奏', '灯光与人流让熟悉的城市显得不同。'], ['进入热闹中心', '越往里走，消费和社交机会越集中。'], ['在散场前决定', '夜色将尽，需要在尽兴与克制之间选择。']],
+    urban: [['读懂城市人流', '先观察交通、街口与人群，再确定方向。'], ['穿入街区内部', '主路之外的店铺和公共空间更接近日常生活。'], ['在灯光中返程', '城市仍在运转，但你的这段探索即将结束。']],
+    coast: [['确认海岸条件', '海风、潮水和步道状况影响接下来的行动。'], ['沿海湾前进', '开阔视野伴随着更高的体力消耗。'], ['看完海面余光', '返程前可以留下照片、故事或一次相识。']],
+  };
+
+  function effect(result, changes, requires, risk) {
+    return Object.assign({ result, requires: requires || {} }, changes, risk ? { risk } : {});
+  }
+
+  function options(meta, routeType, stage) {
+    const place = meta.name;
+    const social = ['ask', `向同路人请教${place}的看法`,
+      effect(`交流让你听见了${place}的另一种故事。`, { mood: 3, charm: 1, score: 4, meet: true },
+        { stat: '魅力', min: 40 })];
+    const sets = [
+      [
+        ['plan', `先研究${place}的导览与路线`,
+          effect('清晰的路线让后续探索更从容。', { intelligence: 2, score: 3 })],
+        ['record', `从最有代表性的角度记录${place}`,
+          effect('你留下了一张能代表此地气质的照片。', { mood: 4, charm: 1, score: 3 }, {},
+            { chance: 0.2, stat: '心情', delta: -2, text: '拥挤与等待让兴致稍减。' })],
+        social,
+      ],
+      [
+        ['focus', `沿${meta.description}的核心区域深入`,
+          effect('认真探索换来了更完整的见闻。', { intelligence: 2, mood: 3, score: 4 },
+            { stat: '健康', min: routeType === 'mountain' || routeType === 'coast' ? 55 : 35 })],
+        ['experience', `购买一次${place}特色体验`,
+          effect('这次投入换来了鲜明而具体的体验。', { cost: 90, mood: 6, score: 5 })],
+        ['shortcut', '选择人少但不熟悉的支线',
+          effect('偏离主路让你看见了少有人注意的细节。', { mood: 4, intelligence: 1, score: 4 }, {},
+            { chance: 0.3, stat: '健康', delta: -3, text: '绕路消耗了额外体力。' })],
+      ],
+      [
+        ['reflect', `整理今天在${place}的见闻`,
+          effect('你把零散印象整理成了清晰记忆。', { intelligence: 1, mood: 5, score: 4 })],
+        ['help', '帮助一位临时遇到困难的游客',
+          effect('善意得到回应，你在当地留下了好口碑。', { reputation: 3, mood: 4, score: 5 },
+            { stat: '健康', min: 40 })],
+        ['linger', `多停留一会儿等待${place}的最佳光线`,
+          effect('等待带来了漂亮的收尾画面。', { mood: 7, score: 5 }, { stat: '心情', min: 35 },
+            { chance: 0.18, stat: '健康', delta: -2, text: '久留让身体略感疲惫。' })],
+      ],
     ];
+    return sets[stage];
+  }
+
+  function metaFor(placeName) {
+    const local = localMeta[placeName];
+    if (local) return { name: placeName, description: local[0], routeType: local[1] };
+    return Game.cityAttractions?.find(placeName) || null;
   }
 
   function forPlace(placeName) {
-    return stages[placeName] || landmarkFallback(placeName);
+    const meta = metaFor(placeName);
+    const copy = meta && routeCopy[meta.routeType];
+    if (!meta || !copy) return [];
+    return copy.map(([title, text], index) => ({
+      title: `${placeName} · ${title}`,
+      text: `${meta.description}。${text}`,
+      options: options(meta, meta.routeType, index),
+    }));
   }
 
   function stageData(placeName, stage) {
     return forPlace(placeName)[stage] || null;
   }
 
-  Game.travelStages = Object.freeze({ forPlace, stageData, stages });
+  Game.travelStages = Object.freeze({ forPlace, stageData, metaFor });
 }(window));

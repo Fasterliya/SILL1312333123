@@ -37,7 +37,7 @@
       culturePreference: '媚日二次元',
       japaneseFashion: true,
       japaneseSurnameOnly: true,
-      japaneseRenameChance: 55,
+      japaneseRenameChance: 90,
       favoriteSeries: '东方Project',
     } : {}),
   }));

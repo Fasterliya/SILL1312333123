@@ -19,6 +19,8 @@
   function peopleFor(state) {
     const all = Game.people.all(state).filter((person) => person.id !== 'player-profile');
     if (filter === 'city') return Game.socialWorld.cityPeople(state, state.location.city);
+    if (filter === 'overseas-cn') return Game.socialWorld.cityPeople(state, state.location.city)
+      .filter((person) => person.culture === '华夏');
     if (filter === 'school') return all.filter(isClassmate);
     if (filter === 'work') return all.filter((person) => (
       state.career.company && person.company === state.career.company
@@ -46,10 +48,13 @@
   function render(state) {
     const host = document.getElementById('roleBookPanel');
     if (!host) return;
+    const inJapan = state.location.country === '日本';
+    if (filter === 'overseas-cn' && !inJapan) filter = 'city';
     const filters = [
       ['city', '当前城市'], ['school', '同窗校友'], ['work', '同事'],
       ['contact', '可联系'], ['all', '全部人物'],
     ];
+    if (inJapan) filters.splice(1, 0, ['overseas-cn', '华侨']);
     const source = peopleFor(state);
     const people = filter === 'city' ? source : source.slice(0, 100);
     host.innerHTML = `<section class="list-guide"><strong>${escape(state.location.city)}人物网络</strong>

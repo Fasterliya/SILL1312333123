@@ -123,17 +123,10 @@
     if (studyFocus) return finish(Game.educationSystem.setFocus(state, studyFocus.dataset.studyFocus)), true;
     const education = event.target.closest('[data-education-action]');
     if (education) return finish(Game.educationSystem.act(state, education.dataset.educationAction)), true;
-    const diet = event.target.closest('[data-health-diet]');
-    if (diet) return finish(Game.healthSystem.setDiet(state, diet.dataset.healthDiet)), true;
-    const sleep = event.target.closest('[data-health-sleep]');
-    if (sleep) return finish(Game.healthSystem.setSleep(state, sleep.dataset.healthSleep)), true;
-    const insurance = event.target.closest('[data-health-insurance]');
-    if (insurance) return finish(Game.healthSystem.setInsurance(state, insurance.dataset.healthInsurance)), true;
     const action = event.target.closest('[data-health-action]');
     if (action) {
-      return finish(Game.healthSystem.action(
-        state, action.dataset.healthAction, action.dataset.healthValue,
-      )), true;
+      return finish(Game.healthSystem.action(state, action.dataset.healthAction,
+        action.dataset.healthValue)), true;
     }
     const surgery = event.target.closest('[data-surgery]');
     if (surgery) {

@@ -1,0 +1,159 @@
+.health-module {
+  margin-top: 12px;
+  border: 1px solid #dedbd0;
+  background: #fff;
+}
+
+.health-module > header {
+  min-height: 58px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #ece9df;
+}
+
+.health-module > header > span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  flex: 0 0 34px;
+  place-items: center;
+  background: #315f58;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.health-module h3,
+.health-module header small {
+  display: block;
+}
+
+.health-module header small {
+  margin-top: 3px;
+  color: #66726f;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.health-primary {
+  width: calc(100% - 24px);
+  min-height: 48px;
+  margin: 12px;
+  background: #263b37;
+  color: #fff;
+  font-weight: 800;
+}
+
+.disease-list {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.disease-list .empty-state {
+  margin: 0;
+}
+
+.disease-row {
+  min-width: 0;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  background: #fff8eb;
+}
+
+.disease-row strong,
+.disease-row small {
+  display: block;
+}
+
+.disease-row small {
+  margin-top: 4px;
+  color: #66726f;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.disease-row button {
+  padding: 8px 10px;
+  background: #c23b32;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.health-module .system-fold {
+  margin: 0;
+  border: 0;
+}
+
+.health-module .system-fold > summary {
+  display: none;
+}
+
+.health-module .system-note {
+  padding-top: 12px;
+}
+
+.surgery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.surgery-btn {
+  min-width: 0;
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid #dedbd0;
+  background: #fffdf7;
+  color: #263b37;
+  text-align: left;
+}
+
+.surgery-btn small,
+.surgery-btn b {
+  color: #66726f;
+  font-size: 10px;
+}
+
+.surgery-history {
+  padding: 0 12px 12px;
+}
+
+.surgery-history h4 {
+  margin: 0 0 8px;
+}
+
+.surgery-record {
+  margin: 0;
+  padding: 8px 0;
+  display: grid;
+  gap: 3px;
+  border-top: 1px solid #ece9df;
+}
+
+.surgery-record small,
+.surgery-record span {
+  font-size: 11px;
+}
+
+.surgery-record.failed small {
+  color: #b93630;
+}
+
+@media (max-width: 420px) {
+  .disease-row {
+    grid-template-columns: 1fr;
+  }
+
+  .disease-row button {
+    width: 100%;
+  }
+}

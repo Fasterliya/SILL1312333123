@@ -50,11 +50,13 @@
   function updateGrowth(state) {
     const identity = Game.hunterMode.identity(state);
     const years = Math.max(0, (state.totalMonths - identity.birthMonth) / 12);
-    const phase = agePhase(U.age(state));
+    const age = Math.floor(years);
+    const phase = agePhase(age);
     const phaseChanged = identity.profile.styleStage !== phase;
     if (phaseChanged) Game.geneticsGrowth.applyAppearance(identity.profile, identity.gender, years);
     Game.geneticsGrowth.updateGrowth(identity.profile, identity.gender, years, false);
     if (phaseChanged) phaseStyle(state, phase);
+    Game.femaleYouthStyle.apply(identity.profile, identity.gender, age);
   }
 
   function value(profile, field) {

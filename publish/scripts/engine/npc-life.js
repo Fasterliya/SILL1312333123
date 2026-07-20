@@ -20,7 +20,9 @@
   }
 
   function syncGrowth(state, person) {
-    updateGrowth(person, U.personAge(state, person));
+    const age = U.personAge(state, person);
+    updateGrowth(person, age);
+    Game.femaleYouthStyle.apply(person, person.gender, age);
   }
 
   function education(state, person, age) {
@@ -177,7 +179,9 @@
     person.lastLifeUpdateAge = age;
     career(state, person, age);
     Game.npcLifeSupport.relationships(state, person, age);
-    if (person.gender !== '女' || age < 18 || firstUpdate) Game.npcLifeSupport.appearance(person, age);
+    if (person.gender !== '女' || age < 18 || firstUpdate || person.femaleYouthStyleStage) {
+      Game.npcLifeSupport.appearance(person, age);
+    }
     Game.npcCulturalStyle.update(state, person, age);
     syncGrowth(state, person);
   }

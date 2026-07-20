@@ -67,6 +67,7 @@
       .replace(/婴儿软底鞋/g, '柔软底鞋').replace(/婴儿连体衣/g, '柔软连体衣')
       .replace(/婴儿袜/g, '柔软婴儿袜').replace(/胎毛短发/g, '柔软短发')
       .replace(/儿童短发/g, '自然短发').replace(/彩色童装/g, '彩色休闲装')
+      .replace(/针织开衫制服格子裙/g, '针织开衫格纹百褶裙套装').replace(/JK制服格子裙/g, '格纹百褶裙套装').replace(/幼稚园制服/g, '圆领开衫套装')
       .replace(/学生装|校服/g, '简洁端庄套装').replace(/校园|学院/g, '经典')
       .replace(/水手服/g, '海军领套装').replace(/制服/g, '套装')
       .replace(/幼小/g, '娇小').replace(/小胸/g, '纤细匀称').replace(/丰满/g, '柔和匀称')

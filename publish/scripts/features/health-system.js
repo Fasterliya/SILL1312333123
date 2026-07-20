@@ -47,8 +47,9 @@
     state.health.lastCheckupMonth = state.totalMonths;
     state.health.careLevel = U.clamp(state.health.careLevel + 12, 0, 100);
     const hidden = active(state).filter((item) => !hasMonth(item.discoveredAt));
+    const known = active(state).length;
     hidden.forEach((item) => { item.discoveredAt = state.totalMonths; });
-    const result = hidden.length ? `发现${hidden.length}项健康问题` : '没有发现新的健康问题';
+    const result = hidden.length ? `发现${hidden.length}项健康问题` : (known ? `已确认${known}项健康问题` : '未发现疾病');
     Game.lifeDirector.addLog(state, '健康检测', `完成健康检测，${result}。`, hidden.length ? 'normal' : 'good');
     return { ok: true, message: `健康检测完成，${result}；${paymentText(payment)}` };
   }
@@ -145,7 +146,7 @@
         return;
       }
       if (!hasMonth(disease.treatedAt)) {
-        const minimumHealth = def.type === 'std' ? 1 : 0;
+        const minimumHealth = def.fatal ? 0 : 1;
         state.stats.健康 = U.clamp(
           state.stats.健康 - Math.max(1, def.severity), minimumHealth, 100,
         );
@@ -157,8 +158,10 @@
       ));
       if (pool.length) addDisease(state, U.random(pool).id);
     }
-    if (state.stats.健康 <= 0 || reachedLifeExpectancy(state)) {
-      Game.legacySystem.prepareDeath(state, state.stats.健康 <= 0 ? '致命疾病' : '自然衰老');
+    const fatalZero = state.stats.健康 <= 0 && Game.healthSafety.hasUntreatedFatal(state);
+    if (state.stats.健康 <= 0 && !fatalZero) state.stats.健康 = 1;
+    if (fatalZero || reachedLifeExpectancy(state)) {
+      Game.legacySystem.prepareDeath(state, fatalZero ? '致命疾病' : '自然衰老');
     }
   }
 
@@ -175,7 +178,7 @@
         data-health-value="${disease.id}">治疗 · ${Game.view.money(def.treatCost)}</button>`;
       return `<article class="disease-row"><div><strong>${disease.name}</strong><small>${status}</small></div>${button}</article>`;
     }).join('');
-    return rows || '<p class="empty-state">目前没有已发现疾病。可痊愈的非致命疾病会随时间自行恢复。</p>';
+    return rows || '<p class="empty-state">目前没有已发现疾病。健康仍可能因职业倦怠、训练、年龄或随机事件下降，但非致命原因不会降到0。</p>';
   }
 
   function render(state) {
@@ -183,7 +186,7 @@
     const checkupNote = U.age(state) < 18 ? '未成年检测与治疗费用由家庭承担' : '检测费用由个人现金承担';
     const surgery = Game.plasticSurgery ? Game.plasticSurgery.render(state) : '';
     return `<section class="health-summary"><div><span>健康状态</span><strong>${state.stats.健康}</strong>
-      <small>已发现疾病 ${known} 项</small></div></section>
+      <small>已发现疾病 ${known} 项 · 职业倦怠 ${Math.round(state.career.burnout || 0)}</small></div></section>
       <section class="health-module"><header><span>01</span><div><h3>检测健康</h3><small>${checkupNote}</small></div></header>
       <button class="health-primary" data-health-action="checkup">进行健康检测 · ${Game.view.money(1200)}</button></section>
       <section class="health-module"><header><span>02</span><div><h3>疾病治疗</h3>

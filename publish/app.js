@@ -19,6 +19,7 @@
   }
 
   function refresh() {
+    Game.healthSafety.repair(state);
     Game.view.render(state);
     Game.lifeLoop.render(state);
     Game.actions.renderDecision();

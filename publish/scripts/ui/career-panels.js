@@ -527,7 +527,16 @@
      ================================================================ */
 
   function routePanel(state, money) {
+    /* Company creation wizard */
+    if (state.companyCreationStage && state.companyCreationStage.active) {
+      return Game.companySystem ? Game.companySystem.renderCreationStage(state) : '<p>公司创建系统加载中...</p>';
+    }
+
     var jobId = state.career.jobId || '';
+
+    /* Explicit pimp and blackmarket routing */
+    if (jobId === 'pimp') return pimpPanel(state);
+    if (jobId === 'blackmarket') return blackMarketPanel(state);
 
     /* Idol jobs */
     if (Game.idolSystem && Game.idolSystem.isIdolJob && Game.idolSystem.isIdolJob(jobId)) {

@@ -82,10 +82,37 @@
     return { ok: true, message: `学习方向调整为${value}` };
   }
 
+  function dropout(state) {
+    if (Game.content.age(state) < 12) return { ok: false, message: '12岁后才能辍学' };
+    if (state.education.schoolStage === 'home' || state.education.schoolStage === 'graduate' || state.education.schoolStage === 'workforce') {
+      return { ok: false, message: '当前不在学龄阶段' };
+    }
+    state.education.dropout = true;
+    state.education.dropoutAge = Game.content.age(state);
+    state.education.school = '辍学';
+    state.education.schoolStage = 'dropout';
+    state.education.graduated = false;
+    if (state.familyWealth < 50000) {
+      Game.lifeDirector.addLog(state, '辍学', '你离开了学校。家庭无力阻止。', 'milestone');
+    } else {
+      state.family.forEach(function(p) {
+        if (['父亲','母亲'].includes(p.relation) && p.status === '健康') {
+          p.conflict = Game.content.clamp((p.conflict || 0) + 20, 0, 100);
+        }
+      });
+      Game.lifeDirector.addLog(state, '辍学', '你离开了学校。家人对此非常失望。', 'normal');
+    }
+    return { ok: true, message: '你辍学了。学历锁定。' };
+  }
+
   function act(state, type) {
+    if (type === 'dropout') return dropout(state);
+    if (!enrolled(state)) return { ok: false, message: '当前阶段没有全日制学习安排' };
+    var st = Game.staminaSystem && Game.staminaSystem.spend(state, 15);
+    if (st && !st.ok) return st;
     const item = ensure(state);
     const action = actions[type];
-    if (!enrolled(state) || !action) return { ok: false, message: '当前阶段没有全日制学习安排' };
+    if (!action) return { ok: false, message: '当前阶段没有全日制学习安排' };
     if (item.lastStudyMonth === state.totalMonths) return { ok: false, message: '本月已经完成学习安排' };
     Game.economy.spend(state, action[0]);
     item.preparation = clamp(item.preparation + action[1]);
@@ -189,10 +216,11 @@
       <div><dt>应试能力</dt><dd>${Math.round(item.examTechnique)}</dd></div>
       <div><dt>学习压力</dt><dd>${Math.round(item.pressure)}</dd></div></dl></section>
       <h3>${latest ? `${latest.label} · ${latest.total}/${latest.maximum || '-'}` : '考试成绩'}</h3>
-      <div class="score-grid">${scores}</div>${Game.schoolLines.render(state)}`;
+      <div class="score-grid">${scores}</div>${Game.schoolLines.render(state)}
+      <div class="study-actions"><button data-education-action="dropout" class="danger">辍学</button></div>`;
   }
 
   Game.educationSystem = Object.freeze({
-    ensure, ensurePerson, readiness, addPreparation, setFocus, act, exam, monthly, render, renderQuick,
+    ensure, ensurePerson, readiness, addPreparation, setFocus, act, exam, monthly, render, renderQuick, dropout,
   });
 }(window));

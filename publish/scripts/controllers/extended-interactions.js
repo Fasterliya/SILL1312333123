@@ -42,10 +42,21 @@
     return true;
   }
 
+  function handleAssault(event, state, finish) {
+    var btn = event.target.closest('[data-contact-action="assault"], [data-detail-contact]');
+    if (!btn || btn.dataset.contactAction !== 'assault') return false;
+    var id = btn.dataset.detailContact || btn.dataset.contact;
+    var partner = Game.people.find(state, id);
+    if (!partner) return false;
+    finish(Game.rapeEncounter.initRape(state, partner, 'contact'));
+    return true;
+  }
+
   function handle(event, state, finish) {
     return handleSecret(event, state, finish)
       || handleHousehold(event, state, finish)
-      || handleCreator(event, state, finish);
+      || handleCreator(event, state, finish)
+      || handleAssault(event, state, finish);
   }
 
   Game.extendedInteractions = Object.freeze({ handle });

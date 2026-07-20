@@ -190,6 +190,7 @@
   }
 
   function handle(event) {
+    if (Game.relationshipPanel?.handleClick?.(event)) return;
     if (Game.npcInitiative?.handleEventClick?.(event)) return;
     if (Game.undergroundIdol?.handleClick?.(event)) return;
     if (Game.careerPanels?.handleClick?.(event)) return;

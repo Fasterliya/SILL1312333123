@@ -200,6 +200,7 @@
         <div class="panel-title"><h2>红灯区</h2><span>深夜娱乐</span></div>
         <p class="empty-state">成年人的夜生活。消费不菲，但能彻底放松身心。</p>
         <button class="wide-action" data-brothel-start>进入红灯区 · ${Game.view.money(680)}</button>
+        ${state.money >= 200000 ? '<button class="wide-action" data-brothel-buy>收购红灯区会所 · ' + Game.view.money(200000) + '</button>' : ''}
       </section>`;
     }
 
@@ -216,6 +217,17 @@
       )).join('')}</div>`;
   }
 
+  function buyBrothel(state) {
+    if (state.money < 200000) return { ok: false, message: '收购会所需要20万资金' };
+    state.money -= 200000;
+    state.career.job = '皮条客';
+    state.career.jobId = 'pimp';
+    state.career.company = '自营妓院';
+    state.career.salary = 0;
+    Game.lifeDirector.addLog(state, '收购会所', '你花费20万收购了红灯区的一家会所，成为了皮条客。', 'milestone');
+    return { ok: true, message: '你成为了皮条客，可以开始经营妓院了' };
+  }
+
   function handleClick(event) {
     const startBtn = event.target.closest('[data-brothel-start]');
     if (startBtn) {
@@ -224,6 +236,17 @@
         const result = start(state);
         Game._refresh();
         if (result.ok) Game.view.showToast(result.message, 'good');
+      }
+      return true;
+    }
+    const buyBtn = event.target.closest('[data-brothel-buy]');
+    if (buyBtn) {
+      const state = Game._getState ? Game._getState() : null;
+      if (state) {
+        const result = buyBrothel(state);
+        Game._refresh();
+        if (result.ok) Game.view.showToast(result.message, 'good');
+        else Game.view.showToast(result.message, 'warning');
       }
       return true;
     }
@@ -250,5 +273,5 @@
     return false;
   }
 
-  Game.brothelSystem = Object.freeze({ ensure, start, choose, render, handleClick, styleAsProstitute });
+  Game.brothelSystem = Object.freeze({ ensure, start, choose, render, handleClick, buyBrothel, styleAsProstitute });
 }(window));

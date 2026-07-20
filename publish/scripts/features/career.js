@@ -127,6 +127,7 @@
   function work(state, type) {
     if (!state.career.job) return { ok: false, message: '当前没有工作' };
     if (type === 'promotion') return Game.careerGrowth.requestRaise(state);
+    if (Game.staminaSystem) { var st = Game.staminaSystem.spend(state, 15); if (!st.ok) return st; }
     const actions = {
       focus: [8, 5, -3, 0, '专注完成关键任务', 0, 0],
       network: [5, 3, 1, 2, '主动结识同事与合作伙伴', 0, 0],

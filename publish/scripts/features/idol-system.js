@@ -198,6 +198,18 @@
     state.money += income;
     idol.stage = 'retired';
     Game.lifeDirector.addLog(state, '毕业公演', '最后一场演出。你唱了出道曲，走音的地方和当年一模一样。收入' + Game.view.money(income) + '。', 'milestone');
+    state.pendingDecision = {
+      type: 'idolTransition',
+      title: '偶像毕业 — 选择未来方向',
+      text: '你的偶像生涯走到了终点。粉丝们会记住你。现在，选择下一个方向——',
+      options: [
+        {value:'welfare', label:'福利姬 · 继承30%粉丝 · 金主约会x1.5'},
+        {value:'coser', label:'职业Coser · 继承25%粉丝 · 漫展x1.5'},
+        {value:'vtuber', label:'虚拟主播 · 继承35%粉丝 · 直播x1.3'},
+        {value:'beautyblog', label:'美妆博主 · 继承20%粉丝 · 品牌x1.3'},
+        {value:'retire', label:'彻底引退 · 无加成'},
+      ]
+    };
     return { ok: true, message: '毕业公演完成。可以转型了。' };
   }
 

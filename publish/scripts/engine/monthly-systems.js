@@ -33,6 +33,7 @@
     Game.companySystem?.monthly(state);
     Game.stockDirector?.monthly(state);
     Game.undergroundIdol?.monthly(state);
+    Game.universityLife?.monthly(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

@@ -47,7 +47,8 @@
           state.education.electives = ['化学', '生物'];
         }
         const result = exam(state, '高考');
-        state.pendingDecision = { type: 'volunteer', score: result.total };
+        if (Game.examSystem) { Game.examSystem.conductExam(state, '高考', result); }
+        else { state.pendingDecision = { type: 'volunteer', score: result.total }; }
       }
     } else if (years >= 16 && stage === 'high' && !state.education.track) {
       state.pendingDecision = { type: 'track' };
@@ -57,7 +58,8 @@
         state.education.schoolStage = 'middle';
       }
       const result = exam(state, '中考');
-      state.pendingDecision = { type: 'highSchool', score: result.total };
+      if (Game.examSystem) { Game.examSystem.conductExam(state, '中考', result); }
+      else { state.pendingDecision = { type: 'highSchool', score: result.total }; }
     } else if (years >= 12 && ['home', 'primary'].includes(stage)) {
       const school = `${state.location.city}新城初级中学`;
       Game.social.enterSchool(state, school, 'middle', 32);

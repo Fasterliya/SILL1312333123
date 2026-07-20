@@ -85,6 +85,12 @@
         if (!result.ok) return Game.view.showToast(result.message, 'warning');
         Game.view.showToast(result.message, 'good');
       }
+    } else if (decision.type === 'idolTransition') {
+      var result = Game.idolSystem.transitionCareer(current, value);
+      if (!result.ok) return Game.view.showToast(result.message, 'warning');
+      Game.view.showToast(result.message, 'good');
+    } else if (decision.type === 'internship') {
+      Game.universityLife.resolveInternship(current, value);
     }
     current.pendingDecision = null;
     done();
@@ -145,6 +151,11 @@
         { value: 'vocational-work', label: '直接就业 · 技能岗位与自由职业' },
         { value: 'vocational-college', label: '高职升学 · 城市职业学院' },
       ];
+    }
+    if (!options.length && d.options) {
+      Game.view.el.decisionTitle.textContent = d.title || '';
+      Game.view.el.decisionText.textContent = d.text || '';
+      options = d.options;
     }
     Game.view.el.decisionBody.innerHTML = options.map((item) => (
       `<button data-choice="${item.value}">${item.label}</button>`

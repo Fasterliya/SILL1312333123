@@ -92,6 +92,7 @@
   }
 
   function characterHtml(state, person) {
+    if (Game.lifeResume) Game.lifeResume.backfillResume(state, person);
     const effective = (field) => Game.cosplayCatalog.effectiveValue(person, field);
     const labels = {
       cosplay: 'COS服', hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
@@ -165,7 +166,10 @@
       <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}
       ${Game.plasticSurgery.renderNpcPortraitStages(state, person)}</div></details>
       <details class="interaction-menu detail-interactions"><summary>互动选项</summary>
-      <div class="interaction-options">${detailActions(state, person)}</div></details>`;
+      <div class="interaction-options">${detailActions(state, person)}</div></details>
+      <details class="record-section"><summary>人生履历</summary><div class="fold-content">`
+      + (Game.lifeResume ? Game.lifeResume.renderResume(person) : '')
+      + `</div></details>`;
   }
 
   function openCharacter(id) {

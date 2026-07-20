@@ -64,6 +64,8 @@
     { id: 'idol', name: '偶像艺人', company: '偶像事务所', industry: '娱乐业', salary: 8000, need: 55, category: '艺术', majors: ['数字媒体'], education: 1, tier: 2, cities: ['北京', '上海', '深圳', '成都', '长沙', '首尔', '东京'], freelance: false, recommendedGender: '女', adultOnly: false, minAge: 16 },
     { id: 'illustrator', name: '自由插画师', company: '个人插画工作室', industry: '内容创作', salary: 7800, need: 62, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true },
     { id: 'convention', name: '漫展活动执行', company: '次元城市会展', industry: '会展活动', salary: 7000, need: 50, category: '社交', majors: ['现代服务', '数字媒体'], education: 1, tier: 3, cities: [] },
+    { id: 'pimp', name: '皮条客', company: '自营妓院', industry: '风俗业', salary: 8000, need: 30, category: '社交', majors: [], education: 0, tier: 3, cities: [], freelance: true, recommendedGender: '男' },
+    { id: 'blackmarket', name: '黑市商人', company: '地下市场', industry: '黑市', salary: 5000, need: 25, category: '商业', majors: [], education: 0, tier: 3, cities: [], freelance: true },
   );
 
   C.houses.push(

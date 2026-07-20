@@ -233,6 +233,17 @@
     }
   }
 
+  /* ---- enterBlackMarket ---- */
+  function enterBlackMarket(state) {
+    if (state.criminal.record < 5) return { ok: false, message: '犯罪值至少5才能接触黑市' };
+    state.career.job = '黑市商人';
+    state.career.jobId = 'blackmarket';
+    state.career.company = '地下市场';
+    state.career.salary = 5000;
+    Game.lifeDirector.addLog(state, '进入黑市', '你开始在地下市场买卖违禁品。', 'milestone');
+    return { ok: true, message: '你进入了黑市' };
+  }
+
   /* ---- render ---- */
   function render(state) {
     ensure(state);
@@ -275,8 +286,9 @@
       </div>
       <h4>入狱历史</h4>
       ${historyHtml}
+      <div class="system-actions"><button data-criminal-blackmarket>进入黑市</button></div>
     </section>`;
   }
 
-  Game.criminalSystem = Object.freeze({ ensure, addRecord, arrest, monthly, render });
+  Game.criminalSystem = Object.freeze({ ensure, addRecord, arrest, monthly, render, enterBlackMarket });
 }(window));

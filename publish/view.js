@@ -12,7 +12,7 @@
     'hunterModePanel', 'possessedList',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
-    'decisionBody', 'examJumpBtn', 'timeBar', 'toast', 'tabPages',
+    'decisionBody', 'examJumpBtn', 'timeBar', 'staminaRing', 'toast', 'tabPages',
     'tabs', 'heroCanvas', 'resetBtn',
   ];
   const el = {};
@@ -156,6 +156,15 @@
     Game.navigation.refreshDetail();
     Game.educationFastForward.updateButton(state, el.examJumpBtn);
     renderTimeBar(state);
+    if (state.stamina && el.staminaRing) {
+      var pct = state.stamina.current / state.stamina.max * 100;
+      var offset = 251 * (1 - pct/100);
+      var fg = el.staminaRing.querySelector('.stamina-fg');
+      if (fg) fg.setAttribute('stroke-dashoffset', offset);
+      var span = el.staminaRing.querySelector('span');
+      if (span) span.textContent = state.stamina.current + '/' + state.stamina.max;
+      el.staminaRing.style.display = 'block';
+    }
   }
 
   function renderTimeBar(state) {

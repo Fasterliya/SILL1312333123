@@ -324,8 +324,33 @@ button:disabled {
 .time-bar .time-controls { display:flex; gap:4px; }
 .time-bar .time-controls button { padding:4px 8px; border:1px solid #4a6a62; border-radius:4px; background:transparent; color:#c0d0ca; cursor:pointer; }
 .time-bar .time-controls button.active { background:#d4a04a; color:#fff; border-color:#d4a04a; }
-.stamina-ring { position:fixed; bottom:16px; right:16px; width:64px; height:64px; z-index:400; }
+.stamina-ring { position:fixed; bottom:16px; right:16px; width:64px; height:64px; z-index:500; }
 .stamina-ring svg { width:100%; height:100%; transform:rotate(-90deg); }
 .stamina-ring .stamina-bg { fill:none; stroke:#2a2520; stroke-width:8; }
 .stamina-ring .stamina-fg { fill:none; stroke:#4a8; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset .3s; }
 .stamina-ring span { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; }
+
+/* subject cards */
+.subject-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 8px 0; }
+.subject-card { padding: 12px; border: 1px solid #dedcd2; border-radius: 6px; background: #fffdf7; }
+.subject-card .subj-name { font-weight: 700; font-size: 14px; }
+.subject-card .subj-max { font-size: 10px; color: #8c918d; float: right; }
+.subject-card .subj-stars { font-size: 11px; color: #d4a04a; display: block; margin: 4px 0; }
+.subject-card .subj-bar { margin: 6px 0; }
+.subject-card .subj-bar i { height: 6px; background: #e4e2d9; border-radius: 3px; display: block; }
+.subject-card .subj-bar b { display: block; height: 100%; background: #315f58; border-radius: 3px; }
+.subject-card .subj-bar em { font-size: 10px; color: #727973; float: right; font-style: normal; }
+.subject-card small { font-size: 10px; color: #8c918d; display: block; }
+.subject-card button { width: 100%; padding: 6px; margin-top: 6px; border: 1px solid #315f58; border-radius: 4px; background: #315f58; color: #fff; font-size: 11px; cursor: pointer; }
+.subject-card button:disabled { background: #ccc; border-color: #ccc; }
+
+/* timeline */
+.timeline { position:relative; padding:10px 0; }
+.timeline::before { content:''; position:absolute; left:50%; top:0; bottom:0; width:2px; background:#d9d8cf; }
+.timeline-card { width:45%; padding:8px 12px; margin:8px 0; border:1px solid #dedcd2; border-radius:6px; background:#fffdf7; position:relative; }
+.timeline-card.left { margin-right:55%; }
+.timeline-card.right { margin-left:55%; }
+.timeline-card time { font-size:10px; color:#8c918d; display:block; }
+.timeline-card strong { font-size:13px; display:block; margin:2px 0; }
+.timeline-card span { font-size:11px; color:#66726f; }
+.timeline-card.deceased { opacity:.5; background:#f0ece0; }

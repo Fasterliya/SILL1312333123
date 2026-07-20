@@ -50,9 +50,8 @@
     for(var i=0;i<days;i++){
       s.day+=1;
       if(s.day>30){
-        s.day=1; s.totalMonths+=1;
-        Game.timeSystem.syncCalendar(s);
-        Game.monthlySystems.run(s);
+        s.day=1;
+        Game.lifeDirector.advance(s,1);
         s.stamina.current = s.stamina.max;
         if(s.education.fastForwardTarget&&s.totalMonths>=s.education.fastForwardTarget) Game.educationFastForward.complete(s);
       }

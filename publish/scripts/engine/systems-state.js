@@ -226,6 +226,8 @@
       producerAbuse: 0, corruptionFromForced: 0,
       fallBufferMonths: 0, fellTo: '', careerExtended: false,
     };
+    state.education.subjects = state.education.subjects && typeof state.education.subjects === 'object' ? state.education.subjects : {};
+    state.education.burnout = Number.isFinite(state.education.burnout) ? state.education.burnout : 0;
     return state;
   }
 

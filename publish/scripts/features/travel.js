@@ -47,6 +47,12 @@
     const blocked = unavailable(state, place);
     if (blocked) return { ok: false, message: blocked };
 
+    if (Game.staminaSystem) {
+      var staminaCost = placeName === '红灯区' ? 35 : 20;
+      var st = Game.staminaSystem.spend(state, cost);
+      if (!st.ok) return st;
+    }
+
     const discount = state.assets.vehicles.length ? 0.5 : 1;
     const cost = Math.round(place.cost * discount);
     Game.economy.spend(state, cost);

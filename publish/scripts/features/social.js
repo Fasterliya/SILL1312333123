@@ -102,6 +102,11 @@
     if (!person || person.status !== '健康') return { ok: false, message: '无法联系这位角色' };
     if (type === 'reconnect') return Game.socialWorld.reconnect(state, person);
     if (!Game.socialWorld.reachable(state, person)) return { ok: false, message: '毕业前没有留下联系方式' };
+    if (Game.staminaSystem) {
+      var cost = type === 'date' ? 10 : (type === 'meal' ? 8 : 5);
+      var st = Game.staminaSystem.spend(state, cost);
+      if (!st.ok) return st;
+    }
     const romantic = romance(state, person, type);
     if (romantic) {
       person.interactions += 1;
@@ -188,6 +193,11 @@
     else if (!state.romance.partnerId && U.age(state) >= 16 && person.affection >= 62) actions.push(['confess', '告白']);
     else if (person.relation === '相亲对象') actions.push(['date', '约会']);
     if (Game.relationshipSecrets.available(state, person)) actions.push(['secret-date', '隐秘约会']);
+    if (person.gender === '女' && person.status === '健康' && U.personAge(state, person) >= 18
+        && !['父亲','母亲','儿子','女儿','哥哥','姐姐','弟弟','妹妹'].includes(person.relation)
+        && person.currentCity === state.location.city) {
+      actions.push(['assault', '暴力侵犯']);
+    }
     return actions;
   }
   function setClassFilter(value) {

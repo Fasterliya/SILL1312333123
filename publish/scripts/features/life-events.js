@@ -21,35 +21,6 @@
       ],
     },
     {
-      id: 'city_neighbor', min: 18, max: 90,
-      title: '社区里的求助', text: '邻居临时遇到困难，希望有人花时间帮忙。',
-      options: [
-        ['help', '主动帮忙', '城市声望与心情提高', { city: 7, stats: { 心情: 3 } }],
-        ['donate', '提供一些资金', '花费资金并获得更多声望', { money: -600, city: 12 }],
-        ['decline', '礼貌拒绝', '保留自己的时间', {}],
-      ],
-    },
-    {
-      id: 'career_crossroad', min: 20, max: 70,
-      condition: (state) => Boolean(state.career.job),
-      title: '项目方向分歧', text: '团队对项目方向产生分歧，你的选择会影响职业评价。',
-      options: [
-        ['quality', '坚持长期质量', '经验与专业能力提高', { career: { exp: 10, performance: 5 }, burnout: 3 }],
-        ['speed', '优先按时交付', '绩效明显提高但更疲惫', { career: { exp: 5, performance: 9 }, burnout: 9 }],
-        ['mediate', '协调双方方案', '魅力和城市人脉提高', { stats: { 魅力: 4 }, city: 4 }],
-      ],
-    },
-    {
-      id: 'family_care', min: 28, max: 75,
-      condition: (state) => state.family.some((person) => person.status === '健康'),
-      title: '家人的需要', text: '一位家人最近状态不佳，希望你能抽出时间陪伴。',
-      options: [
-        ['stay', '留在家中陪伴', '家庭信任提高，工作表现略降', { familyTrust: 8, career: { performance: -3 } }],
-        ['support', '承担照护费用', '花费资金并提高家庭信任', { money: -1800, familyTrust: 6 }],
-        ['busy', '继续处理自己的事务', '职业表现提高，但家庭产生隔阂', { career: { performance: 4 }, familyConflict: 5 }],
-      ],
-    },
-    {
       id: 'health_warning', min: 35, max: 100, once: true,
       title: '体检提醒', text: '近期容易疲惫，社区医生建议你重新安排生活习惯。',
       options: [

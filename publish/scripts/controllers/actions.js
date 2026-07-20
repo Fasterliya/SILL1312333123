@@ -97,7 +97,12 @@
     if (!d) return;
     if (['lifeEvent', 'succession'].includes(d.type)) {
       const content = d.type === 'lifeEvent' ? Game.lifeEvents.render(current) : Game.legacySystem.renderDecision(current);
-      if (!content) return;
+      if (!content) {
+        current.pendingDecision = null;
+        Game.view.el.decision.hidden = true;
+        api.save();
+        return;
+      }
       Game.view.el.decisionTitle.textContent = content.title;
       Game.view.el.decisionText.textContent = content.text;
       Game.view.el.decisionBody.innerHTML = content.options.map((item) => (

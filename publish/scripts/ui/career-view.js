@@ -39,10 +39,18 @@
   }
 
   function companyDirectory(state) {
-    const companies = Game.companyCatalog.inCity(state.location.city);
+    const companies = [...Game.careerSystem.board(state).filter((job) => !job.freelance)
+      .reduce((items, job) => {
+        const current = items.get(job.companyId) || {
+          name: job.company, industry: job.industry, parent: job.parentCompany || '', positions: 0,
+        };
+        current.positions += 1;
+        items.set(job.companyId, current);
+        return items;
+      }, new Map()).values()];
     return `<details class="company-directory"><summary>本地特色公司 · ${companies.length}家</summary>
       <div>${companies.map((company) => (
-        `<article><strong>${company.name}</strong><span>${company.industry} · ${company.positions.length}个职位
+        `<article><strong>${company.name}</strong><span>${company.industry} · ${company.positions}个职位
         ${company.parent ? ` · ${company.parent}旗下` : ''}</span></article>`
       )).join('')}</div></details>`;
   }
@@ -57,7 +65,7 @@
       || job.industry === jobFilter);
     const level = Game.careerSystem.qualification(state);
     const guide = `<section class="list-guide career-guide"><strong>当前资格：${Game.careerSystem.qualificationLabel(level)}</strong>
-      <span>先按行业或资格筛选，再点击职位查看职责、门槛与录取率。</span></section>`;
+      <span>招聘仅显示当前城市的本地公司、当地分公司与本地独立职业。</span></section>`;
     const cards = jobs.length ? jobs.map((job) => {
       const locked = !Game.careerSystem.eligible(state, job);
       return `<article class="job-card ${locked ? 'locked' : ''}">
@@ -85,7 +93,7 @@
     const company = Game.companyCatalog.find(job.companyId);
     const allowed = Game.careerSystem.eligible(state, job);
     const facts = [
-      ['公司/主体', job.company], ['母公司/集团', company?.parent || '独立单位'],
+      ['公司/主体', job.company], ['母公司/集团', company?.parent || job.parentCompany || '独立单位'],
       ['工作方式', job.freelance ? '自由职业' : '单位岗位'],
       ['所在城市', state.location.city], ['参考月收入', Game.view.money(job.salary)],
       ['学历要求', Game.careerSystem.requirementLabel(job.education || 0)],

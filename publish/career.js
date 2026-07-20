@@ -86,6 +86,7 @@
     const employerJob = { ...job, company: employer, companyId: job.companyId || `local-${state.location.city}-${job.id}` };
     if (job.freelance) Game.workplace.leave(state);
     else Game.workplace.join(state, employerJob);
+    Game.creatorCareer.onJobChange(state);
     Game.lifeDirector.addLog(state, '获得工作', `你加入${employer}担任${job.name}。`, 'milestone');
     return { ok: true, message: `${employer}录取了你` };
   }

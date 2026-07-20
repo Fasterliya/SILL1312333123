@@ -156,6 +156,7 @@
       ${Game.familyLinks.render(state, person)}
       ${Game.workplace.personSection(state, person)}
       ${Game.relationshipMemory.render(person)}
+      ${Game.relationshipSecretsView.render(state, person)}
       ${Game.characterChat.render(state, person)}</div>
       <details class="record-section npc-editor"><summary><span>编辑角色外观</span>
       <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}</div></details>

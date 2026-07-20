@@ -28,10 +28,14 @@
 
   function currentJob(state, money) {
     if (!state.career.job) return '<p class="empty-state">当前没有工作。先筛选方向，再打开职位详情确认应聘。</p>';
-    return `<section class="career-current"><span>${state.career.company || '当前单位'}</span>
-      <strong>${Game.careerGrowth.titleName(state)} · 薪级P${state.career.level + 1}</strong><b>${money(state.career.salary)}/月</b>
-      <small>绩效 ${state.career.performance} · 经验 ${state.career.exp} · ${state.career.titleTrack === 'staff' ? '待选择晋升方向' : '已进入晋升序列'}</small></section>${workActions(state)}
-      ${Game.workplace.render(state)}${Game.careerSpecialties.render(state)}`;
+    const creator = Game.creatorCareer.isCreator(state);
+    const title = creator ? state.career.job : `${Game.careerGrowth.titleName(state)} · 薪级P${state.career.level + 1}`;
+    const detail = creator ? '频道收入随播放、粉丝与合作变化'
+      : `绩效 ${state.career.performance} · 经验 ${state.career.exp} · ${state.career.titleTrack === 'staff' ? '待选择晋升方向' : '已进入晋升序列'}`;
+    const base = `<section class="career-current"><span>${state.career.company || '当前单位'}</span>
+      <strong>${title}</strong><b>${money(state.career.salary)}/月</b><small>${detail}</small></section>`;
+    return creator ? base + Game.creatorCareer.render(state)
+      : `${base}${workActions(state)}${Game.workplace.render(state)}${Game.careerSpecialties.render(state)}`;
   }
 
   function companyDirectory(state) {
@@ -88,12 +92,10 @@
       ['当前资格', Game.careerSystem.qualificationLabel(Game.careerSystem.qualification(state))],
       ['参考录取率', `${chance(state, job)}%`], ['主要职责', duties(job)],
     ];
-    const note = job.adultOnly
-      ? '<p class="job-note">仅限18岁以上角色，内容限定为非露骨、合法合规的成年写真创作。</p>' : '';
     Game.navigation.openDetail(job.name, `<section class="job-detail-head"><p>${job.industry}</p>
       <h3>${job.name}</h3><span>${job.company}</span></section>
       <section class="detail-facts">${facts.map(([label, value]) => (
-        `<div><span>${label}</span><strong>${value}</strong></div>`)).join('')}</section>${note}
+        `<div><span>${label}</span><strong>${value}</strong></div>`)).join('')}</section>
       <section class="job-apply-bar"><button data-job-apply="${job.id}" ${allowed ? '' : 'disabled'}>
       ${allowed ? '确认应聘' : '当前资格不足'}</button></section>`, 'job');
   }

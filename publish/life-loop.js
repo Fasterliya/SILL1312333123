@@ -28,7 +28,7 @@
       volunteer: ['完成大学志愿', '筛选院校并选择具体专业'],
       vocationalExit: ['选择职高毕业去向', '决定直接就业或继续高职升学'],
       lifeEvent: ['处理人生事件', '完成当前事件选择后继续推进时间'],
-      succession: ['选择家族继承人', '确认下一代人生后继续时间'],
+      succession: ['选择下一代角色', '确认下一代人生后继续时间'],
     };
     const item = goals[type];
     return item ? { title: item[0], detail: item[1], value: 0, target: 1 } : null;
@@ -68,6 +68,10 @@
         value: growing.upbringing.care, target: 70 };
     }
     if (!state.career.job) return { title: '寻找人生方向', detail: '进入求职菜单并获得一份工作', value: 0, target: 1 };
+    if (Game.creatorCareer.isCreator(state) && state.creator.followers < 10000) {
+      return { title: '扩大频道影响力', detail: '粉丝达到10000',
+        value: state.creator.followers, target: 10000 };
+    }
     if (state.career.performance < 70) {
       return { title: '积累职业表现', detail: '绩效达到70后申请晋升', value: state.career.performance, target: 70 };
     }

@@ -185,6 +185,7 @@
     if (Game.schoolLines.handleClick(event)) return;
     if (handlePortrait(event) || handleNavigation(event)) return;
     const state = api.getState();
+    if (Game.extendedInteractions.handle(event, state, finish)) return;
     if (handleRelations(event, state) || handleCareer(event, state) || handleLifeSystems(event, state)) return;
     handleAssets(event, state);
   }

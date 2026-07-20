@@ -187,6 +187,7 @@
     if (state.romance.partnerId === person.id) actions.push(['date', '约会'], ['propose', '求婚']);
     else if (!state.romance.partnerId && U.age(state) >= 16 && person.affection >= 62) actions.push(['confess', '告白']);
     else if (person.relation === '相亲对象') actions.push(['date', '约会']);
+    if (Game.relationshipSecrets.available(state, person)) actions.push(['secret-date', '隐秘约会']);
     return actions;
   }
   function setClassFilter(value) {

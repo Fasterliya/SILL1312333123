@@ -62,7 +62,7 @@
       state.matchmaking.candidates.push(...candidates);
       state.contacts = state.contacts.filter((person) => !candidates.includes(person));
     }
-    state.version = 25;
+    state.version = 26;
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {
@@ -134,6 +134,9 @@
     if (sourceVersion < 22) Game.cityLife?.syncDependents(state);
     Game.demography.ensureState(state);
     Game.civicSystem.ensure(state);
+    Game.householdSystem.ensure(state);
+    Game.relationshipSecrets.ensure(state);
+    Game.creatorCareer.ensure(state);
     return state;
   }
 

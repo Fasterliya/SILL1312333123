@@ -33,7 +33,7 @@
       return;
     }
     state.pendingDecision = { type: 'succession', cause, heirs: heirs.map((item) => item.id) };
-    Game.lifeDirector.addLog(state, '家族传承', '生命走到终点，家族将由下一代继续书写。', 'milestone');
+    Game.lifeDirector.addLog(state, '家庭延续', '生命走到终点，下一代将继续书写新的生活。', 'milestone');
   }
 
   function education(child, age) {
@@ -64,7 +64,7 @@
       id: `ancestor-${record.generation}-${record.deathMonth}`, name: record.name,
       relation: record.gender === '男' ? '父亲' : '母亲', gender: record.gender,
       birthMonth: record.birthMonth, status: '已故', affection: 90, job: record.job,
-      memories: [{ kind: '传承', text: '将家族人生交给了下一代', month: record.deathMonth,
+      memories: [{ kind: '传承', text: '将家庭人生交给了下一代', month: record.deathMonth,
         generation: record.generation }], trust: 100, conflict: 0,
     });
     return person;
@@ -114,6 +114,7 @@
     const oldProfile = clone(state.profile);
     const inherited = Math.max(0, Math.round(state.money * 0.7));
     const age = U.personAge(state, heir);
+    Game.relationshipSecrets.archivePlayer(state, `ancestor-${record.generation}-${record.deathMonth}`);
     state.legacy.ancestors.push(record);
     state.legacy.ancestors = state.legacy.ancestors.slice(-12);
     state.legacy.inheritedMoney += inherited;
@@ -154,14 +155,14 @@
     Game.profile.updateGrowth(state);
     Game.npcLife.update(state);
     Game.lifeDirector.addLog(state, `第${state.generation}代人生`,
-      `${state.name}继承家业与 ${Game.view.money(inherited)} 资金，开始续写家族故事。`, 'milestone');
-    return { ok: true, message: `已由${state.name}继承家族人生` };
+      `${state.name}承接家庭资产与 ${Game.view.money(inherited)} 资金，开始新的生活。`, 'milestone');
+    return { ok: true, message: `已由${state.name}继续下一代人生` };
   }
 
   function renderDecision(state) {
     const ids = state.pendingDecision?.heirs || [];
     const heirs = children(state).filter((item) => ids.includes(item.id));
-    return { title: '选择家族继承人', text: `第${state.generation}代人生已经结束。房产、产业和股票将保留，现金按70%继承。`,
+    return { title: '选择下一代角色', text: `第${state.generation}代人生已经结束。房产、产业和股票将保留，现金按70%继承。`,
       options: heirs.map((item) => ({ value: item.id,
         label: `${item.name} · ${U.personAge(state, item)}岁 · 关爱${Math.round(item.upbringing?.care || 0)} · 学业${Math.round(item.upbringing?.education || 0)}` })) };
   }
@@ -173,8 +174,8 @@
       <span>${item.age}岁 · ${item.job} · ${item.cause}</span><small>${item.house}</small></article>`
     )).join('');
     return `<section class="legacy-summary"><span>当前第 ${state.generation} 代</span>
-      <strong>${state.surname}氏家族</strong><small>累计继承现金 ${Game.view.money(state.legacy.inheritedMoney)} · 可继承子女 ${heirs.length} 人</small></section>
-      <h3>家族先辈</h3>${history || '<p class="empty-state">第一代人生仍在书写中。</p>'}`;
+      <strong>家庭代际档案</strong><small>累计承接现金 ${Game.view.money(state.legacy.inheritedMoney)} · 可选择下一代 ${heirs.length} 人</small></section>
+      <h3>历代家庭成员</h3>${history || '<p class="empty-state">第一代人生仍在书写中。</p>'}`;
   }
 
   Game.legacySystem = Object.freeze({ prepareDeath, resolve, renderDecision, render });

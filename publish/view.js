@@ -82,6 +82,7 @@
 
   function familyCards(state) {
     const activeSkin = Game.hunterMode.active(state);
+    const household = activeSkin ? '' : Game.householdSystem.render(state);
     const members = activeSkin ? Game.hunterMode.socialPeople(state, activeSkin).map((link) => ({
       ...link.person, relation: link.kind,
     })) : state.family;
@@ -96,7 +97,7 @@
         : `月受孕率 ${stats.monthlyPercent}% · 连续12月累计 ${stats.annualPercent}%`);
     const fertility = !activeSkin && state.romance.married
       ? `<div class="detail-row"><span>自然生育</span><b>${birthStatus}</b></div>` : '';
-    return summary + fertility + members.map((item) => {
+    return household + summary + fertility + members.map((item) => {
       const actions = activeSkin ? `<button data-character-id="${item.id}">查看档案</button>`
         : (item.status === '已故' ? '<button disabled>追忆</button>'
         : Game.familySystem.detailActions(state, item).map(([type, label]) => (

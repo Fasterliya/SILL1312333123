@@ -1,0 +1,122 @@
+.household-dashboard {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #dedbd0;
+}
+
+.household-dashboard > header,
+.creator-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.household-dashboard header span,
+.creator-card header span {
+  display: block;
+  color: #66726f;
+  font-size: 10px;
+}
+
+.household-dashboard header strong,
+.creator-card header strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 17px;
+}
+
+.household-dashboard header > b,
+.creator-card header > b {
+  color: #a04439;
+  font-size: 12px;
+}
+
+.household-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.household-metrics div {
+  min-width: 0;
+  padding: 8px 4px;
+  background: #f5f2e8;
+  text-align: center;
+}
+
+.household-metrics span,
+.household-metrics b {
+  display: block;
+  font-size: 10px;
+}
+
+.household-metrics b {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.household-policies,
+.household-actions,
+.creator-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.household-policies button,
+.household-actions button,
+.creator-actions button {
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid #c9d5d1;
+  background: #edf3ef;
+  color: #315f58;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.household-policies button.active {
+  border-color: #c23b32;
+  background: #fff3e3;
+  color: #a22e27;
+}
+
+.household-goals {
+  display: grid;
+  gap: 5px;
+}
+
+.household-goals span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 9px;
+  background: #fffdf7;
+  color: #66726f;
+  font-size: 11px;
+}
+
+.household-goals b {
+  color: #263b37;
+}
+
+.household-secret {
+  margin: 0;
+  padding: 9px;
+  border-left: 3px solid #a8453a;
+  background: #fff0ed;
+  color: #7b241d;
+  font-size: 11px;
+}
+
+@media (max-width: 360px) {
+  .household-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

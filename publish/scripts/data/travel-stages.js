@@ -98,6 +98,20 @@
         options: [['contact', '与新认识的朋友交换联系方式', { mood: 4, affection: 8, score: 5, meet: true }],
           ['inspire', '带着满满的灵感离开', { mood: 6, intelligence: 2, score: 3 }]] },
     ],
+    '浅草与浅草寺': [
+      { title: '穿过雷门', text: '巨大的红灯笼悬在雷门下，游客沿着参道缓缓汇入浅草老街。',
+        options: [['photo', '在雷门前记录街景', { mood: 5, charm: 1, score: 3 }],
+          ['observe', '观察门楼与两侧雕像', { intelligence: 2, mood: 3, score: 3 }],
+          ['guide', '向当地人询问参拜路线', { mood: 3, affection: 4, score: 4, meet: true }]] },
+      { title: '漫步仲见世', text: '仲见世商店街飘着米果与人形烧的香气，传统招牌一路延伸到宝藏门。',
+        options: [['snack', '品尝浅草传统点心', { cost: 80, mood: 6, score: 3 }],
+          ['souvenir', '挑选一件江户风纪念品', { cost: 160, mood: 5, charm: 1, score: 4 }],
+          ['history', '阅读沿途的街区历史介绍', { intelligence: 3, score: 3 }]] },
+      { title: '本堂参拜', text: '香炉的烟气在本堂前缓缓升起，钟声与人群低语让气氛安静下来。',
+        options: [['pray', '依照礼仪认真参拜', { mood: 7, reputation: 2, score: 5 }],
+          ['fortune', '抽一支御神签留作纪念', { cost: 40, mood: 5, score: 4 }],
+          ['leave', '沿着下町街巷悠闲返程', { mood: 5, health: 1, score: 3 }]] },
+    ],
     '红灯区': [
       { title: '踏入烟花巷', text: '霓虹灯映照着狭窄的巷子。穿着暴露的女性倚在门框上，空气里飘着廉价香水和酒精的气味。',
         options: [['premium', '径直走进最高档的会所', { cost: 800, mood: 2, score: 3 }],
@@ -114,13 +128,29 @@
     ],
   };
 
+  function landmarkFallback(placeName) {
+    return [
+      { title: `抵达${placeName}`, text: `你来到${placeName}入口，先观察周围环境并规划游览路线。`,
+        options: [['view', '寻找最佳视角欣赏景观', { mood: 5, score: 3 }],
+          ['learn', '阅读现场介绍了解背景', { intelligence: 2, score: 3 }],
+          ['ask', '向附近游客询问推荐路线', { mood: 3, score: 3, meet: true }]] },
+      { title: '深入游览', text: '沿着主要路线继续前行，建筑、街景与当地生活逐渐展现在眼前。',
+        options: [['walk', '慢慢步行探索每个角落', { health: 1, mood: 4, score: 4 }],
+          ['photo', '拍下最有代表性的景色', { charm: 1, mood: 4, score: 3 }],
+          ['rest', '在休息区停留片刻', { mood: 5, score: 2 }]] },
+      { title: '结束行程', text: '游览接近尾声，你准备带着今天的见闻返回日常生活。',
+        options: [['memory', '整理照片并记录见闻', { intelligence: 1, mood: 5, score: 4 }],
+          ['chat', '与同路游客聊聊感受', { mood: 4, affection: 4, score: 4, meet: true }],
+          ['return', '从容返程休息', { mood: 4, health: 1, score: 3 }]] },
+    ];
+  }
+
   function forPlace(placeName) {
-    return stages[placeName] || null;
+    return stages[placeName] || landmarkFallback(placeName);
   }
 
   function stageData(placeName, stage) {
-    const entry = stages[placeName];
-    return entry ? entry[stage] : null;
+    return forPlace(placeName)[stage] || null;
   }
 
   Game.travelStages = Object.freeze({ forPlace, stageData, stages });

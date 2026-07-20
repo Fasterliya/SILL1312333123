@@ -104,7 +104,7 @@
     }
 
     ts.stage += 1;
-    const totalStages = (Game.travelStages.stages[ts.placeName] || []).length;
+    const totalStages = Game.travelStages.forPlace(ts.placeName).length;
     if (ts.stage >= totalStages) {
       const familiarity = state.cityLife.familiarity;
       familiarity[state.location.city] = U.clamp((familiarity[state.location.city] || 0) + 2, 0, 100);
@@ -146,7 +146,7 @@
       const ts = state.travel.activeStage;
       const stage = Game.travelStages.stageData(ts.placeName, ts.stage);
       if (!stage) return '';
-      const total = (Game.travelStages.stages[ts.placeName] || []).length;
+      const total = Game.travelStages.forPlace(ts.placeName).length;
       return `<section class="journey-current"><span>${ts.placeName}</span>
         <strong>${stage.title}</strong><small>${stage.text}</small>
         <div class="journey-progress"><i style="width:${ts.stage * 100 / total}%"></i></div></section>
@@ -191,37 +191,5 @@
     if (valid.includes(value)) activeFilter = value;
   }
 
-  function handleClick(event) {
-    const filterBtn = event.target.closest('[data-travel-filter]');
-    if (filterBtn) {
-      setFilter(filterBtn.dataset.travelFilter);
-      Game._refresh();
-      return true;
-    }
-    const startBtn = event.target.closest('[data-travel-start]');
-    if (startBtn) {
-      const state = Game._getState ? Game._getState() : null;
-      if (state) {
-        const result = startTravel(state, startBtn.dataset.travelStart);
-        Game._refresh();
-        if (result.ok) Game.view.showToast(result.message, 'good');
-        else Game.view.showToast(result.message, 'warning');
-      }
-      return true;
-    }
-    const choiceBtn = event.target.closest('[data-travel-choice]');
-    if (choiceBtn) {
-      const state = Game._getState ? Game._getState() : null;
-      if (state && state.travel.activeStage) {
-        const result = chooseStage(state, choiceBtn.dataset.travelChoice);
-        Game._refresh();
-        if (result.ok) Game.view.showToast(result.message, result.finished ? 'good' : 'normal');
-        else Game.view.showToast(result.message, 'warning');
-      }
-      return true;
-    }
-    return false;
-  }
-
-  Game.travelSystem = Object.freeze({ roam: startTravel, render, setFilter, handleClick });
+  Game.travelSystem = Object.freeze({ roam: startTravel, chooseStage, render, setFilter });
 }(window));

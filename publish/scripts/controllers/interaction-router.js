@@ -154,7 +154,7 @@
     if (journeyStart) return finish(Game.journeySystem.start(state, journeyStart.dataset.journeyStart)), true;
     const journeyChoice = event.target.closest('[data-journey-choice]');
     if (journeyChoice) return finish(Game.journeySystem.choose(state, journeyChoice.dataset.journeyChoice)), true;
-    if (Game.travelSystem?.handleClick(event)) return true;
+    if (Game.travelInteractions?.handleClick(event)) return true;
     const roam = event.target.closest('[data-roam-area]');
     if (roam) return finish(Game.travelSystem.roam(state, roam.dataset.roamArea)), true;
     const propertyBuy = event.target.closest('[data-property-buy]');
@@ -178,7 +178,7 @@
     if (Game.hookupSystem?.handleClick(event)) return;
     if (Game.idolSystem?.handleClick(event)) return;
     if (Game.familyConflict?.handleClick(event)) return;
-    if (Game.travelSystem?.handleClick(event)) return;
+    if (Game.travelInteractions?.handleClick(event)) return;
     if (Game.portraitGallery.handleClick(event)) return;
     if (Game.characterChat.handleClick(event)) return;
     if (Game.hunterMode.handleClick(event)) return;

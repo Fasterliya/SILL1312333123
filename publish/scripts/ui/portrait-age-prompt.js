@@ -2,6 +2,58 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
+  const minorStyles = Object.freeze([
+    {
+      max: 2,
+      lines: [
+        'minor_age_stage_1: clearly 0-2 years old, age-accurate infant or toddler appearance',
+        'body_proportion: 3-3.5 heads tall, oversized round head, tiny compact torso',
+        'anatomy_details: full cheeks, almost no visible neck, very short rounded limbs, tiny hands and feet',
+        'presentation: fully clothed, comfortable age-appropriate clothing, neutral natural pose, non-suggestive',
+      ],
+      negative: 'older child, adolescent, adult proportions, long limbs, sharp jaw, visible muscle, heavy makeup, revealing clothing, suggestive pose',
+    },
+    {
+      max: 6,
+      lines: [
+        'minor_age_stage_2: clearly 3-6 years old, age-accurate young child appearance',
+        'body_proportion: 3.5-4.5 heads tall, large round head, short compact torso',
+        'anatomy_details: round face, soft cheeks, short jaw, narrow shoulders, short limbs, small hands and feet',
+        'presentation: fully clothed, modest child clothing, relaxed playful posture, neutral and non-suggestive',
+      ],
+      negative: 'infant proportions, teenage appearance, adult proportions, long legs, sharp mature face, broad shoulders, heavy makeup, revealing clothing, suggestive pose',
+    },
+    {
+      max: 10,
+      lines: [
+        'minor_age_stage_3: clearly 7-10 years old, age-accurate school-age child appearance',
+        'body_proportion: 4.5-5 heads tall, compact balanced torso, narrow shoulders',
+        'anatomy_details: softly rounded face, short jaw, gradually longer limbs, small hands and feet, no muscle definition',
+        'presentation: fully clothed, modest coordinated clothing, lively natural posture, neutral and non-suggestive',
+      ],
+      negative: 'infant proportions, teenage appearance, adult curves, adult musculature, overly long legs, sharp mature face, heavy makeup, revealing clothing, suggestive pose',
+    },
+    {
+      max: 14,
+      lines: [
+        'minor_age_stage_4: clearly 11-14 years old, age-accurate early adolescent appearance',
+        'body_proportion: 5-6 heads tall, lean compact frame, slender gradually lengthening limbs',
+        'anatomy_details: soft youthful face, lightly defined jaw, subtle shoulders and pelvis, restrained physical development',
+        'presentation: fully clothed, modest age-appropriate clothing, natural reserved posture, neutral and non-suggestive',
+      ],
+      negative: 'infant proportions, fully adult anatomy, exaggerated curves, emphasized musculature, glamour styling, heavy makeup, revealing clothing, fetish styling, suggestive pose',
+    },
+    {
+      max: 18,
+      lines: [
+        'minor_age_stage_5: clearly 15-18 years old, age-accurate older adolescent appearance',
+        'body_proportion: 6-7 heads tall, balanced elongated proportions, natural shoulder line',
+        'anatomy_details: youthful facial structure, clear but soft jawline, restrained anatomy, minimal muscle definition',
+        'presentation: fully clothed, modest contemporary clothing, bright natural expression, neutral and non-suggestive',
+      ],
+      negative: 'childlike toddler proportions, fully mature adult appearance, exaggerated curves, emphasized musculature, glamour styling, heavy makeup, revealing clothing, fetish styling, suggestive pose',
+    },
+  ]);
 
   function style50(gender) {
     const identity = gender === '女'
@@ -25,54 +77,14 @@
     ];
   }
 
-  function profile(years, gender) {
-    if (years <= 2) return [
-      '3-3.5 heads tall', 'large round head, very short rounded limbs, tiny hands and feet',
-      'soft compact proportions, fully covered comfortable clothing',
-    ];
-    if (years <= 7) return [
-      '3.5-4 heads tall', 'large round face, short soft jawline, narrow shoulders',
-      'short rounded limbs, small hands and feet, straight compact torso',
-    ];
-    if (years <= 9) return [
-      '3.5-4.5 heads tall', 'round face, softly full cheeks, short jawline, narrow shoulders',
-      'short rounded limbs, small hands and feet, no visible muscle definition',
-      'straight compact torso, loose modest casual clothing, calm natural expression',
-    ];
-    if (years <= 11) return [
-      '4-5 heads tall', 'slightly elongated limbs, visible neck, soft jawline, narrow shoulders',
-      'subtly defined waist without exaggerated curves, lively natural expression',
-      'casual modest clothing',
-    ];
-    if (years <= 13) return [
-      '5-5.5 heads tall', 'lean compact frame, slender limbs, soft rounded facial features',
-      'slightly longer hands and feet, shoulders and pelvis only subtly developed',
-      'no exaggerated curves, natural slightly reserved pose, modest coordinated clothing',
-    ];
-    if (years <= 16) return [
-      '5.5-6 heads tall', 'slender balanced frame, visible neck, longer legs',
-      'subtle shoulder line, soft but more defined jawline',
-      'restrained anatomical development, no exaggerated curves or emphasized musculature',
-      'modest contemporary fashion, natural atmosphere',
-    ];
-    if (years <= 18) return [
-      '6-7 heads tall', 'balanced elongated proportions, clear facial structure',
-      'clean natural skin, minimal muscle definition, no exaggerated curves',
-      'modern modest fashion, bright natural expression, restrained styling',
-    ];
-    return [];
+  function minorStyle(years) {
+    return minorStyles.find((style) => years <= style.max) || null;
   }
 
   function lines(years, gender) {
     if (years >= 70) return style70(gender);
     if (years >= 50) return style50(gender);
-    const details = profile(years, gender);
-    if (!details.length) return [];
-    return [
-      `body_proportion: ${details[0]}`,
-      `proportion_details: ${details.slice(1).join(', ')}`,
-      'presentation: fully clothed, modest, neutral, non-suggestive, anatomically consistent proportions',
-    ];
+    return minorStyle(years)?.lines || [];
   }
 
   function negative(years) {
@@ -85,13 +97,7 @@
       'smooth unlined skin, ageless face',
     ].join(', ');
     if (years >= 19) return '';
-    const common = [
-      'overdeveloped anatomy', 'overly sharp facial structure', 'exaggerated body development',
-      'sexualized proportions', 'revealing clothing', 'suggestive pose',
-      'glamour pose', 'heavy makeup', 'fetish styling',
-    ];
-    if (years <= 13) common.push('overly elongated legs', 'overly broad shoulders', 'emphasized musculature');
-    return common.join(', ');
+    return minorStyle(years)?.negative || '';
   }
 
   Game.portraitAgePrompt = Object.freeze({ lines, negative });

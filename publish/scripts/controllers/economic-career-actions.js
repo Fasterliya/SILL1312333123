@@ -55,6 +55,10 @@
       Game.economy.spend(state, cost);
       data.venueLevel += 1;
       State.refreshAppointments(state, true);
+      Game.careerHistory?.add(state, {
+        key: `venue-${data.venueLevel}`, kind: 'career',
+        title: `接待场地升至${data.venueLevel}级`, detail: '预约报价与客源质量提升',
+      });
       return { ok: true, message: `场地升至${data.venueLevel}级，预约报价提高` };
     }
     if (action === 'patron') {
@@ -68,6 +72,10 @@
       if (!person) return { ok: false, message: '当前城市没有合适的新金主' };
       data.patrons.push({ id: person.id, name: person.name, loyalty: 40, deals: 0 });
       Game.relationshipSecrets?.addHookRecord(state, person, '金主关系');
+      Game.careerHistory?.add(state, {
+        key: `patron-${person.id}`, kind: 'career',
+        title: `建立金主关系`, detail: person.name,
+      });
       return { ok: true, message: `与${person.name}建立了金主关系` };
     }
     if (action === 'private') {
@@ -127,6 +135,10 @@
       if (!income) return { ok: false, message: '当前没有库存可出售' };
       state.money += income;
       Game.criminalSystem.addRecord(state, 8);
+      Game.careerHistory?.add(state, {
+        key: 'black-market-first-sale', kind: 'career',
+        title: '完成首笔黑市交易', detail: `批量出售库存，收入${Game.view.money(income)}`,
+      });
       return { ok: true, message: `批量出售收入${Game.view.money(income)}` };
     }
     const item = State.findItem(button.dataset.itemId);
@@ -143,6 +155,10 @@
       market.stock[item.id] -= 1;
       state.money += item.sell;
       Game.criminalSystem.addRecord(state, item.risk + 1);
+      Game.careerHistory?.add(state, {
+        key: 'black-market-first-sale', kind: 'career',
+        title: '完成首笔黑市交易', detail: `出售${item.name}`,
+      });
       return { ok: true, message: `出售${item.name}，收入${Game.view.money(item.sell)}` };
     }
     if (action === 'use') return useItem(state, item);

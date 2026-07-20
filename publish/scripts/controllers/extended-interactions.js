@@ -36,7 +36,8 @@
     } else if (action === 'live') result = Game.creatorCareer.livestream(state);
     else if (action === 'sponsor') result = Game.creatorCareer.sponsor(state);
     else if (action === 'private') result = Game.creatorCareer.privateDeal(state);
-    else result = Game.creatorCareer.community(state);
+    else if (action === 'community') result = Game.creatorCareer.community(state);
+    else result = Game.creatorGrowthActions.act(state, action);
     finish(result);
     return true;
   }

@@ -12,7 +12,7 @@
       + U.between(low, high) + (person.stats?.魅力 || 50) / 5);
     person.npcCreator.followers = Math.max(0, person.npcCreator.followers + gain);
     person.monthlyIncome = (person.monthlyIncome || 0)
-      + Math.round(person.npcCreator.followers * incomeRate);
+      + Game.creatorEconomy.npcIncome(person.npcCreator.followers, incomeRate);
   }
 
   /* ---- individual NPC career monthly handlers ---- */

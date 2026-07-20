@@ -65,7 +65,7 @@
       + state.stats.魅力 * 28 + state.stats.智力 * 8 + quality * 70;
     const views = Math.max(100, Math.round(reach * (0.72 + Math.random() * 0.65)));
     const gained = Math.max(5, Math.round(Math.sqrt(views) * (0.6 + quality / 60) * appeal(state) * style(state)));
-    const income = Math.round(views / 1000 * (8 + creator.brandTrust / 8));
+    const income = Game.creatorEconomy.contentIncome(views, creator.followers, creator.brandTrust);
     creator.followers += gained;
     creator.totalViews += views;
     creator.lastPublishMonth = state.totalMonths;
@@ -73,7 +73,7 @@
     state.money += income;
     state.career.performance = U.clamp(state.career.performance + 7, 0, 100);
     state.career.exp += 6;
-    return { ok: true, message: `发布完成：${views}播放，新增${gained}粉丝，收入${Game.view.money(income)}` };
+    return { ok: true, message: `发布完成：${Game.creatorEconomy.compact(views)}播放，新增${Game.creatorEconomy.compact(gained)}粉丝，收入${Game.view.money(income)}` };
   }
 
   function livestream(state) {
@@ -82,21 +82,21 @@
     if (creator.lastLiveMonth === state.totalMonths) return { ok: false, message: '本月已经完成过频道直播' };
     creator.lastLiveMonth = state.totalMonths;
     const viewers = Math.max(20, Math.round(80 + creator.followers * 0.08 + state.stats.魅力 * 4));
-    const income = Math.round(viewers * (1.5 + Math.random() * 1.8));
+    const income = Game.creatorEconomy.livestreamIncome(viewers, creator.followers, creator.brandTrust);
     creator.followers += Math.max(3, Math.round(viewers * 0.08 * appeal(state) * style(state)));
     creator.totalViews += viewers;
     state.money += income;
     state.stats.心情 = U.clamp(state.stats.心情 + 4, 0, 100);
     state.career.burnout = U.clamp(state.career.burnout + 8, 0, 100);
-    return { ok: true, message: `直播峰值${viewers}人，获得${Game.view.money(income)}` };
+    return { ok: true, message: `直播峰值${Game.creatorEconomy.compact(viewers)}人，获得${Game.view.money(income)}` };
   }
 
   function sponsor(state) {
     const creator = ensure(state);
-    if (creator.followers < 1000) return { ok: false, message: '粉丝达到1000后才能稳定承接广告' };
+    if (creator.followers < 1000) return { ok: false, message: '粉丝达到1k后才能稳定承接广告' };
     if (state.totalMonths - creator.lastSponsorMonth < 3) return { ok: false, message: '距离上次广告合作不足3个月' };
     creator.lastSponsorMonth = state.totalMonths;
-    const income = Math.round(1200 + creator.followers * (0.08 + creator.brandTrust / 1000));
+    const income = Game.creatorEconomy.sponsorIncome(creator.followers, creator.brandTrust);
     state.money += income;
     creator.brandTrust = U.clamp(creator.brandTrust + 4, 0, 100);
     state.career.performance = U.clamp(state.career.performance + 8, 0, 100);
@@ -124,7 +124,7 @@
     const minFollowers = isWelfare ? 1000 : 5000;
     const label = isWelfare ? '金主约会' : '约炮';
     if (creator.followers < minFollowers) {
-      return { ok: false, message: `粉丝达到${minFollowers}后才能收到${label}邀约` };
+      return { ok: false, message: `粉丝达到${Game.creatorEconomy.compact(minFollowers)}后才能收到${label}邀约` };
     }
     if (state.totalMonths - creator.lastPrivateMonth < 6) {
       return { ok: false, message: `${label}至少间隔6个月` };
@@ -151,32 +151,32 @@
     creator.followers += gain;
     creator.brandTrust = U.clamp(creator.brandTrust + 6, 0, 100);
     state.stats.心情 = U.clamp(state.stats.心情 + 3, 0, 100);
-    return { ok: true, message: `社群互动新增${gain}粉丝，品牌信任提升` };
+    return { ok: true, message: `社群互动新增${Game.creatorEconomy.compact(gain)}粉丝，品牌信任提升` };
   }
 
   function monthly(state) {
     if (!isCreator(state)) return;
     const creator = ensure(state);
     const views = Math.round(creator.followers * (0.3 + Math.random() * 0.25));
-    const income = Math.round(views / 1000 * (6 + creator.brandTrust / 10));
+    const income = Game.creatorEconomy.passiveIncome(views, creator.followers, creator.brandTrust);
     creator.totalViews += views;
     state.money += income;
     const base = Game.config.jobs.find((job) => job.id === state.career.jobId)?.salary || 0;
-    state.career.salary = Math.round(base * 0.35 + creator.followers * 0.035);
+    state.career.salary = Game.creatorEconomy.monthlySalary(base, creator.followers, creator.brandTrust);
     if (creator.scandalRisk > 0) creator.scandalRisk = U.clamp(creator.scandalRisk - 2, 0, 100);
     if (Math.random() < creator.scandalRisk / 1200) {
       const lost = Math.min(creator.followers, Math.round(creator.followers * 0.18));
       creator.followers -= lost;
       creator.brandTrust = U.clamp(creator.brandTrust - 15, 0, 100);
       creator.scandalRisk = U.clamp(creator.scandalRisk - 25, 0, 100);
-      Game.lifeDirector.addLog(state, '频道争议', `未披露合作引发质疑，流失${lost}名粉丝。`, 'normal');
+      Game.lifeDirector.addLog(state, '频道争议', `未披露合作引发质疑，流失${Game.creatorEconomy.compact(lost)}名粉丝。`, 'normal');
     }
   }
 
   function render(state) {
     const creator = ensure(state);
     return `<section class="creator-card"><header><div><span>${labels[state.career.jobId]}</span>
-      <strong>${creator.followers.toLocaleString()} 粉丝</strong></div><b>${creator.totalViews.toLocaleString()} 播放</b></header>
+      <strong>${Game.creatorEconomy.compact(creator.followers)} 粉丝</strong></div><b>${Game.creatorEconomy.compact(creator.totalViews)} 播放</b></header>
       <div class="creator-metrics"><span>品牌信任 <b>${Math.round(creator.brandTrust)}</b></span>
       <span>公开风险 <b>${Math.round(creator.scandalRisk)}</b></span>
       <span>魅力增粉 <b>×${appeal(state).toFixed(2)}</b></span>
@@ -186,6 +186,7 @@
       <button data-creator-action="publish">发布视频</button>
       ${state.career.jobId === 'vtuber' ? '<button data-creator-action="live">开启直播</button>' : ''}
       <button data-creator-action="community">经营社群</button>
+      ${Game.creatorGrowthActions.buttons()}
       <button data-creator-action="sponsor">承接广告</button>
       <button data-creator-action="private">${state.career.jobId === 'welfare' ? '金主约会' : '约炮'}</button></div></section>`;
   }

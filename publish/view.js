@@ -12,7 +12,7 @@
     'hunterModePanel', 'possessedList',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
-    'decisionBody', 'monthBtn', 'yearBtn', 'toast', 'tabPages',
+    'decisionBody', 'examJumpBtn', 'monthBtn', 'yearBtn', 'toast', 'tabPages',
     'tabs', 'heroCanvas', 'resetBtn',
   ];
   const el = {};
@@ -154,6 +154,7 @@
     Game.drawSettings.render(state);
     Game.profile.render(state, el);
     Game.navigation.refreshDetail();
+    Game.educationFastForward.updateButton(state, el.examJumpBtn);
     el.monthBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
     el.yearBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
   }

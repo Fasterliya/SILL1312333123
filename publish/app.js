@@ -35,11 +35,38 @@
     if (busy || state.pendingDecision || state.gameOver) return;
     busy = true;
     const result = Game.lifeDirector.advance(state, months);
+    Game.educationFastForward.complete(state);
     refresh();
     if (result.interrupted && state.pendingDecision) {
       Game.view.showToast(`时间推进了${result.advanced}个月，已在关键选择处暂停`, 'warning');
     }
     save().finally(() => { busy = false; });
+  }
+
+  async function runEducationAdvance(resume) {
+    if (busy || state.pendingDecision || state.gameOver) return;
+    const months = resume ? Game.educationFastForward.remaining(state)
+      : Game.educationFastForward.begin(state);
+    if (months <= 0) return;
+    busy = true;
+    Game.view.el.examJumpBtn.disabled = true;
+    Game.view.el.examJumpBtn.querySelector('strong').textContent = '推进中…';
+    try {
+      await new Promise((resolve) => root.requestAnimationFrame(resolve));
+      await Game.educationFastForward.run(state);
+      await save();
+    } catch (err) {
+      console.error('学习阶段推进失败:', err?.message, err?.stack);
+      Game.view.showToast('学习阶段推进失败，请稍后重试', 'warning');
+    } finally {
+      busy = false;
+      refresh();
+    }
+  }
+
+  function resumeEducation() {
+    if (busy) return root.setTimeout(resumeEducation, 80);
+    runEducationAdvance(true);
   }
 
   function switchTabs(event) {
@@ -54,6 +81,7 @@
   function bind() {
     Game.view.el.monthBtn.addEventListener('click', () => advance(1));
     Game.view.el.yearBtn.addEventListener('click', () => advance(12));
+    Game.view.el.examJumpBtn.addEventListener('click', () => runEducationAdvance(false));
     Game.view.el.decisionBody.addEventListener('click', (event) => {
       const choice = event.target.closest('[data-choice]');
       if (choice) Game.actions.decide(choice.dataset.choice);
@@ -136,7 +164,7 @@
       Game.hunterMode.configure({ getState: () => state, refresh, save });
       Game.characterChat.configure({ getState: () => state, refresh, save });
       Game.appearance.configure({ getState: () => state });
-      Game.actions.configure({ getState: () => state, refresh, save });
+      Game.actions.configure({ getState: () => state, refresh, save, resumeEducation });
       Game.familySystem.configure({ getState: () => state, refresh, save });
       Game.interactionRouter.configure({ getState: () => state, refresh, save, finish });
       Game.profile.updateGrowth(state);

@@ -11,7 +11,7 @@
 
   function done() {
     api.refresh();
-    api.save();
+    Promise.resolve(api.save()).finally(() => api.resumeEducation?.());
   }
 
   function trade(name, mode, lot) {

@@ -1,0 +1,26 @@
+.time-controls #examJumpBtn {
+  grid-column: 1 / -1;
+  min-height: 36px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #765c35;
+}
+
+.time-controls #examJumpBtn[hidden] {
+  display: none;
+}
+
+.time-controls #examJumpBtn span {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time-controls #examJumpBtn strong {
+  flex: 0 0 auto;
+  font-size: 12px;
+}

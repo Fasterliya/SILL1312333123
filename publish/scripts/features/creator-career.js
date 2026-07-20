@@ -52,6 +52,7 @@
   }
 
   const appeal = (state) => 0.75 + U.clamp(state.stats.魅力, 0, 100) / 100;
+  const style = (state) => Game.creatorStyleGrowth.multiplier(state.profile, state.career.jobId);
 
   function publish(state, rawTitle) {
     if (!isCreator(state)) return { ok: false, message: '当前职业没有个人频道' };
@@ -63,7 +64,7 @@
     const reach = 320 + creator.followers * (0.35 + Math.random() * 0.5)
       + state.stats.魅力 * 28 + state.stats.智力 * 8 + quality * 70;
     const views = Math.max(100, Math.round(reach * (0.72 + Math.random() * 0.65)));
-    const gained = Math.max(5, Math.round(Math.sqrt(views) * (0.6 + quality / 60) * appeal(state)));
+    const gained = Math.max(5, Math.round(Math.sqrt(views) * (0.6 + quality / 60) * appeal(state) * style(state)));
     const income = Math.round(views / 1000 * (8 + creator.brandTrust / 8));
     creator.followers += gained;
     creator.totalViews += views;
@@ -82,7 +83,7 @@
     creator.lastLiveMonth = state.totalMonths;
     const viewers = Math.max(20, Math.round(80 + creator.followers * 0.08 + state.stats.魅力 * 4));
     const income = Math.round(viewers * (1.5 + Math.random() * 1.8));
-    creator.followers += Math.max(3, Math.round(viewers * 0.08 * appeal(state)));
+    creator.followers += Math.max(3, Math.round(viewers * 0.08 * appeal(state) * style(state)));
     creator.totalViews += viewers;
     state.money += income;
     state.stats.心情 = U.clamp(state.stats.心情 + 4, 0, 100);
@@ -146,7 +147,7 @@
     const creator = ensure(state);
     if (creator.lastCommunityMonth === state.totalMonths) return { ok: false, message: '本月已经完成过社群活动' };
     creator.lastCommunityMonth = state.totalMonths;
-    const gain = Math.max(10, Math.round((creator.followers * 0.015 + 20) * appeal(state)));
+    const gain = Math.max(10, Math.round((creator.followers * 0.015 + 20) * appeal(state) * style(state)));
     creator.followers += gain;
     creator.brandTrust = U.clamp(creator.brandTrust + 6, 0, 100);
     state.stats.心情 = U.clamp(state.stats.心情 + 3, 0, 100);
@@ -178,7 +179,8 @@
       <strong>${creator.followers.toLocaleString()} 粉丝</strong></div><b>${creator.totalViews.toLocaleString()} 播放</b></header>
       <div class="creator-metrics"><span>品牌信任 <b>${Math.round(creator.brandTrust)}</b></span>
       <span>公开风险 <b>${Math.round(creator.scandalRisk)}</b></span>
-      <span>魅力增粉 <b>×${appeal(state).toFixed(2)}</b></span></div>
+      <span>魅力增粉 <b>×${appeal(state).toFixed(2)}</b></span>
+      <span>衣着增粉 <b>×${style(state).toFixed(2)}</b></span></div>
       <label class="creator-title"><span>本期标题</span><input data-creator-title maxlength="40"
       placeholder="输入视频标题"></label><div class="creator-actions">
       <button data-creator-action="publish">发布视频</button>

@@ -7,7 +7,8 @@
   function creatorGrowth(person, rate, low, high, incomeRate) {
     person.npcCreator ||= { followers: U.between(300, 6000) };
     const appeal = 0.75 + (person.stats?.魅力 || 50) / 100;
-    const gain = Math.round(person.npcCreator.followers * rate * appeal
+    const style = Game.creatorStyleGrowth.multiplier(person, person.job);
+    const gain = Math.round(person.npcCreator.followers * rate * appeal * style
       + U.between(low, high) + (person.stats?.魅力 || 50) / 5);
     person.npcCreator.followers = Math.max(0, person.npcCreator.followers + gain);
     person.monthlyIncome = (person.monthlyIncome || 0)

@@ -15,7 +15,7 @@
     ['gonorrhea', '淋病', 'std', 16, 2, 2000, 3],
     ['syphilis', '梅毒', 'std', 16, 3, 5000, 6],
     ['chlamydia', '衣原体感染', 'std', 16, 1, 1500, 2],
-    ['hiv', 'HIV感染', 'std', 16, 5, 15000, 0, true],
+    ['hiv', 'HIV感染', 'std', 16, 5, 15000, 12],
     ['cervicitis', '宫颈炎', 'gyn', 18, 2, 3000, 4],
     ['pid', '盆腔炎', 'gyn', 18, 3, 4500, 5],
     ['fibroid', '子宫肌瘤', 'gyn', 30, 3, 6000, 8],
@@ -142,7 +142,10 @@
         return;
       }
       if (!hasMonth(disease.treatedAt)) {
-        state.stats.健康 = U.clamp(state.stats.健康 - Math.max(1, def.severity), 0, 100);
+        const minimumHealth = def.type === 'std' ? 1 : 0;
+        state.stats.健康 = U.clamp(
+          state.stats.健康 - Math.max(1, def.severity), minimumHealth, 100,
+        );
       }
     });
     if (state.totalMonths % 4 === 0 && Math.random() < 0.08 + (age > 60 ? 0.05 : 0)) {

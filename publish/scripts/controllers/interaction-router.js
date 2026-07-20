@@ -212,6 +212,7 @@
   }
 
   function handle(event) {
+    if (Game.npcInitiative?.handleClick?.(event)) return;
     if (Game.relationshipPanel?.handleClick?.(event)) return;
     if (Game.subjectPanel?.handleClick?.(event)) return;
     if (Game.companySystem?.handleClick?.(event)) { Game._save?.(); return; }

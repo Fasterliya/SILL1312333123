@@ -25,6 +25,7 @@
     Game.idolSystem?.monthly(state);
     Game.npcCareerLife?.monthly(state);
     Game.familyConflict?.monthly(state);
+    Game.relationshipConflict?.monthly(state);
     Game.criminalSystem?.monthly(state);
     Game.psychology?.monthly(state);
     Game.npcInitiative?.monthly(state);

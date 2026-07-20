@@ -7,6 +7,7 @@
     taxFiling: () => Game.taxSystem,
     boardVote: () => Game.stockDirector,
     familyConflict: () => Game.familyConflict,
+    relationshipConflict: () => Game.relationshipConflict,
   };
 
   function content(state) {

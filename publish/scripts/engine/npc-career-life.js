@@ -4,6 +4,16 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
 
+  function creatorGrowth(person, rate, low, high, incomeRate) {
+    person.npcCreator ||= { followers: U.between(300, 6000) };
+    const appeal = 0.75 + (person.stats?.魅力 || 50) / 100;
+    const gain = Math.round(person.npcCreator.followers * rate * appeal
+      + U.between(low, high) + (person.stats?.魅力 || 50) / 5);
+    person.npcCreator.followers = Math.max(0, person.npcCreator.followers + gain);
+    person.monthlyIncome = (person.monthlyIncome || 0)
+      + Math.round(person.npcCreator.followers * incomeRate);
+  }
+
   /* ---- individual NPC career monthly handlers ---- */
 
   function monthlyProstitute(state, person) {
@@ -20,10 +30,7 @@
   function monthlyWelfare(state, person) {
     const age = U.personAge(state, person);
     if (age > 40) { person.job = '退休福利姬'; return; }
-    person.npcCreator = person.npcCreator || { followers: U.between(800, 5000) };
-    person.npcCreator.followers += Math.round(person.npcCreator.followers * 0.03 + U.between(-20, 60));
-    const income = Math.round(person.npcCreator.followers * 0.04);
-    person.monthlyIncome = (person.monthlyIncome || 0) + income;
+    creatorGrowth(person, 0.03, -20, 60, 0.04);
     if (Math.random() < 0.05) {
       person.npcCreator.followers = Math.max(0, Math.round(person.npcCreator.followers * 0.85));
     }
@@ -65,17 +72,11 @@
   }
 
   function monthlyVtuber(state, person) {
-    person.npcCreator = person.npcCreator || { followers: U.between(500, 8000) };
-    person.npcCreator.followers += Math.round(person.npcCreator.followers * 0.02 + U.between(-30, 80));
-    const income = Math.round(person.npcCreator.followers * 0.03);
-    person.monthlyIncome = (person.monthlyIncome || 0) + income;
+    creatorGrowth(person, 0.02, -30, 80, 0.03);
   }
 
   function monthlyBeautybLogger(state, person) {
-    person.npcCreator = person.npcCreator || { followers: U.between(300, 6000) };
-    person.npcCreator.followers += Math.round(person.npcCreator.followers * 0.025 + U.between(-20, 60));
-    const income = Math.round(person.npcCreator.followers * 0.03);
-    person.monthlyIncome = (person.monthlyIncome || 0) + income;
+    creatorGrowth(person, 0.025, -20, 60, 0.03);
   }
 
   /* ---- main monthly dispatcher ---- */
@@ -92,7 +93,7 @@
       else if (job === '偶像艺人' || job.includes('偶像练习生')) monthlyIdol(state, person);
       else if (job === '职业Coser') monthlyCosplayer(state, person);
       else if (job === '虚拟主播') monthlyVtuber(state, person);
-      else if (job === '美妆博主') monthlyBeautybLogger(state, person);
+      else if (['美妆博主', '写真博主', '穿搭博主'].includes(job)) monthlyBeautybLogger(state, person);
     });
   }
 

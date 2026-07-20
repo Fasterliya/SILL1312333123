@@ -27,7 +27,7 @@
     creator.lastLiveMonth = Number.isFinite(creator.lastLiveMonth) ? creator.lastLiveMonth : -1;
     creator.lastCommunityMonth = Number.isFinite(creator.lastCommunityMonth) ? creator.lastCommunityMonth : -1;
     creator.lastPrivateMonth = Number.isFinite(creator.lastPrivateMonth) ? creator.lastPrivateMonth : -6;
-    creator.videos = Array.isArray(creator.videos) ? creator.videos.slice(0, 12) : [];
+    delete creator.videos;
     return creator;
   }
 
@@ -51,6 +51,8 @@
     return keyword + length + punctuation;
   }
 
+  const appeal = (state) => 0.75 + U.clamp(state.stats.魅力, 0, 100) / 100;
+
   function publish(state, rawTitle) {
     if (!isCreator(state)) return { ok: false, message: '当前职业没有个人频道' };
     const creator = ensure(state);
@@ -61,18 +63,15 @@
     const reach = 320 + creator.followers * (0.35 + Math.random() * 0.5)
       + state.stats.魅力 * 28 + state.stats.智力 * 8 + quality * 70;
     const views = Math.max(100, Math.round(reach * (0.72 + Math.random() * 0.65)));
-    const gained = Math.max(5, Math.round(Math.sqrt(views) * (0.6 + quality / 60)));
+    const gained = Math.max(5, Math.round(Math.sqrt(views) * (0.6 + quality / 60) * appeal(state)));
     const income = Math.round(views / 1000 * (8 + creator.brandTrust / 8));
     creator.followers += gained;
     creator.totalViews += views;
     creator.lastPublishMonth = state.totalMonths;
-    creator.videos.unshift({ title, views, gained, income, month: state.totalMonths });
-    creator.videos = creator.videos.slice(0, 12);
     creator.brandTrust = U.clamp(creator.brandTrust + (quality >= 20 ? 3 : 1), 0, 100);
     state.money += income;
     state.career.performance = U.clamp(state.career.performance + 7, 0, 100);
     state.career.exp += 6;
-    Game.lifeDirector.addLog(state, '频道发布', `《${title}》获得${views}次播放，新增${gained}名粉丝。`, 'good');
     return { ok: true, message: `发布完成：${views}播放，新增${gained}粉丝，收入${Game.view.money(income)}` };
   }
 
@@ -83,7 +82,7 @@
     creator.lastLiveMonth = state.totalMonths;
     const viewers = Math.max(20, Math.round(80 + creator.followers * 0.08 + state.stats.魅力 * 4));
     const income = Math.round(viewers * (1.5 + Math.random() * 1.8));
-    creator.followers += Math.max(3, Math.round(viewers * 0.08));
+    creator.followers += Math.max(3, Math.round(viewers * 0.08 * appeal(state)));
     creator.totalViews += viewers;
     state.money += income;
     state.stats.心情 = U.clamp(state.stats.心情 + 4, 0, 100);
@@ -147,7 +146,7 @@
     const creator = ensure(state);
     if (creator.lastCommunityMonth === state.totalMonths) return { ok: false, message: '本月已经完成过社群活动' };
     creator.lastCommunityMonth = state.totalMonths;
-    const gain = Math.max(10, Math.round(creator.followers * 0.015 + state.stats.魅力));
+    const gain = Math.max(10, Math.round((creator.followers * 0.015 + 20) * appeal(state)));
     creator.followers += gain;
     creator.brandTrust = U.clamp(creator.brandTrust + 6, 0, 100);
     state.stats.心情 = U.clamp(state.stats.心情 + 3, 0, 100);
@@ -175,22 +174,18 @@
 
   function render(state) {
     const creator = ensure(state);
-    const videos = creator.videos.slice(0, 5).map((video) => (
-      `<div class="creator-video"><strong>${video.title}</strong><span>${video.views}播放 · +${video.gained}粉丝
-      · ${Game.view.money(video.income)}</span></div>`
-    )).join('');
     return `<section class="creator-card"><header><div><span>${labels[state.career.jobId]}</span>
       <strong>${creator.followers.toLocaleString()} 粉丝</strong></div><b>${creator.totalViews.toLocaleString()} 播放</b></header>
       <div class="creator-metrics"><span>品牌信任 <b>${Math.round(creator.brandTrust)}</b></span>
-      <span>公开风险 <b>${Math.round(creator.scandalRisk)}</b></span></div>
+      <span>公开风险 <b>${Math.round(creator.scandalRisk)}</b></span>
+      <span>魅力增粉 <b>×${appeal(state).toFixed(2)}</b></span></div>
       <label class="creator-title"><span>本期标题</span><input data-creator-title maxlength="40"
       placeholder="输入视频标题"></label><div class="creator-actions">
       <button data-creator-action="publish">发布视频</button>
       ${state.career.jobId === 'vtuber' ? '<button data-creator-action="live">开启直播</button>' : ''}
       <button data-creator-action="community">经营社群</button>
       <button data-creator-action="sponsor">承接广告</button>
-      <button data-creator-action="private">${state.career.jobId === 'welfare' ? '金主约会' : '约炮'}</button></div>
-      <div class="creator-videos">${videos || '<p class="empty-state">频道还没有发布内容。</p>'}</div></section>`;
+      <button data-creator-action="private">${state.career.jobId === 'welfare' ? '金主约会' : '约炮'}</button></div></section>`;
   }
 
   Game.creatorCareer = Object.freeze({

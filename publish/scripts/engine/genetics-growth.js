@@ -34,14 +34,14 @@
     Game.genetics.ensure(target, gender, `${target.id || target.name}-appearance`, true);
     const genes = target.genetics.expressed;
     target.eyeColor = genes.eyeColor;
-    target.faceShape = genes.faceShape;
-    target.featureProportions = genes.featureProportions;
+    target.faceShape = target.cosmeticFaceShape || genes.faceShape;
+    target.featureProportions = target.cosmeticFeatureProportions || genes.featureProportions;
     target.hairStyleTendency = genes.hairStyleTendency;
     target.bodyFrame = genes.bodyFrame;
     target.developmentTendency = genes.developmentTendency;
     target.molePosition = genes.molePosition;
     target.freckles = genes.freckles;
-    target.distinctiveFeature = genes.distinctiveFeature;
+    target.distinctiveFeature = target.cosmeticDistinctiveFeature || genes.distinctiveFeature;
     target.maxHeight = Number(target.adultHeight) || genes.maxHeight;
     target.temperament = age < 3 ? '懵懂' : (age < 7 ? '童真' : genes.temperament);
     target.bodyType = target.adultBodyType && age >= 18

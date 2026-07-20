@@ -2,6 +2,22 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
+  const clamp = (value) => Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+
+  function ensureStats(person) {
+    const sourceId = String(person.id || person.name || 'person');
+    if (!person.stats || typeof person.stats !== 'object' || person.statSourceId !== sourceId) {
+      let seed = 17;
+      for (const char of sourceId) seed = (seed * 31 + char.charCodeAt(0)) >>> 0;
+      person.stats = {
+        健康: 58 + seed % 38,
+        智力: 40 + (seed * 7) % 51,
+        魅力: 35 + (seed * 11) % 56,
+      };
+      person.statSourceId = sourceId;
+    }
+    ['健康', '智力', '魅力'].forEach((key) => { person.stats[key] = clamp(person.stats[key]); });
+  }
 
   function ensurePerson(state, person) {
     const child = ['儿子', '女儿'].includes(person.relation);
@@ -9,6 +25,7 @@
       person.birthMonth = child && Number.isFinite(person.bornAt)
         ? person.bornAt : -(Number(person.baseAge) || 0) * 12;
     }
+    ensureStats(person);
     person.memories = Array.isArray(person.memories) ? person.memories.slice(0, 12) : [];
     person.trust = Number.isFinite(person.trust) ? person.trust : Math.round(person.affection || 50);
     person.conflict = Number.isFinite(person.conflict) ? person.conflict : 0;

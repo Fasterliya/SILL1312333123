@@ -12,7 +12,6 @@
   function clothing(top) {
     return { top: top || '品质日常', socks: '船袜', shoes: '白色运动鞋' };
   }
-
   function person(relation, surname, age, gender, anchorMonth) {
     const resolvedGender = gender || random(['男', '女']);
     const bodyTypes = resolvedGender === '女'
@@ -58,11 +57,12 @@
       lastLifeUpdateAge: null,
       status: '健康',
     };
+    created.statSourceId = created.id;
+    created.stats = { 健康: between(58, 95), 智力: between(40, 90), 魅力: between(35, 90) };
     Game.genetics.founder(created, resolvedGender, `${created.id}-${created.name}`, false);
     Game.demography?.ensureWoman(created);
     return created;
   }
-
   function log(title, text, tone, month) {
     return {
       id: `e-${month}-${Math.random().toString(36).slice(2, 6)}`,

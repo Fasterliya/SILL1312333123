@@ -107,6 +107,8 @@
       ['成长身高', `${Number(person.maxHeight || 0).toFixed(1)} cm`],
       ['性格', person.personality], ['特质', person.trait], ['状态', person.status],
     ];
+    const attributes = [['健康', person.stats?.健康], ['智力', person.stats?.智力],
+      ['魅力', person.stats?.魅力]];
     const life = [
       ['当前学业', person.educationName || person.school || '-'],
       ['职业', person.job || '-'], ['公司', person.company || '-'],
@@ -150,6 +152,7 @@
       <div><p>${escape(person.relation)}</p><h3>${escape(person.name)}</h3>
       <span>${escape(person.personality)} · ${escape(person.trait)}</span></div></section>
       <div class="record-stack">${section('基本档案', '身份与成长', identity, true)}
+      ${section('角色属性', '健康、智力与魅力', attributes, true)}
       ${section('外貌表现', '当前实际外观', looks, false)}
       ${section('遗传信息', 'DNA 与成长倾向', inherited, false)}
       ${section('人生状态', '学业、职业与家庭', life, false)}

@@ -11,15 +11,54 @@
       category: 'breastreduction', failCharm: -2, failHealth: -3 },
     lipo: { name: '抽脂塑形', cost: 42000, success: 0.78, charm: 6, bodyType: '匀称',
       category: 'liposuction', failCharm: -3, failHealth: -4 },
+    waist: { name: '腰腹塑形', cost: 38000, success: 0.84, charm: 6, bodyType: '娇小纤细',
+      category: 'waist', failCharm: -3, failHealth: -4 },
+    hip: { name: '臀部塑形', cost: 46000, success: 0.8, charm: 7, bodyType: '丰满',
+      category: 'hip', failCharm: -4, failHealth: -5 },
     hymen: { name: '处女膜修复', cost: 8000, success: 0.95, charm: 0, bodyType: null,
       category: 'hymen', failCharm: 0, failHealth: 0, hymenOnly: true },
-    facial: { name: '面部整形', cost: 55000, success: 0.75, charm: 10, bodyType: null,
+    facial: { name: '面部整形', cost: 55000, success: 0.75, charm: 10, faceShape: '鹅蛋脸',
       category: 'facial', failCharm: -8, failHealth: -6 },
+    nose: { name: '鼻部塑形', cost: 26000, success: 0.88, charm: 5, featureProportions: '立体协调',
+      category: 'nose', failCharm: -3, failHealth: -3 },
+    eyelid: { name: '双眼皮手术', cost: 16000, success: 0.92, charm: 4, distinctiveFeature: '明亮双眼皮',
+      category: 'eyelid', failCharm: -2, failHealth: -2 },
+    jaw: { name: '下颌轮廓调整', cost: 62000, success: 0.72, charm: 8, faceShape: '精致鹅蛋脸',
+      category: 'jaw', failCharm: -9, failHealth: -7 },
+    height: { name: '增高手术', cost: 120000, success: 0.68, charm: 6, heightDelta: 5,
+      category: 'height', failCharm: -8, failHealth: -10 },
   };
 
   function list() { return Object.keys(procedures).map((k) => ({ id: k, ...procedures[k] })); }
 
   function get(id) { return procedures[id] || null; }
+
+  function applyChanges(state, proc) {
+    const profile = state.profile;
+    if (proc.bodyType) {
+      profile.bodyType = proc.bodyType;
+      profile.adultBodyType = proc.bodyType;
+    }
+    if (proc.faceShape) {
+      profile.faceShape = proc.faceShape;
+      profile.cosmeticFaceShape = proc.faceShape;
+    }
+    if (proc.featureProportions) {
+      profile.featureProportions = proc.featureProportions;
+      profile.cosmeticFeatureProportions = proc.featureProportions;
+    }
+    if (proc.distinctiveFeature) {
+      profile.distinctiveFeature = proc.distinctiveFeature;
+      profile.cosmeticDistinctiveFeature = proc.distinctiveFeature;
+    }
+    if (proc.heightDelta) {
+      const height = Number(profile.adultHeight) || Number(profile.maxHeight) || Number(profile.height) || 160;
+      const currentHeight = Number(profile.height) || height;
+      profile.adultHeight = Math.min(210, height + proc.heightDelta);
+      profile.maxHeight = profile.adultHeight;
+      profile.height = Math.min(profile.maxHeight, currentHeight + proc.heightDelta);
+    }
+  }
 
   function perform(state, procedureId) {
     const proc = procedures[procedureId];
@@ -45,11 +84,7 @@
 
     if (success) {
       if (proc.charm) state.stats.魅力 = U.clamp(state.stats.魅力 + proc.charm, 0, 100);
-      if (proc.bodyType) {
-        const personTarget = (proc.category === 'breast' || proc.category === 'breastreduction'
-          || proc.category === 'liposuction') ? state.profile : null;
-        if (personTarget) personTarget.bodyType = proc.bodyType;
-      }
+      applyChanges(state, proc);
       if (proc.hymenOnly) state.profile.hymenIntact = true;
       result.note = `手术成功，${proc.name}完成。`;
     } else {
@@ -74,7 +109,7 @@
     const items = list().map((proc) => {
       const disabled = proc.hymenOnly && state.gender !== '女';
       return `<button class="surgery-btn" data-surgery="${proc.id}" ${disabled ? 'disabled' : ''}>
-        <strong>${proc.name}</strong><small>成功率 ${Math.round(proc.success * 100)}%</small>
+        <strong>${proc.name}</strong><small>成功率 ${Math.round(proc.success * 100)}% · 魅力+${proc.charm}</small>
         <b>≈${Game.view.money(proc.cost)}</b></button>`;
     }).join('');
 
@@ -85,8 +120,8 @@
     )).join('');
 
     return `<details class="system-fold" open>
-      <summary>整容手术 · 5项可选</summary>
-      <p class="system-note">手术影响外貌和魅力，失败时有并发症。整容结果会遗传影响子女外观。</p>
+      <summary>整容手术 · ${list().length}项可选</summary>
+      <p class="system-note">共${list().length}项改造。手术会改变身体并提高魅力，失败时可能出现并发症。</p>
       <div class="surgery-grid">${items}</div>
       ${history ? `<div class="surgery-history"><h4>手术记录</h4>${history}</div>` : ''}
     </details>`;

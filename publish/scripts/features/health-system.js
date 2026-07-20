@@ -12,15 +12,16 @@
     ['diabetes', '糖尿病', 'chronic', 40, 3, 2500, 24],
     ['arthritis', '关节炎', 'chronic', 45, 2, 1800, 18],
     ['heart', '心脏病', 'chronic', 50, 4, 5000, 0, true],
-    ['gonorrhea', '淋病', 'std', 16, 2, 2000, 3],
-    ['syphilis', '梅毒', 'std', 16, 3, 5000, 6],
-    ['chlamydia', '衣原体感染', 'std', 16, 1, 1500, 2],
-    ['hiv', 'HIV感染', 'std', 16, 5, 15000, 12],
+    ['gonorrhea', '淋病', 'std', 16, 2, 2000, 0, false, true],
+    ['syphilis', '梅毒', 'std', 16, 3, 5000, 0, false, true],
+    ['chlamydia', '衣原体感染', 'std', 16, 1, 1500, 0, false, true],
+    ['hiv', 'HIV感染', 'std', 16, 5, 15000, 0, false, true],
     ['cervicitis', '宫颈炎', 'gyn', 18, 2, 3000, 4],
     ['pid', '盆腔炎', 'gyn', 18, 3, 4500, 5],
     ['fibroid', '子宫肌瘤', 'gyn', 30, 3, 6000, 8],
-  ].map(([id, name, type, minAge, severity, treatCost, selfHealMonths, fatal = false]) => (
-    { id, name, type, minAge, severity, treatCost, selfHealMonths, fatal }
+  ].map(([id, name, type, minAge, severity, treatCost, selfHealMonths,
+    fatal = false, incurable = false]) => (
+    { id, name, type, minAge, severity, treatCost, selfHealMonths, fatal, incurable }
   ));
 
   const definition = (id) => diseasePool.find((item) => item.id === id);
@@ -59,9 +60,9 @@
     const payment = payMedical(state, def.treatCost);
     disease.discoveredAt = hasMonth(disease.discoveredAt) ? disease.discoveredAt : state.totalMonths;
     disease.treatedAt = state.totalMonths;
-    if (!def.fatal) disease.healedAt = state.totalMonths;
+    if (!def.fatal && !def.incurable) disease.healedAt = state.totalMonths;
     state.stats.健康 = U.clamp(state.stats.健康 + Math.max(4, def.severity * 3), 0, 100);
-    const result = def.fatal ? '病情已得到控制' : '已经痊愈';
+    const result = def.fatal || def.incurable ? '病情已得到控制' : '已经痊愈';
     Game.lifeDirector.addLog(state, '疾病治疗', `${disease.name}${result}。`, 'good');
     return { ok: true, message: `${disease.name}${result}；${paymentText(payment)}` };
   }
@@ -83,7 +84,8 @@
     };
     state.health.diseases.push(disease);
     if (hasMonth(disease.discoveredAt)) {
-      const advice = def.fatal ? '需要尽快治疗。' : '可以治疗或等待自行恢复。';
+      const advice = def.incurable ? '不可痊愈，但不会致死，治疗后可以控制病情。'
+        : (def.fatal ? '需要尽快治疗。' : '可以治疗或等待自行恢复。');
       Game.lifeDirector.addLog(state, '健康警报', `你患上了${def.name}，${advice}`, 'normal');
     }
     return disease;
@@ -136,7 +138,8 @@
       if (!def) return;
       disease.infectedAt = hasMonth(disease.infectedAt)
         ? disease.infectedAt : (hasMonth(disease.discoveredAt) ? disease.discoveredAt : state.totalMonths);
-      if (!def.fatal && state.totalMonths - disease.infectedAt >= def.selfHealMonths) {
+      if (!def.fatal && !def.incurable
+        && state.totalMonths - disease.infectedAt >= def.selfHealMonths) {
         disease.healedAt = state.totalMonths;
         Game.lifeDirector.addLog(state, '自行痊愈', `${disease.name}已经自行痊愈。`, 'good');
         return;
@@ -163,15 +166,16 @@
     const rows = active(state).filter((item) => hasMonth(item.discoveredAt)).map((disease) => {
       const def = definition(disease.id);
       if (!def) return '';
-      const managed = def.fatal && hasMonth(disease.treatedAt);
+      const managed = (def.fatal || def.incurable) && hasMonth(disease.treatedAt);
       const infectedAt = hasMonth(disease.infectedAt) ? disease.infectedAt : state.totalMonths;
-      const status = managed ? '病情已控制' : (def.fatal ? '致命疾病，需要治疗'
-        : `可自行痊愈，预计${Math.max(0, def.selfHealMonths - (state.totalMonths - infectedAt))}个月`);
+      const status = managed ? (def.incurable ? '长期控制，不会致死' : '病情已控制')
+        : (def.incurable ? '不可痊愈，但不会致死' : (def.fatal ? '致命疾病，需要治疗'
+          : `可自行痊愈，预计${Math.max(0, def.selfHealMonths - (state.totalMonths - infectedAt))}个月`));
       const button = hasMonth(disease.treatedAt) ? '' : `<button data-health-action="treat"
         data-health-value="${disease.id}">治疗 · ${Game.view.money(def.treatCost)}</button>`;
       return `<article class="disease-row"><div><strong>${disease.name}</strong><small>${status}</small></div>${button}</article>`;
     }).join('');
-    return rows || '<p class="empty-state">目前没有已发现疾病。非致命疾病会随时间自行痊愈。</p>';
+    return rows || '<p class="empty-state">目前没有已发现疾病。可痊愈的非致命疾病会随时间自行恢复。</p>';
   }
 
   function render(state) {
@@ -183,7 +187,7 @@
       <section class="health-module"><header><span>01</span><div><h3>检测健康</h3><small>${checkupNote}</small></div></header>
       <button class="health-primary" data-health-action="checkup">进行健康检测 · ${Game.view.money(1200)}</button></section>
       <section class="health-module"><header><span>02</span><div><h3>疾病治疗</h3>
-      <small>治疗可立即康复；未治疗的非致命疾病也会自行痊愈</small></div></header>
+      <small>普通疾病可自行恢复；性病不可痊愈，但治疗后可长期控制且不会致死</small></div></header>
       <div class="disease-list">${diseaseRows(state)}</div></section>
       <section class="health-module"><header><span>03</span><div><h3>整容</h3>
       <small>保留外貌改造、手术风险与历史记录</small></div></header>${surgery}</section>`;

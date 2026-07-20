@@ -28,6 +28,11 @@
 
   function currentJob(state, money) {
     if (!state.career.job) return '<p class="empty-state">当前没有工作。先筛选方向，再打开职位详情确认应聘。</p>';
+
+    // Route to career panels if available
+    if (Game.careerPanels) return Game.careerPanels.routePanel(state, money);
+
+    // Fallback: original logic
     const creator = Game.creatorCareer.isCreator(state);
     const idol = Game.idolSystem?.isIdolJob(state.career.jobId);
     const specialJob = creator || idol;

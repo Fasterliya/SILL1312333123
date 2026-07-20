@@ -55,6 +55,9 @@
       person.prostitute = person.prostitute && typeof person.prostitute === 'object' ? person.prostitute : {};
       person.hookupHistory = Array.isArray(person.hookupHistory) ? person.hookupHistory.slice(-12) : [];
       person.hymenIntact = person.hymenIntact !== undefined ? person.hymenIntact : true;
+      person.trauma = Number.isFinite(person.trauma) ? person.trauma : 0;
+      person.victimCorruption = Number.isFinite(person.victimCorruption) ? person.victimCorruption : 0;
+      person.lifeResume = Array.isArray(person.lifeResume) ? person.lifeResume.slice(-30) : [];
       person.cosmeticProcedures = Array.isArray(person.cosmeticProcedures) ? person.cosmeticProcedures.slice(-8) : [];
     }
     person.surname ||= Game.familyNaming.surnameOf(person, '', person.culture || state.hometown?.country);
@@ -86,7 +89,7 @@
       state.matchmaking.candidates.push(...candidates);
       state.contacts = state.contacts.filter((person) => !candidates.includes(person));
     }
-    state.version = 26;
+    state.version = 27; state.day = Math.max(1, Math.min(30, Number(state.day) || 1)); state.timeSpeed = [0, 1, 5, 10].includes(state.timeSpeed) ? state.timeSpeed : 0; state.stamina = state.stamina && typeof state.stamina === 'object' ? state.stamina : { current: 100, max: 100 };
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {
@@ -184,6 +187,44 @@
     };
     state.hookupStage = state.hookupStage && typeof state.hookupStage === 'object' ? state.hookupStage : {
       active: false, stage: 0, sponsorId: null, style: '', score: 0,
+    };
+    /* Criminal system */
+    state.criminal = state.criminal && typeof state.criminal === 'object' ? state.criminal : {
+      record: 0, arrests: 0, jailMonths: 0, lastRaidMonth: -24,
+      hideoutQuality: 0, evasionSkill: 0,
+    };
+
+    /* Psychology system */
+    state.psychology = state.psychology && typeof state.psychology === 'object' ? state.psychology : {
+      sexAddiction: 0, lastSexMonth: -1, withdrawalMonths: 0,
+      guilt: 0, corruption: 0,
+    };
+
+    /* NPC events */
+    state.npcEvents = state.npcEvents && typeof state.npcEvents === 'object' ? state.npcEvents : {
+      queue: [], active: true, frequency: 'high',
+    };
+
+    /* Finance */
+    state.finance = state.finance && typeof state.finance === 'object' ? state.finance : {
+      creditScore: 50, loans: [],
+    };
+
+    /* Tax */
+    state.tax = state.tax && typeof state.tax === 'object' ? state.tax : {
+      lastFilingYear: -1, declaredIncome: 0, backTaxes: 0, charityDonations: 0,
+    };
+
+    /* Companies */
+    state.companies = Array.isArray(state.companies) ? state.companies : [];
+
+    /* Underground idol */
+    state.undergroundIdol = state.undergroundIdol && typeof state.undergroundIdol === 'object' ? state.undergroundIdol : {
+      active: false, stage: 'trainee', fans: 0, trainingMonths: 0,
+      skills: {dance:0, vocal:0, expression:0},
+      lastShowMonth: -1, lastSpecialShowMonth: -3, lastProducerMonth: -3,
+      producerAbuse: 0, corruptionFromForced: 0,
+      fallBufferMonths: 0, fellTo: '', careerExtended: false,
     };
     return state;
   }

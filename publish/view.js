@@ -12,7 +12,7 @@
     'hunterModePanel', 'possessedList',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
-    'decisionBody', 'examJumpBtn', 'monthBtn', 'yearBtn', 'toast', 'tabPages',
+    'decisionBody', 'examJumpBtn', 'timeBar', 'toast', 'tabPages',
     'tabs', 'heroCanvas', 'resetBtn',
   ];
   const el = {};
@@ -155,8 +155,19 @@
     Game.profile.render(state, el);
     Game.navigation.refreshDetail();
     Game.educationFastForward.updateButton(state, el.examJumpBtn);
-    el.monthBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
-    el.yearBtn.disabled = Boolean(state.pendingDecision || state.gameOver);
+    renderTimeBar(state);
+  }
+
+  function renderTimeBar(state) {
+    var s = state.timeSpeed || 0;
+    var d = state.day || 1;
+    var speeds = [[0,'⏸'],[1,'▶'],[5,'▶▶'],[10,'▶▶▶']];
+    el.timeBar.innerHTML = '<span class="time-date">' + state.year + '年' + state.month + '月' + d + '日</span>'
+      + '<div class="time-progress"><i class="bar-track"><b style="width:' + (d*100/30) + '%"></b></i>'
+      + '<small>本月剩余 ' + (30-d) + ' 天</small></div>'
+      + '<div class="time-controls">' + speeds.map(function(sp) {
+        return '<button data-time-speed="' + sp[0] + '" class="' + (s===sp[0]?'active':'') + '">' + sp[1] + '</button>';
+      }).join('') + '</div>';
   }
 
   function showToast(message, tone) {

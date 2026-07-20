@@ -314,3 +314,18 @@ button:disabled {
 .encounter-finish-btn { width: 100%; padding: 12px; margin-top: 10px;
   background: #2a1a1a; border: 1px solid #6a3a3a; border-radius: 8px;
   color: #d46a6a; font-size: 14px; cursor: pointer; }
+
+.time-bar { display:flex; align-items:center; gap:8px; padding:6px 12px; background:#263b37; color:#fff; font-size:12px; }
+.time-bar .time-date { flex-shrink:0; }
+.time-bar .time-progress { flex:1; }
+.time-bar .time-progress i { height:6px; background:#3a5a52; border-radius:3px; display:block; }
+.time-bar .time-progress b { display:block; height:100%; background:#d4a04a; border-radius:3px; }
+.time-bar .time-progress small { font-size:10px; color:#a0b0aa; }
+.time-bar .time-controls { display:flex; gap:4px; }
+.time-bar .time-controls button { padding:4px 8px; border:1px solid #4a6a62; border-radius:4px; background:transparent; color:#c0d0ca; cursor:pointer; }
+.time-bar .time-controls button.active { background:#d4a04a; color:#fff; border-color:#d4a04a; }
+.stamina-ring { position:fixed; bottom:16px; right:16px; width:64px; height:64px; z-index:400; }
+.stamina-ring svg { width:100%; height:100%; transform:rotate(-90deg); }
+.stamina-ring .stamina-bg { fill:none; stroke:#2a2520; stroke-width:8; }
+.stamina-ring .stamina-fg { fill:none; stroke:#4a8; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset .3s; }
+.stamina-ring span { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; }

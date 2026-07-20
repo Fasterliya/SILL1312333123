@@ -31,43 +31,54 @@
     save();
   }
 
-  function advance(months) {
-    if (busy || state.pendingDecision || state.gameOver) return;
-    busy = true;
-    const result = Game.lifeDirector.advance(state, months);
-    Game.educationFastForward.complete(state);
+  /* ---- Time loop ---- */
+  var _timer = null;
+  /* tick speed: days per tick | interval | real time per month */
+  /*   1x: 1 day / 2000ms = 60s/month */
+  /*   5x: 15 days / 500ms = 1s/month */
+  /*  10x: 30 days / 250ms = 0.25s/month */
+  var SPEED_DAYS = {0:0, 1:1, 5:15, 10:30};
+  var SPEED_MS   = {0:0, 1:2000, 5:500, 10:250};
+
+  function tickDay() {
+    var s = state;
+    if(!s||s.gameOver) return;
+    var spd = s.timeSpeed||0;
+    if(spd===0) return;
+    if(s.pendingDecision){ s.timeSpeed=0; refresh(); return; }
+    var days = SPEED_DAYS[spd]||1;
+    for(var i=0;i<days;i++){
+      s.day+=1;
+      if(s.day>30){
+        s.day=1; s.totalMonths+=1;
+        Game.timeSystem.syncCalendar(s);
+        Game.monthlySystems.run(s);
+        s.stamina.current = s.stamina.max;
+        if(s.education.fastForwardTarget&&s.totalMonths>=s.education.fastForwardTarget) Game.educationFastForward.complete(s);
+      }
+    }
+    refresh(); save();
+  }
+
+  function startTimer(){
+    if(_timer){root.clearInterval(_timer);_timer=null;}
+    if(!state||state.gameOver) return;
+    var spd = state.timeSpeed||0;
+    if(spd===0||state.pendingDecision) return;
+    var ms = SPEED_MS[spd]||2000;
+    _timer = root.setInterval(tickDay, Math.max(ms,50));
+  }
+
+  function setTimeSpeed(speed){
+    if(!state||state.gameOver) return;
+    state.timeSpeed = Number(speed)||0;
+    startTimer();
     refresh();
-    if (result.interrupted && state.pendingDecision) {
-      Game.view.showToast(`时间推进了${result.advanced}个月，已在关键选择处暂停`, 'warning');
-    }
-    save().finally(() => { busy = false; });
   }
 
-  async function runEducationAdvance(resume) {
-    if (busy || state.pendingDecision || state.gameOver) return;
-    const months = resume ? Game.educationFastForward.remaining(state)
-      : Game.educationFastForward.begin(state);
-    if (months <= 0) return;
-    busy = true;
-    Game.view.el.examJumpBtn.disabled = true;
-    Game.view.el.examJumpBtn.querySelector('strong').textContent = '推进中…';
-    try {
-      await new Promise((resolve) => root.requestAnimationFrame(resolve));
-      await Game.educationFastForward.run(state);
-      await save();
-    } catch (err) {
-      console.error('学习阶段推进失败:', err?.message, err?.stack);
-      Game.view.showToast('学习阶段推进失败，请稍后重试', 'warning');
-    } finally {
-      busy = false;
-      refresh();
-    }
-  }
+  function startTimeLoop(){ startTimer(); }
+  function resumeEducation(){ if(Game.educationFastForward.active(state)) setTimeSpeed(10); }
 
-  function resumeEducation() {
-    if (busy) return root.setTimeout(resumeEducation, 80);
-    runEducationAdvance(true);
-  }
 
   function switchTabs(event) {
     const tab = event.target.closest('[data-tab]');
@@ -79,9 +90,26 @@
   }
 
   function bind() {
-    Game.view.el.monthBtn.addEventListener('click', () => advance(1));
-    Game.view.el.yearBtn.addEventListener('click', () => advance(12));
-    Game.view.el.examJumpBtn.addEventListener('click', () => runEducationAdvance(false));
+    Game.view.el.timeBar.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-time-speed]');
+      if (btn) setTimeSpeed(Number(btn.dataset.timeSpeed));
+    });
+
+    /* Space to toggle pause/resume */
+    var _lastSpeed = 1;
+    root.addEventListener('keydown', function(e) {
+      if (e.code !== 'Space' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      e.preventDefault();
+      if (!state || state.gameOver) return;
+      var current = state.timeSpeed || 0;
+      if (current === 0) {
+        setTimeSpeed(_lastSpeed || 1);
+      } else {
+        _lastSpeed = current;
+        setTimeSpeed(0);
+      }
+    });
+    Game.view.el.examJumpBtn.addEventListener('click', () => { resumeEducation(); });
     Game.view.el.decisionBody.addEventListener('click', (event) => {
       const choice = event.target.closest('[data-choice]');
       if (choice) Game.actions.decide(choice.dataset.choice);
@@ -176,6 +204,8 @@
       /* Expose state accessors for encounter/hookup/brothel systems */
       Game._getState = () => state;
       Game._refresh = refresh;
+      Game._setTimeSpeed = setTimeSpeed;
+      startTimeLoop();
       refresh();
       save();
       Game.saveManager.load();

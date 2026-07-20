@@ -132,6 +132,10 @@
     if (surgery) {
       return finish(Game.plasticSurgery?.perform(state, surgery.dataset.surgery) || { ok: false, message: '手术系统不可用' }), true;
     }
+    const bankRepay = event.target.closest('[data-bank-repay]');
+    if (bankRepay) return finish(Game.bankSystem?.repayLoan(state, bankRepay.dataset.bankRepay) || { ok: false }), true;
+    const companyFire = event.target.closest('[data-company-fire]');
+    if (companyFire) return finish(Game.companySystem?.fireEmployee(state, companyFire.dataset.companyId, companyFire.dataset.employeeId) || { ok: false }), true;
     return false;
   }
 
@@ -169,16 +173,32 @@
     if (business) return finish(Game.assetsSystem.buyBusiness(state, business.dataset.business)), true;
     const vehicle = event.target.closest('[data-vehicle]');
     if (vehicle) return finish(Game.assetsSystem.buyVehicle(state, vehicle.dataset.vehicle)), true;
+    const bankAction = event.target.closest('[data-bank-action]');
+    if (bankAction) return finish(Game.bankSystem?.applyLoan(state, bankAction.dataset.bankAction, Number(bankAction.dataset.loanAmount)) || { ok: false }), true;
+    const companyAction = event.target.closest('[data-company-action]');
+    if (companyAction) {
+      const action = companyAction.dataset.companyAction;
+      if (action === 'create') Game.companySystem?.startCreation(state);
+      else if (action === 'invest') Game.companySystem?.investMore(state, companyAction.dataset.companyId, Number(companyAction.dataset.amount));
+      else if (action === 'sell') Game.companySystem?.sellCompany(state, companyAction.dataset.companyId);
+      else if (action === 'close') Game.companySystem?.closeCompany(state, companyAction.dataset.companyId);
+      api.refresh(); return true;
+    }
+    const companyHire = event.target.closest('[data-company-hire]');
+    if (companyHire) return finish(Game.companySystem?.hireEmployee(state, companyHire.dataset.companyId) || { ok: false }), true;
     return false;
   }
 
   function handle(event) {
-    if (Game.encounterSystem?.handleClick(event)) return;
-    if (Game.brothelSystem?.handleClick(event)) return;
-    if (Game.hookupSystem?.handleClick(event)) return;
-    if (Game.idolSystem?.handleClick(event)) return;
-    if (Game.familyConflict?.handleClick(event)) return;
-    if (Game.travelInteractions?.handleClick(event)) return;
+    if (Game.npcInitiative?.handleEventClick?.(event)) return;
+    if (Game.undergroundIdol?.handleClick?.(event)) return;
+    if (Game.careerPanels?.handleClick?.(event)) return;
+    if (Game.encounterSystem?.handleClick?.(event)) return;
+    if (Game.brothelSystem?.handleClick?.(event)) return;
+    if (Game.hookupSystem?.handleClick?.(event)) return;
+    if (Game.idolSystem?.handleClick?.(event)) return;
+    if (Game.familyConflict?.handleClick?.(event)) return;
+    if (Game.travelInteractions?.handleClick?.(event)) return;
     if (Game.portraitGallery.handleClick(event)) return;
     if (Game.characterChat.handleClick(event)) return;
     if (Game.hunterMode.handleClick(event)) return;

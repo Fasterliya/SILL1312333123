@@ -94,6 +94,16 @@
   <script src="./scripts/features/plastic-surgery.js" defer></script>
   <script src="./scripts/features/idol-system.js" defer></script>
   <script src="./scripts/features/family-conflict.js" defer></script>
+  <script src="./scripts/features/criminal-system.js" defer></script>
+  <script src="./scripts/features/psychology-system.js" defer></script>
+  <script src="./scripts/features/npc-initiative.js" defer></script>
+  <script src="./scripts/features/rape-encounter.js" defer></script>
+  <script src="./scripts/features/tax-system.js" defer></script>
+  <script src="./scripts/features/bank-system.js" defer></script>
+  <script src="./scripts/features/company-system.js" defer></script>
+  <script src="./scripts/features/stock-director.js" defer></script>
+  <script src="./scripts/features/idol-underground.js" defer></script>
+  <script src="./scripts/ui/career-panels.js" defer></script>
   <script src="./scripts/features/journey.js" defer></script>
   <script src="./scripts/features/assets-system.js" defer></script>
   <script src="./scripts/engine/npc-cultural-style.js" defer></script>
@@ -215,12 +225,7 @@
       </div>
     </section>
 
-    <footer class="time-controls">
-      <button id="examJumpBtn" type="button" hidden><span>均衡基础</span><strong>推进至中考前1个月</strong></button>
-      <button id="monthBtn" type="button"><span>推进</span><strong>下个月</strong></button>
-      <button id="yearBtn" type="button"><span>快进</span><strong>下一年</strong></button>
-    </footer>
-  </main>
+    <div class="time-bar" id="timeBar"> <span class="time-date">2026年7月1日</span> <div class="time-progress"><i class="bar-track"><b style="width:3%"></b></i><small>本月剩余 29 天</small></div> <div class="time-controls"> <button data-time-speed="0" class="active">P</button> <button data-time-speed="1">1x</button> <button data-time-speed="5">5x</button> <button data-time-speed="10">10x</button> </div> </div> <div class="stamina-ring" id="staminaRing"> <svg viewBox="0 0 100 100"><circle class="stamina-bg" cx="50" cy="50" r="40"/><circle class="stamina-fg" cx="50" cy="50" r="40" stroke-dasharray="251 251" stroke-dashoffset="0"/></svg> <span>100/100</span> </div> <button id="examJumpBtn" type="button" hidden><span>均衡基础</span><strong>推进至中考前1个月</strong></button> </main>
 
   <section class="screen-layer" id="moduleScreen" hidden aria-label="功能子菜单">
     <header class="screen-header">

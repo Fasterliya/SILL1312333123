@@ -37,26 +37,45 @@
     return traits[category]?.includes(state.profile.trait) ? 12 : 0;
   }
 
+  function universityPrestige(state) {
+    if (!state.education.university) return 0.5;
+    var school = C.universities.find(function(u) { return u.id === state.education.universityId || u.name === state.education.university; });
+    var resource = school ? Game.schoolLines.institutionResource(school) : 60;
+    var base = 0.3 + (resource - 50) / 49 * 1.7;
+    return Math.max(0.3, Math.min(2.0, base));
+  }
+
   function ability(state, job) {
-    const majorMatch = job.majors.includes(state.education.major) ? 18 : 0;
-    const personality = job.category === '社交' && ['外向', '乐观', '热血'].includes(state.profile.personality) ? 6 : 0;
-    const audience = job.recommendedGender === state.gender ? 8 : 0;
+    var isMatch = job.majors.includes(state.education.major);
+    var majorRelevance = isMatch ? 35 + Math.floor((state.education.study || 0) / 100 * 37) : (state.education.university ? -15 : 0);
+    var personality = job.category === '社交' && ['外向','乐观','热血'].includes(state.profile.personality) ? 6 : 0;
+    var audience = job.recommendedGender === state.gender ? 8 : 0;
     return state.stats.智力 * 0.55 + state.stats.魅力 * 0.2 + state.education.study * 0.12
-      + traitBoost(state, job.category) + majorMatch + personality + audience;
+      + traitBoost(state, job.category) + majorRelevance + personality + audience;
   }
 
   function qualification(state) {
     if (!state.education.graduated) return 0;
     if (!state.education.university) return 1;
-    return state.education.universityType === '高职专科' ? 2 : 3;
+    var prestige = universityPrestige(state);
+    if (state.education.universityType === '高职专科') return Math.max(0.5, Math.round(2 * prestige * 10) / 10);
+    var base = prestige >= 1.4 ? 4 : 3;
+    return Math.max(1, Math.round(base * prestige * 10) / 10);
   }
 
   function qualificationLabel(level) {
-    return ['未完成全日制学业', '高中/职高', '高职专科', '本科及以上'][level] || '未知';
+    if (level >= 4.5) return '顶尖大学';
+    if (level >= 3.0) return '本科及以上';
+    if (level >= 2.0) return '高职专科';
+    if (level >= 1.0) return '高中/职高';
+    return '未完成全日制学业';
   }
 
   function requirementLabel(level) {
-    return ['不限学历', '高中/职高', '高职专科', '本科及以上'][level] || '未知';
+    if (level >= 4.5) return '顶尖大学';
+    if (level >= 3.0) return '本科及以上';
+    if (level >= 2.0) return '高职专科';
+    return '不限学历';
   }
 
   function eligible(state, job) {

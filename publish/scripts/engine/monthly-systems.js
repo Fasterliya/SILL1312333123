@@ -25,6 +25,14 @@
     Game.idolSystem?.monthly(state);
     Game.npcCareerLife?.monthly(state);
     Game.familyConflict?.monthly(state);
+    Game.criminalSystem?.monthly(state);
+    Game.psychology?.monthly(state);
+    Game.npcInitiative?.monthly(state);
+    Game.taxSystem?.monthly(state);
+    Game.bankSystem?.monthly(state);
+    Game.companySystem?.monthly(state);
+    Game.stockDirector?.monthly(state);
+    Game.undergroundIdol?.monthly(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

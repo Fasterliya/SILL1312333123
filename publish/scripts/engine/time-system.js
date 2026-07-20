@@ -31,5 +31,5 @@
     return labels[state.education.schoolStage] || Game.content.stage(Game.content.age(state)).name;
   }
 
-  Game.timeSystem = Object.freeze({ ageMonths, syncCalendar, educationElapsed, stageLabel });
+  Game.timeSystem = Object.freeze({ ageMonths, syncCalendar, educationElapsed, stageLabel, dayOfMonth: function(s) { return s.day || 1; }, daysRemaining: function(s) { return 30 - (s.day || 1); } });
 }(window));

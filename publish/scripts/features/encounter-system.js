@@ -193,6 +193,7 @@
       climaxThreshold: 75, semenGauge: 0, maxSemen: 100,
       position: '正常位', positionsTried: [],
       actionLog: [],
+      isRape: false, victimResistance: 100, victimCorruption: 0, usedAphrodisiac: false, usedDrug: false,
     };
     return state.encounter;
   }
@@ -219,6 +220,8 @@
     state.encounter.position = '正常位';
     state.encounter.positionsTried = ['正常位'];
     state.encounter.actionLog = [];
+
+    if (mode === 'rape') { state.encounter.isRape = true; state.encounter.victimResistance = 100; }
 
     const femalePartner = playerRole === 'provider' ? state.profile : partner;
     setFemaleMaxStamina(state, femalePartner);
@@ -289,6 +292,11 @@
         state.encounter.semenGauge + pos.semen + U.between(-3, 5));
     }
 
+    if (state.encounter.isRape) {
+      var dec = state.encounter.usedDrug ? U.between(20, 30) : (state.encounter.usedAphrodisiac ? U.between(12, 20) : U.between(8, 15));
+      state.encounter.victimResistance = U.clamp(state.encounter.victimResistance - dec, 0, 100);
+    }
+
     /* action text */
     const text = actionText(state, posName);
     state.encounter.actionLog.unshift({
@@ -355,7 +363,7 @@
         name: state.name, gender: state.gender, culture: state.location.country };
       const spermAmount = enc.semenGauge;
       const record = Game.relationshipSecrets.addEncounterRecord(state, partner, enc.mode, spermAmount);
-      if (record && spermAmount >= 40) {
+      if (record && spermAmount >= (enc.isRape ? 30 : 40)) {
         Game.relationshipSecrets.schedulePregnancy(state, playerPerson, partner, record);
       }
     } else if (partner && state.gender === '女' && enc.playerRole === 'provider') {
@@ -363,7 +371,7 @@
         name: state.name, gender: state.gender, culture: state.location.country };
       const spermAmount = enc.semenGauge;
       const record = Game.relationshipSecrets.addEncounterRecord(state, partner, enc.mode, spermAmount);
-      if (record && spermAmount >= 40) {
+      if (record && spermAmount >= (enc.isRape ? 30 : 40)) {
         Game.relationshipSecrets.schedulePregnancy(state, playerPerson, partner, record);
       }
     }
@@ -377,25 +385,42 @@
         partner.sexWork.brothelVisits = (partner.sexWork.brothelVisits || 0) + 1;
       }
     }
-
-    /* ensure partner is in travel encounters (brothel/hookup safety net) */
-    if (partner && !state.travel.encounters.some((p) => p.id === partner.id)) {
+    /* ensure partner is in travel encounters */
+    if (partner && !state.travel.encounters.some(function(p) { return p.id === partner.id; })) {
       state.travel.encounters.push(partner);
     }
-
-    /* Add spousal suspicion */
-    if (enc.mode === 'brothel') {
-      Game.familyConflict?.addSuspicion(state, 3, '深夜不归，配偶起了疑心');
-    } else if (enc.mode === 'hookup') {
-      Game.familyConflict?.addSuspicion(state, 5, '身上陌生的香水味让配偶皱眉');
+    /* psychology / addiction hooks */
+    var addAmount = enc.isRape ? 5 : (enc.mode === 'brothel' ? 3 : 2);
+    if (Game.psychology) {
+      Game.psychology.addAddiction(state, addAmount);
+      if (enc.isRape) {
+        Game.psychology.addGuilt(state, 15);
+        Game.psychology.addCorruption(state, 5);
+      } else if (enc.mode === 'hookup') {
+        Game.psychology.addGuilt(state, U.between(3, 8));
+      }
     }
-
+    /* criminal record for rape */
+    if (enc.isRape) {
+      if (Game.rapeEncounter) Game.rapeEncounter.addCorruption(state, partner);
+      if (Game.criminalSystem) Game.criminalSystem.addRecord(state, 18);
+    }
+    /* spousal suspicion */
+    if (Game.familyConflict) {
+      var susAmount = enc.isRape ? 8 : (enc.mode === 'brothel' ? 3 : 5);
+      Game.familyConflict.addSuspicion(state, susAmount, enc.isRape ? '配偶察觉到了你的异样' : (enc.mode === 'brothel' ? '深夜不归，配偶起了疑心' : '身上陌生的香水味让配偶皱眉'));
+    }
     /* STD risk */
-    if (enc.mode === 'brothel') {
-      const risk = enc.positionsTried.includes('口交') ? 'high' : 'medium';
-      Game.healthSystem?.checkSTD(state, risk);
+    if (enc.isRape) {
+      if (Game.healthSystem) Game.healthSystem.checkSTD(state, 'high');
+    } else if (enc.mode === 'brothel') {
+      if (Game.healthSystem) Game.healthSystem.checkSTD(state, 'medium');
     } else if (enc.mode === 'hookup') {
-      Game.healthSystem?.checkSTD(state, 'medium');
+      if (Game.healthSystem) Game.healthSystem.checkSTD(state, 'medium');
+    }
+    /* consume global stamina */
+    if (state.stamina) {
+      state.stamina.current = Math.max(0, state.stamina.current - 30);
     }
 
     Game.lifeDirector.addLog(state, '私密交欢结束',
@@ -448,6 +473,7 @@
         <div class="encounter-bar"><label>精液槽</label>
           <i class="bar-track"><b style="width:${sg}%"></b></i>
           <em>${sg}/${enc.maxSemen}</em></div>
+        ${enc.isRape ? '<div class="encounter-bar"><label>抵抗</label><i class="bar-track"><b style="width:' + enc.victimResistance + '%"></b></i><em>' + enc.victimResistance + '/100</em></div><p style="color:#d46a6a;font-size:11px">' + (enc.victimResistance > 80 ? '她拼命挣扎着...' : (enc.victimResistance > 40 ? '挣扎在减弱...' : (enc.victimResistance > 0 ? '无声流泪...' : '已经不再反抗了。'))) + '</p>' : ''}
       </div>
       <div class="encounter-hud"><span>高潮 ${enc.orgasmCount}次</span>
         <span>体位 ${enc.positionsTried.length}种</span></div>
@@ -462,6 +488,7 @@
   }
 
   function handleClick(event) {
+    event.stopPropagation();
     const posBtn = event.target.closest('[data-encounter-pos]');
     if (posBtn) {
       event.stopPropagation();

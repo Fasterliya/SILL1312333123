@@ -154,64 +154,8 @@
     return false;
   }
 
-  function handleAssets(event, state) {
-    const marketFilter = event.target.closest('[data-market-filter]');
-    if (marketFilter) {
-      Game.marketView.setFilter(marketFilter.dataset.marketFilter);
-      api.refresh();
-      return true;
-    }
-    const companyStock = event.target.closest('[data-company-stock]');
-    if (companyStock) return Game.marketView.openDetail(state, companyStock.dataset.companyStock), true;
-    const stockTrade = event.target.closest('[data-stock-company]');
-    if (stockTrade) {
-      Game.actions.trade(stockTrade.dataset.stockCompany, stockTrade.dataset.trade, stockTrade.dataset.lot);
-      Game.marketView.openDetail(state, stockTrade.dataset.stockCompany);
-      return true;
-    }
-    const journeyStart = event.target.closest('[data-journey-start]');
-    if (journeyStart) return finish(Game.journeySystem.start(state, journeyStart.dataset.journeyStart)), true;
-    const journeyChoice = event.target.closest('[data-journey-choice]');
-    if (journeyChoice) return finish(Game.journeySystem.choose(state, journeyChoice.dataset.journeyChoice)), true;
-    if (Game.travelInteractions?.handleClick(event)) return true;
-    const roam = event.target.closest('[data-roam-area]');
-    if (roam) return finish(Game.travelSystem.roam(state, roam.dataset.roamArea)), true;
-    const propertyBuy = event.target.closest('[data-property-buy]');
-    if (propertyBuy) return finish(Game.propertySystem.buy(state, Number(propertyBuy.dataset.propertyBuy))), true;
-    if (event.target.closest('[data-property-sell]')) {
-      if (root.confirm('确定出售当前房产并结清剩余贷款吗？')) finish(Game.propertySystem.sell(state));
-      return true;
-    }
-    const propertyRepay = event.target.closest('[data-property-repay]');
-    if (propertyRepay) return finish(Game.propertySystem.repay(state, propertyRepay.dataset.propertyRepay)), true;
-    const business = event.target.closest('[data-business]');
-    if (business) return finish(Game.assetsSystem.buyBusiness(state, business.dataset.business)), true;
-    const vehicle = event.target.closest('[data-vehicle]');
-    if (vehicle) return finish(Game.assetsSystem.buyVehicle(state, vehicle.dataset.vehicle)), true;
-    const bankAction = event.target.closest('[data-bank-action]');
-    if (bankAction) {
-      const action = bankAction.dataset.bankAction;
-      if (action === 'repay') return finish(Game.bankSystem.repayLoan(state, bankAction.dataset.bankValue)), true;
-      if (action === 'welfare') return finish(Game.bankSystem.welfare(state)), true;
-      const amount = root.prompt('输入贷款金额：', '10000');
-      if (amount !== null) finish(Game.bankSystem.applyLoan(state, bankAction.dataset.bankType, Number(amount)));
-      return true;
-    }
-    const companyAction = event.target.closest('[data-company-action]');
-    if (companyAction) {
-      const action = companyAction.dataset.companyAction;
-      if (action === 'create') Game.companySystem?.startCreation(state);
-      else if (action === 'invest') Game.companySystem?.investMore(state, companyAction.dataset.companyId, Number(companyAction.dataset.amount));
-      else if (action === 'sell') Game.companySystem?.sellCompany(state, companyAction.dataset.companyId);
-      else if (action === 'close') Game.companySystem?.closeCompany(state, companyAction.dataset.companyId);
-      api.refresh(); return true;
-    }
-    const companyHire = event.target.closest('[data-company-hire]');
-    if (companyHire) return finish(Game.companySystem?.hireEmployee(state, companyHire.dataset.companyId) || { ok: false }), true;
-    return false;
-  }
-
   function handle(event) {
+    if (Game.taskCenter?.handleClick?.(event)) return;
     if (Game.npcInitiative?.handleClick?.(event)) return;
     if (Game.relationshipPanel?.handleClick?.(event)) return;
     if (Game.subjectPanel?.handleClick?.(event)) return;
@@ -238,7 +182,7 @@
     const state = api.getState();
     if (Game.extendedInteractions.handle(event, state, finish)) return;
     if (handleRelations(event, state) || handleCareer(event, state) || handleLifeSystems(event, state)) return;
-    handleAssets(event, state);
+    Game.interactionRouterAssets?.handle(event, state, finish, api.refresh);
   }
 
   function configure(options) { api = options; }

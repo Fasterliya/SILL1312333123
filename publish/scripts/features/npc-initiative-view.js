@@ -48,7 +48,7 @@
   }
 
   function render(state) {
-    return badge(state) + sheet(state);
+    return (Game.taskCenter?.render(state) || '') + badge(state) + sheet(state);
   }
 
   function container() {

@@ -47,6 +47,12 @@
     }
 
     Game.lifeDirector.addLog(state, '学习插曲', picked.text, 'good');
+    Game.taskCenter?.add(state, {
+      key: `study-${picked.id}-${state.totalMonths}`,
+      type: 'notice',
+      title: '学习插曲',
+      text: picked.text,
+    });
     return picked;
   }
 

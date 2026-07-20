@@ -10,12 +10,20 @@
     }[char]));
   }
 
-  function recordEvent(state, person, event, detail) {
+  function recordEvent(state, person, event, detail, eventMonth) {
     if (!person.lifeResume) person.lifeResume = [];
-    const age = U.personAge(state, person);
-    person.lifeResume.push({ age, event, detail, month: state.totalMonths });
+    const month = Number.isFinite(eventMonth) ? eventMonth : state.totalMonths;
+    const birthMonth = Number.isFinite(person.birthMonth)
+      ? person.birthMonth : (person === state.profile ? (state.playerBornAt || 0) : 0);
+    const age = Math.max(0, Math.floor((month - birthMonth) / 12));
+    const duplicate = person.lifeResume.some((entry) => (
+      entry.event === event && entry.detail === detail && entry.month === month
+    ));
+    if (duplicate) return false;
+    person.lifeResume.push({ age, event, detail, month });
+    person.lifeResume.sort((left, right) => (left.month || 0) - (right.month || 0));
 
-    if (person.lifeResume.length <= 30) return;
+    if (person.lifeResume.length <= 30) return true;
 
     const entries = person.lifeResume;
     const lastEntry = entries[entries.length - 1];
@@ -32,6 +40,7 @@
 
     const removeIndices = new Set(candidates.slice(0, removeCount).map(function (item) { return item.index; }));
     person.lifeResume = entries.filter(function (_, index) { return !removeIndices.has(index); });
+    return true;
   }
 
   function backfillResume(state, person) {

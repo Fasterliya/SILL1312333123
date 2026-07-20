@@ -6,6 +6,7 @@
     psychology: () => Game.psychology,
     taxFiling: () => Game.taxSystem,
     boardVote: () => Game.stockDirector,
+    familyConflict: () => Game.familyConflict,
   };
 
   function content(state) {

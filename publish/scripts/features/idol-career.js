@@ -7,11 +7,18 @@
 
   function election(state) {
     const idol = Core.ensure(state);
-    if (state.month !== 1) return null;
+    if (state.month !== 1 || idol.stage !== 'debuted') return null;
     const coreRatio = 0.3 + Math.random() * 0.2;
     const votes = Math.round(idol.fans * (coreRatio + (1 - coreRatio) * 0.5)
       * (state.stats.魅力 / 50));
-    idol.lastElectionRank = U.between(1, 40);
+    const recent = idol.projectHistory?.slice(-4) || [];
+    const recentQuality = recent.length
+      ? recent.reduce((sum, item) => sum + (item.quality || 0), 0) / recent.length : 0.6;
+    const skillAverage = (idol.skills.dance + idol.skills.vocal + idol.skills.expression) / 3;
+    const score = Math.log10(Math.max(10, idol.fans)) * 12
+      + idol.heat * 0.35 + idol.reputation * 0.3 + skillAverage * 0.15
+      + state.stats.魅力 * 0.12 + recentQuality * 15 + U.between(-4, 4);
+    idol.lastElectionRank = U.clamp(41 - Math.floor((score - 35) / 3), 1, 40);
     if (idol.lastElectionRank <= 3) {
       idol.fans += Core.fanGrowth(idol, idol.fans * 0.5);
       state.money += Core.activityIncome(idol.fans * 0.1);

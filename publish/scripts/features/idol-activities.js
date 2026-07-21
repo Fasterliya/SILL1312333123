@@ -4,6 +4,11 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
   const Core = Game.idolCore;
+  function escape(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[char]));
+  }
 
   function train(state, skill) {
     if (!Core.isIdolJob(state.career.jobId)) {
@@ -139,7 +144,8 @@
       idol.skills.vocal = U.clamp(idol.skills.vocal - 1, 0, 100);
     }
     if (idol.group.cohesion < 15 && Math.random() < 0.2) {
-      idol.group.members = idol.group.members.filter((id) => id !== state.profile.id);
+      const departing = idol.group.members.find((id) => id !== state.profile.id);
+      if (departing) idol.group.members = idol.group.members.filter((id) => id !== departing);
       idol.fans = Math.max(0, Math.round(idol.fans * 0.8));
       Game.lifeDirector.addLog(
         state,
@@ -152,10 +158,24 @@
 
   function renderGroup(state) {
     const idol = Core.ensure(state);
-    if (!idol.group?.name) return '<p class="empty-state">尚未组建偶像团体。出道后可组建。</p>';
-    return `<div class="idol-group"><strong>${idol.group.name}</strong>
-      <span>凝聚力 ${Math.round(idol.group.cohesion)} · 成员 ${idol.group.members.length}人</span>
-      <div class="bar-track"><b style="width:${idol.group.cohesion}%"></b></div></div>`;
+    if (!idol.group?.name) return '<p class="empty-state">尚未加入偶像团体。</p>';
+    const members = (idol.group.members || []).map((id) => {
+      if (id === state.profile.id || id === 'player-profile') {
+        return { name: state.name, role: '你' };
+      }
+      const person = Game.people.find(state, id);
+      if (!person) return null;
+      const skills = person.npcIdol?.skills || {};
+      const role = skills.vocal >= skills.dance && skills.vocal >= skills.expression
+        ? '主唱' : (skills.dance >= skills.expression ? '舞担' : '镜头担当');
+      return { name: person.name, role };
+    }).filter(Boolean);
+    return `<div class="idol-group"><strong>${escape(idol.group.name)}</strong>
+      <span>凝聚力 ${Math.round(idol.group.cohesion)} · 成员 ${members.length}人</span>
+      <div class="bar-track"><b style="width:${idol.group.cohesion}%"></b></div>
+      <div class="idol-member-list">${members.map((member) => (
+        `<span><b>${escape(member.name)}</b><em>${member.role}</em></span>`
+      )).join('')}</div></div>`;
   }
 
   Game.idolActivities = Object.freeze({

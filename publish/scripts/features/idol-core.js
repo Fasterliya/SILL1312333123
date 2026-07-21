@@ -55,6 +55,9 @@
     idol.lastReleaseMonths = idol.lastReleaseMonths && typeof idol.lastReleaseMonths === 'object'
       ? idol.lastReleaseMonths : {};
     idol.loveBanSigned = idol.loveBanSigned === true;
+    idol.condition = Number.isFinite(idol.condition) ? idol.condition : 72;
+    idol.heat = Number.isFinite(idol.heat) ? idol.heat : 25;
+    idol.reputation = Number.isFinite(idol.reputation) ? idol.reputation : 40;
     idol.antiProtected = idol.antiProtected === true;
     if (idol.antiProtected && !Number.isFinite(idol.securityUntilMonth)) {
       idol.securityUntilMonth = state.totalMonths;
@@ -89,6 +92,7 @@
         idol.skills.expression = U.between(14, 26);
       }
       Game.idolTraineeState?.ensure(state);
+      Game.idolTraineeSchedule?.requestAnnualPlan(state);
       return;
     }
     if (state.career.jobId !== 'idol') return;
@@ -104,6 +108,7 @@
     }
     if (!idol.fans) idol.fans = U.between(2000, 8000);
     idol.agencyName = state.career.company || '偶像事务所';
+    Game.idolProjectCycle?.requestAnnualPlan(state);
   }
 
   Game.idolCore = Object.freeze({

@@ -9,6 +9,11 @@
     familyConflict: () => Game.familyConflict,
     relationshipConflict: () => Game.relationshipConflict,
     examPrep: () => Game.educationExamPrep,
+    idolTraineePlan: () => Game.idolTraineeDecisions,
+    idolTraineeReview: () => Game.idolTraineeDecisions,
+    idolCareerPlan: () => Game.idolProjectDecisions,
+    idolProjectSelect: () => Game.idolProjectDecisions,
+    idolProjectReview: () => Game.idolProjectDecisions,
   };
 
   function content(state) {

@@ -51,6 +51,27 @@
   font-size: 10px;
 }
 
+.trainee-progress {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.trainee-progress span {
+  padding: 8px 5px;
+  background: #edf3ef;
+  color: #66726f;
+  font-size: 9px;
+  text-align: center;
+}
+
+.trainee-progress b {
+  display: block;
+  margin-top: 3px;
+  color: #263b37;
+  font-size: 12px;
+}
+
 .trainee-plan,
 .trainee-ranking {
   display: grid;
@@ -74,30 +95,16 @@
   font-size: 10px;
 }
 
-.trainee-slots {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px;
-}
-
-.trainee-slots span {
-  display: grid;
-  min-width: 0;
-  min-height: 38px;
-  place-items: center;
-  padding: 5px;
-  border: 1px dashed #b9c5c0;
-  color: #7a8581;
-  font-size: 10px;
-  text-align: center;
-}
-
-.trainee-slots span.filled {
-  border-style: solid;
-  border-color: #8fb0a8;
+.trainee-policy-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-left: 3px solid #417a70;
   background: #edf3ef;
   color: #315f58;
-  font-weight: 750;
+  font-size: 10px;
 }
 
 .trainee-options {
@@ -109,7 +116,7 @@
 .trainee-options button,
 .trainee-confirm button {
   min-width: 0;
-  min-height: 38px;
+  min-height: 44px;
   padding: 6px 4px;
   border: 1px solid #c9d5d1;
   background: #fffdf7;
@@ -126,6 +133,12 @@
 .trainee-options button:disabled,
 .trainee-confirm button:disabled {
   opacity: 0.45;
+}
+
+.trainee-options button.active {
+  border-color: #315f58;
+  background: #315f58;
+  color: #fff;
 }
 
 .trainee-confirm {

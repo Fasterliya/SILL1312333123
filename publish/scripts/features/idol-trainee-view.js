@@ -17,25 +17,17 @@
       <i><em style="width:${width}%"></em></i></div>`;
   }
 
-  function plan(state, idol) {
-    const done = idol.lastScheduleMonth === state.totalMonths;
-    const slots = [0, 1, 2].map((index) => {
-      const type = idol.schedule[index];
-      return `<span class="${type ? 'filled' : ''}">${type
-        ? Schedule.OPTIONS[type].label : `训练格 ${index + 1}`}</span>`;
-    }).join('');
+  function plan(idol) {
+    const current = Schedule.PLANS[idol.planId] || Schedule.PLANS.balanced;
+    const locked = idol.planConfirmed && idol.planAdjustments >= 1;
     return `<section class="trainee-plan">
-      <div class="trainee-section-title"><strong>本月排程</strong>
-        <span>${done ? '本月已执行' : `${idol.schedule.length}/3`}</span></div>
-      <div class="trainee-slots">${slots}</div>
-      <div class="trainee-options">${Object.entries(Schedule.OPTIONS).map(([id, item]) => (
-        `<button data-idol-action="plan" data-plan-type="${id}" ${done ? 'disabled' : ''}>${item.label}</button>`
+      <div class="trainee-section-title"><strong>年度训练方针</strong>
+        <span>${locked ? '本年已锁定' : (idol.planConfirmed ? '可调整一次' : '待选择')}</span></div>
+      <div class="trainee-policy-current"><b>${current.label}</b><span>每月自动执行</span></div>
+      <div class="trainee-options">${Object.entries(Schedule.PLANS).map(([id, item]) => (
+        `<button class="${idol.planId === id ? 'active' : ''}" data-idol-action="setTraineePlan"
+          data-plan-type="${id}" ${locked && idol.planId !== id ? 'disabled' : ''}>${item.label}</button>`
       )).join('')}</div>
-      <div class="trainee-confirm">
-        <button data-idol-action="clearPlan" ${done || !idol.schedule.length ? 'disabled' : ''}>清空</button>
-        <button class="primary" data-idol-action="executePlan"
-          ${done || idol.schedule.length !== 3 ? 'disabled' : ''}>执行本月排程</button>
-      </div>
     </section>`;
   }
 
@@ -61,7 +53,8 @@
         const relation = State.isSchoolPeer(person) ? '同窗' : '同城';
         return `<button type="button" data-character-id="${escape(person.id)}">
           <span>${Game.portraitSystem.avatar(person)}</span><strong>${escape(person.name)}</strong>
-          <small>${relation} · ${idol.stage === 'debuted' ? '已出道' : `关注${idol.attention}`}</small>
+          <small>${relation} · ${idol.debutPoints}点 · 警告${idol.warnings}
+            · ${escape(Schedule.PLANS[idol.planId]?.label || '均衡训练')}</small>
         </button>`;
       }).join('')}</div></details>`;
   }
@@ -73,12 +66,18 @@
       <header><div><span>${escape(idol.agencyName)} · 练习生</span>
         <strong>${Number.isFinite(idol.lastRank) ? `同期第${idol.lastRank}名` : '等待首次排名'}</strong></div>
         <b>${months ? `${months}个月后考评` : '本月考评'}</b></header>
+      <div class="trainee-progress">
+        <span>出道积分 <b>${idol.debutPoints}/5</b></span>
+        <span>警告 <b>${idol.warnings}/2</b></span>
+        <span>团队协作 <b>${Math.round(idol.teamwork)}</b></span>
+      </div>
       <div class="trainee-metrics">
         ${metric('舞蹈', idol.skills.dance)}${metric('声乐', idol.skills.vocal)}
         ${metric('镜头', idol.skills.expression)}${metric('状态', idol.condition)}
       </div>
-      <p class="trainee-attention">关注度 <b>${Math.round(idol.attention)}</b> · 已完成${idol.trainingMonths}个月排程</p>
-      ${plan(state, idol)}${ranking(state, idol)}${cohort(state)}
+      <p class="trainee-attention">关注度 <b>${Math.round(idol.attention)}</b> · 已训练${idol.trainingMonths}个月
+        · 下次主题${Schedule.THEMES[(idol.evaluationHistory.length || 0) % Schedule.THEMES.length].label}</p>
+      ${plan(idol)}${ranking(state, idol)}${cohort(state)}
     </section>`;
   }
 

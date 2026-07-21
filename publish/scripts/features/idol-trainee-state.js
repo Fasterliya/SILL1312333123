@@ -32,6 +32,14 @@
     idol.attention = Number.isFinite(idol.attention) ? idol.attention : 10 + seed % 31;
     idol.condition = Number.isFinite(idol.condition) ? idol.condition : 58 + seed % 29;
     idol.trainingMonths = Number.isFinite(idol.trainingMonths) ? idol.trainingMonths : 0;
+    idol.debutPoints = Math.max(0, Number(idol.debutPoints) || 0);
+    idol.warnings = Math.max(0, Number(idol.warnings) || 0);
+    idol.teamwork = Number.isFinite(idol.teamwork) ? idol.teamwork : 35 + seed % 36;
+    idol.planId ||= ['balanced', 'performance', 'vocal', 'exposure', 'teamwork'][seed % 5];
+    idol.originalCareer ||= {
+      job: person.job || '', jobId: person.jobId || '', company: person.company || '',
+      companyId: person.companyId || '',
+    };
     person.job = idol.stage === 'debuted' ? '偶像艺人' : '偶像练习生';
     person.jobId = idol.stage === 'debuted' ? 'idol' : 'idoltrainee';
     person.company = state.idol.agencyName || state.career.company;
@@ -47,9 +55,11 @@
     const playerAge = U.age(state);
     return Game.people.all(state).filter((person) => {
       const age = U.personAge(state, person);
+      const available = !person.job || person.jobId === 'idoltrainee';
       return person.status === '健康'
         && person.currentCity === city
         && person.gender === state.gender
+        && available
         && !['debuted', 'retired'].includes(person.npcIdol?.stage)
         && age >= 12 && age <= 29
         && Math.abs(age - playerAge) <= 6;
@@ -59,27 +69,35 @@
   function ensure(state) {
     const idol = Game.idolCore.ensure(state);
     idol.cohortIds = Array.isArray(idol.cohortIds)
-      ? idol.cohortIds.filter((id) => Game.people.find(state, id)) : [];
-    const selected = new Set(idol.cohortIds);
-    for (const person of candidates(state)) {
-      if (selected.has(person.id)) continue;
-      idol.cohortIds.push(person.id);
-      selected.add(person.id);
-      if (idol.cohortIds.length >= COHORT_SIZE - 1) break;
+      ? idol.cohortIds.filter((id) => {
+        const person = Game.people.find(state, id);
+        return person && !['debuted', 'released', 'retired'].includes(person.npcIdol?.stage);
+      }) : [];
+    idol.cohortAlumniIds = Array.isArray(idol.cohortAlumniIds)
+      ? idol.cohortAlumniIds.filter((id) => Game.people.find(state, id)).slice(-20) : [];
+    if (idol.stage === 'trainee') {
+      const selected = new Set(idol.cohortIds);
+      for (const person of candidates(state)) {
+        if (selected.has(person.id)) continue;
+        idol.cohortIds.push(person.id);
+        selected.add(person.id);
+        if (idol.cohortIds.length >= COHORT_SIZE - 1) break;
+      }
+      idol.cohortIds = idol.cohortIds.slice(0, COHORT_SIZE - 1);
+      idol.cohortIds.forEach((id, index) => {
+        const person = Game.people.find(state, id);
+        if (person) ensureNpc(state, person, index);
+      });
     }
-    idol.cohortIds = idol.cohortIds.slice(0, COHORT_SIZE - 1);
-    idol.cohortIds.forEach((id, index) => {
-      const person = Game.people.find(state, id);
-      if (person) ensureNpc(state, person, index);
-    });
-    idol.schedule = Array.isArray(idol.schedule) ? idol.schedule.slice(0, 3) : [];
-    idol.lastScheduleMonth = Number.isFinite(idol.lastScheduleMonth) ? idol.lastScheduleMonth : -1;
     idol.nextEvaluationMonth = Number.isFinite(idol.nextEvaluationMonth)
       ? idol.nextEvaluationMonth : state.totalMonths + 3;
     idol.evaluationHistory = Array.isArray(idol.evaluationHistory)
       ? idol.evaluationHistory.slice(-8) : [];
     idol.condition = Number.isFinite(idol.condition) ? idol.condition : 72;
     idol.attention = Number.isFinite(idol.attention) ? idol.attention : Math.min(45, idol.fans || 0);
+    idol.debutPoints = Math.max(0, Number(idol.debutPoints) || 0);
+    idol.warnings = Math.max(0, Number(idol.warnings) || 0);
+    idol.teamwork = Number.isFinite(idol.teamwork) ? idol.teamwork : 50;
     return idol;
   }
 

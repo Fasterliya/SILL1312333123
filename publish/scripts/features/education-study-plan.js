@@ -2,7 +2,7 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const U = Game.content, Capacity = Game.educationPlanCapacity;
+  const U = Game.content, Capacity = Game.educationPlanCapacity, Groups = Game.educationSubjectGroups;
   const extras = Object.freeze({
     rest: ['休息', '降低疲劳并改善状态'],
     club: ['社团', '提升心情与魅力'],
@@ -17,11 +17,11 @@
     const month = Number(state.month) || 1;
     const stage = state.education.schoolStage;
     const start = month >= 9 ? year : year - 1;
-    return { key: `${stage}:${start}-year`, label: `${start}-${start + 1}学年` };
+    return { key: `${stage}:${start}-year-groups`, label: `${start}-${start + 1}学年` };
   }
 
   function subjectKeys(state) {
-    return Object.keys(Game.subjectPanel.getStageSubjects(state));
+    return Groups.keys(state);
   }
   function emptyAllocation(state) {
     return Object.fromEntries([...subjectKeys(state), ...Object.keys(extras)].map((key) => [key, 0]));
@@ -33,11 +33,8 @@
     allocation.rest = 1;
     allocation.club = 1;
     const slotCount = Capacity.slots(state);
-    const ranked = subjectKeys(state).sort((left, right) => {
-      const a = state.education.subjects[left] || {};
-      const b = state.education.subjects[right] || {};
-      return (Number(a.studyHours) || 0) - (Number(b.studyHours) || 0);
-    });
+    const ranked = subjectKeys(state)
+      .sort((left, right) => Groups.progress(state, left) - Groups.progress(state, right));
     for (let index = 0; index < slotCount - 2; index += 1) {
       allocation[ranked[index % ranked.length]] += 1;
     }
@@ -101,7 +98,7 @@
   }
 
   function weakestSubjects(state, count) {
-    return subjectKeys(state).sort((left, right) => {
+    return Groups.subjects(state).sort((left, right) => {
       const a = state.education.subjects[left] || {};
       const b = state.education.subjects[right] || {};
       const aScore = (Number(a.studyHours) || 0) + (Number(a.aptitude) || 0) * 0.4;
@@ -115,10 +112,10 @@
     if (!plan || plan.key !== termInfo(state).key || plan.lastAppliedMonth === state.totalMonths) return null;
     Game.subjectPanel.ensureSubjects(state);
     let gained = 0;
-    subjectKeys(state).forEach((subject) => {
+    Groups.subjects(state).forEach((subject) => {
       const data = state.education.subjects[subject];
       const aptitudeBonus = data.aptitude >= 75 ? 1 : 0;
-      const gain = 2 + aptitudeBonus + (plan.allocation[subject] || 0) * 5;
+      const gain = 2 + aptitudeBonus + Groups.allocationFor(state, plan.allocation, subject) * 5;
       const previous = Number(data.studyHours) || 0;
       data.studyHours = Math.min(200, previous + gain);
       gained += data.studyHours - previous;
@@ -176,7 +173,7 @@
         key,
         count: decision.draft[key] || 0,
         label: extras[key]?.[0] || key,
-        hint: extras[key]?.[1] || '每格每月增加5小时专项学习',
+        hint: extras[key]?.[1] || Groups.hint(state, key),
       })),
     };
   }

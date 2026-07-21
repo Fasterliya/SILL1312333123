@@ -53,7 +53,7 @@
       const rate = U.clamp(0.18 + knowledge * 0.38 + aptitude * 0.14
         + (state.stats.智力 || 0) / 100 * 0.08 + condition + school * 0.05
         + technique * 0.04 - burnout / 100 * 0.12 - debuff - difficulty + random, 0.15, 0.95);
-      scores[subject] = Math.round(cap * rate);
+      scores[subject] = U.clamp(Math.round(cap * rate), 0, cap);
     });
     const total = Object.values(scores).reduce((sum, value) => sum + value, 0);
     const maximum = Object.values(subjects).reduce((sum, value) => sum + value, 0);
@@ -62,7 +62,8 @@
       label, age: U.age(state), scores, total, maximum,
       paperDifficulty: paper?.label || null,
       paperDifficultyIndex: paper?.difficulty || null,
-      readiness: Math.round(readiness(state)), date: `${state.year}.${state.month}`,
+      subjectCaps: { ...subjects }, readiness: Math.round(readiness(state)),
+      date: `${state.year}.${state.month}`,
     };
   }
 
@@ -74,6 +75,8 @@
         state.education.subjects[subject] = { studyHours: 0, aptitude: 40, examScore: 0 };
       }
       state.education.subjects[subject].examScore = score;
+      state.education.subjects[subject].examCap = result.subjectCaps?.[subject]
+        || Game.subjectPanel.getStageSubjects(state)[subject] || 100;
       state.education.subjects[subject].studyHours = Math.round(
         (state.education.subjects[subject].studyHours || 0) * 0.62,
       );
@@ -124,14 +127,15 @@
     const item = syncLegacy(state);
     const latest = item.exams[0];
     const scores = latest ? Object.entries(latest.scores).map(([name, score]) => (
-      `<span>${name}<b>${score}</b></span>`
+      `<span>${name}<b>${score}/${latest.subjectCaps?.[name]
+        || Game.subjectPanel.getStageSubjects(state)[name] || 100}</b></span>`
     )).join('') : '<p class="empty-state">成绩公布后会显示各科分数。</p>';
     return `<section class="study-summary"><div><span>${Game.content.gradeLabel(state)}</span>
       <strong>${state.education.school}</strong><small>${state.education.path || '全日制学习'}</small></div>
       <dl><div><dt>科目掌握度</dt><dd>${Math.round(readiness(state))}</dd></div>
       <div><dt>学习疲劳</dt><dd>${Math.round(state.education.burnout || 0)}</dd></div>
       <div><dt>睡眠时长</dt><dd>${state.health.sleep || 0}小时</dd></div>
-      <div><dt>综合成绩</dt><dd>${state.education.examScore || '待公布'}</dd></div></dl></section>
+      <div><dt>得分率</dt><dd>${state.education.examScore ? `${state.education.examScore}%` : '待公布'}</dd></div></dl></section>
       <h3>${latest ? `${latest.label} · ${latest.total}/${latest.maximum}` : '考试成绩'}</h3>
       <div class="score-grid">${scores}</div>${Game.schoolLines.render(state)}
       <div class="study-actions"><button data-education-action="dropout" class="danger">辍学</button></div>`;

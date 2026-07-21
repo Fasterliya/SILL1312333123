@@ -13,16 +13,7 @@
   }
 
   function subjects(state) {
-    const years = U.age(state);
-    if (years <= 11) return C.subjectCaps.primary;
-    if (years <= 14) return C.subjectCaps.middle;
-    if (state.education.schoolStage === 'vocational') {
-      return { 语文: 150, 数学: 150, 英语: 150, 专业技能: 300 };
-    }
-    const selected = [state.education.track || '物理', ...(state.education.electives.length
-      ? state.education.electives : ['化学', '生物'])];
-    return Object.assign({}, C.subjectCaps.highBase,
-      Object.fromEntries(selected.map((name) => [name, 100])));
+    return Game.subjectPanel.getStageSubjects(state);
   }
 
   function exam(state, label) {

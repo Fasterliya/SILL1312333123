@@ -6,7 +6,7 @@
     primary: { 语文: 100, 数学: 100, 英语: 100, 科学: 100 },
     middle: { 语文: 130, 数学: 130, 英语: 130, 政治: 50, 历史: 50, 物理: 100, 化学: 100 },
     high: { 语文: 150, 数学: 150, 英语: 150 },
-    vocational: { 语文: 100, 数学: 100, 英语: 100, 专业技能: 150 },
+    vocational: { 语文: 150, 数学: 150, 英语: 150, 专业技能: 300 },
     university: { 专业核心: 100, 通识课程: 100, 外语: 100, 毕业论文: 100 },
   };
 
@@ -45,12 +45,21 @@
   function ensureSubjects(state) {
     state.education.subjects = state.education.subjects
       && typeof state.education.subjects === 'object' ? state.education.subjects : {};
+    if (state.education.schoolStage === 'high' && !state.education.highSubjectReset) {
+      ['生物', '地理'].forEach((subject) => {
+        if (!state.education.subjects[subject]) return;
+        state.education.subjects[subject].studyHours = 0;
+        state.education.subjects[subject].examScore = 0;
+      });
+      state.education.highSubjectReset = true;
+    }
     Object.keys(getStageSubjects(state)).forEach((subject) => {
       const current = state.education.subjects[subject] || {};
       current.studyHours = Math.max(0, Math.min(200, Number(current.studyHours) || 0));
       current.examScore = Math.max(0, Number(current.examScore) || 0);
       current.aptitude = Number(current.aptitude)
         || 34 + (subjectHash(subject + state.name) % 54);
+      current.stage ||= state.education.schoolStage;
       state.education.subjects[subject] = current;
     });
   }
@@ -66,14 +75,15 @@
     return `<div class="subject-grid">${Object.entries(getStageSubjects(state)).map(([subject, cap]) => {
       const data = state.education.subjects[subject];
       const range = Game.subjectEducation?.predictedRange(state, subject, cap) || [0, 0];
-      const slots = allocation?.[subject] || 0;
+      const group = Game.educationSubjectGroups?.groupFor(state, subject) || subject;
+      const slots = Game.educationSubjectGroups?.allocationFor(state, allocation, subject) || 0;
       return `<article class="subject-card ${slots ? 'plan-focus' : ''}">
         <div class="subject-copy"><div class="subject-name">${escape(subject)}
           <span class="subject-max">${cap}分</span></div>
-          <small>天赋 ${data.aptitude} · 计划 ${slots}格</small></div>
+          <small>天赋 ${data.aptitude} · ${group} ${slots}格</small></div>
         <strong class="subject-forecast">${range[0]}–${range[1]}</strong>
         <div class="progress-bar"><i style="width:${Math.min(100, data.studyHours / 2)}%"></i>
-          <span>${data.studyHours}h · 上次 ${data.examScore}分</span></div></article>`;
+          <span>${data.studyHours}h · 上次 ${data.examScore}/${data.examCap || cap}</span></div></article>`;
     }).join('')}</div>`;
   }
 

@@ -7,7 +7,6 @@
     ['书店街', 80, '阅读、创作交流与安静相识集中在这里。', 'daily'],
     ['车站广场', 60, '短暂停留的旅人让每次交流都带有偶然性。', 'social'],
     ['夜间食街', 160, '成年后可在深夜摊档中品尝与拼桌。', 'night'],
-    ['城市漫展', 260, '舞台、摊位与同好交流组成完整逛展路线。', 'creative'],
     ['创作者市集', 180, '作品、摊主与合作机会构成创作探索。', 'creative'],
     ['红灯区', 680, '成年人的深夜消费区域，由独立事件链处理。', 'night'],
   ].map(([name, cost, description, category]) => (
@@ -20,7 +19,7 @@
   const places = (state) => [...(Game.cityAttractions?.forCity(state.location.city) || []), ...neighborhoods];
   function unavailable(state, place) {
     if (['夜间食街', '红灯区'].includes(place.name) && U.age(state) < 18) return '成年后才能前往';
-    if (['城市漫展', '创作者市集'].includes(place.name) && U.age(state) < 12) return '12岁后可以独立参加';
+    if (place.name === '创作者市集' && U.age(state) < 12) return '12岁后可以独立参加';
     return '';
   }
   function requirementFailure(state, effect) {
@@ -110,7 +109,6 @@
       return result;
     }
     travel.encounters = [];
-    if (placeName === '城市漫展' && Game.conventionTravel) return Game.conventionTravel.start(state);
     travel.activeStage = { placeName, stage: 0, score: 0, partnerId: null, riskCount: 0, feedback: `抵达${placeName}，请选择第一段行动。`, choices: [] };
     Game.lifeDirector.addLog(state, '街区旅途', `你开始了${placeName}的多段探索。`, 'good');
     return { ok: true, message: `开始探索${placeName}` };
@@ -187,10 +185,11 @@
         <span><strong>${place.name}</strong><small>${place.description}${blocked ? ` · ${blocked}` : ''}</small></span>
         <b>${Game.view.money(cost)}<br><span class="travel-category">${place.kind === 'landmark' ? '城市景观' : place.category}</span></b></button>`;
     }).join('');
-    return `<section class="list-guide"><strong>${state.location.country} · ${state.location.city}</strong>
+    const streetHtml = `<section class="list-guide"><strong>${state.location.country} · ${state.location.city}</strong>
       <span>${recent ? `最近完成：${recent.place}（${recent.outcome || '已游览'}）。` : '选择目的地开始三段探索。'}</span></section>
       <nav class="filter-chips">${filters}</nav><div class="travel-grid">${cards || '<p class="empty-state">当前筛选没有匹配地点。</p>'}</div>
       <h3>旅途相识 · ${state.travel.encounters.length}位角色</h3>${renderEncounters(state)}`;
+    return Game.conventionCalendarView?.wrap(state, streetHtml) || streetHtml;
   }
   function setFilter(value) {
     const valid = filterLabels.map((item) => item.includes(':') ? item.split(':')[0] : item);

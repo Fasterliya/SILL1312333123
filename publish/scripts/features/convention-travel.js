@@ -12,13 +12,13 @@
     return ts.selectedCoserId ? Game.people.find(state, ts.selectedCoserId) : null;
   }
 
-  function createCoser(state, costume) {
+  function createCoser(state, costume, ts) {
     const age = Math.max(12, U.age(state) + U.between(-3, 4));
     const person = U.person('漫展相识', '', age, null, state.totalMonths);
     Game.worldCulture.applyPerson(person, state.location.country);
     U.setUniqueName(state, person, Game.worldCulture.profile(state.location.country).locale);
     person.affection = U.between(40, 52);
-    person.metCity = `${state.location.city}城市漫展`;
+    person.metCity = `${state.location.city}${ts.placeName}`;
     person.currentCity = state.location.city;
     Game.npcLife.syncGrowth(state, person);
     person.cosplay = costume.name;
@@ -31,29 +31,40 @@
   }
 
   function createRoster(state, ts) {
-    const pool = Game.cosplayCatalog.items.filter((item) => item.name !== '无');
+    const pool = Game.cosplayCatalog.items.filter((item) => (
+      item.name !== '无' && (!ts.series || item.series === ts.series)
+    ));
     const available = pool.slice();
     while (ts.coserIds.length < 3 && available.length) {
       const index = U.between(0, available.length - 1);
       const [costume] = available.splice(index, 1);
       if (ts.coserIds.some((id) => Game.people.find(state, id)?.cosplay === costume.name)) continue;
-      ts.coserIds.push(createCoser(state, costume).id);
+      ts.coserIds.push(createCoser(state, costume, ts).id);
     }
   }
 
-  function start(state) {
+  function start(state, edition) {
+    const event = edition || {
+      id: '', name: '城市漫展', themeName: '综合漫展', series: '',
+      organizer: { name: '城市会展公司' },
+    };
+    const registration = state.conventionCalendar?.registrations?.[event.id]
+      || { role: 'visitor', intent: 'social' };
     const ts = {
-      placeName: '城市漫展', mode: 'convention', node: 'entrance',
+      placeName: event.name, mode: 'convention', node: 'entrance',
+      editionId: event.id, themeName: event.themeName, series: event.series,
+      organizerName: event.organizer.name,
+      role: registration.role, intent: registration.intent,
       score: 0, feedback: '抵达会场，先选择最想体验的区域。',
       path: [], total: 4, coserIds: [], selectedCoserId: null, riskCount: 0,
     };
     state.travel.activeStage = ts;
     createRoster(state, ts);
-    Game.lifeDirector.addLog(state, '街区旅途', '你开始了城市漫展的多路线探索。', 'good');
-    return { ok: true, message: '城市漫展已开放：摄影区、主舞台和同人摊位都可以探索' };
+    Game.lifeDirector.addLog(state, '街区旅途', `你开始了${event.name}的多路线探索。`, 'good');
+    return { ok: true, message: `${event.name}已开放：摄影区、主舞台和同人摊位都可以探索` };
   }
 
-  function requirementFailure(state, option) {
+  function requirementFailure(state, ts, option) {
     const effect = option.effect || {};
     if ((effect.cost || 0) > state.money) return `资金不足，需要${Game.view.money(effect.cost)}`;
     const req = effect.requires || {};
@@ -62,6 +73,10 @@
     if (req.stat && value < req.min) return `${ability || req.stat}需要达到${req.min}`;
     if (req.cosplay && Game.cosplayCatalog.find(identityProfile(state).cosplay).name === '无') {
       return '需要先在角色外观中穿上 COS 服';
+    }
+    if (req.cosplay && ts.series
+      && Game.cosplayCatalog.find(identityProfile(state).cosplay).series !== ts.series) {
+      return `${ts.themeName}舞台只接受对应系列的 COS 服`;
     }
     return '';
   }
@@ -84,7 +99,7 @@
   function options(state, ts) {
     const node = Game.conventionRoutes.get(ts.node);
     const source = ts.node === 'coser-select' ? rosterOptions(state, ts) : (node?.options || []);
-    return source.map((item) => ({ ...item, blocked: requirementFailure(state, item) }));
+    return source.map((item) => ({ ...item, blocked: requirementFailure(state, ts, item) }));
   }
 
   function chooseFallbackCoser(state, ts) {
@@ -132,14 +147,17 @@
     Game.stressSystem.reduce(state, ts.score >= 18 ? 9 : 5, '漫展体验');
     Game.structuredTraits.addExperience(state.profile, 'traveler');
     state.travel.localHistory.unshift({
-      city: state.location.city, place: '城市漫展', month: state.totalMonths,
+      city: state.location.city, place: ts.placeName, month: state.totalMonths,
       score: ts.score, outcome: `${rating}${relation}`,
     });
     state.travel.localHistory = state.travel.localHistory.slice(0, 20);
     state.travel.activeStage = null;
     const summary = `${rating}，评分${ts.score}${relation}。`;
+    Game.conventionCalendar?.finishAttendance(state, ts.editionId, {
+      score: ts.score, outcome: `${rating}${relation}`,
+    });
     Game.lifeDirector.addLog(state, '漫展归来', summary, 'milestone');
-    return { ok: true, finished: true, message: `城市漫展完成：${summary}` };
+    return { ok: true, finished: true, message: `${ts.placeName}完成：${summary}` };
   }
 
   function choose(state, choiceId) {
@@ -158,12 +176,16 @@
   function model(state, ts) {
     const node = Game.conventionRoutes.get(ts.node);
     if (!node && ts.node !== 'coser-select') return null;
+    const role = Game.conventionCatalog.roles.find((item) => item.id === ts.role)?.name || '游客';
+    const intent = Game.conventionCatalog.intents.find((item) => item.id === ts.intent)?.name || '结识同好';
     return {
       node: ts.node,
       title: node?.title || 'COS 摄影区 · 选择想认识的人',
       text: node?.text || '三名 Coser 穿着不同作品的角色服装，选择一位开始交流。',
       step: ts.path.length + 1, total: ts.total || node?.total || 4,
       feedback: ts.feedback, score: ts.score,
+      eventName: ts.placeName, themeName: ts.themeName,
+      roleName: role, intentName: intent,
       options: options(state, ts),
       people: ts.coserIds.map((id) => Game.people.find(state, id)).filter(Boolean),
       selectedId: ts.selectedCoserId,

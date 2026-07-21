@@ -174,6 +174,7 @@
     if (Game.hookupSystem?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.idolSystem?.handleClick?.(event)) return;
     if (Game.familyConflict?.handleClick?.(event)) return;
+    if (Game.conventionCalendarInteractions?.handleClick?.(event)) return;
     if (Game.travelInteractions?.handleClick?.(event)) return;
     if (Game.portraitGallery.handleClick(event)) return;
     if (Game.hunterMode.handleClick(event)) return;

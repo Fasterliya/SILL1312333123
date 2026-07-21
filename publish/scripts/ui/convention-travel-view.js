@@ -39,9 +39,10 @@
       return '';
     }
     return `<section class="journey-current convention-current">
-      <span>城市漫展 · 第${model.step}/${model.total}层 · 当前评价 ${model.score}</span>
+      <span>${escape(model.eventName)} · 第${model.step}/${model.total}层 · 当前评价 ${model.score}</span>
       <strong>${escape(model.title)}</strong>
-      <small>${escape(model.text)}<br>上一步：${escape(model.feedback)}</small>
+      <small>${escape(model.themeName)} · ${escape(model.roleName)} · ${escape(model.intentName)}
+      <br>${escape(model.text)}<br>上一步：${escape(model.feedback)}</small>
       <div class="journey-progress"><i style="width:${Math.max(0, (model.step - 1) * 100 / model.total)}%"></i></div>
     </section>${roster(model)}<div class="journey-options convention-options">${optionCards(model)}</div>`;
   }

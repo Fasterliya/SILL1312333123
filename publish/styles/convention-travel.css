@@ -1,29 +1,137 @@
 .convention-current {
-  border-left-color: #a33b56;
-  background: #f6eef1;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #dfd2d6;
+  border-left: 4px solid #a33b56;
+  border-radius: 6px;
+  background: #fbf6f7;
+}
+
+.convention-current > header {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.convention-current > header div,
+.convention-current > header span,
+.convention-current > header strong {
+  min-width: 0;
+  display: block;
+}
+
+.convention-current > header span {
+  color: #8a6a73;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.convention-current > header strong {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  color: #382d31;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.convention-current > header > b {
+  flex: 0 0 auto;
+  padding: 6px 8px;
+  color: #fff;
+  background: #8e3850;
+  font-size: 10px;
+}
+
+.convention-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.convention-context span {
+  padding: 4px 7px;
+  border: 1px solid #ddcdd2;
+  color: #744858;
+  background: #fff;
+  font-size: 10px;
+}
+
+.convention-current p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #62575a;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.convention-current p b {
+  display: block;
+  margin-bottom: 2px;
+  color: #8e3850;
+  font-size: 9px;
+}
+
+.convention-arrangement,
+.convention-feedback {
+  padding: 9px 10px;
+  background: #fff;
+}
+
+.convention-feedback {
+  border-left: 3px solid #d0a658;
 }
 
 .convention-roster {
-  margin: 10px 0;
+  margin: 12px 0;
+}
+
+.convention-roster > header {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.convention-roster > header span,
+.convention-roster > header h3 {
+  display: block;
+}
+
+.convention-roster > header span {
+  color: #8a7278;
+  font-size: 9px;
 }
 
 .convention-roster h3 {
-  margin: 0 0 7px;
+  margin: 2px 0 0;
   color: #4e373e;
-  font-size: 11px;
+  font-size: 13px;
+}
+
+.convention-roster > header b {
+  color: #8e3850;
+  font-size: 10px;
+}
+
+.convention-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .convention-coser {
-  min-height: 64px;
-  margin-bottom: 7px;
-  padding: 8px;
+  min-width: 0;
+  min-height: 72px;
+  padding: 10px;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: 9px;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 10px;
   align-items: center;
   border: 1px solid #ded5d8;
-  border-radius: 7px;
-  background: #fffaf9;
+  border-radius: 6px;
+  background: #fff;
 }
 
 .convention-coser.selected {
@@ -32,8 +140,8 @@
 }
 
 .convention-coser .person-avatar {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
 }
 
 .convention-coser div,
@@ -46,7 +154,7 @@
 
 .convention-coser strong {
   color: #263b37;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .convention-coser span {
@@ -60,35 +168,68 @@
 .convention-coser small {
   margin-top: 4px;
   color: #74706f;
-  font-size: 9px;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.convention-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .journey-options .convention-option {
-  min-height: 66px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 12px;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  border: 1px solid #263b37;
+  border-radius: 6px;
   text-align: left;
 }
 
 .convention-option strong,
-.convention-option small {
+.convention-option small,
+.convention-option span {
+  min-width: 0;
   display: block;
+  overflow-wrap: anywhere;
+}
+
+.convention-option strong {
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .convention-option small {
-  margin-top: 5px;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.45;
+}
+
+.convention-option span {
+  align-self: end;
+  color: #f1d59b;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.convention-option:disabled span {
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .convention-calendar-summary {
   margin-bottom: 12px;
-  padding: 11px;
+  padding: 14px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
+  border: 1px solid #dfd2d6;
   border-left: 4px solid #a33b56;
-  background: #f6eef1;
+  border-radius: 6px;
+  background: #fbf6f7;
 }
 
 .convention-calendar-summary span,
@@ -99,26 +240,54 @@
 
 .convention-calendar-summary span {
   color: #8b6670;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .convention-calendar-summary strong {
   margin-top: 3px;
   color: #3e3034;
-  font-size: 13px;
+  overflow-wrap: anywhere;
+  font-size: 15px;
 }
 
 .convention-calendar-summary small {
   margin-top: 4px;
   color: #746b6e;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.convention-calendar-summary button {
+  min-width: 88px;
+  padding: 8px 10px;
+  background: #8e3850;
+  color: #fff;
+}
+
+.convention-calendar-summary button span,
+.convention-calendar-summary button strong {
+  display: block;
+  color: inherit;
+}
+
+.convention-calendar-summary button span {
   font-size: 9px;
+  opacity: 0.75;
+}
+
+.convention-calendar-summary button strong {
+  margin-top: 2px;
+  font-size: 11px;
 }
 
 .convention-calendar-head {
+  padding: 12px;
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
   gap: 9px;
   align-items: center;
+  border: 1px solid #dfd5d8;
+  background: #fbf7f8;
 }
 
 .convention-calendar-head > button {
@@ -136,13 +305,14 @@
 .convention-calendar-head span,
 .convention-calendar-head small {
   color: #776c70;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .convention-calendar-head strong {
   margin: 3px 0;
   color: #3f3035;
-  font-size: 14px;
+  overflow-wrap: anywhere;
+  font-size: 16px;
 }
 
 .convention-calendar-head nav {
@@ -150,6 +320,13 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
+}
+
+.convention-calendar-head nav button {
+  min-height: 40px;
+  border: 1px solid #ded3d6;
+  background: #fff;
+  color: #6f4a55;
 }
 
 .convention-calendar-list {
@@ -160,48 +337,69 @@
 
 .convention-calendar-row {
   width: 100%;
-  min-height: 64px;
-  padding: 8px;
+  min-width: 0;
+  min-height: 78px;
+  padding: 10px;
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr) 52px;
-  gap: 9px;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 10px;
   align-items: center;
   text-align: left;
   border: 1px solid #ded5d8;
-  background: #fffafa;
+  border-radius: 6px;
+  background: #fff;
   color: #342d2f;
 }
 
 .convention-date b,
 .convention-date small,
 .convention-main strong,
-.convention-main small {
+.convention-main small,
+.convention-main em {
   display: block;
+}
+
+.convention-date,
+.convention-main {
+  min-width: 0;
 }
 
 .convention-date b {
   color: #a33b56;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .convention-date small,
 .convention-main small {
   margin-top: 4px;
   color: #796f72;
-  font-size: 9px;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .convention-main strong {
   overflow-wrap: anywhere;
-  font-size: 11px;
+  color: #3f3236;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.convention-main em {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  color: #8c6872;
+  font-size: 9px;
+  font-style: normal;
 }
 
 .convention-status {
-  padding: 5px 3px;
+  min-width: 58px;
+  padding: 6px 8px;
   text-align: center;
   color: #786f71;
   background: #ece8e8;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 750;
 }
 
@@ -216,8 +414,10 @@
 }
 
 .convention-detail-head {
-  padding: 10px 0 12px;
-  border-bottom: 1px solid #ddd5d7;
+  padding: 14px;
+  border: 1px solid #dfd5d8;
+  border-left: 4px solid #a33b56;
+  background: #fbf7f8;
 }
 
 .convention-detail-head span,
@@ -229,13 +429,14 @@
 .convention-detail-head span,
 .convention-detail-head small {
   color: #766c6f;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .convention-detail-head strong {
   margin: 5px 0;
   color: #3c2f33;
-  font-size: 17px;
+  overflow-wrap: anywhere;
+  font-size: 19px;
 }
 
 .convention-detail-grid {
@@ -246,26 +447,28 @@
 }
 
 .convention-detail-grid div {
-  padding: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #e2d9dc;
   background: #f4eff0;
 }
 
 .convention-detail-grid dt {
   color: #837579;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .convention-detail-grid dd {
   margin: 4px 0 0;
   overflow-wrap: anywhere;
   color: #3c3235;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 750;
 }
 
 .convention-zones h3 {
   margin: 0 0 7px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .convention-zones div {
@@ -279,23 +482,6 @@
   border: 1px solid #d9ced1;
   color: #6e4e58;
   background: #fffafa;
-  font-size: 9px;
-}
-
-.convention-registration {
-  margin-top: 12px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.convention-registration label {
-  color: #776d70;
-  font-size: 9px;
-}
-
-.convention-registration select {
-  width: 100%;
-  min-height: 44px;
-  margin-top: 4px;
+  overflow-wrap: anywhere;
+  font-size: 10px;
 }

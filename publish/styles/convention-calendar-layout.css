@@ -1,0 +1,51 @@
+.convention-registration {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.convention-registration label {
+  color: #776d70;
+  font-size: 10px;
+}
+
+.convention-registration select {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 0 10px;
+  border: 1px solid #d8cfd2;
+  background: #fff;
+  color: #45383c;
+}
+
+@media (max-width: 420px) {
+  .convention-roster-grid,
+  .convention-options,
+  .convention-registration {
+    grid-template-columns: 1fr;
+  }
+
+  .convention-calendar-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .convention-calendar-summary button {
+    width: 100%;
+  }
+
+  .convention-calendar-row {
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .convention-status {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .convention-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

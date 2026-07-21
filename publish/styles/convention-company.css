@@ -7,7 +7,15 @@
   margin-top: 9px;
   padding: 10px;
   border: 1px solid #d9d1d3;
+  border-radius: 6px;
   background: #fffafa;
+}
+
+.convention-company-license > div,
+.convention-company-block > header > div,
+.convention-contract > header > div,
+.convention-tender > div {
+  min-width: 0;
 }
 
 .convention-company-license {
@@ -43,7 +51,9 @@
 .convention-company-block > header small {
   margin-top: 4px;
   color: #756c6e;
-  font-size: 9px;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .convention-company-block > header,
@@ -71,9 +81,8 @@
 }
 
 .convention-brand > header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 
@@ -88,25 +97,29 @@
 .convention-brand header span,
 .convention-brand header small {
   color: #7d6d71;
-  font-size: 8px;
+  overflow-wrap: anywhere;
+  font-size: 10px;
 }
 
 .convention-brand header strong {
   margin-top: 2px;
   color: #49383d;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .convention-brand > div {
   margin-top: 7px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 5px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
 }
 
 .convention-brand button {
-  min-height: 48px;
-  padding: 6px;
+  min-width: 0;
+  min-height: 64px;
+  padding: 9px;
+  border: 1px solid #ded4d7;
+  background: #fbf8f9;
   text-align: left;
 }
 
@@ -118,8 +131,9 @@
 .convention-brand button small {
   margin-top: 3px;
   opacity: 0.78;
-  font-size: 8px;
-  line-height: 1.3;
+  overflow-wrap: anywhere;
+  font-size: 9px;
+  line-height: 1.4;
 }
 
 .convention-tender,
@@ -162,7 +176,9 @@
 .convention-tender small {
   margin-top: 4px;
   color: #756c6f;
-  font-size: 9px;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .convention-tender > b {
@@ -189,13 +205,13 @@
 
 .convention-prep-metrics span {
   color: #84777a;
-  font-size: 8px;
+  font-size: 9px;
 }
 
 .convention-prep-metrics b {
   margin-top: 3px;
   color: #704553;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .convention-prep-stage {
@@ -221,7 +237,11 @@
 }
 
 .convention-prep-stage button {
-  min-height: 54px;
+  min-width: 0;
+  min-height: 68px;
+  padding: 9px;
+  border: 1px solid #ddd3d6;
+  background: #fbf8f9;
   text-align: left;
 }
 
@@ -233,7 +253,9 @@
 .convention-prep-stage button small {
   margin-top: 4px;
   opacity: 0.75;
-  font-size: 9px;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .convention-company-ready {
@@ -310,18 +332,21 @@
   display: block;
   margin-bottom: 5px;
   color: #806e73;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .convention-partner-group > div {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
 }
 
 .convention-partner-group button {
-  min-height: 66px;
-  padding: 7px;
+  min-width: 0;
+  min-height: 82px;
+  padding: 9px;
+  border: 1px solid #ddd3d6;
+  background: #fbf8f9;
   text-align: left;
 }
 
@@ -335,15 +360,17 @@
 .convention-partner-group button strong,
 .convention-partner-group.selected strong {
   color: #46383c;
-  font-size: 9px;
+  overflow-wrap: anywhere;
+  font-size: 11px;
 }
 
 .convention-partner-group button small,
 .convention-partner-group.selected small {
   margin-top: 4px;
   color: #74696c;
-  font-size: 8px;
-  line-height: 1.35;
+  overflow-wrap: anywhere;
+  font-size: 9px;
+  line-height: 1.45;
 }
 
 .convention-partner-group.selected {
@@ -375,7 +402,7 @@
 .convention-operations header span,
 .convention-operations p {
   color: #766a6d;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .convention-operations p {
@@ -390,7 +417,11 @@
 }
 
 .convention-operations button {
-  min-height: 58px;
+  min-width: 0;
+  min-height: 72px;
+  padding: 9px;
+  border: 1px solid #ddd3d6;
+  background: #fbf8f9;
   text-align: left;
 }
 
@@ -401,8 +432,9 @@
 
 .convention-operations button small {
   margin-top: 4px;
-  font-size: 8px;
-  line-height: 1.35;
+  overflow-wrap: anywhere;
+  font-size: 9px;
+  line-height: 1.45;
 }
 
 .convention-operations.completed {
@@ -426,7 +458,7 @@
   }
 
   .convention-brand > div {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .convention-operations > div {

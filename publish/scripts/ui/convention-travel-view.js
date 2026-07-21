@@ -21,14 +21,17 @@
         <small>${escape(person.job)} · 好感 ${person.affection}${selected ? ' · 当前同行' : ''}</small></div>
       </article>`;
     }).join('');
-    return `<section class="convention-roster"><h3>现场 Coser · ${model.people.length}人</h3>${cards}</section>`;
+    return `<section class="convention-roster"><header><div><span>现场角色</span>
+      <h3>Coser 阵容</h3></div><b>${model.people.length}人</b></header>
+      <div class="convention-roster-grid">${cards}</div></section>`;
   }
 
   function optionCards(model) {
     return model.options.map((option) => (
       `<button class="convention-option" data-travel-choice="${escape(option.id)}"
         ${option.blocked ? 'disabled' : ''}><strong>${escape(option.label)}</strong>
-        <small>${escape(option.hint)}${option.blocked ? `<br>${escape(option.blocked)}` : ''}</small></button>`
+        <small>${escape(option.hint)}</small>
+        ${option.blocked ? `<span>${escape(option.blocked)}</span>` : '<span>选择此路线</span>'}</button>`
     )).join('');
   }
 
@@ -39,11 +42,13 @@
       return '';
     }
     return `<section class="journey-current convention-current">
-      <span>${escape(model.eventName)} · 第${model.step}/${model.total}层 · 当前评价 ${model.score}</span>
-      <strong>${escape(model.title)}</strong>
-      <small>${escape(model.themeName)} · ${escape(model.roleName)} · ${escape(model.intentName)}
-      ${model.arrangement ? `<br>现场安排：${escape(model.arrangement)}` : ''}
-      <br>${escape(model.text)}<br>上一步：${escape(model.feedback)}</small>
+      <header><div><span>${escape(model.eventName)} · 路线 ${model.step}/${model.total}</span>
+      <strong>${escape(model.title)}</strong></div><b>评价 ${model.score}</b></header>
+      <div class="convention-context"><span>${escape(model.themeName)}</span>
+      <span>${escape(model.roleName)}</span><span>${escape(model.intentName)}</span></div>
+      ${model.arrangement ? `<p class="convention-arrangement"><b>现场安排</b>${escape(model.arrangement)}</p>` : ''}
+      <p class="convention-scene">${escape(model.text)}</p>
+      <p class="convention-feedback"><b>上一步</b>${escape(model.feedback)}</p>
       <div class="journey-progress"><i style="width:${Math.max(0, (model.step - 1) * 100 / model.total)}%"></i></div>
     </section>${roster(model)}<div class="journey-options convention-options">${optionCards(model)}</div>`;
   }

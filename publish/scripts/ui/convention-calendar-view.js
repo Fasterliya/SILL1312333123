@@ -25,8 +25,8 @@
     return `<button class="convention-calendar-row" data-convention-detail="${escape(item.id)}">
       <span class="convention-date"><b>${item.month}月</b><small>${escape(item.country)}</small></span>
       <span class="convention-main"><strong>${escape(item.name)}</strong>
-      <small>第${item.editionNumber}届 · ${escape(item.city)} · ${escape(item.scale)}
-      · ${escape(item.organizer.name)}</small></span>
+      <small>第${item.editionNumber}届 · ${escape(item.city)} · ${escape(item.scale)}</small>
+      <em>${escape(item.organizer.name)}</em></span>
       <span class="convention-status ${statusClass(status.id)}">${attended ? '已参加' : status.label}</span>
     </button>`;
   }
@@ -44,7 +44,7 @@
       <div><span>${next.year}年度 · 第${next.editionNumber}届</span><strong>${escape(next.name)}</strong>
       <small>${escape(next.country)} · ${escape(next.city)} · ${next.month}月 · ${status.label}
       · 品牌声望 ${next.franchise.prestige}</small></div>
-      <button data-convention-calendar>年度日历</button>
+      <button data-convention-calendar><span>查看</span><strong>年度日历</strong></button>
     </section>`;
   }
   function calendar(state) {

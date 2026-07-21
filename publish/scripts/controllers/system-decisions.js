@@ -8,6 +8,7 @@
     boardVote: () => Game.stockDirector,
     familyConflict: () => Game.familyConflict,
     relationshipConflict: () => Game.relationshipConflict,
+    stress: () => Game.stressSystem,
     examPrep: () => Game.educationExamPrep,
     idolTraineePlan: () => Game.idolTraineeDecisions,
     idolTraineeReview: () => Game.idolTraineeDecisions,

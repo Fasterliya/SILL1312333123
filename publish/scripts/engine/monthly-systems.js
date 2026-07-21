@@ -18,6 +18,7 @@
     Game.householdSystem.monthly(state);
     Game.relationshipSecrets.monthly(state);
     Game.creatorCareer.monthly(state);
+    Game.stressSystem.monthly(state);
     Game.healthSystem.monthly(state);
     Game.npcFashion.monthly(state);
     Game.encounterSystem?.ensure(state);

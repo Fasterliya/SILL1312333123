@@ -11,14 +11,12 @@
     ['创作者市集', 180, '作品、摊主与合作机会构成创作探索。', 'creative'],
     ['红灯区', 680, '成年人的深夜消费区域，由独立事件链处理。', 'night'],
   ].map(([name, cost, description, category]) => (
-    { name, cost, description, kind: 'neighborhood', category }
-  ));
+    { name, cost, description, kind: 'neighborhood', category }));
   const filterLabels = ['全部', 'daily:日常休闲', 'social:社交邂逅', 'creative:创作活动', 'night:深夜']; let activeFilter = '全部';
   function ensureTravel(state) {
     state.travel = state.travel && typeof state.travel === 'object' ? state.travel : {};
     state.travel.encounters = Array.isArray(state.travel.encounters) ? state.travel.encounters : [];
-    state.travel.localHistory = Array.isArray(state.travel.localHistory) ? state.travel.localHistory : [];
-    return state.travel;
+    state.travel.localHistory = Array.isArray(state.travel.localHistory) ? state.travel.localHistory : []; return state.travel;
   }
   const places = (state) => [...(Game.cityAttractions?.forCity(state.location.city) || []), ...neighborhoods];
   function unavailable(state, place) {
@@ -30,7 +28,8 @@
     if ((effect.cost || 0) > state.money) return `资金不足，需要${Game.view.money(effect.cost)}`;
     const req = effect.requires || {};
     if (req.age && U.age(state) < req.age) return `需要年满${req.age}岁`;
-    if (req.stat && (state.stats[req.stat] || 0) < req.min) return `${req.stat}需要达到${req.min}`;
+    const value = ['智力', '魅力', '力量'].includes(req.stat) ? Game.characterAttributes.playerValue(state, req.stat) : (state.stats[req.stat] || 0);
+    if (req.stat && value < req.min) return `${req.stat}需要达到${req.min}`;
     return '';
   }
   function requirementText(effect) {
@@ -67,14 +66,14 @@
     if (effect.money) state.money += effect.money;
     const changes = { 心情: effect.mood, 魅力: effect.charm, 智力: effect.intelligence, 健康: effect.health };
     Object.entries(changes).forEach(([stat, delta]) => {
-      if (delta) state.stats[stat] = U.clamp(state.stats[stat] + delta, 0, 100);
+      if (delta > 0 && ['智力', '魅力'].includes(stat)) Game.characterAttributes.gain(state, stat, delta, '街区旅途');
+      else if (delta) state.stats[stat] = U.clamp(state.stats[stat] + delta, 0, 100);
     });
-    state.cityLife = state.cityLife || { reputation: 0, familiarity: {} };
-    state.cityLife.familiarity = state.cityLife.familiarity || {};
+    state.cityLife = state.cityLife || { reputation: 0, familiarity: {} }; state.cityLife.familiarity ||= {};
     if (effect.reputation) state.cityLife.reputation = U.clamp((state.cityLife.reputation || 0) + effect.reputation, 0, 100);
     ts.score += effect.score || 0;
-    const partner = effect.meet ? addEncounter(state, ts)
-      : (ts.partnerId ? Game.people.find(state, ts.partnerId) : null);
+    const partner = effect.meet ? addEncounter(state, ts) : (ts.partnerId
+      ? Game.people.find(state, ts.partnerId) : null);
     if (partner && effect.affection) partner.affection = U.clamp(partner.affection + effect.affection, 0, 100);
     let riskText = '';
     if (effect.risk && Math.random() < effect.risk.chance) {
@@ -139,6 +138,7 @@
     const rating = ts.score >= 13 ? '深入探索' : (ts.score >= 9 ? '充实旅程' : '轻松到访');
     const summary = `${rating}，评分${ts.score}，遭遇风险${ts.riskCount}次。${ts.feedback}`;
     state.stats.心情 = U.clamp(state.stats.心情 + (ts.score >= 13 ? 6 : 3), 0, 100);
+    Game.stressSystem.reduce(state, ts.score >= 13 ? 8 : 4, '街区旅途');
     recordHistory(state, ts.placeName, ts.score, rating);
     state.travel.activeStage = null;
     Game.lifeDirector.addLog(state, '旅途归来', `${ts.placeName}：${summary}`, 'milestone');

@@ -26,15 +26,17 @@
   }
 
   function ability(state, job) {
+    const charm = Game.characterAttributes.playerValue(state, '魅力');
+    const intelligence = Game.characterAttributes.playerValue(state, '智力');
     if (['idoltrainee', 'idol-underground', 'idol'].includes(job.id)) {
-      return state.stats.魅力 * 0.7 + state.stats.健康 * 0.2
+      return charm * 0.7 + state.stats.健康 * 0.2
         + traitBoost(state, '艺术') + (state.education.study || 0) * 0.04;
     }
     var isMatch = job.majors.includes(state.education.major);
     var majorRelevance = isMatch ? 35 + Math.floor((state.education.study || 0) / 100 * 37) : (state.education.university ? -15 : 0);
     var personality = job.category === '社交' && ['外向','乐观','热血'].includes(state.profile.personality) ? 6 : 0;
     var audience = job.recommendedGender === state.gender ? 8 : 0;
-    return state.stats.智力 * 0.55 + state.stats.魅力 * 0.2 + state.education.study * 0.12
+    return intelligence * 0.55 + charm * 0.2 + state.education.study * 0.12
       + traitBoost(state, job.category) + majorRelevance + personality + audience;
   }
 
@@ -151,7 +153,7 @@
     state.career.performance = U.clamp(state.career.performance + performance, 0, 100);
     state.career.exp += exp;
     state.stats.心情 = U.clamp(state.stats.心情 + mood, 0, 100);
-    state.stats.智力 = U.clamp(state.stats.智力 + intelligence, 0, 100);
+    Game.characterAttributes.gain(state, '智力', intelligence, `职场行动:${type}`);
     Game.careerSpecialties.afterWork(state, type);
     Game.lifeDirector.addLog(state, '职场行动', label, 'good');
     return { ok: true, message: Game.economy.message(

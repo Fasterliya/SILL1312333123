@@ -4,6 +4,24 @@
   background: #fff;
 }
 
+.stress-panel {
+  border-left: 3px solid #cf6d3c;
+}
+
+.stress-meter {
+  height: 8px;
+  margin: 10px 0 6px;
+  overflow: hidden;
+  background: #e8e0d2;
+  border-radius: 4px;
+}
+
+.stress-meter i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #d6a642, #c84d3f);
+}
+
 .health-module > header {
   min-height: 58px;
   padding: 12px;

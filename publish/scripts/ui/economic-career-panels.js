@@ -53,7 +53,7 @@
       ? `${state.totalMonths - state.health.lastCheckupMonth}个月前` : '从未';
     return `<section class="career-panel"><div class="work-metrics">
       <div><span>职业倦怠</span><strong>${state.career.burnout || 0}/100</strong></div>
-      <div><span>健康</span><strong>${Math.round(state.stats.健康)}</strong></div>
+      <div><span>健康</span><strong>${Math.round(state.stats.健康)}%</strong></div>
       <div><span>上次体检</span><strong>${last}</strong></div>
       <div><span>场地等级</span><strong>${data.venueLevel}</strong></div>
     </div><div class="system-actions">

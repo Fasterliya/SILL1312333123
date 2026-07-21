@@ -44,7 +44,9 @@
 
   function apply(state, effects) {
     Object.entries(effects.stats || {}).forEach(([key, value]) => {
-      state.stats[key] = clamp((state.stats[key] || 0) + value);
+      if (value > 0 && ['智力', '魅力', '力量'].includes(key)) {
+        Game.characterAttributes.gain(state, key, value, '人生事件');
+      } else state.stats[key] = clamp((state.stats[key] || 0) + value);
     });
     state.money += effects.money || 0;
     if (effects.study) Game.educationSystem.addPreparation(state, effects.study);

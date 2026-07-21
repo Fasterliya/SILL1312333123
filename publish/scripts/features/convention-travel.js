@@ -57,7 +57,9 @@
     const effect = option.effect || {};
     if ((effect.cost || 0) > state.money) return `资金不足，需要${Game.view.money(effect.cost)}`;
     const req = effect.requires || {};
-    if (req.stat && (state.stats[req.stat] || 0) < req.min) return `${req.stat}需要达到${req.min}`;
+    const value = ['智力', '魅力', '力量'].includes(req.stat)
+      ? Game.characterAttributes.playerValue(state, req.stat) : (state.stats[req.stat] || 0);
+    if (req.stat && value < req.min) return `${req.stat}需要达到${req.min}`;
     if (req.cosplay && Game.cosplayCatalog.find(identityProfile(state).cosplay).name === '无') {
       return '需要先在角色外观中穿上 COS 服';
     }
@@ -101,7 +103,9 @@
       智力: effect.intelligence, 健康: effect.health,
     };
     Object.entries(changes).forEach(([stat, delta]) => {
-      if (delta) state.stats[stat] = U.clamp(state.stats[stat] + delta, 0, 100);
+      if (delta > 0 && ['智力', '魅力'].includes(stat)) {
+        Game.characterAttributes.gain(state, stat, delta, '城市漫展');
+      } else if (delta) state.stats[stat] = U.clamp(state.stats[stat] + delta, 0, 100);
     });
     state.cityLife ||= { reputation: 0, familiarity: {} };
     state.cityLife.familiarity ||= {};
@@ -130,6 +134,7 @@
       (state.cityLife.familiarity[state.location.city] || 0) + 3, 0, 100,
     );
     state.stats.心情 = U.clamp(state.stats.心情 + (ts.score >= 18 ? 6 : 3), 0, 100);
+    Game.stressSystem.reduce(state, ts.score >= 18 ? 9 : 5, '漫展体验');
     state.travel.localHistory.unshift({
       city: state.location.city, place: '城市漫展', month: state.totalMonths,
       score: ts.score, outcome: `${rating}${relation}`,

@@ -15,7 +15,8 @@
   }
 
   function renderStatus(state) {
-    return (Game.psychology?.render(state) || '')
+    return (Game.stressSystem?.render(state) || '')
+      + (Game.psychology?.render(state) || '')
       + (Game.criminalSystem?.render(state) || '')
       + npcSettings(state);
   }

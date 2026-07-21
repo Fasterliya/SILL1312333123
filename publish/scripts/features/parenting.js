@@ -29,6 +29,10 @@
     up.education = clamp(up.education + action[2]);
     up.independence = clamp(up.independence + action[3]);
     up.health = clamp(up.health + action[4]);
+    Game.characterAttributes.ensurePerson(child);
+    const growth = { read: ['智力', 1.5], exercise: ['力量', 1.5], explore: ['魅力', 1] }[type];
+    if (growth) Game.characterAttributes.gainPerson(child, growth[0], growth[1], `养育:${type}`);
+    Game.stressSystem.reduce(state, type === 'accompany' ? 4 : 2, '陪伴子女');
     child.affection = clamp(child.affection + 4);
     if (type === 'education') state.parenting.educationFund += action[0];
     Game.relationshipMemory.record(state, child, '养育', action[5], 5, -2);
@@ -49,12 +53,15 @@
       if (child.status !== '健康' || age > 18) return;
       if (age === 18 && (state.totalMonths - child.birthMonth) % 12 !== 0) return;
       const up = child.upbringing;
+      Game.characterAttributes.ensurePerson(child);
       ['care', 'education', 'independence', 'health'].forEach((key, index) => {
         up[key] = clamp(up[key] + gains[index] / 12);
       });
       if (up.care < 25 && state.totalMonths % 6 === 0) child.affection = clamp(child.affection - 2);
       if (up.health >= 70) child.status = '健康';
       if ((state.totalMonths - child.birthMonth) % 12 !== 0) return;
+      Game.characterAttributes.gainPerson(child, '智力', up.education / 45, '家庭教育');
+      Game.characterAttributes.gainPerson(child, '力量', up.health / 55, '健康养育');
       if (age === 12) {
         child.personality = up.independence >= 65 ? '自律' : (up.care >= 70 ? '温柔' : child.personality);
         Game.lifeDirector.addLog(state, `${child.name}进入青春期`, '长期养育方式开始塑造性格与独立能力。', 'milestone');

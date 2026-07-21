@@ -30,7 +30,6 @@
       item.portraitGallery = item.portraitGallery.slice(0, 8);
     }
   }
-
   function fillPerson(item, updatedAt) {
     item.personality ||= U.random(C.personalities);
     item.trait ||= legacyTrait(item.interests);
@@ -87,7 +86,6 @@
     Game.genetics.ensure(item, item.gender, `legacy-${item.id || item.name}`, true);
     return item;
   }
-
   function fillProfile(state) {
     const profile = state.profile;
     profile.trait ||= legacyTrait(profile.interests);
@@ -189,6 +187,9 @@
     state.routine.actions ||= { study: 0, sport: 0, social: 0, rest: 0 };
     delete state.routine.lastReport;
     state = Game.systemsState.ensure(state);
+    Game.congenitalTraits.ensure(state.profile, state.gender, `player-${state.name}`); Game.characterAttributes.ensurePlayer(state);
+    Game.people.all(state).forEach(Game.characterAttributes.ensurePerson);
+    Game.stressSystem.ensure(state); Game.healthModel.ensure(state);
     Game.jobMarketRebalance?.run(state);
     Game.taxSystem?.migratePending?.(state);
     return state;

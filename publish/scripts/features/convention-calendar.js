@@ -12,7 +12,7 @@
     state.conventionCalendar = state.conventionCalendar && typeof state.conventionCalendar === 'object'
       ? state.conventionCalendar : {};
     const data = state.conventionCalendar;
-    data.version = 2;
+    data.version = 3;
     data.registrations = data.registrations && typeof data.registrations === 'object'
       ? data.registrations : {};
     data.attendance = data.attendance && typeof data.attendance === 'object'
@@ -77,6 +77,12 @@
     const prep = data.preparation[edition.id];
     prep.sponsors = Array.isArray(prep.sponsors) ? prep.sponsors : [];
     prep.guests = Array.isArray(prep.guests) ? prep.guests : [];
+    prep.partnerAttempts = prep.partnerAttempts && typeof prep.partnerAttempts === 'object'
+      ? prep.partnerAttempts : { sponsor: [], guest: [] };
+    prep.partnerAttempts.sponsor = Array.isArray(prep.partnerAttempts.sponsor)
+      ? prep.partnerAttempts.sponsor : [];
+    prep.partnerAttempts.guest = Array.isArray(prep.partnerAttempts.guest)
+      ? prep.partnerAttempts.guest : [];
     return prep;
   }
   function edition(state, year, country) {

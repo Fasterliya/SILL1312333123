@@ -68,6 +68,40 @@
       ],
     },
   ]);
+  const sponsorOffers = Object.freeze([
+    {
+      id: 'community-alliance', name: '同人社团联合支持',
+      primary: '交涉', secondary: '学识', difficulty: 50, value: 70000,
+      effects: { quality: 5, safety: 1, promotion: 3 },
+    },
+    {
+      id: 'local-brand', name: '本地消费品牌赞助',
+      primary: '管理', secondary: '交涉', difficulty: 56, value: 95000,
+      effects: { quality: 1, safety: 0, promotion: 5 },
+    },
+    {
+      id: 'platform-title', name: '内容平台独家冠名',
+      primary: '心计', secondary: '管理', difficulty: 68, value: 160000,
+      effects: { quality: -2, safety: -3, promotion: 10 },
+    },
+  ]);
+  const guestOffers = Object.freeze([
+    {
+      id: 'featured-coser', name: '人气 Coser 嘉宾',
+      primary: '交涉', secondary: '魅力', difficulty: 54, fee: 40000, draw: 900,
+      effects: { quality: 2, safety: -1, promotion: 4 }, themed: true,
+    },
+    {
+      id: 'voice-cast', name: '配音演员舞台嘉宾',
+      primary: '交涉', secondary: '管理', difficulty: 66, fee: 90000, draw: 1800,
+      effects: { quality: 3, safety: -3, promotion: 7 },
+    },
+    {
+      id: 'creator-panel', name: '创作者座谈嘉宾',
+      primary: '学识', secondary: '交涉', difficulty: 48, fee: 30000, draw: 600,
+      effects: { quality: 5, safety: 1, promotion: 2 },
+    },
+  ]);
   const fallbackOrganizers = Object.freeze({
     华夏: '次元城市会展', 日本: '都市创作祭执行委员会', 韩国: '首尔文化活动社',
     新加坡: '狮城流行文化会展', 法国: '巴黎幻想文化协会',
@@ -79,7 +113,7 @@
   }
 
   Game.conventionCatalog = Object.freeze({
-    themes, roles, intents, prepStages, theme,
+    themes, roles, intents, prepStages, sponsorOffers, guestOffers, theme,
     fallbackOrganizer: (country) => fallbackOrganizers[country] || `${country}文化会展公司`,
   });
 }(window));

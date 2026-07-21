@@ -40,18 +40,18 @@
     const completion = completed / Game.conventionCatalog.prepStages.length;
     const appeal = 0.55 + prep.quality / 200 + prep.promotion / 250;
     const themeFactor = event.kind === 'only' ? 0.78 : 1;
+    const guestDraw = prep.guests.reduce((sum, item) => sum + (Number(item.draw) || 0), 0);
     const attendance = Math.max(300, Math.round(
       (attendanceBase[event.scale] || 4000) * appeal * (0.65 + completion * 0.35) * themeFactor,
-    ));
+    ) + guestDraw);
     const ticketRevenue = Math.round(attendance * event.ticketPrice * 0.08);
     const boothRevenue = Math.round(attendance * (event.kind === 'only' ? 16 : 12));
     const sponsorBoost = prep.sponsors.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
-    const guestBoost = prep.guests.reduce((sum, item) => sum + (Number(item.draw) || 0), 0);
     const sponsorRevenue = Math.round(attendance * (2 + prep.promotion * 0.06) + sponsorBoost);
     const contractRevenue = Math.round(
       (contractBase[event.scale] || 160000) * (0.7 + completion * 0.3),
     );
-    const grossRevenue = contractRevenue + ticketRevenue + boothRevenue + sponsorRevenue + guestBoost;
+    const grossRevenue = contractRevenue + ticketRevenue + boothRevenue + sponsorRevenue;
     const risk = incidentFor(event, prep, completed);
     const incidentCost = risk.incident ? Math.round(grossRevenue * risk.incident.rate) : 0;
     const emergencyCost = (Game.conventionCatalog.prepStages.length - completed) * 60000;

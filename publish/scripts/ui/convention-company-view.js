@@ -36,6 +36,7 @@
       ${settlement?.status === 'completed' ? settlementSummary(settlement) : ''}
       ${forecast ? forecastSummary(forecast) : ''}
       ${['ongoing', 'ended'].includes(status.id) ? '' : prepOptions(event, company)}
+      ${partnerPanel(state, event, company)}
     </article>`;
   }
   function forecastSummary(item) {
@@ -45,6 +46,46 @@
       <strong>预计 ${item.attendance.toLocaleString()} 人到场</strong>
       <small>无事故收入 ${Game.view.money(item.grossRevenue)}
       · 预计利润 ${Game.view.money(profit)}</small></div>`;
+  }
+  function partnerMeta(type, offer) {
+    const ability = `${offer.primary}+${offer.secondary} · 难度${offer.difficulty}`;
+    if (type === 'sponsor') {
+      return `合作收入 ${Game.view.money(offer.value)} · ${effectText(offer)} · ${ability}`;
+    }
+    return `费用 ${Game.view.money(offer.fee)} · 客流+${offer.draw}
+      · ${effectText(offer)} · ${ability}`;
+  }
+  function partnerGroup(state, event, company, type, open) {
+    const accepted = type === 'sponsor' ? event.preparation.sponsors : event.preparation.guests;
+    const title = type === 'sponsor' ? '赞助商' : '主嘉宾';
+    if (accepted.length) {
+      const item = accepted[0];
+      const detail = type === 'sponsor'
+        ? `合作收入 ${Game.view.money(item.value)}`
+        : `邀请费 ${Game.view.money(item.fee)} · 客流+${item.draw}`;
+      return `<div class="convention-partner-group selected"><span>${title}</span>
+        <strong>${escape(item.name)}</strong><small>${detail}</small></div>`;
+    }
+    if (!open) {
+      return `<div class="convention-partner-group selected"><span>${title}</span>
+        <strong>未确定</strong><small>本届没有达成合作</small></div>`;
+    }
+    const offers = Game.conventionPartners.available(state, event.id, company.id, type);
+    return `<div class="convention-partner-group"><span>${title}</span><div>${offers.map((offer) => (
+      `<button data-convention-partner="${escape(event.id)}|${escape(company.id)}|${type}|${offer.id}"
+        ${offer.attempted ? 'disabled' : ''}><strong>${escape(offer.name)}</strong>
+        <small>${offer.attempted ? '洽谈未成' : partnerMeta(type, offer)}</small></button>`
+    )).join('')}</div></div>`;
+  }
+  function partnerPanel(state, event, company) {
+    const prep = event.preparation;
+    const hasPartner = prep.sponsors.length || prep.guests.length;
+    const open = !Game.conventionCompany.nextStage(prep)
+      && !['ongoing', 'ended'].includes(Game.conventionCalendar.status(state, event).id);
+    if (!open && !hasPartner) return '';
+    return `<section class="convention-partners"><h3>合作阵容</h3>
+      ${partnerGroup(state, event, company, 'sponsor', open)}
+      ${partnerGroup(state, event, company, 'guest', open)}</section>`;
   }
   function settlementSummary(item) {
     const profitClass = item.projectProfit >= 0 ? 'profit' : 'loss';

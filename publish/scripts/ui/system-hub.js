@@ -21,9 +21,10 @@
   }
 
   function renderFinance(state) {
-    return (Game.bankSystem?.render(state) || '')
-      + (Game.companySystem?.render(state) || '')
-      + (Game.stockDirector?.render(state) || '');
+    return Game.financeEnterpriseView?.render(state)
+      || ((Game.bankSystem?.render(state) || '')
+        + (Game.companySystem?.render(state) || '')
+        + (Game.stockDirector?.render(state) || ''));
   }
 
   Game.systemHub = Object.freeze({ renderStatus, renderFinance });

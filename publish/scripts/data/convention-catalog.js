@@ -14,6 +14,16 @@
       series: '原神', accent: '原神主题' },
     { id: 'bluearchive', name: '蔚蓝档案 Only展', shortName: '蔚档Only',
       series: '蔚蓝档案', accent: '蔚蓝档案主题' },
+    { id: 'mygo', name: 'MyGO!!!!! Only展', shortName: 'MyGO Only',
+      series: 'MyGO!!!!!', accent: '少女乐队主题' },
+    { id: 'cardcaptor', name: '魔卡少女樱 Only展', shortName: '小樱Only',
+      series: '魔卡少女樱', accent: '魔法少女主题' },
+    { id: 'demonslayer', name: '鬼灭之刃 Only展', shortName: '鬼灭Only',
+      series: '鬼灭之刃', accent: '和风幻想主题' },
+    { id: 'detectiveprecure', name: '名侦探光之美少女 Only展', shortName: '光美Only',
+      series: '名侦探光之美少女', accent: '侦探魔法少女主题' },
+    { id: 'gochiusa', name: '点兔 Only展', shortName: '点兔Only',
+      series: '请问您今天要来点兔子吗？', accent: '咖啡店少女主题' },
   ]);
   const roles = Object.freeze([
     { id: 'visitor', name: '游客' },

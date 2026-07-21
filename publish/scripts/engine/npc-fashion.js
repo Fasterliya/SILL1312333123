@@ -3,7 +3,10 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
-  const series = ['东方Project', '原神', '蔚蓝档案', '星穹铁道', '鸣潮'];
+  const series = [
+    '东方Project', '原神', '蔚蓝档案', '星穹铁道', '鸣潮',
+    'MyGO!!!!!', '魔卡少女樱', '鬼灭之刃', '名侦探光之美少女', '请问您今天要来点兔子吗？',
+  ];
 
   function hash(value) {
     let result = 2166136261;

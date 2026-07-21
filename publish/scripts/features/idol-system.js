@@ -31,6 +31,7 @@
   function render(state) {
     if (!Core.isIdolJob(state.career.jobId)) return '';
     const idol = Core.ensure(state);
+    if (idol.stage === 'trainee') return Game.idolTraineeView.render(state);
     const stages = { trainee: '练习生', debuted: '已出道', retired: '已退役' };
     const securityActive = Core.securityActive(state, idol);
     const securityMonths = securityActive
@@ -70,6 +71,9 @@
 
   function actionResult(state, button) {
     const action = button.dataset.idolAction;
+    if (action === 'plan') return Game.idolTraineeSchedule.add(state, button.dataset.planType);
+    if (action === 'clearPlan') return Game.idolTraineeSchedule.clear(state);
+    if (action === 'executePlan') return Game.idolTraineeSchedule.execute(state);
     if (action === 'train') return Activities.train(state, button.dataset.idolSkill);
     if (action === 'evaluate') return Activities.evaluation(state);
     if (action === 'handshake') return Activities.handshake(state);

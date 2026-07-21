@@ -82,7 +82,13 @@
       idol.active = true;
       idol.stage = 'trainee';
       idol.agencyName = state.career.company || '偶像事务所';
-      if (!idol.fans) idol.fans = U.between(80, 300);
+      if (!idol.fans) idol.fans = U.between(8, 25);
+      if (!idol.trainingMonths && !Object.values(idol.skills).some(Boolean)) {
+        idol.skills.dance = U.between(14, 26);
+        idol.skills.vocal = U.between(14, 26);
+        idol.skills.expression = U.between(14, 26);
+      }
+      Game.idolTraineeState?.ensure(state);
       return;
     }
     if (state.career.jobId !== 'idol') return;

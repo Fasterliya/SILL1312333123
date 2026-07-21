@@ -164,7 +164,8 @@
     if (!Core.isIdolJob(state.career.jobId)) return;
     const idol = Core.ensure(state);
     if (idol.stage === 'trainee') {
-      idol.fans += Core.fanGrowth(idol, idol.fans * 0.02 + U.between(-20, 40));
+      Game.idolTraineeSchedule?.monthly(state);
+      idol.fans = Math.max(0, Math.round(idol.attention || idol.fans));
     } else if (idol.stage === 'debuted') {
       idol.fans += Core.fanGrowth(idol, idol.fans * 0.04 + U.between(-50, 120));
     } else if (idol.stage === 'retired') {

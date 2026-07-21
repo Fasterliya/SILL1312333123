@@ -41,6 +41,8 @@
     const age = U.personAge(state, person);
     person.npcIdol = person.npcIdol || { stage: 'trainee', fans: 500, trainingMonths: 0 };
     const idol = person.npcIdol;
+    if (idol.cohortManaged && idol.stage === 'trainee'
+      && state.career.jobId === 'idoltrainee' && state.idol?.stage === 'trainee') return;
 
     if (idol.stage === 'trainee') {
       idol.trainingMonths += 1;

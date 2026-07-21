@@ -101,6 +101,7 @@
         (item.education || 0) <= eduLevel
         && (!item.adultOnly || age >= 18)
         && (!item.recommendedGender || item.recommendedGender === person.gender)
+        && Game.jobMarket.canNpcEnter(state, person, item)
       ));
 
       const weighted = jobs.map((job) => {
@@ -153,6 +154,7 @@
       (item.education || 0) <= person.educationLevel
       && (!item.adultOnly || age >= 18)
       && (!item.recommendedGender || item.recommendedGender === person.gender)
+      && Game.jobMarket.canNpcEnter(state, person, item)
     )));
     if (!job) return;
     person.job = job.name;

@@ -1,0 +1,247 @@
+.trainee-card {
+  gap: 10px;
+  padding-bottom: 2px;
+}
+
+.trainee-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.trainee-metric {
+  min-width: 0;
+  padding: 8px;
+  background: #f5f2e8;
+}
+
+.trainee-metric span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #66726f;
+  font-size: 10px;
+}
+
+.trainee-metric span b {
+  color: #263b37;
+  font-size: 11px;
+}
+
+.trainee-metric i {
+  display: block;
+  height: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+  background: #dfe4df;
+}
+
+.trainee-metric em {
+  display: block;
+  height: 100%;
+  background: #417a70;
+}
+
+.trainee-attention {
+  margin: 0;
+  padding: 8px 10px;
+  border-left: 3px solid #b38a2d;
+  background: #fff8e8;
+  color: #695b3b;
+  font-size: 10px;
+}
+
+.trainee-plan,
+.trainee-ranking {
+  display: grid;
+  gap: 8px;
+}
+
+.trainee-section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.trainee-section-title strong {
+  color: #263b37;
+  font-size: 12px;
+}
+
+.trainee-section-title span {
+  color: #66726f;
+  font-size: 10px;
+}
+
+.trainee-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.trainee-slots span {
+  display: grid;
+  min-width: 0;
+  min-height: 38px;
+  place-items: center;
+  padding: 5px;
+  border: 1px dashed #b9c5c0;
+  color: #7a8581;
+  font-size: 10px;
+  text-align: center;
+}
+
+.trainee-slots span.filled {
+  border-style: solid;
+  border-color: #8fb0a8;
+  background: #edf3ef;
+  color: #315f58;
+  font-weight: 750;
+}
+
+.trainee-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.trainee-options button,
+.trainee-confirm button {
+  min-width: 0;
+  min-height: 38px;
+  padding: 6px 4px;
+  border: 1px solid #c9d5d1;
+  background: #fffdf7;
+  color: #315f58;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.trainee-options button:active:not(:disabled),
+.trainee-confirm button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.trainee-options button:disabled,
+.trainee-confirm button:disabled {
+  opacity: 0.45;
+}
+
+.trainee-confirm {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 6px;
+}
+
+.trainee-confirm button {
+  min-height: 44px;
+}
+
+.trainee-confirm button.primary {
+  border-color: #315f58;
+  background: #315f58;
+  color: #fff;
+}
+
+.trainee-leaders {
+  display: grid;
+  gap: 1px;
+  background: #deddd5;
+}
+
+.trainee-leaders span {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  padding: 7px 9px;
+  background: #fffdf7;
+  color: #4f5f5b;
+  font-size: 10px;
+}
+
+.trainee-leaders b {
+  color: #9a7625;
+}
+
+.trainee-leaders em {
+  color: #315f58;
+  font-style: normal;
+  font-weight: 750;
+}
+
+.trainee-cohort {
+  border-top: 1px solid #deddd5;
+  padding-top: 8px;
+}
+
+.trainee-cohort summary {
+  color: #315f58;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.trainee-cohort > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.trainee-cohort button {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 1px 7px;
+  align-items: center;
+  min-width: 0;
+  min-height: 48px;
+  padding: 5px;
+  border: 1px solid #d6ddd9;
+  background: #fffdf7;
+  color: #263b37;
+  text-align: left;
+}
+
+.trainee-cohort button > span {
+  grid-row: 1 / 3;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  place-items: center;
+}
+
+.trainee-cohort button > span img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trainee-cohort strong,
+.trainee-cohort small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trainee-cohort strong {
+  font-size: 10px;
+}
+
+.trainee-cohort small {
+  color: #74807c;
+  font-size: 9px;
+}
+
+@media (max-width: 360px) {
+  .trainee-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trainee-cohort > div {
+    grid-template-columns: 1fr;
+  }
+}

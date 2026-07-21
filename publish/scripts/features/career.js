@@ -26,6 +26,10 @@
   }
 
   function ability(state, job) {
+    if (['idoltrainee', 'idol-underground', 'idol'].includes(job.id)) {
+      return state.stats.魅力 * 0.7 + state.stats.健康 * 0.2
+        + traitBoost(state, '艺术') + (state.education.study || 0) * 0.04;
+    }
     var isMatch = job.majors.includes(state.education.major);
     var majorRelevance = isMatch ? 35 + Math.floor((state.education.study || 0) / 100 * 37) : (state.education.university ? -15 : 0);
     var personality = job.category === '社交' && ['外向','乐观','热血'].includes(state.profile.personality) ? 6 : 0;
@@ -71,7 +75,12 @@
     if (state.health?.retired) return { ok: false, message: '当前已办理退休，不再参加全职招聘' };
     if (state.education.university && !state.education.graduated) return { ok: false, message: '完成大学学业后才能全职求职' };
     if (!eligible(state, job)) return { ok: false, message: `该职位要求${requirementLabel(job.education || 0)}` };
-    const chance = U.clamp(0.18 + (ability(state, job) - job.need) / 105, 0.08, 0.92);
+    const market = Game.jobMarket.summary(state, job);
+    if (!market.vacancies) {
+      return { ok: false, message: `${job.company}的${job.name}岗位已经饱和` };
+    }
+    const baseChance = 0.12 + (ability(state, job) - job.need) / 125;
+    const chance = U.clamp(baseChance * Game.jobMarket.chanceMultiplier(state, job), 0.03, 0.78);
     const accepted = Math.random() < chance;
     const employer = job.company || `${state.location.city}${job.industry || '城市'}企业`;
     state.career.applications.push({

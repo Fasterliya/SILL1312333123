@@ -1,0 +1,69 @@
+.convention-career-status {
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid #cfc6ae;
+  border-left: 4px solid #a77a22;
+  border-radius: 6px;
+  background: #fffaf0;
+}
+
+.convention-career-status header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.convention-career-status header span,
+.convention-career-status header strong {
+  display: block;
+}
+
+.convention-career-status header span {
+  color: #84745a;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.convention-career-status header strong {
+  margin-top: 2px;
+  color: #493b24;
+  font-size: 14px;
+}
+
+.convention-career-status header > b {
+  flex: 0 0 auto;
+  color: #805b17;
+  font-size: 11px;
+}
+
+.convention-career-status dl {
+  margin: 10px 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.convention-career-status dl div {
+  min-width: 0;
+  padding: 7px;
+  background: #fff;
+}
+
+.convention-career-status dt,
+.convention-career-status dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.convention-career-status dt {
+  color: #8a7a60;
+  font-size: 8px;
+}
+
+.convention-career-status dd {
+  margin-top: 3px;
+  color: #493b24;
+  font-size: 11px;
+  font-weight: 800;
+}

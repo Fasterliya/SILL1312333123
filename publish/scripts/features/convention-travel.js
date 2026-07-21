@@ -50,7 +50,7 @@
       || { role: 'visitor', intent: 'social' };
     const ts = {
       placeName: event.name, mode: 'convention', node: 'entrance',
-      editionId: event.id, themeName: event.themeName, series: event.series,
+      editionId: event.id, eventScale: event.scale || '标准', themeName: event.themeName, series: event.series,
       hostCity: event.city || state.location.city,
       hostCountry: event.country || state.location.country,
       organizerName: event.organizer.name,
@@ -61,9 +61,7 @@
     };
     state.travel.activeStage = ts;
     createRoster(state, ts);
-    Game.lifeDirector.addLog(
-      state, '漫展出行', `你持票前往${ts.hostCity}参加${event.name}。`, 'good',
-    );
+    Game.lifeDirector.addLog(state, '漫展出行', `你持票前往${ts.hostCity}参加${event.name}。`, 'good');
     return { ok: true, message: `已抵达${ts.hostCity}，摄影区、主舞台和同人摊位都可以探索` };
   }
 
@@ -125,8 +123,7 @@
       state.cityLife.reputation = U.clamp((state.cityLife.reputation || 0) + effect.reputation, 0, 100);
     }
     if (effect.selectId) ts.selectedCoserId = effect.selectId;
-    const person = effect.meetCoser ? (selectedPerson(state, ts) || chooseFallbackCoser(state, ts))
-      : selectedPerson(state, ts);
+    const person = effect.meetCoser ? (selectedPerson(state, ts) || chooseFallbackCoser(state, ts)) : selectedPerson(state, ts);
     if (person && effect.affection) {
       person.affection = U.clamp(person.affection + effect.affection, 0, 100);
       person.interactions = (person.interactions || 0) + 1;
@@ -134,6 +131,7 @@
     if (person && effect.contact) Game.people.addContact(state, person);
     if (effect.total) ts.total = effect.total;
     ts.score += effect.score || 0;
+    Game.conventionCoserCareer?.applyChoice(state, ts, effect);
     ts.feedback = effect.result || '你继续探索漫展。';
   }
 
@@ -142,21 +140,22 @@
     const connected = Boolean(person?.phoneUnlocked);
     const rating = ts.score >= 18 ? '深度逛展' : (ts.score >= 13 ? '充实参展' : '轻松到访');
     const relation = connected ? `并与${person.name}交换了联系方式` : '';
+    const career = Game.conventionCoserCareer?.settle(state, ts);
+    const careerText = career ? `，职业项目新增${career.followers}粉丝、收入${Game.view.money(career.income)}` : '';
     state.cityLife ||= { reputation: 0, familiarity: {} };
     state.cityLife.familiarity ||= {};
     state.cityLife.familiarity[ts.hostCity] = U.clamp(
-      (state.cityLife.familiarity[ts.hostCity] || 0) + 3, 0, 100,
-    );
+      (state.cityLife.familiarity[ts.hostCity] || 0) + 3, 0, 100);
     Game.stressSystem.reduce(state, ts.score >= 18 ? 9 : 5, '漫展体验');
     Game.structuredTraits.addExperience(state.profile, 'traveler');
     state.travel.localHistory.unshift({
       city: ts.hostCity, place: ts.placeName, month: state.totalMonths,
-      score: ts.score, outcome: `${rating}${relation}`,
+      score: ts.score, outcome: `${rating}${relation}${careerText}`,
     });
     state.travel.localHistory = state.travel.localHistory.slice(0, 20);
-    const summary = `从${ts.hostCity}返程，${rating}，评分${ts.score}${relation}。`;
+    const summary = `从${ts.hostCity}返程，${rating}，评分${ts.score}${relation}${careerText}。`;
     Game.conventionCalendar?.finishAttendance(state, ts.editionId, {
-      score: ts.score, outcome: `${rating}${relation}`,
+      score: ts.score, outcome: `${rating}${relation}${careerText}`,
     });
     state.travel.activeStage = null;
     Game.lifeDirector.addLog(state, '漫展归来', summary, 'milestone');
@@ -190,6 +189,7 @@
       feedback: ts.feedback, score: ts.score,
       eventName: ts.placeName, themeName: ts.themeName,
       roleName: role, intentName: intent, arrangement: ts.arrangement || '',
+      career: Game.conventionCoserCareer?.model(state, ts) || null,
       options: options(state, ts),
       people: ts.coserIds.map((id) => Game.people.find(state, id)).filter(Boolean),
       selectedId: ts.selectedCoserId,

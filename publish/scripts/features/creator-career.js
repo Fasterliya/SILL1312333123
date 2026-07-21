@@ -3,15 +3,17 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
-  const ids = new Set(['vtuber', 'beautyblog', 'styleblog', 'portraitblog', 'welfare']);
+  const ids = new Set(['vtuber', 'beautyblog', 'styleblog', 'portraitblog', 'welfare', 'coser']);
   const labels = {
     vtuber: '虚拟主播频道', beautyblog: '美妆频道',
     styleblog: '穿搭频道', portraitblog: '影像频道',
-    welfare: '福利频道',
+    welfare: '福利频道', coser: 'Coser作品频道',
   };
 
   function isCreator(state) {
-    return ids.has(state.career.jobId);
+    const matched = ids.has(state.career.jobId);
+    if (matched) ensure(state);
+    return matched;
   }
 
   function ensure(state) {
@@ -43,7 +45,7 @@
       beautyblog: ['妆容', '测评', '教程', '护肤', '平价'],
       styleblog: ['穿搭', '通勤', '显高', '约会', '换季'],
       portraitblog: ['摄影', '构图', '写真', '街拍', '幕后'],
-      welfare: ['写真', '福利', '限定', '日常', '互动'],
+      welfare: ['写真', '福利', '限定', '日常', '互动'], coser: ['漫展', '返图', '角色', '妆造', '舞台'],
     }[state.career.jobId] || [];
     const keyword = topics.some((word) => title.includes(word)) ? 18 : 0;
     const length = title.length >= 8 && title.length <= 24 ? 12 : 3;
@@ -175,7 +177,8 @@
 
   function render(state) {
     const creator = ensure(state);
-    return `<section class="creator-card"><header><div><span>${labels[state.career.jobId]}</span>
+    const rank = state.career.jobId === 'coser' ? Game.specialCareerRanks?.render(state) || '' : '';
+    return `${rank}<section class="creator-card"><header><div><span>${labels[state.career.jobId]}</span>
       <strong>${Game.creatorEconomy.compact(creator.followers)} 粉丝</strong></div><b>${Game.creatorEconomy.compact(creator.totalViews)} 播放</b></header>
       <div class="creator-metrics"><span>品牌信任 <b>${Math.round(creator.brandTrust)}</b></span>
       <span>公开风险 <b>${Math.round(creator.scandalRisk)}</b></span>
@@ -188,7 +191,7 @@
       <button data-creator-action="community">经营社群</button>
       ${Game.creatorGrowthActions.buttons()}
       <button data-creator-action="sponsor">承接广告</button>
-      <button data-creator-action="private">${state.career.jobId === 'welfare' ? '金主约会' : '约炮'}</button></div></section>`;
+      ${state.career.jobId === 'coser' ? '' : `<button data-creator-action="private">${state.career.jobId === 'welfare' ? '金主约会' : '约炮'}</button>`}</div></section>`;
   }
 
   Game.creatorCareer = Object.freeze({

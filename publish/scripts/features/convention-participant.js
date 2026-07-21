@@ -147,14 +147,16 @@
   }
   function options(state, ts, source) {
     const contextual = contextualOptions(state, ts);
-    if (ts.node !== 'entrance') return [...contextual, ...source];
-    return [roleOptions[ts.role] || roleOptions.visitor, ...contextual, ...source];
+    const career = Game.conventionCoserCareer?.options(state, ts) || [];
+    if (ts.node !== 'entrance') return [...career, ...contextual, ...source];
+    return [roleOptions[ts.role] || roleOptions.visitor, ...career, ...contextual, ...source];
   }
   function adjust(state, ts, option) {
     const profile = route(option.id);
     const result = Game.actionResolver.resolve(state, {
       primary: profile.primary, secondary: profile.secondary,
-      difficulty: profile.difficulty, context: context(ts, profile.tag),
+      difficulty: profile.difficulty, context: context(ts, profile.tag)
+        + (Game.conventionCoserCareer?.contextBonus(state, ts, profile.tag) || 0),
       variance: 6, label: option.label,
     });
     const effect = { ...(option.effect || {}) };

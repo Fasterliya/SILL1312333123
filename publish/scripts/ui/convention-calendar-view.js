@@ -98,6 +98,8 @@
     const status = Game.conventionCalendar.status(state, item);
     const registration = state.conventionCalendar?.registrations?.[item.id];
     const attendance = state.conventionCalendar?.attendance?.[item.id];
+    const defaultRole = state.career?.jobId === 'coser' ? 'coser' : 'visitor';
+    const defaultIntent = state.career?.jobId === 'coser' ? 'compete' : 'social';
     const canRegister = ['registration', 'ongoing'].includes(status.id);
     let action = `<button disabled>${status.label}</button>`;
     if (attendance?.completed) action = '<button disabled>本届已参加</button>';
@@ -123,9 +125,9 @@
       ${lineup(item)}
       ${attendanceReview(attendance)}
       <div class="convention-registration"><label>参展身份<select data-convention-role>
-      ${optionList(Game.conventionCatalog.roles, registration?.role || 'visitor')}</select></label>
+      ${optionList(Game.conventionCatalog.roles, registration?.role || defaultRole)}</select></label>
       <label>参展目的<select data-convention-intent>
-      ${optionList(Game.conventionCatalog.intents, registration?.intent || 'social')}</select></label></div>
+      ${optionList(Game.conventionCatalog.intents, registration?.intent || defaultIntent)}</select></label></div>
       <div class="detail-actions">${action}</div>`;
   }
   function setOpen(value) { calendarOpen = Boolean(value); }

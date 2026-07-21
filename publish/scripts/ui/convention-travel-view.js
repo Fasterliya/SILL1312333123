@@ -35,6 +35,16 @@
     )).join('');
   }
 
+  function careerStatus(model) {
+    const career = model.career;
+    if (!career) return '';
+    return `<section class="convention-career-status"><header><div><span>职业联动</span>
+      <strong>${escape(career.title)}</strong></div><b>检定 +${career.bonus}</b></header>
+      <dl><div><dt>频道粉丝</dt><dd>${Game.creatorEconomy.compact(career.followers)}</dd></div>
+      <div><dt>职业绩效</dt><dd>${career.performance}/100</dd></div>
+      <div><dt>本届项目</dt><dd>${career.actions} 项</dd></div></dl></section>`;
+  }
+
   function render(state, ts) {
     const model = Game.conventionTravel.model(state, ts);
     if (!model) {
@@ -50,7 +60,8 @@
       <p class="convention-scene">${escape(model.text)}</p>
       <p class="convention-feedback"><b>上一步</b>${escape(model.feedback)}</p>
       <div class="journey-progress"><i style="width:${Math.max(0, (model.step - 1) * 100 / model.total)}%"></i></div>
-    </section>${roster(model)}<div class="journey-options convention-options">${optionCards(model)}</div>`;
+    </section>${careerStatus(model)}${roster(model)}
+      <div class="journey-options convention-options">${optionCards(model)}</div>`;
   }
 
   Game.conventionTravelView = Object.freeze({ render });

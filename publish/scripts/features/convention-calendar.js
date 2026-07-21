@@ -142,7 +142,10 @@
     const stamina = Game.staminaSystem?.spend(state, 20) || { ok: true };
     if (!stamina.ok) return stamina;
     Game.economy.spend(state, item.ticketPrice);
-    if (!ensure(state).registrations[item.id]) register(state, item.id);
+    if (!ensure(state).registrations[item.id]) {
+      register(state, item.id, state.career?.jobId === 'coser' ? 'coser' : 'visitor',
+        state.career?.jobId === 'coser' ? 'compete' : 'social');
+    }
     const registration = ensure(state).registrations[item.id];
     ensure(state).attendance[item.id] = {
       startedAt: state.totalMonths, completed: false,

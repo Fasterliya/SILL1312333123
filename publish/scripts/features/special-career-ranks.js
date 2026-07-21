@@ -11,6 +11,10 @@
       titles: ['新人福利姬', '小有人气', '频道红人', '顶级福利姬'],
       thresholds: [0, 5000, 20000, 100000],
     },
+    coser: {
+      titles: ['新人Coser', '活跃Coser', '舞台常客', '受邀嘉宾'],
+      thresholds: [0, 1500, 10000, 50000],
+    },
     pimp: {
       titles: ['街头中介', '小店老板', '会所经营者', '连锁老板', '地下皇帝'],
       thresholds: [0, 3, 6, 11, 21],
@@ -30,7 +34,9 @@
         + Math.min(40, data.completed) * 0.8 + data.patrons.length * 4 - agePenalty,
       );
     }
-    if (jobId === 'welfare') return Math.max(0, state.creator?.followers || state.idol?.fans || 0);
+    if (['welfare', 'coser'].includes(jobId)) {
+      return Math.max(0, state.creator?.followers || state.idol?.fans || 0);
+    }
     if (jobId === 'pimp') return state.brothel?.girls?.length || 0;
     if (jobId === 'blackmarket') {
       const stock = Game.economicCareerState.ensure(state).blackMarket.stock;

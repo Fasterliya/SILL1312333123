@@ -101,6 +101,18 @@
     syncLegacy(state);
   }
 
+  function act(state, type) {
+    const result = legacy.act(state, type);
+    if (!result?.ok || type === 'dropout') return result;
+    const gains = { foundation: 6, weakness: 8, mock: 5, tutor: 10, balance: 3 };
+    const multiplier = result.actionResolution?.multiplier || 1;
+    addPreparation(state, (gains[type] || 4) * multiplier);
+    return {
+      ...result,
+      message: result.message.replace(/备考度达到 \d+/, `备考度达到 ${Math.round(readiness(state))}`),
+    };
+  }
+
   function monthly(state) {
     legacy.monthly(state);
     if (!Game.subjectPanel.isStudent(state)) return;
@@ -148,6 +160,7 @@
     aptitude,
     readiness,
     addPreparation,
+    act,
     exam,
     monthly,
     render,

@@ -46,6 +46,15 @@
   function spend(state, amount) {
     Game.economy.spend(state, amount);
   }
+  function interactionConfig(type, compatibility) {
+    const secondary = type === 'study' ? '学识'
+      : (['gift', 'meal'].includes(type) ? '管理' : (type === 'exchange' ? '心计' : '魅力'));
+    const difficulty = type === 'exchange' ? 58 : (type === 'gift' ? 42 : 48);
+    return {
+      primary: '交涉', secondary, difficulty, context: compatibility,
+      variance: 6, label: type === 'exchange' ? '交换联系方式' : '人际互动',
+    };
+  }
   function interact(state, id, type) {
     const person = Game.people.find(state, id);
     if (!person || person.status !== '健康') return { ok: false, message: '无法联系这位角色' };
@@ -62,27 +71,27 @@
       return romantic;
     }
     const actions = {
-      chat: [0, U.between(3, 6), 2, '你们分享了最近的生活。'],
-      study: [0, U.between(3, 5), 0, '你们一起讨论课程，学习积累增加。'],
-      hangout: [80, U.between(5, 8), 4, '你们结伴度过了轻松的课余时间。'],
-      phone: [0, U.between(2, 5), 2, '一通电话让关系没有中断。'],
-      meal: [120, U.between(5, 8), 4, '你们一起吃饭，聊了许多近况。'],
-      gift: [300, U.between(7, 11), 3, '你认真挑选了一份礼物。'],
-      movie: [160, U.between(5, 9), 5, '你们看了一场印象深刻的电影。'],
-      walk: [0, U.between(3, 7), 3, '你们边走边聊，关系更加自然。'],
-      exchange: [0, 3, 2, '你提出交换联系方式。'],
+      chat: [0, U.between(3, 6), '你们分享了最近的生活。'],
+      study: [0, U.between(3, 5), '你们一起讨论课程，学习积累增加。'],
+      hangout: [80, U.between(5, 8), '你们结伴度过了轻松的课余时间。'],
+      phone: [0, U.between(2, 5), '一通电话让关系没有中断。'],
+      meal: [120, U.between(5, 8), '你们一起吃饭，聊了许多近况。'],
+      gift: [300, U.between(7, 11), '你认真挑选了一份礼物。'],
+      movie: [160, U.between(5, 9), '你们看了一场印象深刻的电影。'],
+      walk: [0, U.between(3, 7), '你们边走边聊，关系更加自然。'],
+      exchange: [0, 3, '你提出交换联系方式。'],
     };
     const action = actions[type] || actions.chat;
     spend(state, action[0]);
-    const negotiation = Game.characterAttributes.playerValue(state, '交涉');
     const compatibility = Game.structuredTraits.compatibility(state.profile, person);
-    if (type === 'exchange' && person.affection + negotiation / 5 + compatibility / 2 < 52) {
-      return { ok: false, message: '交涉能力或关系熟悉度还不足以交换联系方式' };
+    const resolution = Game.actionResolver.resolve(state, interactionConfig(type, compatibility));
+    const familiarity = person.affection + person.interactions * 2;
+    if (type === 'exchange' && (familiarity < 42 || !resolution.success)) {
+      return { ok: false, message: `还未能交换联系方式；${Game.actionResolver.summary(resolution)}` };
     }
-    const socialGain = U.clamp(Math.round((negotiation - 50) / 25 + compatibility / 6), -3, 5);
     person.interactions += 1;
-    person.affection = U.clamp(person.affection + action[1] + socialGain, 0, 100);
-    state.stats.心情 = U.clamp(state.stats.心情 + action[2], 0, 100);
+    const affectionGain = Math.max(1, Math.round(action[1] * resolution.multiplier));
+    person.affection = U.clamp(person.affection + affectionGain, 0, 100);
     if (type === 'study') {
       Game.educationSystem.addPreparation(state, 4);
       Game.characterAttributes.gain(state, '学识', 0.45, '共同学习');
@@ -90,9 +99,11 @@
     if (type === 'exchange') {
       Game.people.addContact(state, person);
     } else if (person.affection >= 75 && person.relation === '同学') person.relation = '好友';
-    Game.lifeDirector.addLog(state, `与${person.name}互动`, action[3], 'good');
-    Game.relationshipMemory.record(state, person, '日常互动', action[3], Math.max(2, action[1] - 2), -1);
-    return { ok: true, message: Game.economy.message(state, `${person.name}的好感提升到 ${person.affection}`) };
+    Game.lifeDirector.addLog(state, `与${person.name}互动`, action[2], 'good');
+    Game.relationshipMemory.record(state, person, '日常互动', action[2], Math.max(2, affectionGain - 2), -1);
+    return { ok: true, actionResolution: resolution, message: Game.economy.message(
+      state, `${person.name}的好感提升到 ${person.affection}；${Game.actionResolver.summary(resolution)}`,
+    ) };
   }
 
   function card(person, actions) {

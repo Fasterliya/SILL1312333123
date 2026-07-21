@@ -86,8 +86,8 @@
     if (!market.vacancies) {
       return { ok: false, message: `${job.company}的${job.name}岗位已经饱和` };
     }
-    const baseChance = 0.12 + (ability(state, job) - job.need) / 125;
-    const chance = U.clamp(baseChance * Game.jobMarket.chanceMultiplier(state, job), 0.03, 0.78);
+    const assessment = Game.careerActionResolution.application(state, job);
+    const chance = assessment.chance;
     const accepted = Math.random() < chance;
     const employer = job.company || `${state.location.city}${job.industry || '城市'}企业`;
     state.career.applications.push({
@@ -97,7 +97,8 @@
     state.career.applications = state.career.applications.slice(-30);
     if (!accepted) {
       Game.lifeDirector.addLog(state, '求职未录取', `${employer}婉拒了${job.name}申请。`, 'normal');
-      return { ok: false, message: `${employer}未录取，参考概率 ${Math.round(chance * 100)}%` };
+      return { ok: false, message: `${employer}未录取，${Game.actionResolver.summary(assessment)}`
+        + `，参考概率 ${Math.round(chance * 100)}%` };
     }
     if (state.career.job && state.career.jobId !== job.id) {
       Game.careerHistory?.add(state, {
@@ -136,7 +137,7 @@
     Game.lifeDirector.addLog(state, '获得工作', `你加入${employer}担任${job.name}。`, 'milestone');
     Game.careerHistory?.add(state, { kind: 'hire', title: `加入${employer}`,
       detail: `担任${job.name}`, company: employer, salary: state.career.salary });
-    return { ok: true, message: `${employer}录取了你` };
+    return { ok: true, message: `${employer}录取了你，${Game.actionResolver.summary(assessment)}` };
   }
 
   function work(state, type) {
@@ -144,21 +145,20 @@
     if (type === 'promotion') return Game.careerGrowth.requestRaise(state);
     if (Game.staminaSystem) { var st = Game.staminaSystem.spend(state, 15); if (!st.ok) return st; }
     const actions = {
-      focus: [8, 5, -3, 0, '专注完成关键任务', 0, 0],
-      network: [5, 3, 1, 2, '主动结识同事与合作伙伴', 0, 0],
-      train: [4, 8, -1, 2, '参加培训并提升专业能力', 0, 0],
-      overtime: [12, 7, -6, 0, '加班冲刺重要项目', 0, 0],
-      create: [8, 7, 2, 1, '发布了一组新作品', 350, 80],
-      stream: [7, 6, -1, 1, '完成了一场直播', 520, 60],
-      sponsor: [10, 5, -2, 0, '完成一次品牌合作', 900, 150],
-      convention: [12, 8, 4, 1, '参加城市漫展并经营个人展位', 680, 260],
+      focus: [8, 5, 0, '专注完成关键任务', 0, 0],
+      network: [5, 3, 2, '主动结识同事与合作伙伴', 0, 0],
+      train: [4, 8, 2, '参加培训并提升专业能力', 0, 0],
+      overtime: [12, 7, 0, '加班冲刺重要项目', 0, 0],
+      create: [8, 7, 1, '发布了一组新作品', 350, 80],
+      stream: [7, 6, 1, '完成了一场直播', 520, 60],
+      sponsor: [10, 5, 0, '完成一次品牌合作', 900, 150],
+      convention: [12, 8, 1, '参加城市漫展并经营个人展位', 680, 260],
     };
-    const [performance, exp, mood, intelligence, label, income, cost] = actions[type] || actions.focus;
+    const [performance, exp, intelligence, label, income, cost] = actions[type] || actions.focus;
     state.money += income;
     Game.economy.spend(state, cost);
     state.career.performance = U.clamp(state.career.performance + performance, 0, 100);
     state.career.exp += exp;
-    state.stats.心情 = U.clamp(state.stats.心情 + mood, 0, 100);
     const growthAbility = type === 'network' ? '交涉'
       : (state.career.management ? '管理' : '学识');
     Game.characterAttributes.gain(state, growthAbility, intelligence, `职场行动:${type}`);

@@ -15,8 +15,7 @@
 
   function chance(state, job) {
     if (!Game.jobMarket.vacancies(state, job)) return 0;
-    const base = 0.12 + (Game.careerSystem.ability(state, job) - job.need) / 125;
-    return Math.round(U.clamp(base * Game.jobMarket.chanceMultiplier(state, job), 0.03, 0.78) * 100);
+    return Math.round(Game.careerSystem.applicationChance(state, job).chance * 100);
   }
 
   function workActions(state) {

@@ -63,7 +63,7 @@
     } else return { ok: false, message: '未知的生活方式安排' };
     state.health.lastLifestyleMonth = state.totalMonths;
     Game.healthModel.sync(state);
-    return { ok: true, message: type === 'exercise' ? '完成规律运动，体能经验增长并缓解压力' : '安排充分休息，睡眠和压力得到改善' };
+    return { ok: true, message: type === 'exercise' ? '完成规律运动，改善健康并缓解压力' : '安排充分休息，睡眠和压力得到改善' };
   }
 
   function action(state, type, value) {

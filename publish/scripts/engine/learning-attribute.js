@@ -1,9 +1,12 @@
-(function initLearningAttribute(root) {
+(function initInnateAttributes(root) {
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const VERSION = 1;
-  const clamp = (value, min = 0, max = 60) => Math.max(min, Math.min(max, Number(value) || 0));
+  const VERSION = 2;
+  const abilities = Object.freeze(['学识', '交涉', '管理', '心计', '体能']);
+  const clamp = (value, min = 0, max = 100) => (
+    Math.max(min, Math.min(max, Number(value) || 0))
+  );
 
   function hash(value) {
     return [...String(value || 'person')].reduce((sum, char) => (
@@ -13,17 +16,9 @@
 
   function ageOf(target, age) {
     if (Number.isFinite(age)) return Math.max(0, age);
+    if (Number.isFinite(target?.abilityAge)) return Math.max(0, target.abilityAge);
     if (Number.isFinite(target?.baseAge)) return Math.max(0, target.baseAge);
     return 18;
-  }
-
-  function adultBase(target, seed) {
-    if (target.learningModelVersion === VERSION && Number.isFinite(target.innateLearning)) {
-      return clamp(target.innateLearning, 8, 36);
-    }
-    target.innateLearning = 17 + hash(`${seed || target.id || target.name}:learning`) % 9;
-    target.learningModelVersion = VERSION;
-    return target.innateLearning;
   }
 
   function maturity(age) {
@@ -35,33 +30,83 @@
     return 1;
   }
 
-  function current(target, age, seed) {
-    return clamp(Math.round(adultBase(target, seed) * maturity(ageOf(target, age))));
+  function migratedBase(target, ability, age, seed) {
+    if (ability === '学识' && Number.isFinite(target.innateLearning)) {
+      return clamp(target.innateLearning, 8, 42);
+    }
+    const old = Number(target.abilities?.[ability]);
+    if (Number.isFinite(old) && old > 0) {
+      return clamp(Math.round(old / Math.max(0.35, maturity(age)) / 2), 8, 42);
+    }
+    return 17 + hash(`${seed || target.id || target.name}:${ability}`) % 9;
   }
 
-  function sync(target, age, seed) {
-    const keepCurrent = !Number.isFinite(age) && target.learningModelVersion === VERSION
-      && Number.isFinite(target.abilities?.学识);
+  function adultBase(target, ability = '学识', seed, age) {
+    const name = abilities.includes(ability) ? ability : '学识';
+    target.innateAbilities = target.innateAbilities && typeof target.innateAbilities === 'object'
+      ? target.innateAbilities : {};
+    if (!Number.isFinite(target.innateAbilities[name])) {
+      target.innateAbilities[name] = migratedBase(
+        target, name, ageOf(target, age), seed || ability,
+      );
+    }
+    target.innateModelVersion = VERSION;
+    if (name === '学识') {
+      target.innateLearning = target.innateAbilities[name];
+      target.learningModelVersion = VERSION;
+    }
+    return clamp(target.innateAbilities[name], 8, 42);
+  }
+
+  function current(target, ability = '学识', age, seed) {
+    return clamp(Math.round(
+      adultBase(target, ability, seed, age) * maturity(ageOf(target, age)),
+    ));
+  }
+
+  function syncAll(target, age, seed) {
+    const resolvedAge = ageOf(target, age);
+    target.abilityAge = resolvedAge;
     target.abilities ||= {};
     target.abilityGrowth ||= { potential: {}, xp: {}, history: [] };
     target.abilityGrowth.potential ||= {};
     target.abilityGrowth.xp ||= {};
-    target.abilities.学识 = keepCurrent ? clamp(target.abilities.学识) : current(target, age, seed);
-    target.abilityGrowth.potential.学识 = adultBase(target, seed);
-    target.abilityGrowth.xp.学识 = 0;
+    abilities.forEach((ability) => {
+      target.abilities[ability] = current(target, ability, resolvedAge, seed);
+      target.abilityGrowth.potential[ability] = adultBase(
+        target, ability, seed, resolvedAge,
+      );
+      target.abilityGrowth.xp[ability] = 0;
+    });
+    target.abilityGrowth.history = [];
+    return target.abilities;
+  }
+
+  function sync(target, age, seed) {
+    syncAll(target, age, seed);
     return target.abilities.学识;
   }
 
-  function inherit(child, left, right, seed) {
-    const average = (adultBase(left) + adultBase(right)) / 2;
-    const mutation = hash(`${seed || child.id || child.name}:learning-inherit`) % 5 - 2;
-    child.innateLearning = clamp(Math.round(average + mutation), 10, 34);
+  function inheritAll(child, left, right, seed) {
+    child.innateAbilities = {};
+    abilities.forEach((ability) => {
+      const average = (adultBase(left, ability) + adultBase(right, ability)) / 2;
+      const mutation = hash(`${seed || child.id || child.name}:${ability}:inherit`) % 5 - 2;
+      child.innateAbilities[ability] = clamp(Math.round(average + mutation), 10, 38);
+    });
+    child.innateModelVersion = VERSION;
+    child.innateLearning = child.innateAbilities.学识;
     child.learningModelVersion = VERSION;
-    return sync(child, Number.isFinite(child.baseAge) ? child.baseAge : 0, seed);
+    return syncAll(child, Number.isFinite(child.baseAge) ? child.baseAge : 0, seed);
+  }
+
+  function inherit(child, left, right, seed) {
+    inheritAll(child, left, right, seed);
+    return child.abilities.学识;
   }
 
   function checkValue(value) {
-    return Math.max(0, Math.min(100, Math.round(clamp(value) * 2)));
+    return clamp(Math.round(clamp(value) * 2));
   }
 
   function examRate(value) {
@@ -92,7 +137,10 @@
     }
   }
 
-  Game.learningAttribute = Object.freeze({
-    adultBase, current, sync, inherit, checkValue, examRate, planSlots, syncEducation,
+  const api = Object.freeze({
+    abilities, adultBase, current, maturity, sync, syncAll, inherit, inheritAll,
+    checkValue, examRate, planSlots, syncEducation,
   });
+  Game.innateAttributes = api;
+  Game.learningAttribute = api;
 }(window));

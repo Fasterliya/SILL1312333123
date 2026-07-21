@@ -58,7 +58,7 @@
     return `<section class="convention-calendar-head">
       <button data-convention-back aria-label="返回街区">‹</button>
       <div><span>全球年度排期</span><strong>${year}年漫展日历</strong>
-      <small>每个国家每年固定举办一届</small></div>
+      <small>华夏与日本每月均有活动，部分月份同月两场</small></div>
       <nav><button data-convention-year="-1">上年</button>
       <button data-convention-year="0">今年</button><button data-convention-year="1">下年</button></nav>
     </section><nav class="filter-chips">${filters}</nav>
@@ -98,23 +98,21 @@
     const status = Game.conventionCalendar.status(state, item);
     const registration = state.conventionCalendar?.registrations?.[item.id];
     const attendance = state.conventionCalendar?.attendance?.[item.id];
-    const locationReady = item.city === state.location.city;
     const canRegister = ['registration', 'ongoing'].includes(status.id);
     let action = `<button disabled>${status.label}</button>`;
     if (attendance?.completed) action = '<button disabled>本届已参加</button>';
     else if (status.id === 'ongoing' && Game.content.age(state) < 12) {
       action = '<button disabled>12岁后可独立参加</button>';
-    } else if (status.id === 'ongoing' && locationReady) {
-      action = `<button data-convention-attend="${escape(item.id)}">购票入场 · ${Game.view.money(item.ticketPrice)}</button>`;
-    } else if (status.id === 'ongoing') action = `<button disabled>需先前往${escape(item.city)}</button>`;
-    else if (canRegister) {
+    } else if (status.id === 'ongoing') {
+      action = `<button data-convention-attend="${escape(item.id)}">购票前往 · ${Game.view.money(item.ticketPrice)}</button>`;
+    } else if (canRegister) {
       action = `<button data-convention-register="${escape(item.id)}">${registration ? '更新报名' : '确认报名'}</button>`;
     }
     return `<section class="convention-detail-head"><span>${item.year} · ${item.country} · ${item.month}月</span>
       <strong>${escape(item.name)}</strong><small>${escape(item.themeName)} · ${escape(item.scale)} · ${status.label}</small></section>
       <dl class="convention-detail-grid"><div><dt>举办城市</dt><dd>${escape(item.city)}</dd></div>
       <div><dt>承办公司</dt><dd>${escape(item.organizer.name)}</dd></div>
-      <div><dt>门票</dt><dd>${Game.view.money(item.ticketPrice)}</dd></div>
+      <div><dt>门票与往返</dt><dd>${Game.view.money(item.ticketPrice)}</dd></div>
       <div><dt>筹备质量</dt><dd>${item.preparation.quality}/100</dd></div>
       <div><dt>安全准备</dt><dd>${item.preparation.safety}/100</dd></div>
       <div><dt>宣传热度</dt><dd>${item.preparation.promotion}/100</dd></div></dl>

@@ -39,8 +39,7 @@
     return parts.join(' · ') || '无额外门槛';
   }
   function rewardText(effect) {
-    const labels = { charm: '交涉经验', intelligence: '学习积累',
-      strength: '体能经验', health: '健康', reputation: '声望' };
+    const labels = { intelligence: '学习积累', health: '健康', reputation: '声望' };
     const gains = Object.entries(labels).filter(([key]) => effect[key])
       .map(([key, label]) => `${label}${effect[key] > 0 ? '+' : ''}${effect[key]}`);
     if (effect.score) gains.push(`评价+${effect.score}`);

@@ -71,7 +71,9 @@
     const identity = Game.hunterMode.identity(state);
     const p = identity.profile;
     const sourceStats = identity.skin?.stats || state.stats;
-    Game.characterAttributes.ensure(p, sourceStats, identity.skin ? null : state.education);
+    Game.characterAttributes.ensure(
+      p, sourceStats, identity.skin ? null : state.education, U.age(state),
+    );
     const congenital = Game.congenitalTraits.names(p, identity.gender);
     const structured = Game.abilityView.traitRows(p);
     Game.portraitSystem.renderPlayer(state, elements);

@@ -29,14 +29,15 @@
     const categoryAbility = {
       科学: '学识', 文学: '学识', 艺术: '交涉', 社交: '交涉', 商业: '管理', 运动: '体能',
     }[job.category] || '学识';
-    const rawProfessional = Game.characterAttributes.playerValue(state, categoryAbility);
-    const professional = categoryAbility === '学识'
-      ? Game.learningAttribute.checkValue(rawProfessional) : rawProfessional;
-    const negotiation = Game.characterAttributes.playerValue(state, '交涉');
+    const check = (name) => Game.characterAttributes.checkValue(
+      Game.characterAttributes.playerValue(state, name),
+    );
+    const professional = check(categoryAbility);
+    const negotiation = check('交涉');
     const charm = Game.characterAttributes.derivedCharm(state.profile);
     if (['idoltrainee', 'idol-underground', 'idol'].includes(job.id)) {
       return charm * 0.45 + negotiation * 0.25
-        + Game.characterAttributes.playerValue(state, '体能') * 0.2
+        + check('体能') * 0.2
         + traitBoost(state, '艺术') + (state.education.study || 0) * 0.04;
     }
     var isMatch = job.majors.includes(state.education.major);

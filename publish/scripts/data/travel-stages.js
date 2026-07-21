@@ -37,7 +37,7 @@
     const place = meta.name;
     const social = ['ask', `向同路人请教${place}的看法`,
       effect(`交流让你听见了${place}的另一种故事。`, { mood: 3, charm: 1, score: 4, meet: true },
-        { stat: '交涉', min: 40 })];
+        { stat: '交涉', min: 20 })];
     const sets = [
       [
         ['plan', `先研究${place}的导览与路线`,
@@ -50,7 +50,7 @@
       [
         ['focus', `沿${meta.description}的核心区域深入`,
           effect('认真探索换来了更完整的见闻。', { intelligence: 2, mood: 3, score: 4 },
-            { stat: '体能', min: routeType === 'mountain' || routeType === 'coast' ? 55 : 35 })],
+            { stat: '体能', min: routeType === 'mountain' || routeType === 'coast' ? 28 : 18 })],
         ['experience', `购买一次${place}特色体验`,
           effect('这次投入换来了鲜明而具体的体验。', { cost: 90, mood: 6, score: 5 })],
         ['shortcut', '选择人少但不熟悉的支线',
@@ -62,9 +62,9 @@
           effect('你把零散印象整理成了清晰记忆。', { intelligence: 1, mood: 5, score: 4 })],
         ['help', '帮助一位临时遇到困难的游客',
           effect('善意得到回应，你在当地留下了好口碑。', { reputation: 3, mood: 4, strength: 1, score: 5 },
-            { stat: '体能', min: 40 })],
+            { stat: '体能', min: 20 })],
         ['linger', `多停留一会儿等待${place}的最佳光线`,
-          effect('等待带来了漂亮的收尾画面。', { mood: 7, score: 5 }, { stat: '体能', min: 35 },
+          effect('等待带来了漂亮的收尾画面。', { mood: 7, score: 5 }, { stat: '体能', min: 18 },
             { chance: 0.18, stat: '健康', delta: -2, text: '久留让身体略感疲惫。' })],
       ],
     ];

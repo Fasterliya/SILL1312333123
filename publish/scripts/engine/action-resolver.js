@@ -15,7 +15,9 @@
     return Game.characterAttributes.playerValue(state, name);
   }
   function checkValue(name, value) {
-    return name === '学识' ? Game.learningAttribute.checkValue(value) : value;
+    if (name === '魅力') return value;
+    return Game.characterAttributes.normalize(name)
+      ? Game.characterAttributes.checkValue(value) : value;
   }
 
   function tierFor(score) {

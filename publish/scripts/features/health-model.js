@@ -130,8 +130,8 @@
   }
 
   function npcStatus(state, person) {
-    Game.characterAttributes.ensurePerson(person);
     const age = Game.content.personAge(state, person);
+    Game.characterAttributes.ensurePerson(person, age);
     const estimate = clamp((person.stats?.健康 || 65)
       + Game.congenitalTraits.healthBonus(person) - agePenalty(age), 1, 100);
     return status(estimate);

@@ -34,7 +34,7 @@
     up.education = clamp(up.education + action[2]);
     up.independence = clamp(up.independence + action[3]);
     up.health = clamp(up.health + action[4]);
-    Game.characterAttributes.ensurePerson(child);
+    Game.characterAttributes.ensurePerson(child, U.personAge(state, child));
     const growth = { read: ['学识', 1.5], exercise: ['体能', 1.5], explore: ['心计', 1] }[type];
     if (growth) Game.characterAttributes.gainPerson(child, growth[0], growth[1], `养育:${type}`);
     Game.stressSystem.reduce(state, type === 'accompany' ? 4 : 2, '陪伴子女');
@@ -68,7 +68,7 @@
     const focus = ensureState(state).focus;
     const tendency = Game.structuredTraits.childhood(child);
     const rawMatching = Game.characterAttributes.playerValue(state, focus);
-    const matching = focus === '学识' ? Game.learningAttribute.checkValue(rawMatching) : rawMatching;
+    const matching = Game.characterAttributes.checkValue(rawMatching);
     const learning = Game.learningAttribute.checkValue(
       Game.characterAttributes.playerValue(state, '学识'),
     );
@@ -98,7 +98,7 @@
       if (child.status !== '健康' || age > 18) return;
       if (age === 18 && (state.totalMonths - child.birthMonth) % 12 !== 0) return;
       const up = child.upbringing;
-      Game.characterAttributes.ensurePerson(child);
+      Game.characterAttributes.ensurePerson(child, age);
       ['care', 'education', 'independence', 'health'].forEach((key, index) => {
         up[key] = clamp(up[key] + gains[index] / 12);
       });

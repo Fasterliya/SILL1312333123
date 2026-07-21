@@ -3,7 +3,6 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
-
   function identityProfile(state) {
     return Game.hunterMode.identity(state).profile;
   }
@@ -11,15 +10,14 @@
   function selectedPerson(state, ts) {
     return ts.selectedCoserId ? Game.people.find(state, ts.selectedCoserId) : null;
   }
-
   function createCoser(state, costume, ts) {
     const age = Math.max(12, U.age(state) + U.between(-3, 4));
     const person = U.person('漫展相识', '', age, null, state.totalMonths);
-    Game.worldCulture.applyPerson(person, state.location.country);
-    U.setUniqueName(state, person, Game.worldCulture.profile(state.location.country).locale);
+    Game.worldCulture.applyPerson(person, ts.hostCountry);
+    U.setUniqueName(state, person, Game.worldCulture.profile(ts.hostCountry).locale);
     person.affection = U.between(40, 52);
-    person.metCity = `${state.location.city}${ts.placeName}`;
-    person.currentCity = state.location.city;
+    person.metCity = `${ts.hostCity}${ts.placeName}`;
+    person.currentCity = ts.hostCity;
     Game.npcLife.syncGrowth(state, person);
     person.cosplay = costume.name;
     person.job = age >= 18 && Math.random() < 0.35 ? '职业Coser' : '业余Coser';
@@ -29,7 +27,6 @@
     state.travel.encounters.push(person);
     return person;
   }
-
   function createRoster(state, ts) {
     const pool = Game.cosplayCatalog.items.filter((item) => (
       item.name !== '无' && (!ts.series || item.series === ts.series)
@@ -54,6 +51,8 @@
     const ts = {
       placeName: event.name, mode: 'convention', node: 'entrance',
       editionId: event.id, themeName: event.themeName, series: event.series,
+      hostCity: event.city || state.location.city,
+      hostCountry: event.country || state.location.country,
       organizerName: event.organizer.name,
       role: registration.role, intent: registration.intent,
       ...(Game.conventionParticipant?.travelContext(event) || {}),
@@ -62,8 +61,10 @@
     };
     state.travel.activeStage = ts;
     createRoster(state, ts);
-    Game.lifeDirector.addLog(state, '街区旅途', `你开始了${event.name}的多路线探索。`, 'good');
-    return { ok: true, message: `${event.name}已开放：摄影区、主舞台和同人摊位都可以探索` };
+    Game.lifeDirector.addLog(
+      state, '漫展出行', `你持票前往${ts.hostCity}参加${event.name}。`, 'good',
+    );
+    return { ok: true, message: `已抵达${ts.hostCity}，摄影区、主舞台和同人摊位都可以探索` };
   }
 
   function requirementFailure(state, ts, option) {
@@ -118,8 +119,6 @@
     if (effect.mood) Game.legacyMood.apply(state, effect.mood, '漫展体验');
     if (effect.health) state.stats.健康 = U.clamp(state.stats.健康 + effect.health, 0, 100);
     if (effect.intelligence && Game.subjectPanel.isStudent(state)) Game.educationSystem.addPreparation(state, effect.intelligence * 2);
-    if (effect.charm) Game.characterAttributes.gain(state, '交涉', effect.charm, '城市漫展');
-    if (effect.strength) Game.characterAttributes.gain(state, '体能', effect.strength, '城市漫展');
     state.cityLife ||= { reputation: 0, familiarity: {} };
     state.cityLife.familiarity ||= {};
     if (effect.reputation) {
@@ -143,17 +142,19 @@
     const connected = Boolean(person?.phoneUnlocked);
     const rating = ts.score >= 18 ? '深度逛展' : (ts.score >= 13 ? '充实参展' : '轻松到访');
     const relation = connected ? `并与${person.name}交换了联系方式` : '';
-    state.cityLife.familiarity[state.location.city] = U.clamp(
-      (state.cityLife.familiarity[state.location.city] || 0) + 3, 0, 100,
+    state.cityLife ||= { reputation: 0, familiarity: {} };
+    state.cityLife.familiarity ||= {};
+    state.cityLife.familiarity[ts.hostCity] = U.clamp(
+      (state.cityLife.familiarity[ts.hostCity] || 0) + 3, 0, 100,
     );
     Game.stressSystem.reduce(state, ts.score >= 18 ? 9 : 5, '漫展体验');
     Game.structuredTraits.addExperience(state.profile, 'traveler');
     state.travel.localHistory.unshift({
-      city: state.location.city, place: ts.placeName, month: state.totalMonths,
+      city: ts.hostCity, place: ts.placeName, month: state.totalMonths,
       score: ts.score, outcome: `${rating}${relation}`,
     });
     state.travel.localHistory = state.travel.localHistory.slice(0, 20);
-    const summary = `${rating}，评分${ts.score}${relation}。`;
+    const summary = `从${ts.hostCity}返程，${rating}，评分${ts.score}${relation}。`;
     Game.conventionCalendar?.finishAttendance(state, ts.editionId, {
       score: ts.score, outcome: `${rating}${relation}`,
     });

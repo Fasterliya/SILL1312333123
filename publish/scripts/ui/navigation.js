@@ -82,7 +82,7 @@
   }
   function characterHtml(state, person) {
     if (Game.lifeResume) Game.lifeResume.backfillResume(state, person);
-    Game.characterAttributes.ensurePerson(person);
+    Game.characterAttributes.ensurePerson(person, U.personAge(state, person));
     const resumeCount = person.lifeResume?.length || 0;
     const effective = (field) => Game.cosplayCatalog.effectiveValue(person, field);
     const labels = {
@@ -148,7 +148,7 @@
       <div><p>${escape(person.relation)}</p><h3>${escape(person.name)}</h3>
       <span>${escape(person.personality)} · ${escape(person.trait)}</span></div></section>
       <div class="record-stack">${section('基本档案', '身份与成长', identity, true)}
-      ${section('角色属性', '健康隐藏评估与成长潜力', attributes, true)}
+      ${section('角色属性', '健康状态与固有属性', attributes, true)}
       ${section('外貌表现', '当前实际外观', looks, false)}
       ${section('遗传信息', 'DNA 与成长倾向', inherited, false)}
       ${section('人生状态', '学业、职业与家庭', life, false)}

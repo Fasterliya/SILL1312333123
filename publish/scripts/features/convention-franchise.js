@@ -39,7 +39,10 @@
   }
   function decorate(state, event) {
     const data = ensure(state, event.country);
-    const editionNumber = Math.max(1, event.year - data.foundedYear + 1);
+    const frequency = Math.max(1, Number(event.annualFrequency) || 1);
+    const editionNumber = Math.max(
+      1, (event.year - data.foundedYear) * frequency + (Number(event.slot) || 0) + 1,
+    );
     event.brandName = data.name;
     event.editionNumber = editionNumber;
     event.name = `${data.name} · ${event.themeName}`;
@@ -74,10 +77,12 @@
     const data = ensure(state, event.country);
     if (data.lastSettlementId === event.id) return data;
     const sameOrganizer = data.incumbentCompanyId === result.companyId
-      && Number(data.lastSettlementYear) === event.year - 1;
+      && (Number(data.lastEditionNumber) === event.editionNumber - 1
+        || (!data.lastEditionNumber && Number(data.lastSettlementYear) === event.year - 1));
     data.organizerStreak = sameOrganizer ? data.organizerStreak + 1 : 1;
     data.incumbentCompanyId = result.companyId;
     data.lastSettlementYear = event.year;
+    data.lastEditionNumber = event.editionNumber;
     data.lastSettlementId = event.id;
     data.lastAudienceScore = result.audienceScore;
     data.fanbase = clamp(data.fanbase + fanDelta(result.audienceScore));

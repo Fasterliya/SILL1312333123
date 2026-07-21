@@ -13,7 +13,9 @@
     if (person.affection < 62) return { ok: false, message: '关系还没有亲密到适合告白' };
     const partnerCount = Relations.ensure(state).partners.length;
     const openness = ['开放', '洒脱', '自由'].includes(person.personality) ? 0.1 : 0;
-    const negotiation = Game.characterAttributes.playerValue(state, '交涉');
+    const negotiation = Game.characterAttributes.checkValue(
+      Game.characterAttributes.playerValue(state, '交涉'),
+    );
     const charm = Game.characterAttributes.derivedCharm(state.profile);
     const compatibility = Game.structuredTraits.compatibility(state.profile, person);
     const chance = U.clamp(

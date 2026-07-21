@@ -3,16 +3,11 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const clamp = (value) => Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
-  function hash(value) {
-    return [...String(value)].reduce((sum, char) => (
-      Math.imul(sum ^ char.charCodeAt(0), 16777619) >>> 0
-    ), 2166136261);
-  }
   function ensure(state) {
     state.conventionCalendar = state.conventionCalendar && typeof state.conventionCalendar === 'object'
       ? state.conventionCalendar : {};
     const data = state.conventionCalendar;
-    data.version = 6;
+    data.version = 7;
     data.registrations = data.registrations && typeof data.registrations === 'object'
       ? data.registrations : {};
     data.attendance = data.attendance && typeof data.attendance === 'object'
@@ -24,43 +19,18 @@
     return data;
   }
   function countries() {
-    return [...new Set(Game.config.cities.map((city) => city.country || '华夏'))];
+    return Game.conventionSchedule.countries();
   }
-  function cityFor(country, seed) {
-    const cities = Game.config.cities.filter((city) => (city.country || '华夏') === country);
-    return cities[seed % cities.length];
-  }
-  function npcOrganizer(city, country, seed) {
-    const candidates = Game.companyCatalog.inCity(city).filter((company) => (
-      /文化|创意|娱乐|演艺/.test(company.industry)
-    ));
-    const company = candidates.length ? candidates[seed % candidates.length] : null;
-    return {
-      type: 'npc', companyId: company?.id || `national-convention-${country}`,
-      name: company?.name || Game.conventionCatalog.fallbackOrganizer(country),
-    };
-  }
-  function generated(year, country) {
-    const seed = hash(`${year}:${country}:annual-convention`);
-    const city = cityFor(country, seed);
-    const only = seed % 100 >= 55;
-    const themes = Game.conventionCatalog.themes;
-    const theme = only ? themes[1 + ((seed >>> 8) % (themes.length - 1))] : themes[0];
-    const tier = Number(city.tier) || 3;
-    const scale = tier === 1 ? ((seed & 2) ? '大型' : '国际级') : (tier === 2 ? '标准' : '地区级');
-    const month = 3 + ((seed >>> 13) % 9);
-    const organizer = npcOrganizer(city.city, country, seed >>> 5);
-    const basePrice = { 国际级: 420, 大型: 320, 标准: 240, 地区级: 180 }[scale];
-    return {
-      id: `${year}-${country}`, year, month, country, city: city.city,
-      themeId: theme.id, themeName: theme.name, series: theme.series,
-      kind: theme.id === 'general' ? 'general' : 'only',
-      name: `${city.city}${theme.id === 'general' ? '国际动漫游戏展' : theme.name}`,
-      scale, ticketPrice: basePrice + (seed % 5) * 20,
-      organizer, zones: theme.id === 'general'
-        ? ['主舞台', 'COS摄影区', '同人摊位', '商业展区', '休息区']
-        : ['主题舞台', '角色摄影区', 'Only同人区', '交流区', '休息区'],
-    };
+  function migrateLegacy(state, item) {
+    if (item.slot !== 0) return;
+    const legacyId = `${item.year}-${item.country}`;
+    const data = ensure(state);
+    ['registrations', 'attendance', 'contracts', 'bids', 'preparation', 'settlements']
+      .forEach((key) => {
+        if (!data[key][item.id] && data[key][legacyId]) {
+          data[key][item.id] = data[key][legacyId];
+        }
+      });
   }
   function organizer(state, edition) {
     return ensure(state).contracts[edition.id]?.organizer || edition.organizer;
@@ -91,21 +61,25 @@
     prep.operations.completed = Boolean(prep.operations.completed);
     return prep;
   }
-  function edition(state, year, country) {
-    const item = generated(year, country);
+  function decorate(state, item) {
+    migrateLegacy(state, item);
     item.organizer = organizer(state, item);
     item.preparation = preparation(state, item);
     Game.conventionFranchise?.decorate(state, item);
     return item;
   }
+  function edition(state, year, country, slot = 0) {
+    return decorate(state, Game.conventionSchedule.generated(year, country, slot));
+  }
   function list(state, year = state.year) {
     ensure(state);
-    return countries().map((country) => edition(state, year, country))
-      .sort((left, right) => left.month - right.month || left.country.localeCompare(right.country));
+    return Game.conventionSchedule.list(year).map((item) => decorate(state, item))
+      .sort((left, right) => left.month - right.month
+        || left.country.localeCompare(right.country) || left.slot - right.slot);
   }
   function find(state, id) {
-    const match = /^(\d+)-(.+)$/.exec(String(id || ''));
-    return match ? edition(state, Number(match[1]), match[2]) : null;
+    const item = Game.conventionSchedule.find(id);
+    return item ? decorate(state, item) : null;
   }
   function status(state, item) {
     if (state.year < item.year) return { id: 'announced', label: '预告' };
@@ -161,7 +135,6 @@
   function startAttendance(state, editionId) {
     const item = find(state, editionId);
     if (!item || status(state, item).id !== 'ongoing') return { ok: false, message: '漫展当前没有开放' };
-    if (item.city !== state.location.city) return { ok: false, message: `需要先前往${item.city}` };
     if (Game.content.age(state) < 12) return { ok: false, message: '12岁后可以独立参加漫展' };
     if (state.travel?.activeStage) return { ok: false, message: '请先完成当前旅途' };
     if (ensure(state).attendance[item.id]?.completed) return { ok: false, message: '本届漫展已经参加过' };

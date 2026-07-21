@@ -1,0 +1,81 @@
+.convention-current {
+  border-left-color: #a33b56;
+  background: #f6eef1;
+}
+
+.convention-roster {
+  margin: 10px 0;
+}
+
+.convention-roster h3 {
+  margin: 0 0 7px;
+  color: #4e373e;
+  font-size: 11px;
+}
+
+.convention-coser {
+  min-height: 64px;
+  margin-bottom: 7px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  border: 1px solid #ded5d8;
+  border-radius: 7px;
+  background: #fffaf9;
+}
+
+.convention-coser.selected {
+  border-color: #a33b56;
+  box-shadow: inset 3px 0 #a33b56;
+}
+
+.convention-coser .person-avatar {
+  width: 48px;
+  height: 48px;
+}
+
+.convention-coser div,
+.convention-coser strong,
+.convention-coser span,
+.convention-coser small {
+  min-width: 0;
+  display: block;
+}
+
+.convention-coser strong {
+  color: #263b37;
+  font-size: 12px;
+}
+
+.convention-coser span {
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  color: #a33b56;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.convention-coser small {
+  margin-top: 4px;
+  color: #74706f;
+  font-size: 9px;
+}
+
+.journey-options .convention-option {
+  min-height: 66px;
+  text-align: left;
+}
+
+.convention-option strong,
+.convention-option small {
+  display: block;
+}
+
+.convention-option small {
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 9px;
+  line-height: 1.45;
+}

@@ -109,8 +109,8 @@
       return result;
     }
     travel.encounters = [];
-    travel.activeStage = { placeName, stage: 0, score: 0, partnerId: null,
-      riskCount: 0, feedback: `抵达${placeName}，请选择第一段行动。`, choices: [] };
+    if (placeName === '城市漫展' && Game.conventionTravel) return Game.conventionTravel.start(state);
+    travel.activeStage = { placeName, stage: 0, score: 0, partnerId: null, riskCount: 0, feedback: `抵达${placeName}，请选择第一段行动。`, choices: [] };
     Game.lifeDirector.addLog(state, '街区旅途', `你开始了${placeName}的多段探索。`, 'good');
     return { ok: true, message: `开始探索${placeName}` };
   }
@@ -119,8 +119,8 @@
     state.travel.localHistory = state.travel.localHistory.slice(0, 20);
   }
   function chooseStage(state, choiceId) {
-    const ts = ensureTravel(state).activeStage;
-    if (!ts) return { ok: false, message: '当前没有进行中的旅途' };
+    const ts = ensureTravel(state).activeStage; if (!ts) return { ok: false, message: '当前没有进行中的旅途' };
+    if (ts.mode === 'convention') return Game.conventionTravel.choose(state, choiceId);
     ts.stage = Number.isInteger(ts.stage) ? ts.stage : 0; ts.score = Number.isFinite(ts.score) ? ts.score : 0;
     ts.riskCount = Number.isInteger(ts.riskCount) ? ts.riskCount : 0;
     ts.choices = Array.isArray(ts.choices) ? ts.choices : []; ts.feedback ||= '继续完成这段旅途。';
@@ -152,6 +152,7 @@
     ])).join('');
   }
   function renderActive(state, ts) {
+    if (ts.mode === 'convention') return Game.conventionTravelView.render(state, ts);
     const stages = Game.travelStages?.forPlace(ts.placeName) || [];
     const stage = stages[ts.stage];
     if (!stage) { state.travel.activeStage = null; return ''; }

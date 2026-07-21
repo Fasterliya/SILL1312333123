@@ -8,11 +8,11 @@
   function subjectReadiness(state, subject) {
     Game.subjectPanel.ensureSubjects(state);
     const data = state.education.subjects[subject] || {};
-    const hours = U.clamp(Number(data.studyHours) || 0, 0, 240);
+    const hours = U.clamp(Number(data.studyHours) || 0, 0, 200);
     const aptitude = U.clamp(Number(data.aptitude) || 0, 0, 100);
     const burnout = U.clamp(Number(state.education.burnout) || 0, 0, 100);
-    return U.clamp(aptitude * 0.35 + hours / 240 * 55
-      + (state.stats.智力 || 0) * 0.1 - burnout * 0.18, 0, 100);
+    return U.clamp(Math.sqrt(hours / 200) * 60 + aptitude * 0.2
+      + (state.stats.智力 || 0) * 0.1 - burnout * 0.15, 0, 100);
   }
 
   function readiness(state) {
@@ -33,21 +33,26 @@
   function exam(state, label, subjects) {
     Game.subjectPanel.ensureSubjects(state);
     const paper = Game.schoolLines.examProfile(state, label);
-    const difficulty = paper?.penalty ?? 0.06;
+    const stageDifficulty = {
+      primary: 0.02, middle: 0.05, high: 0.08, vocational: 0.07, university: 0.07,
+    }[state.education.schoolStage] || 0.05;
+    const difficulty = paper?.penalty ?? stageDifficulty;
     const debuff = U.clamp(Number(state.education._examDebuff) || 0, 0, 0.3);
     const burnout = U.clamp(Number(state.education.burnout) || 0, 0, 100);
     const scores = {};
     Object.entries(subjects).forEach(([subject, cap]) => {
       const data = state.education.subjects[subject] || { studyHours: 0, aptitude: 40 };
-      const hours = U.clamp(Number(data.studyHours) || 0, 0, 240) / 240;
+      const knowledge = Math.sqrt(U.clamp(Number(data.studyHours) || 0, 0, 200) / 200);
       const aptitude = U.clamp(Number(data.aptitude) || 40, 0, 100) / 100;
-      const condition = (state.stats.健康 || 0) / 100 * 0.05
-        + (state.stats.心情 || 0) / 100 * 0.04
-        + U.clamp((state.health.sleep || 7) / 8, 0.5, 1.1) * 0.04;
-      const random = (U.between(-6, 6) + U.between(-6, 6)) / 200;
-      const rate = U.clamp(0.2 + hours * 0.36 + aptitude * 0.22
-        + (state.stats.智力 || 0) / 100 * 0.12 + condition
-        - burnout / 100 * 0.1 - debuff - difficulty + random, 0.18, 0.96);
+      const condition = (state.stats.健康 || 0) / 100 * 0.03
+        + (state.stats.心情 || 0) / 100 * 0.025
+        + U.clamp((state.health.sleep || 7) / 8, 0.5, 1.1) * 0.025;
+      const school = Game.schoolLines.cityResource(state.location.city) / 100;
+      const technique = U.clamp(Number(state.education.examTechnique) || 20, 0, 100) / 100;
+      const random = (U.between(-10, 10) + U.between(-8, 8)) / 200;
+      const rate = U.clamp(0.18 + knowledge * 0.38 + aptitude * 0.14
+        + (state.stats.智力 || 0) / 100 * 0.08 + condition + school * 0.05
+        + technique * 0.04 - burnout / 100 * 0.12 - debuff - difficulty + random, 0.15, 0.95);
       scores[subject] = Math.round(cap * rate);
     });
     const total = Object.values(scores).reduce((sum, value) => sum + value, 0);
@@ -70,21 +75,22 @@
       }
       state.education.subjects[subject].examScore = score;
       state.education.subjects[subject].studyHours = Math.round(
-        (state.education.subjects[subject].studyHours || 0) * 0.88,
+        (state.education.subjects[subject].studyHours || 0) * 0.62,
       );
     });
     item.exams.unshift(result);
     item.exams = item.exams.slice(0, 12);
     state.education.examScore = result.maximum
       ? Math.round(result.total / result.maximum * 100) : 0;
-    state.education.burnout = U.clamp((state.education.burnout || 0) - 12, 0, 100);
+    state.education.burnout = U.clamp((state.education.burnout || 0) - 8, 0, 100);
   }
 
   function addPreparation(state, amount) {
     Game.subjectPanel.ensureSubjects(state);
     const subjects = Object.keys(Game.subjectPanel.getStageSubjects(state));
     subjects.forEach((subject) => {
-      state.education.subjects[subject].studyHours += Math.max(1, Math.round(amount * 1.5));
+      state.education.subjects[subject].studyHours = Math.min(200,
+        state.education.subjects[subject].studyHours + Math.max(1, Math.round(amount * 0.6)));
     });
     syncLegacy(state);
   }
@@ -92,10 +98,25 @@
   function monthly(state) {
     legacy.monthly(state);
     if (!Game.subjectPanel.isStudent(state)) return;
-    Game.educationStudyPlan.applyMonthly(state);
-    const recovery = state.health.sleep >= 8 ? 7 : 4;
+    Game.educationStudyPlan.ensureSemester(state);
+    Game.educationStudyPlan.applyMonth(state);
+    const recovery = state.health.sleep >= 8 ? 3 : 1;
     state.education.burnout = U.clamp((state.education.burnout || 0) - recovery, 0, 100);
     syncLegacy(state);
+    Game.educationExamPrep.maybeTrigger(state);
+  }
+
+  function predictedRange(state, subject, cap) {
+    Game.subjectPanel.ensureSubjects(state);
+    const data = state.education.subjects[subject] || {};
+    const knowledge = Math.sqrt(U.clamp(Number(data.studyHours) || 0, 0, 200) / 200);
+    const aptitude = U.clamp(Number(data.aptitude) || 40, 0, 100) / 100;
+    const school = Game.schoolLines.cityResource(state.location.city) / 100;
+    const burnout = U.clamp(Number(state.education.burnout) || 0, 0, 100) / 100;
+    const base = U.clamp(0.18 + knowledge * 0.38 + aptitude * 0.14
+      + (state.stats.智力 || 0) / 100 * 0.08 + school * 0.05 - burnout * 0.12 - 0.05, 0.15, 0.9);
+    return [Math.round(cap * U.clamp(base - 0.07, 0.15, 0.95)),
+      Math.round(cap * U.clamp(base + 0.07, 0.15, 0.95))];
   }
 
   function render(state) {
@@ -125,5 +146,5 @@
     render,
     renderQuick: (state) => Game.subjectPanel.renderQuick(state),
   });
-  Game.subjectEducation = Object.freeze({ subjectReadiness, applyResult });
+  Game.subjectEducation = Object.freeze({ subjectReadiness, applyResult, predictedRange });
 }(window));

@@ -8,6 +8,7 @@
     boardVote: () => Game.stockDirector,
     familyConflict: () => Game.familyConflict,
     relationshipConflict: () => Game.relationshipConflict,
+    examPrep: () => Game.educationExamPrep,
   };
 
   function content(state) {

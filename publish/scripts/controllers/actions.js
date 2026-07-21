@@ -8,8 +8,8 @@
   function state() {
     return api.getState();
   }
-
   function done() {
+    Game.educationStudyPlan?.ensureSemester(state());
     api.refresh();
     Promise.resolve(api.save()).finally(() => api.resumeEducation?.());
   }
@@ -39,6 +39,12 @@
     const current = state();
     const decision = current.pendingDecision;
     if (!decision) return;
+    if (decision.type === 'semesterPlan') {
+      const result = Game.educationStudyPlan.resolve(current);
+      Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
+      if (result.ok) done();
+      return;
+    }
     const systemResult = Game.systemDecisions?.resolve(current, value);
     if (systemResult) {
       Game.view.showToast(systemResult.message, systemResult.ok ? 'good' : 'warning');
@@ -102,15 +108,18 @@
     done();
   }
 
-  function renderDecision(open) {
+  function renderDecision() {
     const current = state();
     const d = current.pendingDecision;
-    const center = Game.taskCenter?.ensure(current);
-    if (open && d && center) center.decisionOpen = true;
-    if (!d && center) center.decisionOpen = false;
-    const visible = Boolean(d && (!center || center.decisionOpen));
+    const visible = Boolean(d);
     Game.view.el.decision.hidden = !visible;
     if (!visible) return;
+    if (d.type === 'semesterPlan') {
+      Game.view.el.decisionTitle.textContent = d.adjustment ? '调整本学期计划' : '制定本学期计划';
+      Game.view.el.decisionText.textContent = `${d.term.label}：把6个时间格分配给科目与生活安排。`;
+      Game.view.el.decisionBody.innerHTML = Game.educationPlanView.renderDecision(current);
+      return;
+    }
     const systemContent = Game.systemDecisions?.content(current);
     if (systemContent) {
       Game.view.el.decisionTitle.textContent = systemContent.title;

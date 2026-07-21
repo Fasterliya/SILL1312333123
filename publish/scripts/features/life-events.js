@@ -64,7 +64,6 @@
   }
 
   function maybeTrigger(state) {
-    if (Game.educationFastForward.active(state)) return;
     if (state.pendingDecision || state.gameOver || state.totalMonths - state.eventState.lastMonth < 4) return;
     if (Math.random() > 0.16) return;
     const age = Game.content.age(state);

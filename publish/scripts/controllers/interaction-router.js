@@ -155,6 +155,7 @@
   }
 
   function handle(event) {
+    if (Game.educationPlanView?.handleClick?.(event)) return;
     if (Game.taskCenter?.handleClick?.(event)) return;
     if (Game.npcInitiative?.handleClick?.(event)) return;
     if (Game.relationshipPanel?.handleClick?.(event)) return;

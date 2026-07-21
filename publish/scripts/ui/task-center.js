@@ -15,7 +15,6 @@
     state.taskCenter.items = Array.isArray(state.taskCenter.items)
       ? state.taskCenter.items.slice(-30) : [];
     state.taskCenter.open = Boolean(state.taskCenter.open);
-    state.taskCenter.decisionOpen = Boolean(state.taskCenter.decisionOpen);
     return state.taskCenter;
   }
 
@@ -34,35 +33,8 @@
     return true;
   }
 
-  function decisionTitle(state) {
-    const decision = state.pendingDecision;
-    if (!decision) return '';
-    const system = Game.systemDecisions?.content(state);
-    if (system?.title) return system.title;
-    if (decision.type === 'lifeEvent') return Game.lifeEvents?.render(state)?.title || '人生事件';
-    if (decision.type === 'succession') return '选择下一代角色';
-    const labels = {
-      highSchool: '中考志愿填报',
-      track: '高中选科',
-      volunteer: '高考志愿填报',
-      vocationalExit: '职高毕业去向',
-      idolTransition: '偶像毕业转型',
-      internship: '大学实习选择',
-    };
-    return decision.title || labels[decision.type] || '关键人生选择';
-  }
-
   function dynamicItems(state) {
     const result = [];
-    if (state.pendingDecision) {
-      result.push({
-        key: 'pending-decision',
-        type: 'decision',
-        title: decisionTitle(state),
-        text: state.pendingDecision.text || '需要完成选择后才能继续推进。',
-        month: state.totalMonths,
-      });
-    }
     const npcQueue = Game.npcInitiativeCore?.ensure(state).queue || [];
     npcQueue.forEach((event) => {
       result.push({
@@ -152,11 +124,6 @@
       refresh(state);
       return true;
     }
-    if (event.target.closest('[data-decision-later]')) {
-      ensure(state).decisionOpen = false;
-      Game.actions.renderDecision();
-      return true;
-    }
     const button = event.target.closest('[data-task-action]');
     if (!button) return false;
     const type = button.dataset.taskAction;
@@ -178,9 +145,6 @@
       state._ugTab = 'career';
       state.taskCenter.open = false;
       Game.view.showToast('地下偶像邀约已定位到职业面板', 'good');
-    } else if (type === 'decision') {
-      state.taskCenter.open = false;
-      Game.actions.renderDecision(true);
     }
     refresh(state);
     Game._save?.();

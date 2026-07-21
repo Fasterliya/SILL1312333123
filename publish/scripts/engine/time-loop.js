@@ -5,7 +5,6 @@
   const SPEED_MS = { 0: 0, 1: 1000, 5: 200, 10: 100, 30: 33, 90: 11 };
   let api = null;
   let timer = null;
-  let renderTicks = 0;
 
   function state() {
     return api?.getState?.() || null;
@@ -25,27 +24,28 @@
       Game.lifeDirector.advance(current, 1);
       current.stamina.current = current.stamina.max;
       shouldSave = true;
+      Game.examSystem?.checkReveal(current);
       if (current.education.fastForwardTarget
         && current.totalMonths >= current.education.fastForwardTarget) {
         Game.educationFastForward.complete(current);
       }
     }
-    if (Game.examSystem?.checkReveal(current)) shouldSave = true;
     if (current.pendingDecision || current.gameOver) {
       current.timeSpeed = 0;
       startTimer();
       shouldSave = true;
     }
-    const renderStride = current.timeSpeed >= 90 ? 3 : (current.timeSpeed >= 30 ? 2 : 1);
-    renderTicks += 1;
-    if (shouldSave || current.pendingDecision || renderTicks % renderStride === 0) api.refresh();
-    if (shouldSave) api.save();
+    if (shouldSave) {
+      api.refresh();
+      api.save();
+    } else {
+      api.refreshTime?.();
+    }
   }
 
   function startTimer() {
     if (timer) root.clearInterval(timer);
     timer = null;
-    renderTicks = 0;
     const current = state();
     if (!current || current.gameOver || current.pendingDecision || !current.timeSpeed) return;
     timer = root.setInterval(tickDay, SPEED_MS[current.timeSpeed] || SPEED_MS[1]);
@@ -56,7 +56,7 @@
     if (!current || current.gameOver) return;
     current.timeSpeed = current.pendingDecision ? 0 : Number(speed) || 0;
     startTimer();
-    api.refresh();
+    (api.refreshTime || api.refresh)();
   }
 
   function start() {

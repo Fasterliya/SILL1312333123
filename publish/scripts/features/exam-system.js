@@ -18,10 +18,9 @@
     es.active = true;
     es.type = type;
     es.startDay = absoluteDay(state);
-    es.revealedDay = es.startDay + 3 + Math.floor(Math.random()*3); // 3-5 days
+    es.revealedMonth = state.totalMonths + 1;
     es.result = result;
-    es.partialRevealed = false;
-    Game.lifeDirector.addLog(state, type, type+'考试结束。成绩将在3-5天后公布。心情-5(焦虑等待)。', 'normal');
+    Game.lifeDirector.addLog(state, type, type+'考试结束。成绩将在下个月公布。心情-5(焦虑等待)。', 'normal');
     state.stats.心情 = U.clamp(state.stats.心情 - 5, 0, 100);
     return { ok: true, message: type + '已结束，等待公布成绩' };
   }
@@ -29,25 +28,13 @@
   function checkReveal(state) {
     var es = ensure(state);
     if (!es.active) return null;
-    var currentDay = absoluteDay(state);
     if (!es.result || typeof es.result !== 'object') {
       es.active = false;
       return null;
     }
-
-    // Partial reveal on day 1-2 (one subject per day)
-    if (!es.partialRevealed && currentDay >= es.startDay + 1) {
-      es.partialRevealed = true;
-      var scores = es.result.scores || {};
-      var keys = Object.keys(scores);
-      if (keys.length > 0) {
-        var mid = Math.ceil(keys.length/2);
-        var firstHalf = keys.slice(0, mid).map(function(k){return k+scores[k]+'分';}).join('、');
-        Game.lifeDirector.addLog(state, '成绩公布(部分)', '今日公布: '+firstHalf+'。剩余科目明天公布。', 'normal');
-      }
-    }
-
-    if (currentDay >= es.revealedDay) {
+    var revealMonth = Number.isFinite(es.revealedMonth)
+      ? es.revealedMonth : Math.max(state.totalMonths, Math.ceil((es.revealedDay || 0) / 30));
+    if (state.totalMonths >= revealMonth) {
       es.active = false;
       var total = es.result.total || 0;
       var max = es.result.maximum || 0;
@@ -57,7 +44,7 @@
       if (es.type === '中考') state.pendingDecision = { type: 'highSchool', score: total };
       if (es.type === '高考') state.pendingDecision = { type: 'volunteer', score: total };
       es.lastCompletedType = es.type;
-      es.lastCompletedDay = currentDay;
+      es.lastCompletedDay = absoluteDay(state);
       return es.result;
     }
     return null;

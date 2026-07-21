@@ -185,5 +185,5 @@
     toastTimer = root.setTimeout(() => { el.toast.hidden = true; }, 2400);
   }
 
-  Game.view = Object.freeze({ el, init, render, showToast, money, drawHero });
+  Game.view = Object.freeze({ el, init, render, renderTimeBar, showToast, money, drawHero });
 }(window));

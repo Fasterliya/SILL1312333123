@@ -138,7 +138,10 @@
       Game.portraitSystem.configure({ getState: () => state, refresh, save });
       Game.drawSettings.configure({ getState: () => state, save });
       Game.saveManager.configure({ getState: () => state, restore });
-      Game.timeLoop.configure({ getState: () => state, refresh, save });
+      Game.timeLoop.configure({
+        getState: () => state, refresh, save,
+        refreshTime: () => Game.view.renderTimeBar(state),
+      });
       Game.schoolLines.configure({ getState: () => state, refresh });
       Game.roleBook.configure({ getState: () => state });
       Game.marketView.configure({ getState: () => state, save });

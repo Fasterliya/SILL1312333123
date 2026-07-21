@@ -50,8 +50,9 @@
     if (state.money < bidCost) return { ok: false, message: `投标保证金需要${Game.view.money(bidCost)}` };
     Game.economy.spend(state, bidCost);
     const access = Game.conventionProgression?.bidAccess(item, event) || { penalty: 0 };
-    const context = Math.min(14, Math.round((item.investment || 0) / 50000)
-      + (item.employees?.length || 0) * 2 + (item.conventionReputation || 0) / 10);
+    const context = Math.min(18, Math.round((item.investment || 0) / 50000)
+      + (item.employees?.length || 0) * 2 + (item.conventionReputation || 0) / 10
+      + (Game.conventionFranchise?.bidContext(state, item, event) || 0));
     const resolution = Game.actionResolver.resolve(state, {
       primary: '管理', secondary: '心计', difficulty: 62 + access.penalty,
       context, variance: 7, label: `${event.name}承办投标`,

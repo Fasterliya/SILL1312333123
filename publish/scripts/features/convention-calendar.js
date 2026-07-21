@@ -12,7 +12,7 @@
     state.conventionCalendar = state.conventionCalendar && typeof state.conventionCalendar === 'object'
       ? state.conventionCalendar : {};
     const data = state.conventionCalendar;
-    data.version = 5;
+    data.version = 6;
     data.registrations = data.registrations && typeof data.registrations === 'object'
       ? data.registrations : {};
     data.attendance = data.attendance && typeof data.attendance === 'object'
@@ -95,6 +95,7 @@
     const item = generated(year, country);
     item.organizer = organizer(state, item);
     item.preparation = preparation(state, item);
+    Game.conventionFranchise?.decorate(state, item);
     return item;
   }
   function list(state, year = state.year) {

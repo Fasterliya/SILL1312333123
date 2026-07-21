@@ -134,9 +134,10 @@
     if (event.organizer.type === 'player') return '';
     if (Game.conventionCalendar.status(state, event).id !== 'announced') return '';
     const access = Game.conventionProgression?.bidAccess(company, event);
+    const incumbent = Game.conventionFranchise?.bidLabel(state, company, event);
     return `<article class="convention-tender"><div><span>${event.year}年${event.month}月 · ${event.city}</span>
       <strong>${escape(event.name)}</strong><small>${escape(event.scale)} · 当前承办候选：${escape(event.organizer.name)}
-      ${access ? ` · ${escape(access.label)}` : ''}</small></div>
+      ${access ? ` · ${escape(access.label)}` : ''}${incumbent ? ` · ${escape(incumbent)}` : ''}</small></div>
       ${bid ? `<b>${bid.won ? '已中标' : '未中标'}</b>` : (
         `<button data-convention-bid="${escape(event.id)}|${escape(company.id)}">
         申请承办 · ${Game.view.money(Game.conventionCompany.bidCost)}</button>`

@@ -48,9 +48,11 @@
       ? Math.round(prep.operations.score / operationCount) : 0;
     const appeal = 0.55 + prep.quality / 200 + prep.promotion / 250;
     const themeFactor = event.kind === 'only' ? 0.78 : 1;
+    const franchiseFactor = Game.conventionFranchise?.attendanceFactor(state, event) || 1;
     const guestDraw = prep.guests.reduce((sum, item) => sum + (Number(item.draw) || 0), 0);
     const attendance = Math.max(300, Math.round(
-      (attendanceBase[event.scale] || 4000) * appeal * (0.65 + completion * 0.35) * themeFactor,
+      (attendanceBase[event.scale] || 4000) * appeal * (0.65 + completion * 0.35)
+      * themeFactor * franchiseFactor,
     ) + guestDraw);
     const ticketRevenue = Math.round(attendance * event.ticketPrice * 0.08);
     const boothRevenue = Math.round(attendance * (event.kind === 'only' ? 16 : 12));
@@ -86,6 +88,7 @@
       payout, prepBudget: prep.budget, forecastProfit, projectProfit, reputationDelta,
       quality: prep.quality, safety: prep.safety, promotion: prep.promotion,
       incidentChance: risk.chance, incident: risk.incident,
+      franchiseFactor, franchiseFanbase: event.franchise?.fanbase,
       audienceScore: audience?.score, audienceLabel: audience?.label,
       audienceStrengths: audience?.strengths || [], audienceConcerns: audience?.concerns || [],
       audienceSampleUsed: Boolean(audience?.sampleUsed),
@@ -114,6 +117,10 @@
     Game.conventionProgression?.recordSettlement(
       item, event, Game.conventionCalendar.preparation(state, event), result,
     );
+    const franchise = Game.conventionFranchise?.recordSettlement(state, event, result);
+    result.franchiseFanbase = franchise?.fanbase;
+    result.franchisePrestige = franchise?.prestige;
+    result.organizerStreak = franchise?.organizerStreak;
     item.events = Array.isArray(item.events) ? item.events : [];
     const incident = result.incident ? `，${result.incident.name}造成损失` : '，现场秩序稳定';
     item.events.push({

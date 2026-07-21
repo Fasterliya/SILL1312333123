@@ -171,6 +171,7 @@
     name: '无', series: '基础', character: '无', prompt: '', tags: ['基础'],
     minAge: 0, maxAge: 120, personalities: [], temperaments: [],
   }, ...touhou, ...starRail, ...wuwa, ...genshin, ...blueArchive, ...anime];
+  const series = [...new Set(items.filter((item) => item.name !== '无').map((item) => item.series))];
   const find = (name) => items.find((item) => item.name === name) || items[0];
   const covered = new Set(['hairColor', 'hairstyle', 'clothing.top', 'clothing.shoes']);
 
@@ -192,6 +193,6 @@
   }
 
   Game.cosplayCatalog = Object.freeze({
-    items: Object.freeze(items), find, overrides, effectiveValue, stripWeapons,
+    items: Object.freeze(items), series: Object.freeze(series), find, overrides, effectiveValue, stripWeapons,
   });
 }(window));

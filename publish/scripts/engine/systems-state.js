@@ -46,9 +46,7 @@
       from: Game.nameSystem.normalizeName(item.from, person.gender, culture),
       to: Game.nameSystem.normalizeName(item.to, person.gender, culture),
     })) : [];
-    person.aiChat = person.aiChat && typeof person.aiChat === 'object' ? person.aiChat : {};
-    person.aiChat.messages = Array.isArray(person.aiChat.messages) ? person.aiChat.messages.slice(-10) : [];
-    person.aiChat.lastAction ||= '';
+    delete person.aiChat;
     Game.npcFashion.ensurePerson(state, person);
     person.sexWork = person.sexWork && typeof person.sexWork === 'object' ? person.sexWork : {};
     if (person.gender === '女') {

@@ -93,6 +93,7 @@
 
   function characterHtml(state, person) {
     if (Game.lifeResume) Game.lifeResume.backfillResume(state, person);
+    const resumeCount = person.lifeResume?.length || 0;
     const effective = (field) => Game.cosplayCatalog.effectiveValue(person, field);
     const labels = {
       cosplay: 'COS服', hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
@@ -157,19 +158,17 @@
       ${section('外貌表现', '当前实际外观', looks, false)}
       ${section('遗传信息', 'DNA 与成长倾向', inherited, false)}
       ${section('人生状态', '学业、职业与家庭', life, false)}
+      <details class="record-section resume-section" open><summary><span>人生履历</span>
+      <small>${resumeCount}项记录</small></summary>
+      ${Game.lifeResume ? Game.lifeResume.renderResume(person) : ''}</details>
       ${Game.familyLinks.render(state, person)}
       ${Game.workplace.personSection(state, person)}
-      ${Game.relationshipMemory.render(person)}
-      ${Game.relationshipSecretsView.render(state, person)}
-      ${Game.characterChat.render(state, person)}</div>
+      ${Game.relationshipSecretsView.render(state, person)}</div>
       <details class="record-section npc-editor"><summary><span>编辑角色外观</span>
       <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}
       ${Game.plasticSurgery.renderNpcPortraitStages(state, person)}</div></details>
       <details class="interaction-menu detail-interactions"><summary>互动选项</summary>
-      <div class="interaction-options">${detailActions(state, person)}</div></details>
-      <details class="record-section"><summary>人生履历</summary><div class="fold-content">`
-      + (Game.lifeResume ? Game.lifeResume.renderResume(person) : '')
-      + `</div></details>`;
+      <div class="interaction-options">${detailActions(state, person)}</div></details>`;
   }
 
   function openCharacter(id) {

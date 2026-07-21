@@ -1,0 +1,139 @@
+.resume-section > summary {
+  border-left: 4px solid #315f58;
+  background: #eef3ef;
+}
+
+.resume-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border-top: 1px solid #dedbd0;
+  border-bottom: 1px solid #dedbd0;
+  background: #dedbd0;
+}
+
+.resume-overview div {
+  min-width: 0;
+  padding: 10px;
+  display: grid;
+  gap: 3px;
+  background: #fffdf7;
+}
+
+.resume-overview span,
+.resume-entry small {
+  color: #757d78;
+  font-size: 10px;
+}
+
+.resume-overview strong {
+  overflow: hidden;
+  color: #263b37;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resume-list {
+  position: relative;
+  max-height: 52dvh;
+  padding: 10px 12px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.resume-list::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: 34px;
+  width: 2px;
+  background: #d8ddd9;
+}
+
+.resume-entry {
+  --resume-accent: #53756d;
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 10px;
+  padding: 7px 0;
+}
+
+.resume-entry time {
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-content: center;
+  border: 2px solid var(--resume-accent);
+  border-radius: 50%;
+  background: #fffdf7;
+  color: var(--resume-accent);
+  text-align: center;
+}
+
+.resume-entry time b {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.resume-entry time span {
+  font-size: 9px;
+}
+
+.resume-entry > div {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid #dedbd0;
+  border-left: 3px solid var(--resume-accent);
+  border-radius: 6px;
+  background: #fffdf7;
+}
+
+.resume-entry header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resume-entry strong {
+  color: #283d39;
+  font-size: 13px;
+}
+
+.resume-entry p {
+  margin: 4px 0 0;
+  color: #66726f;
+  font-size: 11px;
+  line-height: 1.5;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.resume-entry.education { --resume-accent: #486c92; }
+.resume-entry.career { --resume-accent: #39705c; }
+.resume-entry.family { --resume-accent: #946249; }
+.resume-entry.risk,
+.resume-entry.deceased { --resume-accent: #963d35; }
+
+.resume-empty {
+  margin: 0;
+  padding: 24px 12px;
+  border-top: 1px solid #dedbd0;
+  color: #7a817c;
+  text-align: center;
+  font-size: 12px;
+}
+
+@media (max-width: 360px) {
+  .resume-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .resume-overview div:last-child {
+    grid-column: 1 / -1;
+  }
+}

@@ -455,30 +455,6 @@
   line-height: 1.55;
 }
 
-.timeline {
-  padding: 8px 0 8px 18px;
-}
-
-.timeline::before {
-  left: 7px;
-  background: #c9d2ce;
-}
-
-.timeline-card,
-.timeline-card.left,
-.timeline-card.right {
-  width: auto;
-  margin: 8px 0;
-  border-color: var(--ui-line);
-  border-left: 3px solid var(--ui-green);
-  background: var(--ui-paper);
-}
-
-.timeline-card.deceased {
-  border-left-color: var(--ui-red);
-  background: #f2eee5;
-}
-
 @media (max-width: 420px) {
   .work-metrics,
   .black-market-items,

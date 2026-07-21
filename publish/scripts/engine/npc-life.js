@@ -27,18 +27,21 @@
 
   function education(state, person, age) {
     const [stage] = schoolStage(age);
+    Game.educationSystem.ensurePerson(person);
+    const city = person.currentCity || person.metCity || state.location.city || state.hometown.city;
+    if (person.droppedOut) return;
     if (person.school === state.education.school && !['家中', '已毕业'].includes(person.school)) {
+      if (Game.npcEducationPaths.maybeDropout(state, person, age, city)) return;
       person.educationStage = state.education.schoolStage;
       person.educationName = person.school;
       return;
     }
-    Game.educationSystem.ensurePerson(person);
     if (age >= 18 && age < 22 && person.educationStage === 'workforce') return;
     if (person.educationStage === stage && person.educationName) return;
-    const city = person.currentCity || person.metCity || state.location.city || state.hometown.city;
     const variation = U.between(-10, 10) + U.between(-10, 10);
     const score = U.clamp(person.academicAbility * 0.58 + person.studyHabit * 0.32 + variation, 0, 100);
     person.academicScore = Math.round(score);
+    if (Game.npcEducationPaths.maybeDropout(state, person, age, city)) return;
     person.educationStage = stage;
     if (stage === 'home') person.educationName = '家庭照护';
     else if (stage === 'kindergarten') person.educationName = `${city}向日葵幼儿园`;
@@ -85,18 +88,7 @@
 
     /* ---- weighted career selection for female NPCs ---- */
     if (person.gender === '女') {
-      const charm = person.charm || 50;
-      const intelligence = Game.genetics?.growthModel
-        ? 50 : 50; /* approximate: use education level as proxy */
       const eduLevel = person.educationLevel || 0;
-      const isYoung = age >= 18 && age <= 28;
-      const isPetite = ['娇小纤细', '小胸'].includes(person.bodyType || '');
-      const isCute = ['青涩', '灵动', '明快'].includes(person.temperament || '');
-      const hasCosplayInterest = (person.fashion?.cosplayInterest || 0) > 40;
-      const hasProstituteFlag = person.sexWork?.isProstitute;
-
-      /* Build weighted job pool */
-      const pool = [];
       const jobs = Game.companyCatalog.jobsInCity(person.currentCity || person.metCity || state.location.city).filter((item) => (
         (item.education || 0) <= eduLevel
         && (!item.adultOnly || age >= 18)
@@ -104,19 +96,9 @@
         && Game.jobMarket.canNpcEnter(state, person, item)
       ));
 
-      const weighted = jobs.map((job) => {
-        let weight = 100;
-        if (hasProstituteFlag && job.id === 'prostitute') weight = 400;
-        else if (job.id === 'prostitute' && isYoung && eduLevel <= 1) weight = charm > 55 ? 180 : 120;
-        else if (job.id === 'welfare' && isYoung && isCute) weight = charm > 50 ? 200 : 140;
-        else if (job.id === 'welfare' && isYoung && isPetite) weight = 160;
-        else if (job.id === 'idoltrainee' && isYoung && age <= 20 && charm > 55) weight = 180;
-        else if (job.id === 'idol' && isYoung && charm > 60 && (person.fashion?.cosplayInterest || 0) > 30) weight = 150;
-        else if (job.id === 'coser' && hasCosplayInterest) weight = 170;
-        else if (job.id === 'vtuber' && isCute && isYoung) weight = 130;
-        else if (job.id === 'beautyblog' && charm > 55) weight = 120;
-        return { job, weight };
-      });
+      const weighted = jobs.map((job) => ({
+        job, weight: Game.npcEducationPaths.jobWeight(person, job, age),
+      }));
       const totalWeight = weighted.reduce((s, w) => s + w.weight, 0);
       let cursor = Math.random() * totalWeight;
       const chosen = weighted.find((w) => (cursor -= w.weight) < 0);

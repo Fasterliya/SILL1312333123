@@ -344,14 +344,3 @@ button:disabled {
 .subject-card small { font-size: 10px; color: #8c918d; display: block; }
 .subject-card button { width: 100%; padding: 6px; margin-top: 6px; border: 1px solid #315f58; border-radius: 4px; background: #315f58; color: #fff; font-size: 11px; cursor: pointer; }
 .subject-card button:disabled { background: #ccc; border-color: #ccc; }
-
-/* timeline */
-.timeline { position:relative; padding:10px 0; }
-.timeline::before { content:''; position:absolute; left:50%; top:0; bottom:0; width:2px; background:#d9d8cf; }
-.timeline-card { width:45%; padding:8px 12px; margin:8px 0; border:1px solid #dedcd2; border-radius:6px; background:#fffdf7; position:relative; }
-.timeline-card.left { margin-right:55%; }
-.timeline-card.right { margin-left:55%; }
-.timeline-card time { font-size:10px; color:#8c918d; display:block; }
-.timeline-card strong { font-size:13px; display:block; margin:2px 0; }
-.timeline-card span { font-size:11px; color:#66726f; }
-.timeline-card.deceased { opacity:.5; background:#f0ece0; }

@@ -38,11 +38,16 @@
       return;
     }
     if (age >= 18 && age < 22 && person.educationStage === 'workforce') return;
-    if (person.educationStage === stage && person.educationName) return;
-    const variation = U.between(-10, 10) + U.between(-10, 10);
+    const rebalance = person.educationBalanceVersion !== 2
+      && ['high', 'university'].includes(stage);
+    if (person.educationStage === stage && person.educationName && !rebalance) return;
+    const variation = U.between(-6, 6) + U.between(-6, 6);
     const learning = Game.learningAttribute.checkValue(person.academicAbility);
-    const score = U.clamp(learning * 0.58 + person.studyHabit * 0.32 + variation, 0, 100);
+    const upbringing = Number(person.upbringing?.education ?? 20);
+    const score = U.clamp(10 + learning * 0.6 + person.studyHabit * 0.27
+      + upbringing * 0.13 + variation, 0, 100);
     person.academicScore = Math.round(score);
+    person.educationBalanceVersion = 2;
     if (Game.npcEducationPaths.maybeDropout(state, person, age, city)) return;
     person.educationStage = stage;
     if (stage === 'home') person.educationName = '家庭照护';
@@ -50,11 +55,11 @@
     else if (stage === 'primary') person.educationName = `${city}启明小学`;
     else if (stage === 'middle') person.educationName = `${city}新城初级中学`;
     else if (stage === 'high') {
-      if (score >= 70) person.educationName = `${city}实验中学`;
-      else if (score >= 47) person.educationName = `${city}新区高级中学`;
-      else if (score >= 29) person.educationName = `${city}现代服务职业高中`;
+      if (score >= 56) person.educationName = `${city}实验中学`;
+      else if (score >= 40) person.educationName = `${city}新区高级中学`;
+      else if (score >= 25) person.educationName = `${city}现代服务职业高中`;
       else person.educationName = `${city}职业技能培训中心`;
-      person.educationLevel = score >= 29 ? 1 : 0;
+      person.educationLevel = score >= 25 ? 1 : 0;
     }
     else if (stage === 'university') {
       if (score >= 74) {

@@ -44,7 +44,7 @@
     'subsurface scattering',
     'soft bloom',
     'light particles',
-    'clean background',
+    'clean softly colored environmental background',
     'soft depth of field',
     'bright atmosphere',
     'official key visual',
@@ -165,7 +165,7 @@
       : [defaultPose, 'front view', 'slightly dynamic pose', 'looking at viewer',
         'natural gesture', 'elegant posture', 'empty relaxed hands'];
     const finalLighting = intent.scene
-      ? lighting.filter((line) => line !== 'clean background') : lighting;
+      ? lighting.filter((line) => line !== 'clean softly colored environmental background') : lighting;
     const proportionSafeDirection = appearance.years <= 18
       ? `PROPORTION-SAFE PLAYER DIRECTION, follow only when modest and non-suggestive: ${intent.direction}`
       : intent.direction;

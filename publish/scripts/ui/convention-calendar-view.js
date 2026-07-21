@@ -84,6 +84,14 @@
     return `<section class="convention-zones"><h3>合作与现场安排</h3>
       <div>${entries.map((entry) => `<span>${escape(entry)}</span>`).join('')}</div></section>`;
   }
+  function attendanceReview(attendance) {
+    const review = attendance?.feedback;
+    if (!review) return '';
+    const highlights = Array.isArray(review.highlights) && review.highlights.length
+      ? review.highlights : ['完成本届漫展路线'];
+    return `<section class="convention-zones"><h3>我的本届体验 · ${escape(review.score)}/100 · ${escape(review.label)}</h3>
+      <div>${highlights.map((entry) => `<span>${escape(entry)}</span>`).join('')}</div></section>`;
+  }
   function detail(state, item) {
     const status = Game.conventionCalendar.status(state, item);
     const registration = state.conventionCalendar?.registrations?.[item.id];
@@ -111,6 +119,7 @@
       <section class="convention-zones"><h3>开放展区</h3><div>${item.zones.map((zone) => (
         `<span>${escape(zone)}</span>`)).join('')}</div></section>
       ${lineup(item)}
+      ${attendanceReview(attendance)}
       <div class="convention-registration"><label>参展身份<select data-convention-role>
       ${optionList(Game.conventionCatalog.roles, registration?.role || 'visitor')}</select></label>
       <label>参展目的<select data-convention-intent>

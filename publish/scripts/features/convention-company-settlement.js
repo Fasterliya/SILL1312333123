@@ -61,6 +61,9 @@
     );
     const grossRevenue = contractRevenue + ticketRevenue + boothRevenue + sponsorRevenue;
     const risk = incidentFor(event, prep, completed, operationMissing);
+    const audience = Game.conventionAudienceFeedback?.evaluate(state, event, {
+      operationCount, operationScore, incident: risk.incident,
+    });
     const incidentCost = risk.incident ? Math.round(grossRevenue * risk.incident.rate) : 0;
     const emergencyCost = (Game.conventionCatalog.prepStages.length - completed) * 60000;
     const operationCost = operationMissing * 40000;
@@ -73,6 +76,7 @@
     reputationDelta -= (4 - completed) * 2;
     reputationDelta -= operationMissing * 2;
     if (operationCount === 3 && operationScore >= 70) reputationDelta += 2;
+    reputationDelta += audience?.reputationDelta || 0;
     if (projectProfit < 0) reputationDelta -= 1;
     return {
       editionId: event.id, eventName: event.name, companyId: event.organizer.companyId,
@@ -82,6 +86,9 @@
       payout, prepBudget: prep.budget, forecastProfit, projectProfit, reputationDelta,
       quality: prep.quality, safety: prep.safety, promotion: prep.promotion,
       incidentChance: risk.chance, incident: risk.incident,
+      audienceScore: audience?.score, audienceLabel: audience?.label,
+      audienceStrengths: audience?.strengths || [], audienceConcerns: audience?.concerns || [],
+      audienceSampleUsed: Boolean(audience?.sampleUsed),
     };
   }
   function settle(state, event) {
@@ -101,18 +108,22 @@
     item.conventionReputation = clamp(
       (item.conventionReputation || 0) + result.reputationDelta, 0, 100,
     );
+    item.conventionAudienceScore = Number.isFinite(item.conventionAudienceScore)
+      ? Math.round(item.conventionAudienceScore * 0.65 + result.audienceScore * 0.35)
+      : result.audienceScore;
     item.events = Array.isArray(item.events) ? item.events : [];
     const incident = result.incident ? `，${result.incident.name}造成损失` : '，现场秩序稳定';
     item.events.push({
       id: `convention-${event.id}`, title: '漫展项目结算',
-      desc: `${event.name}接待${result.attendance}人，项目利润${Game.view.money(result.projectProfit)}${incident}`,
+      desc: `${event.name}接待${result.attendance}人，观众评价${result.audienceScore}，`
+        + `项目利润${Game.view.money(result.projectProfit)}${incident}`,
       severity: result.reputationDelta >= 0 ? 'positive' : 'negative', month: state.totalMonths,
     });
     item.events = item.events.slice(-20);
     Game.characterAttributes.gain(state, '管理', 0.8, '漫展项目结算');
     Game.lifeDirector.addLog(state, '漫展承办结算',
       `${item.name}完成${event.name}，结算现金流${Game.view.money(result.payout)}，`
-      + `项目利润${Game.view.money(result.projectProfit)}${incident}。`,
+      + `项目利润${Game.view.money(result.projectProfit)}，观众评价${result.audienceLabel}${incident}。`,
       result.reputationDelta >= 0 ? 'good' : 'normal');
     return result;
   }

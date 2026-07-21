@@ -42,11 +42,12 @@
   }
   function forecastSummary(item) {
     const profit = item.forecastProfit;
+    const review = Number.isFinite(item.audienceScore) ? ` · 预计口碑 ${item.audienceScore}/100` : '';
     return `<div class="convention-settlement ${profit >= 0 ? 'profit' : 'loss'}">
       <span>当前预估 · 事故风险 ${item.incidentChance}%</span>
       <strong>预计 ${item.attendance.toLocaleString()} 人到场</strong>
       <small>无事故收入 ${Game.view.money(item.grossRevenue)}
-      · 预计利润 ${Game.view.money(profit)}</small></div>`;
+      · 预计利润 ${Game.view.money(profit)}${review}</small></div>`;
   }
   function partnerMeta(type, offer) {
     const ability = `${offer.primary}+${offer.secondary} · 难度${offer.difficulty}`;
@@ -111,10 +112,19 @@
   function settlementSummary(item) {
     const profitClass = item.projectProfit >= 0 ? 'profit' : 'loss';
     const incident = item.incident ? item.incident.name : '平稳举办';
+    const review = Number.isFinite(item.audienceScore)
+      ? ` · 观众口碑 ${item.audienceScore}/100（${escape(item.audienceLabel)}）` : '';
+    const strengths = Array.isArray(item.audienceStrengths) ? item.audienceStrengths : [];
+    const concerns = Array.isArray(item.audienceConcerns) ? item.audienceConcerns : [];
+    const strength = strengths.length
+      ? `<small>好评点：${escape(strengths.slice(0, 2).join('；'))}</small>` : '';
+    const concern = concerns.length
+      ? `<small>风险点：${escape(concerns.slice(0, 2).join('；'))}</small>` : '';
     return `<div class="convention-settlement ${profitClass}">
       <span>结算 · ${escape(incident)}</span><strong>${item.attendance.toLocaleString()}人到场</strong>
       <small>现金流 ${Game.view.money(item.payout)} · 项目利润 ${Game.view.money(item.projectProfit)}
-      · 声誉 ${item.reputationDelta >= 0 ? '+' : ''}${item.reputationDelta}</small></div>`;
+      · 声誉 ${item.reputationDelta >= 0 ? '+' : ''}${item.reputationDelta}${review}</small>
+      ${strength}${concern}</div>`;
   }
   function tenderCard(state, event, company) {
     const bid = state.conventionCalendar?.bids?.[`${event.id}:${company.id}`];
@@ -139,9 +149,11 @@
     const currentIds = new Set(contracts.map((event) => event.id));
     const history = entry.settlements.filter((settlement) => !currentIds.has(settlement.editionId));
     const tenders = entry.events.map((event) => tenderCard(state, event, item)).filter(Boolean).join('');
+    const audience = Number.isFinite(item.conventionAudienceScore)
+      ? ` · 往届口碑 ${item.conventionAudienceScore}/100` : '';
     return `<section class="convention-company-block"><header><div><span>${escape(item.name)}</span>
       <strong>漫展会展业务</strong><small>${escape(item.conventionBase?.country || state.location.country)}
-      · 行业声誉 ${Math.round(item.conventionReputation || 0)}</small></div><b>已获资质</b></header>
+      · 行业声誉 ${Math.round(item.conventionReputation || 0)}${audience}</small></div><b>已获资质</b></header>
       ${contracts.map((event) => contractCard(state, event, item)).join('')}
       ${history.length ? `<div class="convention-settlement-history"><h3>往届结算</h3>
       ${history.map((settlement) => settlementSummary(settlement)).join('')}</div>` : ''}

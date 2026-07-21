@@ -12,7 +12,7 @@
     state.conventionCalendar = state.conventionCalendar && typeof state.conventionCalendar === 'object'
       ? state.conventionCalendar : {};
     const data = state.conventionCalendar;
-    data.version = 4;
+    data.version = 5;
     data.registrations = data.registrations && typeof data.registrations === 'object'
       ? data.registrations : {};
     data.attendance = data.attendance && typeof data.attendance === 'object'
@@ -179,9 +179,10 @@
   }
   function finishAttendance(state, editionId, result) {
     if (!editionId) return;
+    const feedback = Game.conventionAudienceFeedback?.capture(state.travel?.activeStage, result);
     ensure(state).attendance[editionId] = {
       ...ensure(state).attendance[editionId], completed: true, completedAt: state.totalMonths,
-      score: Math.round(result.score || 0), outcome: result.outcome || '',
+      score: Math.round(result.score || 0), outcome: result.outcome || '', feedback,
     };
   }
 

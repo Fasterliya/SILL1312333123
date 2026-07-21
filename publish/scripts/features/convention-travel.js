@@ -153,11 +153,11 @@
       score: ts.score, outcome: `${rating}${relation}`,
     });
     state.travel.localHistory = state.travel.localHistory.slice(0, 20);
-    state.travel.activeStage = null;
     const summary = `${rating}，评分${ts.score}${relation}。`;
     Game.conventionCalendar?.finishAttendance(state, ts.editionId, {
       score: ts.score, outcome: `${rating}${relation}`,
     });
+    state.travel.activeStage = null;
     Game.lifeDirector.addLog(state, '漫展归来', summary, 'milestone');
     return { ok: true, finished: true, message: `${ts.placeName}完成：${summary}` };
   }

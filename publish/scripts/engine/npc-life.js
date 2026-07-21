@@ -88,13 +88,17 @@
     const available = person.educationStage === 'workforce' || person.educationStage === 'graduate';
     if (age < 18 || !available || person.job || Math.random() > (age >= 22 ? 0.88 : 0.72)) return;
 
-    /* ---- weighted career selection for female NPCs ---- */
-    if (person.gender === '女') {
+    /* ---- weighted creator-career selection ---- */
+    const feminineCandidate = person.gender === '男'
+      && Game.companyCatalog.jobsInCity(person.currentCity || person.metCity || state.location.city)
+        .some((item) => Game.npcFemboyCareer?.allowsJob(person, item, age));
+    if (person.gender === '女' || feminineCandidate) {
       const eduLevel = person.educationLevel || 0;
       const jobs = Game.companyCatalog.jobsInCity(person.currentCity || person.metCity || state.location.city).filter((item) => (
         (item.education || 0) <= eduLevel
         && (!item.adultOnly || age >= 18)
-        && (!item.recommendedGender || item.recommendedGender === person.gender)
+        && (!item.recommendedGender || item.recommendedGender === person.gender
+          || Game.npcFemboyCareer?.allowsJob(person, item, age))
         && Game.jobMarket.canNpcEnter(state, person, item)
       ));
 
@@ -114,6 +118,7 @@
         person.departmentName = Game.workplace.departmentName(job);
         person.careerRank = age >= 35 ? 2 : (age >= 27 ? 1 : 0);
         person.careerCity = job.cities?.length ? U.random(job.cities) : (person.metCity || state.location.city);
+        Game.npcFemboyCareer?.onJobAssigned(state, person, job);
 
         /* Init NPC idol state */
         if (id === 'idoltrainee' || id === 'idol') {
@@ -137,7 +142,8 @@
     const job = U.random(Game.companyCatalog.jobsInCity(person.currentCity || person.metCity || state.location.city).filter((item) => (
       (item.education || 0) <= person.educationLevel
       && (!item.adultOnly || age >= 18)
-      && (!item.recommendedGender || item.recommendedGender === person.gender)
+      && (!item.recommendedGender || item.recommendedGender === person.gender
+        || Game.npcFemboyCareer?.allowsJob(person, item, age))
       && Game.jobMarket.canNpcEnter(state, person, item)
     )));
     if (!job) return;
@@ -148,6 +154,7 @@
     person.departmentName = Game.workplace.departmentName(job);
     person.careerRank = age >= 35 ? 2 : (age >= 27 ? 1 : 0);
     person.careerCity = job.cities?.length ? U.random(job.cities) : (person.metCity || state.location.city);
+    Game.npcFemboyCareer?.onJobAssigned(state, person, job);
   }
 
   function updatePerson(state, person) {

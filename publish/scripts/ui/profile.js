@@ -135,6 +135,7 @@
     const target = Game.people.find(state, targetId);
     if (!target) return false;
     if (Game.cosplayCatalog.overrides(target, field)) return false;
+    if (!(Game.npcFemboyCareer?.allowsAppearance(target, field, nextValue) ?? true)) return false;
     if (field.startsWith('clothing.')) target.clothing[key] = nextValue;
     else target[field] = nextValue;
     if (field === 'bodyType') Game.npcLife.syncGrowth(state, target);

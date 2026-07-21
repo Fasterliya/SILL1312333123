@@ -6,15 +6,17 @@
 
   const procedures = {
     breastaug: { name: '隆胸', cost: 35000, charm: 8, bodyType: '丰满',
-      category: 'breast', recoveryMonths: 2, cooldownMonths: 4 },
+      category: 'breast', recoveryMonths: 2, cooldownMonths: 4, morphology: { chest: 28 } },
     breastred: { name: '缩胸', cost: 28000, charm: 3, bodyType: '小胸',
       category: 'breastreduction', recoveryMonths: 2, cooldownMonths: 4 },
     lipo: { name: '抽脂塑形', cost: 42000, charm: 6, bodyType: '匀称', weightDelta: -5,
-      category: 'liposuction', recoveryMonths: 3, cooldownMonths: 5 },
+      category: 'liposuction', recoveryMonths: 3, cooldownMonths: 5,
+      morphology: { waistDefinition: 10, legSlenderness: 8 } },
     waist: { name: '腰腹塑形', cost: 38000, charm: 6, bodyType: '娇小纤细', weightDelta: -4,
-      category: 'waist', recoveryMonths: 3, cooldownMonths: 5 },
+      category: 'waist', recoveryMonths: 3, cooldownMonths: 5,
+      morphology: { waistDefinition: 18 } },
     hip: { name: '臀部塑形', cost: 46000, charm: 7, bodyType: '丰满',
-      category: 'hip', recoveryMonths: 3, cooldownMonths: 5 },
+      category: 'hip', recoveryMonths: 3, cooldownMonths: 5, morphology: { hipVolume: 22 } },
     hymen: { name: '处女膜修复', cost: 8000, charm: 0, bodyType: null,
       category: 'hymen', recoveryMonths: 1, cooldownMonths: 3, hymenOnly: true },
     facial: { name: '面部整形', cost: 55000, charm: 10, faceShape: '鹅蛋脸',
@@ -25,6 +27,9 @@
       category: 'eyelid', recoveryMonths: 1, cooldownMonths: 3 },
     jaw: { name: '下颌轮廓调整', cost: 62000, charm: 8, faceShape: '精致鹅蛋脸',
       category: 'jaw', recoveryMonths: 4, cooldownMonths: 7 },
+    shoulder: { name: '肩部轮廓调整', cost: 68000, charm: 7,
+      category: 'shoulder', recoveryMonths: 4, cooldownMonths: 7,
+      morphology: { shoulderWidth: -15 } },
     height: { name: '增高手术', cost: 120000, charm: 6, heightDelta: 5,
       category: 'height', recoveryMonths: 5, cooldownMonths: 9 },
     heightshort: { name: '身高缩减塑形', cost: 98000, charm: 7, heightDelta: -4, weightDelta: -2,
@@ -111,6 +116,14 @@
     }
     if (proc.weightDelta && Number.isFinite(Number(profile.weight))) {
       profile.weight = Math.max(35, Math.round((Number(profile.weight) + proc.weightDelta) * 10) / 10);
+    }
+    if (proc.morphology) {
+      profile.bodyMorphology ||= {};
+      Object.entries(proc.morphology).forEach(([field, delta]) => {
+        profile.bodyMorphology[field] = U.clamp(
+          (Number(profile.bodyMorphology[field]) || 0) + delta, 0, 100,
+        );
+      });
     }
   }
 

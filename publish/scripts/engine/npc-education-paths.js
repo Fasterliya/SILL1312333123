@@ -48,6 +48,9 @@
     const petite = ['娇小纤细', '小胸'].includes(person.bodyType || '');
     const cute = ['青涩', '灵动', '明快'].includes(person.temperament || '');
     const cosplay = (person.fashion?.cosplayInterest || 0) > 40;
+    if (person.gender === '男' && Game.npcFemboyCareer?.allowsJob(person, job, age)) {
+      return job.id === 'coser' ? 190 : 165;
+    }
     if (person.sexWork?.isProstitute && job.id === 'prostitute') return 400;
     if (job.id === 'idol-underground' && young) {
       if (person.droppedOut) return charm > 55 ? 620 : 460;

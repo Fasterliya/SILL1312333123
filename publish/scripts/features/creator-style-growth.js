@@ -37,7 +37,9 @@
 
   function details(profile, rawJobId) {
     const jobId = jobAliases[rawJobId] || '';
-    if (!tuning[jobId]) return { multiplier: 1, cute: 0, sexy: 0, fashion: 0, cosplay: 0, combo: 0 };
+    if (!tuning[jobId]) return {
+      multiplier: 1, cute: 0, sexy: 0, fashion: 0, cosplay: 0, combo: 0, careerBonus: 0,
+    };
     const top = value(profile, 'clothing.top');
     const socks = value(profile, 'clothing.socks');
     const hair = value(profile, 'hairstyle');
@@ -77,11 +79,12 @@
     if (cosText && /制服|学院|女仆|巫女|洋装/.test(cosText)) cosplayBonus += 0.03;
 
     const weights = tuning[jobId];
+    const careerBonus = Game.npcFemboyCareer?.styleBonus(profile, jobId) || 0;
     const bonus = cute * weights.cute + sexy * weights.sexy
-      + fashion * weights.fashion + cosplayBonus * weights.cosplay + combo;
+      + fashion * weights.fashion + cosplayBonus * weights.cosplay + combo + careerBonus;
     return {
-      multiplier: Math.min(1.8, Math.max(1, 1 + bonus)),
-      cute, sexy, fashion, cosplay: cosplayBonus, combo,
+      multiplier: Math.min(2, Math.max(1, 1 + bonus)),
+      cute, sexy, fashion, cosplay: cosplayBonus, combo, careerBonus,
     };
   }
 

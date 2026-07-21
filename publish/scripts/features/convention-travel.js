@@ -6,7 +6,6 @@
   function identityProfile(state) {
     return Game.hunterMode.identity(state).profile;
   }
-
   function selectedPerson(state, ts) {
     return ts.selectedCoserId ? Game.people.find(state, ts.selectedCoserId) : null;
   }
@@ -24,6 +23,7 @@
     person.fashion = person.fashion && typeof person.fashion === 'object' ? person.fashion : {};
     person.fashion.cosplayInterest = U.between(78, 100);
     person.fashion.favoriteSeries = costume.series;
+    Game.npcFemboyCareer?.considerConvention(state, person, costume);
     state.travel.encounters.push(person);
     return person;
   }

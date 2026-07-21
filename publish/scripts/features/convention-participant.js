@@ -47,6 +47,7 @@
     const person = Game.people.find(state, ts.coserIds[0]);
     if (!person) return;
     person.job = '受邀嘉宾Coser';
+    Game.npcFemboyCareer?.onJobAssigned(state, person, person.job);
     person.conventionGuest = true;
     person.affection = Math.min(100, person.affection + 5);
   }

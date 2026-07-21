@@ -31,7 +31,7 @@
 
   function role(person) {
     const job = String(person.job || '');
-    if (/Coser/i.test(job)) return 'coser';
+    if (['职业Coser', '业余Coser', '受邀嘉宾Coser'].includes(job)) return 'coser';
     return jobs[job] || '';
   }
 
@@ -61,6 +61,7 @@
       shoes: person.clothing.shoes, hairstyle: person.hairstyle,
     });
     data.history = data.history.slice(-8);
+    Game.npcFemboyCareer?.markOutfit(state, person);
   }
 
   function finishSurgery(state, person, data) {
@@ -75,12 +76,16 @@
         note: `${proc.name}恢复完成，魅力与外形得到提升。`,
       });
       person.cosmeticProcedures = person.cosmeticProcedures.slice(-8);
+      Game.npcFemboyCareer?.afterSurgery(state, person);
     }
     data.pending = null;
   }
 
-  function nextProcedure(person) {
+  function nextProcedure(state, person) {
     const completed = new Set((person.cosmeticProcedures || []).map((item) => item.type));
+    if (Game.npcFemboyCareer?.active(person)) {
+      return Game.npcFemboyCareer.nextProcedure(state, person, completed);
+    }
     if (person.bodyType !== '娇小纤细' && !completed.has('waist')) return 'waist';
     if (Number(person.height) > 158 && !completed.has('height-reduction')) return 'heightshort';
     return ['eyelid', 'nose', 'facial'].find((id) => (
@@ -90,7 +95,7 @@
 
   function scheduleSurgery(state, person, data) {
     if (data.pending || state.totalMonths < data.cooldownUntil) return;
-    const procedureId = nextProcedure(person);
+    const procedureId = nextProcedure(state, person);
     const proc = Game.plasticSurgery.get(procedureId);
     if (!proc) return;
     data.pending = {
@@ -103,7 +108,9 @@
   function monthlyPerson(state, person) {
     const kind = role(person);
     const age = U.personAge(state, person);
-    if (!kind || person.gender !== '女' || age < 18 || person.status !== '健康') return;
+    const feminineCareer = Game.npcFemboyCareer?.active(person);
+    if (!kind || (person.gender !== '女' && !feminineCareer)
+      || age < 18 || person.status !== '健康') return;
     const data = ensure(person, state.totalMonths);
     finishSurgery(state, person, data);
     changeLook(state, person, kind, data);
@@ -112,7 +119,9 @@
 
   function statusRows(state, person) {
     const kind = role(person);
-    if (!kind) return [];
+    const feminineCareer = Game.npcFemboyCareer?.active(person);
+    if (!kind || U.personAge(state, person) < 18
+      || (person.gender !== '女' && !feminineCareer)) return [];
     const data = ensure(person, state.totalMonths);
     const pending = data.pending;
     const proc = pending ? Game.plasticSurgery.get(pending.procedureId) : null;
@@ -120,6 +129,10 @@
     const cooldown = Math.max(0, data.cooldownUntil - state.totalMonths);
     return [
       ['职业造型', '双马尾 / 可爱系裙装 / 白色连裤袜'],
+      ...(feminineCareer ? [
+        ['身材优势', Game.npcFemboyCareer.advantageLabel(person)],
+        ['女性化医美计划', Game.npcFemboyCareer.planLabel(state, person)],
+      ] : []),
       ['换装计划', `${Math.max(0, data.nextChangeMonth - state.totalMonths)}个月后更新`],
       ['整容进程', proc ? `${proc.name}恢复中 · 剩余${recovery}个月`
         : (cooldown ? `术后冷却 · 剩余${cooldown}个月` : '可开始下一项')],

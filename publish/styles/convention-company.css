@@ -293,6 +293,69 @@
   background: #f0f5f1;
 }
 
+.convention-operations {
+  margin-top: 9px;
+  padding: 8px;
+  border: 1px solid #cfc6c8;
+  background: #fff;
+}
+
+.convention-operations > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.convention-operations h3,
+.convention-operations header strong {
+  margin: 0;
+  color: #493a3e;
+  font-size: 10px;
+}
+
+.convention-operations header span,
+.convention-operations p {
+  color: #766a6d;
+  font-size: 8px;
+}
+
+.convention-operations p {
+  margin: 5px 0 7px;
+  line-height: 1.4;
+}
+
+.convention-operations > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.convention-operations button {
+  min-height: 58px;
+  text-align: left;
+}
+
+.convention-operations button strong,
+.convention-operations button small {
+  display: block;
+}
+
+.convention-operations button small {
+  margin-top: 4px;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+.convention-operations.completed {
+  border-left: 3px solid #5f806b;
+  background: #eef5f0;
+}
+
+.convention-operations.blocked {
+  border-left: 3px solid #a46a70;
+  background: #f8eded;
+}
+
 @media (max-width: 420px) {
   .convention-company-license,
   .convention-tender {
@@ -300,6 +363,10 @@
   }
 
   .convention-partner-group > div {
+    grid-template-columns: 1fr;
+  }
+
+  .convention-operations > div {
     grid-template-columns: 1fr;
   }
 }

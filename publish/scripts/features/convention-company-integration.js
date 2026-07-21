@@ -29,6 +29,11 @@
       const [editionId, companyId, type, offerId] = partner.dataset.conventionPartner.split('|');
       return run(Game.conventionPartners.negotiate(state, editionId, companyId, type, offerId));
     }
+    const operation = target?.closest?.('[data-convention-operation]');
+    if (operation) {
+      const [editionId, companyId, choiceId] = operation.dataset.conventionOperation.split('|');
+      return run(Game.conventionOperations.choose(state, editionId, companyId, choiceId));
+    }
     return base.handleClick(event);
   }
   function render(state) {

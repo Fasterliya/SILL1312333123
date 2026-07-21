@@ -37,6 +37,7 @@
       ${forecast ? forecastSummary(forecast) : ''}
       ${['ongoing', 'ended'].includes(status.id) ? '' : prepOptions(event, company)}
       ${partnerPanel(state, event, company)}
+      ${operationPanel(state, event, company)}
     </article>`;
   }
   function forecastSummary(item) {
@@ -86,6 +87,26 @@
     return `<section class="convention-partners"><h3>合作阵容</h3>
       ${partnerGroup(state, event, company, 'sponsor', open)}
       ${partnerGroup(state, event, company, 'guest', open)}</section>`;
+  }
+  function operationPanel(state, event, company) {
+    if (Game.conventionCalendar.status(state, event).id !== 'ongoing') return '';
+    if (Game.conventionCompany.nextStage(event.preparation)) {
+      return `<section class="convention-operations blocked"><h3>现场运营</h3>
+        <p>基础筹备未完成，现场将产生额外调度成本。</p></section>`;
+    }
+    const model = Game.conventionOperations.model(state, event, company.id);
+    if (model.completed) {
+      return `<section class="convention-operations completed"><h3>现场运营完成</h3>
+        <p>三个阶段均已处理 · 平均执行 ${model.score}</p></section>`;
+    }
+    const phase = model.phase;
+    return `<section class="convention-operations"><header><span>现场 ${model.count + 1}/3</span>
+      <strong>${phase.name}</strong></header><p>${escape(phase.text)}</p>
+      <div>${phase.options.map((option) => (
+        `<button data-convention-operation="${escape(event.id)}|${escape(company.id)}|${option.id}">
+        <strong>${option.name}</strong><small>${effectText(option)}
+        · ${option.primary}+${option.secondary} · 难度${option.difficulty}</small></button>`
+      )).join('')}</div></section>`;
   }
   function settlementSummary(item) {
     const profitClass = item.projectProfit >= 0 ? 'profit' : 'loss';

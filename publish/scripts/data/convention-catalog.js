@@ -102,6 +102,38 @@
       effects: { quality: 5, safety: 1, promotion: 2 },
     },
   ]);
+  const operationPhases = Object.freeze([
+    {
+      id: 'entry', name: '入场高峰',
+      text: '检票口开始聚集人流，需要在通行效率与秩序之间做出选择。',
+      options: [
+        { id: 'entry-zoned', name: '分区分批放行', primary: '管理', secondary: '心计',
+          difficulty: 54, effects: { quality: 2, safety: 6, promotion: -1 } },
+        { id: 'entry-open', name: '开放全部闸机快速入场', primary: '体能', secondary: '管理',
+          difficulty: 62, effects: { quality: 3, safety: -4, promotion: 4 } },
+      ],
+    },
+    {
+      id: 'peak', name: '舞台高峰',
+      text: '主舞台与嘉宾活动同时升温，节目延误开始挤压现场空间。',
+      options: [
+        { id: 'peak-schedule', name: '压缩节目并保护时间表', primary: '管理', secondary: '学识',
+          difficulty: 58, effects: { quality: 5, safety: 3, promotion: -2 } },
+        { id: 'peak-encore', name: '追加嘉宾互动环节', primary: '交涉', secondary: '魅力',
+          difficulty: 66, effects: { quality: 2, safety: -4, promotion: 7 } },
+      ],
+    },
+    {
+      id: 'finale', name: '散场收尾',
+      text: '闭馆广播响起，返程人流、摊主撤场和线上热度需要同时处理。',
+      options: [
+        { id: 'finale-controlled', name: '分区闭馆并安排接驳', primary: '管理', secondary: '心计',
+          difficulty: 56, effects: { quality: 2, safety: 6, promotion: 0 } },
+        { id: 'finale-stream', name: '直播压轴后集中散场', primary: '交涉', secondary: '学识',
+          difficulty: 64, effects: { quality: 3, safety: -3, promotion: 6 } },
+      ],
+    },
+  ]);
   const fallbackOrganizers = Object.freeze({
     华夏: '次元城市会展', 日本: '都市创作祭执行委员会', 韩国: '首尔文化活动社',
     新加坡: '狮城流行文化会展', 法国: '巴黎幻想文化协会',
@@ -113,7 +145,7 @@
   }
 
   Game.conventionCatalog = Object.freeze({
-    themes, roles, intents, prepStages, sponsorOffers, guestOffers, theme,
+    themes, roles, intents, prepStages, sponsorOffers, guestOffers, operationPhases, theme,
     fallbackOrganizer: (country) => fallbackOrganizers[country] || `${country}文化会展公司`,
   });
 }(window));

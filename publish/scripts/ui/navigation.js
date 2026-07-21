@@ -125,6 +125,7 @@
       ['身材', person.bodyType], ['身穿', effective('clothing.top')], ['袜子', effective('clothing.socks')],
       ['鞋', effective('clothing.shoes')],
     ];
+    const creatorStyle = Game.npcCreatorStyle?.statusRows(state, person) || [];
     const inherited = [
       ['DNA编码', person.genetics?.code || '-'], ['遗传骨架', person.bodyFrame],
       ['发育倾向', person.developmentTendency], ['痣', person.molePosition],
@@ -150,6 +151,7 @@
       <div class="record-stack">${section('基本档案', '身份与成长', identity, true)}
       ${section('角色属性', '健康状态与固有属性', attributes, true)}
       ${section('外貌表现', '当前实际外观', looks, false)}
+      ${creatorStyle.length ? section('职业造型计划', '主动换装、恢复与冷却', creatorStyle, true) : ''}
       ${section('遗传信息', 'DNA 与成长倾向', inherited, false)}
       ${section('人生状态', '学业、职业与家庭', life, false)}
       <details class="record-section resume-section" open><summary><span>人生履历</span>

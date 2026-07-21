@@ -118,6 +118,8 @@
     state.health.stdHistory = Array.isArray(state.health.stdHistory) ? state.health.stdHistory : [];
     state.health.lastCheckupMonth = Number.isFinite(state.health.lastCheckupMonth) ? state.health.lastCheckupMonth : -12;
     state.health.cosmeticProcedures = Array.isArray(state.health.cosmeticProcedures) ? state.health.cosmeticProcedures.slice(-8) : [];
+    state.health.cosmeticSurgery = state.health.cosmeticSurgery
+      && typeof state.health.cosmeticSurgery === 'object' ? state.health.cosmeticSurgery : {};
     state.romance.suspicion = Number.isFinite(state.romance.suspicion) ? state.romance.suspicion : 0;
     state.romance.affairCount = Math.max(0, Number(state.romance.affairCount) || 0);
     state.idol = state.idol && typeof state.idol === 'object' ? state.idol : {

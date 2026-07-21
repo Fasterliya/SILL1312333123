@@ -97,6 +97,7 @@
       else if (job === '职业Coser') monthlyCosplayer(state, person);
       else if (job === '虚拟主播') monthlyVtuber(state, person);
       else if (['美妆博主', '写真博主', '穿搭博主'].includes(job)) monthlyBeautybLogger(state, person);
+      Game.npcCreatorStyle?.monthlyPerson(state, person);
     });
   }
 

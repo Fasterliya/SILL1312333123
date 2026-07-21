@@ -20,6 +20,7 @@
     Game.creatorCareer.monthly(state);
     Game.stressSystem.monthly(state);
     Game.healthSystem.monthly(state);
+    Game.cosmeticCare?.monthly(state);
     Game.npcFashion.monthly(state);
     Game.encounterSystem?.ensure(state);
     Game.brothelSystem?.ensure(state);

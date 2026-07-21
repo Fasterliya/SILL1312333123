@@ -149,39 +149,9 @@
     if (cause) Game.legacySystem.prepareDeath(state, cause);
   }
 
-  function diseaseRows(state) {
-    const rows = active(state).filter((item) => hasMonth(item.discoveredAt)).map((disease) => {
-      const def = definition(disease.id);
-      if (!def) return '';
-      const managed = hasMonth(disease.treatedAt);
-      const penalty = Math.round(def.healthPenalty * (managed ? 25 : 100));
-      const status = managed ? `已控制 · 健康上限-${penalty}%`
-        : `活动中 · 健康上限-${penalty}%`;
-      const button = managed ? '' : `<button data-health-action="treat"
-        data-health-value="${disease.id}">治疗 · ${Game.view.money(def.treatCost)}</button>`;
-      return `<article class="disease-row"><div><strong>${disease.name}</strong><small>${status}</small></div>${button}</article>`;
-    }).join('');
-    return rows || '<p class="empty-state">目前没有已发现疾病。多种疾病会按剩余健康比例相乘，而不是永久扣除基础生命力。</p>';
-  }
-
   function render(state) {
-    const item = Game.healthModel.sync(state);
-    const known = active(state).filter((entry) => hasMonth(entry.discoveredAt)).length;
-    const status = Game.healthModel.status(item.current);
-    const surgery = Game.plasticSurgery ? Game.plasticSurgery.render(state) : '';
-    const disabled = state.health.lastLifestyleMonth === state.totalMonths ? 'disabled' : '';
-    return `<section class="health-summary"><div><span>健康状态 · ${status}</span>
-      <strong>${item.current}%</strong><small>当前上限 ${item.ceiling}% · 已发现疾病 ${known} 项</small></div></section>
-      <section class="health-module"><header><span>01</span><div><h3>生命力评估</h3>
-      <small>基础生命力隐藏；年龄、强健、生活方式、睡眠、医疗与压力共同计算</small></div></header>
-      <button class="health-primary" data-health-action="checkup">健康检测 · ${Game.view.money(1200)}</button>
-      <div class="study-actions"><button data-health-action="lifestyle" data-health-value="exercise" ${disabled}>规律运动</button>
-      <button data-health-action="lifestyle" data-health-value="rest" ${disabled}>充分休息</button></div></section>
-      <section class="health-module"><header><span>02</span><div><h3>疾病与治疗</h3>
-      <small>活动疾病持续压低健康上限，治疗后逐步恢复</small></div></header>
-      <div class="disease-list">${diseaseRows(state)}</div></section>
-      <section class="health-module"><header><span>03</span><div><h3>整容</h3>
-      <small>保留外貌改造、手术风险与历史记录</small></div></header>${surgery}</section>`;
+    return Game.healthView?.render(state)
+      || '<section class="health-module"><p class="empty-state">健康界面加载中。</p></section>';
   }
 
   Game.healthSystem = Object.freeze({ action, monthly, render, checkSTD, addDisease });

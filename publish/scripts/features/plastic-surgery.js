@@ -5,28 +5,30 @@
   const U = Game.content;
 
   const procedures = {
-    breastaug: { name: '隆胸', cost: 35000, success: 0.82, charm: 8, bodyType: '丰满',
-      category: 'breast', failCharm: -4, failHealth: -5 },
-    breastred: { name: '缩胸', cost: 28000, success: 0.88, charm: 3, bodyType: '小胸',
-      category: 'breastreduction', failCharm: -2, failHealth: -3 },
-    lipo: { name: '抽脂塑形', cost: 42000, success: 0.78, charm: 6, bodyType: '匀称',
-      category: 'liposuction', failCharm: -3, failHealth: -4 },
-    waist: { name: '腰腹塑形', cost: 38000, success: 0.84, charm: 6, bodyType: '娇小纤细',
-      category: 'waist', failCharm: -3, failHealth: -4 },
-    hip: { name: '臀部塑形', cost: 46000, success: 0.8, charm: 7, bodyType: '丰满',
-      category: 'hip', failCharm: -4, failHealth: -5 },
-    hymen: { name: '处女膜修复', cost: 8000, success: 0.95, charm: 0, bodyType: null,
-      category: 'hymen', failCharm: 0, failHealth: 0, hymenOnly: true },
-    facial: { name: '面部整形', cost: 55000, success: 0.75, charm: 10, faceShape: '鹅蛋脸',
-      category: 'facial', failCharm: -8, failHealth: -6 },
-    nose: { name: '鼻部塑形', cost: 26000, success: 0.88, charm: 5, featureProportions: '立体协调',
-      category: 'nose', failCharm: -3, failHealth: -3 },
-    eyelid: { name: '双眼皮手术', cost: 16000, success: 0.92, charm: 4, distinctiveFeature: '明亮双眼皮',
-      category: 'eyelid', failCharm: -2, failHealth: -2 },
-    jaw: { name: '下颌轮廓调整', cost: 62000, success: 0.72, charm: 8, faceShape: '精致鹅蛋脸',
-      category: 'jaw', failCharm: -9, failHealth: -7 },
-    height: { name: '增高手术', cost: 120000, success: 0.68, charm: 6, heightDelta: 5,
-      category: 'height', failCharm: -8, failHealth: -10 },
+    breastaug: { name: '隆胸', cost: 35000, charm: 8, bodyType: '丰满',
+      category: 'breast', recoveryMonths: 2, cooldownMonths: 4 },
+    breastred: { name: '缩胸', cost: 28000, charm: 3, bodyType: '小胸',
+      category: 'breastreduction', recoveryMonths: 2, cooldownMonths: 4 },
+    lipo: { name: '抽脂塑形', cost: 42000, charm: 6, bodyType: '匀称', weightDelta: -5,
+      category: 'liposuction', recoveryMonths: 3, cooldownMonths: 5 },
+    waist: { name: '腰腹塑形', cost: 38000, charm: 6, bodyType: '娇小纤细', weightDelta: -4,
+      category: 'waist', recoveryMonths: 3, cooldownMonths: 5 },
+    hip: { name: '臀部塑形', cost: 46000, charm: 7, bodyType: '丰满',
+      category: 'hip', recoveryMonths: 3, cooldownMonths: 5 },
+    hymen: { name: '处女膜修复', cost: 8000, charm: 0, bodyType: null,
+      category: 'hymen', recoveryMonths: 1, cooldownMonths: 3, hymenOnly: true },
+    facial: { name: '面部整形', cost: 55000, charm: 10, faceShape: '鹅蛋脸',
+      category: 'facial', recoveryMonths: 3, cooldownMonths: 6 },
+    nose: { name: '鼻部塑形', cost: 26000, charm: 5, featureProportions: '立体协调',
+      category: 'nose', recoveryMonths: 2, cooldownMonths: 4 },
+    eyelid: { name: '双眼皮手术', cost: 16000, charm: 4, distinctiveFeature: '明亮双眼皮',
+      category: 'eyelid', recoveryMonths: 1, cooldownMonths: 3 },
+    jaw: { name: '下颌轮廓调整', cost: 62000, charm: 8, faceShape: '精致鹅蛋脸',
+      category: 'jaw', recoveryMonths: 4, cooldownMonths: 7 },
+    height: { name: '增高手术', cost: 120000, charm: 6, heightDelta: 5,
+      category: 'height', recoveryMonths: 5, cooldownMonths: 9 },
+    heightshort: { name: '身高缩减塑形', cost: 98000, charm: 7, heightDelta: -4, weightDelta: -2,
+      bodyType: '娇小纤细', category: 'height-reduction', recoveryMonths: 5, cooldownMonths: 9 },
   };
 
   function list() { return Object.keys(procedures).map((k) => ({ id: k, ...procedures[k] })); }
@@ -79,8 +81,11 @@
       `npc-portrait:${encodeURIComponent(person.id)}:`, '绘画七阶段');
   }
 
-  function applyChanges(state, proc) {
-    const profile = state.profile;
+  function renderPlayerPortraitStages(state) {
+    return stageSelector(portraitProfile(state), U.age(state), 'portrait:', '医院美容 · 绘画阶段');
+  }
+
+  function applyChanges(profile, proc) {
     if (proc.bodyType) {
       profile.bodyType = proc.bodyType;
       profile.adultBodyType = proc.bodyType;
@@ -100,10 +105,19 @@
     if (proc.heightDelta) {
       const height = Number(profile.adultHeight) || Number(profile.maxHeight) || Number(profile.height) || 160;
       const currentHeight = Number(profile.height) || height;
-      profile.adultHeight = Math.min(210, height + proc.heightDelta);
+      profile.adultHeight = Math.max(135, Math.min(210, height + proc.heightDelta));
       profile.maxHeight = profile.adultHeight;
-      profile.height = Math.min(profile.maxHeight, currentHeight + proc.heightDelta);
+      profile.height = Math.max(135, Math.min(profile.maxHeight, currentHeight + proc.heightDelta));
     }
+    if (proc.weightDelta && Number.isFinite(Number(profile.weight))) {
+      profile.weight = Math.max(35, Math.round((Number(profile.weight) + proc.weightDelta) * 10) / 10);
+    }
+  }
+
+  function apply(profile, stats, proc) {
+    if (proc.charm) Game.characterAttributes.adjustPresentation(profile, stats, proc.charm);
+    applyChanges(profile, proc);
+    if (proc.hymenOnly) profile.hymenIntact = true;
   }
 
   function perform(state, procedureId) {
@@ -113,78 +127,16 @@
       const [, targetId, stageId] = action.split(':');
       return setPortraitStage(state, stageId, decodeURIComponent(targetId || ''));
     }
-    const proc = procedures[procedureId];
-    if (!proc) return { ok: false, message: '无效的手术选项' };
-    if (proc.hymenOnly && state.gender !== '女') return { ok: false, message: '此手术仅限女性' };
-
-    const cost = U.between(Math.round(proc.cost * 0.85), Math.round(proc.cost * 1.2));
-    if (state.money < cost) return { ok: false, message: `资金不足，手术需要 ${Game.view.money(cost)}` };
-    Game.economy.spend(state, cost);
-    state.money = Math.max(0, state.money);
-
-    const roll = Math.random();
-    const success = roll < proc.success;
-
-    const result = {
-      id: `surg-${state.totalMonths}-${Math.random().toString(36).slice(2,6)}`,
-      type: proc.category,
-      name: proc.name,
-      month: state.totalMonths,
-      cost,
-      success,
-    };
-
-    if (success) {
-      if (proc.charm) Game.characterAttributes.adjustPresentation(state.profile, state.stats, proc.charm);
-      applyChanges(state, proc);
-      if (proc.hymenOnly) state.profile.hymenIntact = true;
-      result.note = `手术成功，${proc.name}完成。`;
-    } else {
-      if (proc.failCharm) Game.characterAttributes.adjustPresentation(state.profile, state.stats, proc.failCharm);
-      if (proc.failHealth) state.stats.健康 = U.clamp(state.stats.健康 + proc.failHealth, 0, 100);
-      result.note = `手术失败，${proc.name}出现了并发症。`;
-    }
-
-    state.health.cosmeticProcedures.push(result);
-    state.health.cosmeticProcedures = state.health.cosmeticProcedures.slice(-8);
-    state.profile.cosmeticProcedures = Array.isArray(state.profile.cosmeticProcedures)
-      ? state.profile.cosmeticProcedures : [];
-    state.profile.cosmeticProcedures.push(result);
-    state.profile.cosmeticProcedures = state.profile.cosmeticProcedures.slice(-8);
-
-    const tone = success ? 'good' : 'normal';
-    Game.lifeDirector.addLog(state, proc.name + (success ? '完成' : '失败'), result.note, tone);
-    return { ok: true, success, message: result.note + ` 花费 ${Game.view.money(cost)}` };
+    return Game.cosmeticCare?.startPlayer(state, procedureId)
+      || { ok: false, message: '整容恢复系统尚未加载' };
   }
 
   function render(state) {
-    const profile = portraitProfile(state);
-    const portraitStages = stageSelector(
-      profile, U.age(state), 'portrait:', '医院美容 · 绘画阶段',
-    );
-    const items = list().map((proc) => {
-      const disabled = proc.hymenOnly && state.gender !== '女';
-      return `<button class="surgery-btn" data-surgery="${proc.id}" ${disabled ? 'disabled' : ''}>
-        <strong>${proc.name}</strong><small>成功率 ${Math.round(proc.success * 100)}% · 魅力+${proc.charm}</small>
-        <b>≈${Game.view.money(proc.cost)}</b></button>`;
-    }).join('');
-
-    const history = (state.health.cosmeticProcedures || []).map((item) => (
-      `<p class="surgery-record ${item.success ? '' : 'failed'}">
-        <small>${item.name} · ${item.success ? '成功' : '失败'}</small>
-        <span>${Game.view.money(item.cost)} · ${item.note || ''}</span></p>`
-    )).join('');
-
-    return `<details class="system-fold" open>
-      <summary>整容手术 · ${list().length}项可选</summary>
-      ${portraitStages}
-      <p class="system-note">共${list().length}项改造。手术会改变身体并提高魅力，失败时可能出现并发症。</p>
-      <div class="surgery-grid">${items}</div>
-      ${history ? `<div class="surgery-history"><h4>手术记录</h4>${history}</div>` : ''}
-    </details>`;
+    return Game.cosmeticCare?.render(state) || '<p class="empty-state">整容系统加载中。</p>';
   }
 
   Game.plasticSurgery = Object.freeze({
-    list, get, perform, setPortraitStage, renderNpcPortraitStages, render,
+    list, get, apply, perform, setPortraitStage,
+    renderPlayerPortraitStages, renderNpcPortraitStages, render,
   });
 }(window));

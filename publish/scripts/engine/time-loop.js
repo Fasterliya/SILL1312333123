@@ -2,9 +2,10 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const SPEED_MS = { 0: 0, 1: 1000, 5: 400, 10: 200 };
+  const SPEED_MS = { 0: 0, 1: 1000, 5: 200, 10: 100, 30: 33, 90: 11 };
   let api = null;
   let timer = null;
+  let renderTicks = 0;
 
   function state() {
     return api?.getState?.() || null;
@@ -35,13 +36,16 @@
       startTimer();
       shouldSave = true;
     }
-    api.refresh();
+    const renderStride = current.timeSpeed >= 90 ? 3 : (current.timeSpeed >= 30 ? 2 : 1);
+    renderTicks += 1;
+    if (shouldSave || current.pendingDecision || renderTicks % renderStride === 0) api.refresh();
     if (shouldSave) api.save();
   }
 
   function startTimer() {
     if (timer) root.clearInterval(timer);
     timer = null;
+    renderTicks = 0;
     const current = state();
     if (!current || current.gameOver || current.pendingDecision || !current.timeSpeed) return;
     timer = root.setInterval(tickDay, SPEED_MS[current.timeSpeed] || SPEED_MS[1]);

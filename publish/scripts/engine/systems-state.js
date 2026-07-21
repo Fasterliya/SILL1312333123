@@ -89,7 +89,7 @@
       state.matchmaking.candidates.push(...candidates);
       state.contacts = state.contacts.filter((person) => !candidates.includes(person));
     }
-    state.version = 28; state.day = Math.max(1, Math.min(30, Number(state.day) || 1)); state.timeSpeed = [0, 1, 5, 10].includes(state.timeSpeed) ? state.timeSpeed : 0; state.stamina = state.stamina && typeof state.stamina === 'object' ? state.stamina : { current: 100, max: 100 };
+    state.version = 28; state.day = Math.max(1, Math.min(30, Number(state.day) || 1)); state.timeSpeed = [0, 1, 5, 10, 30, 90].includes(state.timeSpeed) ? state.timeSpeed : 0; state.stamina = state.stamina && typeof state.stamina === 'object' ? state.stamina : { current: 100, max: 100 };
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {

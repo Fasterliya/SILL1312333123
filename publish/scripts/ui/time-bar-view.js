@@ -5,8 +5,10 @@
   const speeds = [
     { value: 0, button: 'Ⅱ', label: '暂停', detail: '时间暂停' },
     { value: 1, button: '1×', label: '正常', detail: '1秒/天' },
-    { value: 5, button: '5×', label: '快速', detail: '0.4秒/天' },
-    { value: 10, button: '10×', label: '极速', detail: '0.2秒/天' },
+    { value: 5, button: '5×', label: '快速', detail: '0.2秒/天' },
+    { value: 10, button: '10×', label: '极速', detail: '0.1秒/天' },
+    { value: 30, button: '30×', label: '超速', detail: '0.03秒/天' },
+    { value: 90, button: '90×', label: '瞬时', detail: '0.01秒/天' },
   ];
 
   function shell() {

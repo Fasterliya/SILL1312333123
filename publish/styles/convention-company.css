@@ -1,0 +1,193 @@
+.convention-company-panel {
+  margin-top: 12px;
+}
+
+.convention-company-license,
+.convention-company-block {
+  margin-top: 9px;
+  padding: 10px;
+  border: 1px solid #d9d1d3;
+  background: #fffafa;
+}
+
+.convention-company-license {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.convention-company-license span,
+.convention-company-license strong,
+.convention-company-license small,
+.convention-company-block > header span,
+.convention-company-block > header strong,
+.convention-company-block > header small {
+  display: block;
+}
+
+.convention-company-license span,
+.convention-company-block > header span {
+  color: #8a7379;
+  font-size: 9px;
+}
+
+.convention-company-license strong,
+.convention-company-block > header strong {
+  margin-top: 3px;
+  color: #3d3034;
+  font-size: 12px;
+}
+
+.convention-company-license small,
+.convention-company-block > header small {
+  margin-top: 4px;
+  color: #756c6e;
+  font-size: 9px;
+}
+
+.convention-company-block > header,
+.convention-contract > header {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.convention-company-block > header > b,
+.convention-contract > header > b {
+  flex: 0 0 auto;
+  padding: 4px 6px;
+  color: #6a4550;
+  background: #f1e3e7;
+  font-size: 9px;
+}
+
+.convention-tender,
+.convention-contract {
+  margin-top: 9px;
+  padding: 9px;
+  border-top: 1px solid #e0d9db;
+  background: #f7f2f3;
+}
+
+.convention-tender {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.convention-tender span,
+.convention-tender strong,
+.convention-tender small,
+.convention-contract header span,
+.convention-contract header strong {
+  display: block;
+}
+
+.convention-tender span,
+.convention-contract header span {
+  color: #806f73;
+  font-size: 9px;
+}
+
+.convention-tender strong,
+.convention-contract header strong {
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  color: #403438;
+  font-size: 11px;
+}
+
+.convention-tender small {
+  margin-top: 4px;
+  color: #756c6f;
+  font-size: 9px;
+}
+
+.convention-tender > b {
+  color: #71545c;
+  font-size: 10px;
+}
+
+.convention-prep-metrics {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.convention-prep-metrics div {
+  padding: 7px;
+  background: #fff;
+}
+
+.convention-prep-metrics span,
+.convention-prep-metrics b {
+  display: block;
+}
+
+.convention-prep-metrics span {
+  color: #84777a;
+  font-size: 8px;
+}
+
+.convention-prep-metrics b {
+  margin-top: 3px;
+  color: #704553;
+  font-size: 10px;
+}
+
+.convention-prep-stage {
+  margin-top: 8px;
+}
+
+.convention-prep-stage header {
+  display: flex;
+  justify-content: space-between;
+  color: #786d70;
+  font-size: 9px;
+}
+
+.convention-prep-stage header strong {
+  color: #4b393e;
+}
+
+.convention-prep-stage > div {
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.convention-prep-stage button {
+  min-height: 54px;
+  text-align: left;
+}
+
+.convention-prep-stage button strong,
+.convention-prep-stage button small {
+  display: block;
+}
+
+.convention-prep-stage button small {
+  margin-top: 4px;
+  opacity: 0.75;
+  font-size: 9px;
+}
+
+.convention-company-ready {
+  margin: 8px 0 0;
+  padding: 8px;
+  color: #466b55;
+  background: #edf5ef;
+  font-size: 9px;
+}
+
+@media (max-width: 420px) {
+  .convention-company-license,
+  .convention-tender {
+    grid-template-columns: 1fr;
+  }
+}

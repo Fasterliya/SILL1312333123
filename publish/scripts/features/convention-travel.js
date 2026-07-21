@@ -55,6 +55,9 @@
       editionId: event.id, themeName: event.themeName, series: event.series,
       organizerName: event.organizer.name,
       role: registration.role, intent: registration.intent,
+      quality: event.preparation?.quality ?? 50,
+      safety: event.preparation?.safety ?? 50,
+      promotion: event.preparation?.promotion ?? 50,
       score: 0, feedback: '抵达会场，先选择最想体验的区域。',
       path: [], total: 4, coserIds: [], selectedCoserId: null, riskCount: 0,
     };
@@ -98,7 +101,8 @@
 
   function options(state, ts) {
     const node = Game.conventionRoutes.get(ts.node);
-    const source = ts.node === 'coser-select' ? rosterOptions(state, ts) : (node?.options || []);
+    const baseSource = ts.node === 'coser-select' ? rosterOptions(state, ts) : (node?.options || []);
+    const source = Game.conventionParticipant?.options(state, ts, baseSource) || baseSource;
     return source.map((item) => ({ ...item, blocked: requirementFailure(state, ts, item) }));
   }
 
@@ -109,7 +113,6 @@
     ts.selectedCoserId = person.id;
     return person;
   }
-
   function applyEffect(state, ts, option) {
     const effect = option.effect || {};
     if (effect.cost) Game.economy.spend(state, effect.cost);
@@ -166,10 +169,11 @@
     const option = options(state, ts).find((item) => item.id === choiceId);
     if (!option) return { ok: false, message: '这个漫展选项已经失效' };
     if (option.blocked) return { ok: false, message: option.blocked };
-    applyEffect(state, ts, option);
+    const resolved = Game.conventionParticipant?.adjust(state, ts, option) || option;
+    applyEffect(state, ts, resolved);
     ts.path.push(option.id);
-    if (option.effect?.finish) return complete(state, ts);
-    ts.node = option.next;
+    if (resolved.effect?.finish) return complete(state, ts);
+    ts.node = resolved.next;
     return { ok: true, message: ts.feedback };
   }
 

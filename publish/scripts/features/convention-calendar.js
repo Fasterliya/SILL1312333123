@@ -18,6 +18,7 @@
     data.attendance = data.attendance && typeof data.attendance === 'object'
       ? data.attendance : {};
     data.contracts = data.contracts && typeof data.contracts === 'object' ? data.contracts : {};
+    data.bids = data.bids && typeof data.bids === 'object' ? data.bids : {};
     data.preparation = data.preparation && typeof data.preparation === 'object' ? data.preparation : {};
     return data;
   }
@@ -157,6 +158,7 @@
       startedAt: state.totalMonths, completed: false,
       role: registration.role, intent: registration.intent,
     };
+    item.preparation = preparation(state, item);
     return Game.conventionTravel.start(state, item);
   }
   function finishAttendance(state, editionId, result) {

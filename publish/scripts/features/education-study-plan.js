@@ -17,7 +17,7 @@
     const month = Number(state.month) || 1;
     const stage = state.education.schoolStage;
     const start = month >= 9 ? year : year - 1;
-    return { key: `${stage}:${start}-year-groups`, label: `${start}-${start + 1}学年` };
+    return { key: `${stage}:${start}-year-learning-v2`, label: `${start}-${start + 1}学年` };
   }
 
   function subjectKeys(state) {
@@ -168,7 +168,7 @@
     return {
       used: total(decision.draft),
       limit: Capacity.slots(state),
-      intelligence: Capacity.intelligence(state),
+      learning: Capacity.learning(state),
       rows: [...subjectKeys(state), ...Object.keys(extras)].map((key) => ({
         key,
         count: decision.draft[key] || 0,

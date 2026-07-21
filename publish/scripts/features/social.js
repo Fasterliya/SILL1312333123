@@ -94,7 +94,6 @@
     person.affection = U.clamp(person.affection + affectionGain, 0, 100);
     if (type === 'study') {
       Game.educationSystem.addPreparation(state, 4);
-      Game.characterAttributes.gain(state, '学识', 0.45, '共同学习');
     } else Game.characterAttributes.gain(state, '交涉', 0.25, '人际互动');
     if (type === 'exchange') {
       Game.people.addContact(state, person);

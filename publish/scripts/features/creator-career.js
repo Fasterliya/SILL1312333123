@@ -62,7 +62,7 @@
     if (creator.lastPublishMonth === state.totalMonths) return { ok: false, message: '本月已经发布过主要内容' };
     const quality = titleQuality(state, title);
     const reach = 320 + creator.followers * (0.35 + Math.random() * 0.5)
-      + state.stats.魅力 * 28 + state.stats.智力 * 8 + quality * 70;
+      + state.stats.魅力 * 28 + Game.learningAttribute.checkValue(state.stats.智力) * 8 + quality * 70;
     const views = Math.max(100, Math.round(reach * (0.72 + Math.random() * 0.65)));
     const gained = Math.max(5, Math.round(Math.sqrt(views) * (0.6 + quality / 60) * appeal(state) * style(state)));
     const income = Game.creatorEconomy.contentIncome(views, creator.followers, creator.brandTrust);

@@ -7,7 +7,7 @@
       id: 'curious_child', min: 4, max: 11, once: true,
       title: '窗外的新世界', text: '你对一件陌生事物产生了强烈兴趣，家人愿意陪你尝试。',
       options: [
-        ['read', '先去图书馆查资料', '学识经验与学习积累提高', { stats: { 智力: 4 }, study: 8 }],
+        ['read', '先去图书馆查资料', '学习积累提高', { study: 8 }],
         ['play', '直接动手探索', '健康提高并缓解压力', { stats: { 健康: 3 }, stress: -4 }],
       ],
     },
@@ -15,7 +15,7 @@
       id: 'school_club', min: 8, max: 17, once: true,
       title: '社团招新', text: '学校开放了社团招新，你只能把主要精力投入一个方向。',
       options: [
-        ['science', '加入科技社', '学识经验提高，学习压力增加', { stats: { 智力: 6 }, stress: 2, study: 10 }],
+        ['science', '加入科技社', '学习积累提高，学习压力增加', { stress: 2, study: 10 }],
         ['arts', '加入文艺社', '交涉经验提高并缓解压力', { stats: { 魅力: 5 }, stress: -4 }],
         ['sport', '加入运动队', '健康与体能经验提高，学习积累略降', { stats: { 健康: 7, 力量: 5 }, study: -4 }],
       ],

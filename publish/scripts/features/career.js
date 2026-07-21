@@ -29,7 +29,9 @@
     const categoryAbility = {
       科学: '学识', 文学: '学识', 艺术: '交涉', 社交: '交涉', 商业: '管理', 运动: '体能',
     }[job.category] || '学识';
-    const professional = Game.characterAttributes.playerValue(state, categoryAbility);
+    const rawProfessional = Game.characterAttributes.playerValue(state, categoryAbility);
+    const professional = categoryAbility === '学识'
+      ? Game.learningAttribute.checkValue(rawProfessional) : rawProfessional;
     const negotiation = Game.characterAttributes.playerValue(state, '交涉');
     const charm = Game.characterAttributes.derivedCharm(state.profile);
     if (['idoltrainee', 'idol-underground', 'idol'].includes(job.id)) {

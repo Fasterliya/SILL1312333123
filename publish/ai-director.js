@@ -123,12 +123,13 @@
     const events = [
       ['平凡小确幸', '天气很好，你和家人一起吃了顿热腾腾的饭。', '压力', -4],
       ['偶感风寒', '换季时你有些不舒服，休息了几天。', '健康', -5],
-      ['读到好书', '一本书让你对世界多了一层理解。', '智力', 3],
+      ['读到好书', '一本书让你对世界多了一层理解。', '学时', 5],
       ['运动时刻', '你坚持活动身体，状态比以前轻盈。', '健康', 3],
     ];
     const [title, text, stat, delta] = U.random(events);
     const ability = Game.characterAttributes.normalize(stat);
     if (stat === '压力') Game.stressSystem.add(state, delta, title);
+    else if (stat === '学时') Game.educationSystem.addPreparation(state, delta);
     else if (ability && delta > 0) Game.characterAttributes.gain(state, ability, delta, title);
     else state.stats[stat] = U.clamp(state.stats[stat] + delta, 0, 100);
     addLog(state, title, text, stat === '压力' ? (delta < 0 ? 'good' : 'normal') : (delta > 0 ? 'good' : 'normal'));

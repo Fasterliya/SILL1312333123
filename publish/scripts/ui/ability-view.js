@@ -13,6 +13,9 @@
     Game.characterAttributes.ensure(target, state?.stats || target.stats, state?.education);
     const rows = Game.characterAttributes.abilities.map((ability) => {
       const progress = Game.characterAttributes.progress(target, ability);
+      if (ability === '学识') {
+        return [ability, `${progress.current} · 固有属性 · 成年基础 ${progress.potential}`];
+      }
       return [ability, `${progress.current} · 经验 ${progress.xp}/100 · 潜力 ${progress.potential}`];
     });
     rows.push(['派生魅力', `${Game.characterAttributes.derivedCharm(target)} · 外貌、气质与交涉共同形成`]);
@@ -38,7 +41,7 @@
       ['疲劳', fatigue(state), fatigue(state)],
     ];
     const abilityCards = Game.characterAttributes.abilities.map((ability) => {
-      const item = Game.characterAttributes.progress(state.profile, ability);
+      const item = Game.characterAttributes.progress(state.profile, ability, state);
       return [ability, item.current, item.current];
     });
     abilityCards.push(['魅力', Game.characterAttributes.derivedCharm(state.profile),

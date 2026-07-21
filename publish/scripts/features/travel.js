@@ -39,7 +39,7 @@
     return parts.join(' · ') || '无额外门槛';
   }
   function rewardText(effect) {
-    const labels = { charm: '交涉经验', intelligence: '学识经验',
+    const labels = { charm: '交涉经验', intelligence: '学习积累',
       strength: '体能经验', health: '健康', reputation: '声望' };
     const gains = Object.entries(labels).filter(([key]) => effect[key])
       .map(([key, label]) => `${label}${effect[key] > 0 ? '+' : ''}${effect[key]}`);
@@ -66,7 +66,7 @@
     if (effect.money) state.money += effect.money;
     if (effect.mood) Game.legacyMood.apply(state, effect.mood, '街区旅途');
     if (effect.health) state.stats.健康 = U.clamp(state.stats.健康 + effect.health, 0, 100);
-    if (effect.intelligence) Game.characterAttributes.gain(state, '学识', effect.intelligence, '街区旅途');
+    if (effect.intelligence && Game.subjectPanel.isStudent(state)) Game.educationSystem.addPreparation(state, effect.intelligence * 2);
     if (effect.charm) Game.characterAttributes.gain(state, '交涉', effect.charm, '街区旅途');
     if (effect.strength) Game.characterAttributes.gain(state, '体能', effect.strength, '街区旅途');
     state.cityLife = state.cityLife || { reputation: 0, familiarity: {} }; state.cityLife.familiarity ||= {};

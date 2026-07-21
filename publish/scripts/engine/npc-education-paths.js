@@ -6,7 +6,9 @@
 
   function dropoutRisk(person, age) {
     if (person.droppedOut || age < 15 || age > 20) return 0;
-    const ability = Game.characterAttributes.personValue(person, '学识');
+    const ability = Game.learningAttribute.checkValue(
+      Game.characterAttributes.personValue(person, '学识'),
+    );
     const habit = Number(person.studyHabit) || 50;
     const base = age < 18 ? 0.04 : 0.025;
     const risk = base + Math.max(0, 52 - ability) * 0.004

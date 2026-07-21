@@ -22,12 +22,13 @@
   function syncGrowth(state, person) {
     const age = U.personAge(state, person);
     updateGrowth(person, age);
+    Game.characterAttributes.ensurePerson(person, age);
     Game.femaleYouthStyle.apply(person, person.gender, age);
   }
 
   function education(state, person, age) {
     const [stage] = schoolStage(age);
-    Game.educationSystem.ensurePerson(person);
+    Game.educationSystem.ensurePerson(person, age);
     const city = person.currentCity || person.metCity || state.location.city || state.hometown.city;
     if (person.droppedOut) return;
     if (person.school === state.education.school && !['家中', '已毕业'].includes(person.school)) {
@@ -39,7 +40,8 @@
     if (age >= 18 && age < 22 && person.educationStage === 'workforce') return;
     if (person.educationStage === stage && person.educationName) return;
     const variation = U.between(-10, 10) + U.between(-10, 10);
-    const score = U.clamp(person.academicAbility * 0.58 + person.studyHabit * 0.32 + variation, 0, 100);
+    const learning = Game.learningAttribute.checkValue(person.academicAbility);
+    const score = U.clamp(learning * 0.58 + person.studyHabit * 0.32 + variation, 0, 100);
     person.academicScore = Math.round(score);
     if (Game.npcEducationPaths.maybeDropout(state, person, age, city)) return;
     person.educationStage = stage;

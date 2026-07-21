@@ -117,7 +117,7 @@
     if (effect.cost) Game.economy.spend(state, effect.cost);
     if (effect.mood) Game.legacyMood.apply(state, effect.mood, '漫展体验');
     if (effect.health) state.stats.健康 = U.clamp(state.stats.健康 + effect.health, 0, 100);
-    if (effect.intelligence) Game.characterAttributes.gain(state, '学识', effect.intelligence, '城市漫展');
+    if (effect.intelligence && Game.subjectPanel.isStudent(state)) Game.educationSystem.addPreparation(state, effect.intelligence * 2);
     if (effect.charm) Game.characterAttributes.gain(state, '交涉', effect.charm, '城市漫展');
     if (effect.strength) Game.characterAttributes.gain(state, '体能', effect.strength, '城市漫展');
     state.cityLife ||= { reputation: 0, familiarity: {} };

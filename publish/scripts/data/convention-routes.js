@@ -81,9 +81,9 @@
       options: [
         option('coser-photo', '先礼貌询问能否合影', '稳妥提升好感并缓解压力。',
           'coser-finale', { mood: 5, score: 5, affection: 8, result: '对方整理好造型，和你完成了一张合影。' }),
-        option('coser-lore', '聊这个角色的剧情与设定', '学识达到 40 时可以选择。',
+        option('coser-lore', '聊这个角色的剧情与设定', '学识达到 24 时可以选择。',
           'coser-finale', { intelligence: 2, score: 6, affection: 10,
-            requires: { stat: '学识', min: 40 }, result: '你们从角色设定一路聊到了作品细节。' }),
+            requires: { stat: '学识', min: 24 }, result: '你们从角色设定一路聊到了作品细节。' }),
         option('coser-craft', '称赞服装制作与还原细节', '偏向交涉与创作交流。',
           'coser-finale', { charm: 2, score: 5, affection: 9,
             result: '你注意到的制作细节让对方很开心。' }),

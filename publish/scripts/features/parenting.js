@@ -67,8 +67,11 @@
   function annualEducation(state, child, age) {
     const focus = ensureState(state).focus;
     const tendency = Game.structuredTraits.childhood(child);
-    const matching = Game.characterAttributes.playerValue(state, focus);
-    const learning = Game.characterAttributes.playerValue(state, '学识');
+    const rawMatching = Game.characterAttributes.playerValue(state, focus);
+    const matching = focus === '学识' ? Game.learningAttribute.checkValue(rawMatching) : rawMatching;
+    const learning = Game.learningAttribute.checkValue(
+      Game.characterAttributes.playerValue(state, '学识'),
+    );
     const stress = Game.stressSystem.ensure(state).level || 0;
     const funded = state.parenting.educationFund >= 10000 ? 8 : 0;
     const quality = clamp(matching * 0.55 + learning * 0.15

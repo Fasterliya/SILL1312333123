@@ -19,7 +19,7 @@
       <b>${row.count}</b>
       <button type="button" data-plan-adjust="1" data-plan-key="${escape(row.key)}"
         aria-label="增加${escape(row.label)}">＋</button></div>`).join('');
-    return `<div class="semester-plan-meter"><span>智力 ${model.intelligence} · 已分配</span>
+    return `<div class="semester-plan-meter"><span>学识 ${model.learning} · 已分配</span>
       <strong>${model.used}/${model.limit}格</strong></div>
       <div class="semester-plan-list">${rows}</div>
       <button class="semester-plan-confirm" data-choice="semester-plan-confirm"

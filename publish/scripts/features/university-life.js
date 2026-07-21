@@ -57,7 +57,8 @@
   function triggerThesis(state) {
     const thesisHours = state.education.subjects?.['毕业论文']?.studyHours || 0;
     const internship = state.career._internshipBonus || state.career.exp > 0 ? 8 : 0;
-    const score = (state.stats.智力 || 0) * 0.55 + Math.min(100, thesisHours) * 0.37 + internship;
+    const learning = Game.characterAttributes.personValue(state.profile, '学识');
+    const score = learning * 1.2 + Math.min(100, thesisHours) * 0.37 + internship;
     if (score >= 52) {
       state.education.thesisPassed = true;
       state.education.nextThesisMonth = 0;
@@ -85,8 +86,9 @@
         return school.id === state.education.universityId || school.name === state.education.university;
       });
       var prestige = university && Game.schoolLines ? Game.schoolLines.institutionResource(university) : 50;
-      var intellect = state.stats.智力 || 50;
-      var successRate = U.clamp(prestige / 100 * 0.45 + intellect / 100 * 0.35 + 0.05, 0.1, 0.9);
+      var learning = Game.characterAttributes.personValue(state.profile, '学识');
+      var successRate = U.clamp(prestige / 100 * 0.45
+        + Game.learningAttribute.checkValue(learning) / 100 * 0.35 + 0.05, 0.1, 0.9);
 
       if (Math.random() < successRate) {
         state.career._internshipBonus = true;

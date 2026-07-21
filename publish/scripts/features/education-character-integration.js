@@ -26,8 +26,6 @@
     const rawGain = Math.max(0, item.preparation - before);
     item.preparation = Game.content.clamp(before + rawGain * resolution.multiplier, 0, 100);
     item.study = Math.round(item.preparation);
-    const gains = { foundation: 1, weakness: 1.2, mock: 0.6, tutor: 1.5, balance: 0.2 };
-    Game.characterAttributes.gain(state, '学识', gains[type] || 0.5, `学习安排:${type}`);
     if (type === 'balance') Game.stressSystem.reduce(state, 7, '调整学习节奏');
     else Game.stressSystem.add(state, Math.max(1, Math.round((state.education.pressure || 0) / 30)), '学习安排');
     return {
@@ -49,9 +47,9 @@
     }
   }
 
-  function ensurePerson(person) {
+  function ensurePerson(person, age) {
     base.ensurePerson(person);
-    Game.characterAttributes.ensurePerson(person);
+    Game.characterAttributes.ensurePerson(person, age);
     person.academicAbility = Game.characterAttributes.personValue(person, '学识');
     if (!person.abilityEducationVersion) {
       const upbringing = person.upbringing?.education || 0;
@@ -65,9 +63,6 @@
 
   function monthly(state) {
     base.monthly(state);
-    if (!['home', 'graduate', 'workforce'].includes(state.education.schoolStage)) {
-      Game.characterAttributes.gain(state, '学识', 0.22, '持续教育');
-    }
   }
 
   function readiness(state) {

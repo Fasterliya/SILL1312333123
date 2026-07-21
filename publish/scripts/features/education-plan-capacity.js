@@ -3,20 +3,13 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
 
-  function intelligence(state) {
-    const value = Number(state.stats?.智力);
-    return Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 50;
+  function learning(state) {
+    return Math.round(Game.characterAttributes.personValue(state.profile, '学识'));
   }
 
   function slots(state) {
-    const value = intelligence(state);
-    if (value >= 100) return 9;
-    if (value >= 80) return 8;
-    if (value >= 65) return 7;
-    if (value >= 50) return 6;
-    if (value >= 35) return 5;
-    return 4;
+    return Game.learningAttribute.planSlots(learning(state));
   }
 
-  Game.educationPlanCapacity = Object.freeze({ intelligence, slots });
+  Game.educationPlanCapacity = Object.freeze({ learning, slots });
 }(window));

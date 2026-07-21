@@ -4,15 +4,14 @@
   const abilities = Object.freeze(['学识', '交涉', '管理', '心计', '体能']);
   const aliases = Object.freeze({ 智力: '学识', 魅力: '交涉', 力量: '体能' });
   const legacyNames = Object.freeze({ 学识: '智力', 交涉: '魅力', 体能: '力量' });
+  const Learning = Game.learningAttribute;
   const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, Number(value) || 0));
   function hash(value) {
     return [...String(value || 'person')].reduce((sum, char) => (
       Math.imul(sum ^ char.charCodeAt(0), 16777619) >>> 0
     ), 2166136261);
   }
-  function normalize(name) {
-    return aliases[name] || (abilities.includes(name) ? name : '');
-  }
+  function normalize(name) { return aliases[name] || (abilities.includes(name) ? name : ''); }
   function congenital(target, ability) {
     const kind = Game.characterTraits.abilityKinds[ability];
     const tier = target.congenital?.[kind]?.tier || 0;
@@ -25,7 +24,7 @@
     };
   }
   function initial(target, sourceStats, ability, seed) {
-    if (ability === '学识') return Number(sourceStats?.智力) || 42 + seed % 22;
+    if (ability === '学识') return 0;
     if (ability === '交涉') return Number(sourceStats?.魅力) || 40 + (seed >>> 4) % 24;
     if (ability === '体能') return Number(sourceStats?.力量) || Math.round((sourceStats?.健康 || 65) * 0.75);
     if (ability === '管理') return 38 + (seed >>> 8) % 27;
@@ -39,7 +38,7 @@
   }
   function syncLegacy(target, sourceStats) {
     if (!sourceStats || !target.abilities) return;
-    sourceStats.智力 = Math.round(target.abilities.学识);
+    sourceStats.智力 = Math.round(rawValue(target, '学识'));
     sourceStats.力量 = Math.round(target.abilities.体能);
     sourceStats.魅力 = derivedCharm(target);
   }
@@ -47,7 +46,7 @@
     return clamp((target.abilities?.[ability] || 0) + congenital(target, ability).check
       + Game.structuredTraits.abilityBonus(target, ability));
   }
-  function ensure(target, sourceStats, education) {
+  function ensure(target, sourceStats, education, age) {
     if (!target) return null;
     Game.structuredTraits.ensure(target);
     const seed = hash(target.id || target.name);
@@ -70,6 +69,7 @@
       growth.xp[ability] = clamp(growth.xp[ability]
         ?? ((legacyName ? old.progress?.[legacyName] : 0) || 0) * 100, 0, 99.99);
     });
+    Learning.sync(target, age, target.id || target.name);
     growth.version = 2;
     target.attributes = growth;
     syncLegacy(target, sourceStats);
@@ -77,12 +77,11 @@
     if (!Number.isFinite(target.studyHabit)) target.studyHabit = clamp(35 + (target.upbringing?.education || 0) * 0.35 + seed % 24);
     return growth;
   }
-  function ensurePerson(person) {
-    return ensure(person, person?.stats, { level: person?.educationLevel });
-  }
+  function ensurePerson(person, age) { return ensure(person, person?.stats, null, age); }
   function ensurePlayer(state) {
     Game.legacyMood.ensure(state);
-    const data = ensure(state.profile, state.stats, state.education);
+    Learning.syncEducation(state);
+    const data = ensure(state.profile, state.stats, state.education, Game.content.age(state));
     state.abilities = state.profile.abilities;
     state.abilityGrowth = state.profile.abilityGrowth;
     return data;
@@ -99,6 +98,10 @@
   function gainFor(target, sourceStats, name, base, source, state) {
     const ability = normalize(name);
     if (!ability || base <= 0) return 0;
+    if (ability === '学识') {
+      ensure(target, sourceStats, null, state ? Game.content.age(state) : undefined);
+      return 0;
+    }
     const growth = ensure(target, sourceStats);
     const current = target.abilities[ability];
     const potential = growth.potential[ability];
@@ -130,7 +133,7 @@
     const health = clamp(state.stats?.健康 ?? 60);
     let penalty = stress * 3 + Math.round(fatigue / (ability === '体能' ? 10 : 20));
     if (health < 50) penalty += Math.round((50 - health) / (ability === '体能' ? 4 : 8));
-    return penalty;
+    return ability === '学识' ? Math.round(penalty * 0.35) : penalty;
   }
   function playerlessValue(target, name) {
     const ability = normalize(name);
@@ -142,9 +145,7 @@
     ensurePlayer(state);
     return clamp(playerlessValue(state.profile, ability) - temporaryPenalty(state, ability));
   }
-  function personValue(person, name) {
-    return playerlessValue(person, name);
-  }
+  function personValue(person, name) { return playerlessValue(person, name); }
   function gain(state, name, base, source) {
     return gainFor(state.profile, state.stats, name, base, source, state);
   }
@@ -152,16 +153,18 @@
     return gainFor(person, person.stats, name, base, source, null);
   }
   function potential(target, name) {
-    return Math.round(target.abilityGrowth?.potential?.[normalize(name)] || 50);
+    const ability = normalize(name);
+    if (ability === '学识') return Math.round(Learning.adultBase(target));
+    return Math.round(target.abilityGrowth?.potential?.[ability] || 50);
   }
   function progress(target, name, state) {
     const ability = normalize(name);
     ensure(target, target.stats);
     return {
-      current: Math.round(target.abilities[ability]),
+      current: Math.round(ability === '学识' ? rawValue(target, ability) : target.abilities[ability]),
       effective: state ? playerValue(state, ability) : personValue(target, ability),
       potential: potential(target, ability),
-      xp: Math.floor(target.abilityGrowth.xp[ability] || 0),
+      xp: ability === '学识' ? 0 : Math.floor(target.abilityGrowth.xp[ability] || 0),
     };
   }
   function inheritPotential(child, left, right) {
@@ -170,6 +173,7 @@
     ensurePerson(child);
     const seed = hash(`${child.id || child.name}:potential`);
     abilities.forEach((ability, index) => {
+      if (ability === '学识') return;
       const inherited = 50 + (potential(left, ability) - 50) * 0.35
         + (potential(right, ability) - 50) * 0.35;
       const mutation = ((seed >>> (index * 5)) % 13) - 6;
@@ -180,6 +184,7 @@
         child.abilityGrowth.xp[ability] = 0;
       }
     });
+    Learning.inherit(child, left, right, seed);
     syncLegacy(child, child.stats);
   }
   function adjustPresentation(target, sourceStats, amount) {

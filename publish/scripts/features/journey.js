@@ -72,7 +72,9 @@
     state.money += effect.money || 0;
     state.stats.心情 = U.clamp(state.stats.心情 + (effect.mood || 0), 0, 100);
     if (effect.charm) Game.characterAttributes.gain(state, '交涉', effect.charm, '远途旅行');
-    if (effect.intelligence) Game.characterAttributes.gain(state, '学识', effect.intelligence, '远途旅行');
+    if (effect.intelligence && Game.subjectPanel.isStudent(state)) {
+      Game.educationSystem.addPreparation(state, effect.intelligence * 2);
+    }
     state.cityLife.reputation = U.clamp(state.cityLife.reputation + (effect.reputation || 0), 0, 100);
     journey.score += effect.score || 0;
     const person = Game.people.find(state, journey.encounterId) || (effect.meet ? encounter(state, item) : null);

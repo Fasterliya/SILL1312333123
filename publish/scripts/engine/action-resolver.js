@@ -14,6 +14,9 @@
     if (name === '魅力') return Game.characterAttributes.derivedCharm(state.profile);
     return Game.characterAttributes.playerValue(state, name);
   }
+  function checkValue(name, value) {
+    return name === '学识' ? Game.learningAttribute.checkValue(value) : value;
+  }
 
   function tierFor(score) {
     return tiers.find((item) => score >= item.min) || tiers[tiers.length - 1];
@@ -32,8 +35,8 @@
     const secondary = abilityValue(state, secondaryName);
     const context = Number(config.context) || 0;
     const difficulty = clamp(config.difficulty ?? 50, 0, 120);
-    const primaryModifier = primary * 0.58;
-    const secondaryModifier = secondary * 0.22;
+    const primaryModifier = checkValue(primaryName, primary) * 0.58;
+    const secondaryModifier = checkValue(secondaryName, secondary) * 0.22;
     const difficultyModifier = difficulty * -0.38;
     const score = clamp(Math.round((22 + primaryModifier + secondaryModifier + context
       + difficultyModifier + randomModifier) * 10) / 10);

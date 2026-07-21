@@ -57,12 +57,12 @@
       const current = state.education.subjects[subject] || {};
       current.studyHours = Math.max(0, Math.min(200, Number(current.studyHours) || 0));
       current.examScore = Math.max(0, Number(current.examScore) || 0);
-      const intelligence = Math.max(0, Math.min(100, Number(state.stats?.智力) || 50));
+      const learning = Game.characterAttributes.personValue(state.profile, '学识');
       const generated = 34 + (subjectHash(subject + state.name) % 54);
       current.aptitudeBase = Number.isFinite(Number(current.aptitudeBase))
         ? Number(current.aptitudeBase)
         : (Number.isFinite(Number(current.aptitude)) ? Number(current.aptitude) : generated);
-      current.intelligenceBonus = Math.round((intelligence - 50) * 0.35);
+      current.intelligenceBonus = Math.round((learning - 20) * 0.5);
       current.aptitude = Math.max(10, Math.min(100,
         Math.round(current.aptitudeBase + current.intelligenceBonus)));
       current.stage ||= state.education.schoolStage;
@@ -92,7 +92,7 @@
         <div class="subject-copy"><div class="subject-name">${escape(subject)}
           <span class="subject-max">${cap}分</span></div>
           <small>天赋 ${data.aptitude}${data.intelligenceBonus
-            ? `（智力${data.intelligenceBonus > 0 ? '+' : ''}${data.intelligenceBonus}）` : ''}
+            ? `（学识${data.intelligenceBonus > 0 ? '+' : ''}${data.intelligenceBonus}）` : ''}
             · ${group} ${slots}格</small></div>
         <strong class="subject-forecast">${range[0]}–${range[1]}</strong>
         <div class="progress-bar"><i style="width:${Math.min(100, data.studyHours / 2)}%"></i>

@@ -68,24 +68,27 @@
 
   function annualFiling(state) {
     ensure(state);
-    if (state.pendingDecision || state.gameOver) return;
-    if (U.age(state) < 18) return;
+    if (state.gameOver || U.age(state) < 18) return null;
 
     const result = calculateTax(state);
     if (result.income <= 0 && result.tax <= 0) {
-      /* nothing to file — mark year as done */
       state.tax.lastFilingYear = state.year;
       state.tax._dividendBaseline = state.assets?.dividends || 0;
       state.tax.charityDonations = 0;
-      return;
+      state.tax.declaredIncome = 0;
+      return { ok: true, paid: 0, unpaid: 0 };
     }
 
-    state.pendingDecision = {
-      type: 'taxFiling',
-      income: result.income,
-      tax: result.tax,
-      country: result.country,
-    };
+    const payment = payTax(state, result.tax);
+    state.tax.lastFilingYear = state.year;
+    state.tax._dividendBaseline = state.assets?.dividends || 0;
+    state.tax.charityDonations = 0;
+    state.tax.declaredIncome = result.income;
+    Game.lifeDirector?.addLog(state, '年度税务自动结算',
+      `${result.country}按${Math.round(result.rate * 100)}%税率计税，应缴${Game.view.money(result.tax)}，`
+      + `已扣${Game.view.money(payment.paid)}${payment.unpaid ? `，欠税${Game.view.money(payment.unpaid)}` : '。'}`,
+      payment.unpaid ? 'normal' : 'good');
+    return { ok: true, ...payment, tax: result.tax, income: result.income };
   }
 
   /* ---- pay / donate ---- */
@@ -116,82 +119,26 @@
     return { ok: true, message: `已捐赠${Game.view.money(cost)}` };
   }
 
-  /* ---- resolution (wired into actions.js decide) ---- */
-
-  function resolve(state, value) {
+  function migratePending(state) {
+    if (state.pendingDecision?.type !== 'taxFiling') return false;
+    const decision = state.pendingDecision;
     ensure(state);
-    const d = state.pendingDecision;
-    if (!d || d.type !== 'taxFiling') return { ok: false, message: '无效的税务决策' };
-
-    const country = d.country;
-    const fullTax = d.tax;
-
-    if (value === 'honest') {
-      payTax(state, fullTax);
-      state.tax.lastFilingYear = state.year;
-      state.tax._dividendBaseline = state.assets?.dividends || 0;
-      state.tax.charityDonations = 0;
-      Game.lifeDirector.addLog(state, '税务申报',
-        `${country}税务局年度申报完成，实缴税款${Game.view.money(fullTax)}。`, 'good');
-      return { ok: true, message: `如实申报，已缴纳${Game.view.money(fullTax)}` };
-    }
-
-    if (value === 'evade') {
-      const halfTax = Math.round(fullTax * 0.5);
-      payTax(state, halfTax);
-      state.tax.lastFilingYear = state.year;
-      state.tax._dividendBaseline = state.assets?.dividends || 0;
-      state.tax.charityDonations = 0;
-
-      if (Math.random() < 0.25) {
-        /* audit — pay remaining + penalty */
-        const remaining = fullTax - halfTax;
-        const penalty = Math.round(fullTax * 0.5);
-        state.tax.backTaxes += (remaining + penalty);
-        state.stats.信用 = U.clamp((state.stats.信用 || 50) - 20, 0, 100);
-        Game.lifeDirector.addLog(state, '税务稽查',
-          `虚报收入被税务机关查实！追缴税款${Game.view.money(remaining)}、罚款${Game.view.money(penalty)}，信用大幅降低。`, 'danger');
-        return { ok: true, message: '税务稽查！虚报被查实，面临巨额补缴与罚款' };
-      }
-
-      Game.lifeDirector.addLog(state, '税务申报',
-        `你虚报收入仅缴纳${Game.view.money(halfTax)}，暂时瞒过了税务机关。`, 'normal');
-      return { ok: true, message: `虚报完成，实缴${Game.view.money(halfTax)}（25%稽查风险）` };
-    }
-
-    if (value === 'accountant') {
-      const accountantFee = Math.round(fullTax * 0.1);
-      const reducedTax = Math.round(fullTax * 0.85);
-      Game.economy.spend(state, accountantFee);
-      payTax(state, reducedTax);
-      state.tax.lastFilingYear = state.year;
-      state.tax._dividendBaseline = state.assets?.dividends || 0;
-      state.tax.charityDonations = 0;
-      Game.lifeDirector.addLog(state, '税务申报',
-        `会计师收费${Game.view.money(accountantFee)}，合法节税后实缴${Game.view.money(reducedTax)}。`, 'good');
-      return { ok: true, message: `会计师节税，实缴${Game.view.money(reducedTax)}（含会计师费${Game.view.money(accountantFee)}）` };
-    }
-
-    return { ok: false, message: '未知的申报方式' };
-  }
-
-  /* ---- render (wired into actions.js renderDecision) ---- */
-
-  function renderDecision(state) {
-    const d = state.pendingDecision;
-    if (!d || d.type !== 'taxFiling') return null;
-
-    const ratePct = Math.round((TAX_RATES[d.country] || 0.20) * 100);
-
-    return {
-      title: `${d.country}税务局·年度税务申报`,
-      text: `你去年的总收入为${Game.view.money(d.income)}，应缴税款${Game.view.money(d.tax)}（税率${ratePct}%）。`,
-      options: [
-        { value: 'honest', label: `如实申报 · ${Game.view.money(d.tax)}` },
-        { value: 'evade', label: `虚报收入 · ${Game.view.money(Math.round(d.tax * 0.5))}（25%稽查风险）` },
-        { value: 'accountant', label: `请会计师 · ${Game.view.money(Math.round(d.tax * 0.1))} 费用（合法节税15%）` },
-      ],
+    const result = {
+      income: Math.max(0, Math.round(Number(decision.income) || 0)),
+      tax: Math.max(0, Math.round(Number(decision.tax) || 0)),
+      rate: TAX_RATES[decision.country] || 0.20,
+      country: decision.country || state.location.country,
     };
+    state.pendingDecision = null;
+    const payment = payTax(state, result.tax);
+    state.tax.lastFilingYear = state.year;
+    state.tax._dividendBaseline = state.assets?.dividends || 0;
+    state.tax.charityDonations = 0;
+    state.tax.declaredIncome = result.income;
+    Game.lifeDirector?.addLog(state, '税务规则更新',
+      `旧存档中的待申报税款已按正常方式自动结算，扣除${Game.view.money(payment.paid)}。`,
+      payment.unpaid ? 'normal' : 'good');
+    return true;
   }
 
   /* ---- monthly tick ---- */
@@ -199,14 +146,12 @@
   function monthly(state) {
     ensure(state);
 
-    /* January: trigger annual filing */
-    if (state.month === 1 && state.year > state.tax.lastFilingYear
-      && !state.pendingDecision) {
+    if (state.month === 1 && state.year > state.tax.lastFilingYear) {
       annualFiling(state);
     }
 
     /* auto-pay back taxes when possible */
-    if (state.tax.backTaxes > 0 && state.money > state.tax.backTaxes) {
+    if (state.tax.backTaxes > 0 && state.money >= state.tax.backTaxes) {
       const paid = state.tax.backTaxes;
       Game.economy.spend(state, paid);
       state.tax.backTaxes = 0;
@@ -247,6 +192,6 @@
 
   Game.taxSystem = Object.freeze({
     ensure, calculateTax, annualFiling, payTax, donate, monthly,
-    resolve, renderDecision,
+    migratePending,
   });
 }(window));

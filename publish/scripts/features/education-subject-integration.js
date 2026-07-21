@@ -22,6 +22,10 @@
     return U.clamp(total / subjects.length, 0, 100);
   }
 
+  function aptitude(state, subject) {
+    return Game.subjectPanel.aptitude(state, subject);
+  }
+
   function syncLegacy(state) {
     const item = legacy.ensure(state);
     const value = readiness(state);
@@ -143,6 +147,7 @@
 
   Game.educationSystem = Object.freeze({
     ...legacy,
+    aptitude,
     readiness,
     addPreparation,
     exam,

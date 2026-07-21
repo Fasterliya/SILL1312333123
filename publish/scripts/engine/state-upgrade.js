@@ -189,7 +189,9 @@
     state.routine.fatigue = U.clamp(Number(state.routine.fatigue) || 0, 0, 100);
     state.routine.actions ||= { study: 0, sport: 0, social: 0, rest: 0 };
     delete state.routine.lastReport;
-    return Game.systemsState.ensure(state);
+    state = Game.systemsState.ensure(state);
+    Game.taxSystem?.migratePending?.(state);
+    return state;
   }
 
   Game.stateUpgrade = Object.freeze({ upgradeState });

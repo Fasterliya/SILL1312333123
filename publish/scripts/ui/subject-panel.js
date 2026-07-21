@@ -57,11 +57,22 @@
       const current = state.education.subjects[subject] || {};
       current.studyHours = Math.max(0, Math.min(200, Number(current.studyHours) || 0));
       current.examScore = Math.max(0, Number(current.examScore) || 0);
-      current.aptitude = Number(current.aptitude)
-        || 34 + (subjectHash(subject + state.name) % 54);
+      const intelligence = Math.max(0, Math.min(100, Number(state.stats?.智力) || 50));
+      const generated = 34 + (subjectHash(subject + state.name) % 54);
+      current.aptitudeBase = Number.isFinite(Number(current.aptitudeBase))
+        ? Number(current.aptitudeBase)
+        : (Number.isFinite(Number(current.aptitude)) ? Number(current.aptitude) : generated);
+      current.intelligenceBonus = Math.round((intelligence - 50) * 0.35);
+      current.aptitude = Math.max(10, Math.min(100,
+        Math.round(current.aptitudeBase + current.intelligenceBonus)));
       current.stage ||= state.education.schoolStage;
       state.education.subjects[subject] = current;
     });
+  }
+
+  function aptitude(state, subject) {
+    ensureSubjects(state);
+    return Number(state.education.subjects[subject]?.aptitude) || 40;
   }
 
   function scheduleChips(state, allocation) {
@@ -80,7 +91,9 @@
       return `<article class="subject-card ${slots ? 'plan-focus' : ''}">
         <div class="subject-copy"><div class="subject-name">${escape(subject)}
           <span class="subject-max">${cap}分</span></div>
-          <small>天赋 ${data.aptitude} · ${group} ${slots}格</small></div>
+          <small>天赋 ${data.aptitude}${data.intelligenceBonus
+            ? `（智力${data.intelligenceBonus > 0 ? '+' : ''}${data.intelligenceBonus}）` : ''}
+            · ${group} ${slots}格</small></div>
         <strong class="subject-forecast">${range[0]}–${range[1]}</strong>
         <div class="progress-bar"><i style="width:${Math.min(100, data.studyHours / 2)}%"></i>
           <span>${data.studyHours}h · 上次 ${data.examScore}/${data.examCap || cap}</span></div></article>`;
@@ -125,6 +138,7 @@
     getStageSubjects,
     isStudent,
     ensureSubjects,
+    aptitude,
     render,
     renderQuick,
     handleClick,

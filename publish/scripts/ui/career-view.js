@@ -54,6 +54,7 @@
   }
 
   function companyDirectory(state) {
+    if (Game.companyDirectoryView) return Game.companyDirectoryView.render(state);
     const jobs = Game.careerSystem.board(state);
     const counts = jobs.reduce((items, job) => items.set(
       job.companyId, (items.get(job.companyId) || 0) + 1,

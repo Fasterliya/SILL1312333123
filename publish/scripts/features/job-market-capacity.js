@@ -41,9 +41,14 @@
 
   function occupied(state, job) {
     const city = jobCity(state, job);
-    let count = Game.people.all(state).filter((person) => personMatches(person, job, city)).length;
+    let count = workers(state, job).length;
     if (state.career.jobId === job.id && state.career.company === job.company) count += 1;
     return count;
+  }
+
+  function workers(state, job) {
+    const city = jobCity(state, job);
+    return Game.people.all(state).filter((person) => personMatches(person, job, city));
   }
 
   function vacancies(state, job) {
@@ -98,6 +103,6 @@
   }
 
   Game.jobMarket = Object.freeze({
-    demand, occupied, vacancies, competition, chanceMultiplier, canNpcEnter, summary,
+    demand, occupied, vacancies, competition, chanceMultiplier, canNpcEnter, summary, workers,
   });
 }(window));

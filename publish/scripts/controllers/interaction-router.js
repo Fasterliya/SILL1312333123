@@ -156,6 +156,7 @@
 
   function handle(event) {
     if (Game.financeEnterpriseView?.handleClick?.(event)) return;
+    if (Game.companyDirectoryView?.handleClick?.(event)) return;
     if (Game.educationPlanView?.handleClick?.(event)) return;
     if (Game.taskCenter?.handleClick?.(event)) return;
     if (Game.npcInitiative?.handleClick?.(event)) return;

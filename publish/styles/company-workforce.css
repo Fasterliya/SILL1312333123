@@ -1,0 +1,245 @@
+.company-directory > summary {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.company-directory > summary span,
+.company-directory > summary small {
+  display: block;
+}
+
+.company-directory > summary small {
+  color: #747b76;
+  font-size: 9px;
+  font-weight: 500;
+  text-align: right;
+}
+
+.company-directory-list {
+  display: grid;
+  gap: 1px;
+  background: #deddd5;
+}
+
+.company-directory-row {
+  width: 100%;
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px 18px;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 10px;
+  background: #fffdf7;
+  color: #263b37;
+  text-align: left;
+}
+
+.company-directory-row > div {
+  min-width: 0;
+}
+
+.company-directory-row strong,
+.company-directory-row span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.company-directory-row strong {
+  font-size: 11px;
+}
+
+.company-directory-row span,
+.company-directory-row > small {
+  margin-top: 3px;
+  color: #69726f;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.company-directory-row > small {
+  margin: 0;
+  text-align: right;
+}
+
+.company-directory-row > b {
+  color: #315f58;
+  font-size: 18px;
+}
+
+.company-directory-row i,
+.position-capacity i {
+  height: 4px;
+  margin-top: 7px;
+  display: block;
+  overflow: hidden;
+  background: #e3e4dc;
+}
+
+.company-directory-row i b,
+.position-capacity i b {
+  height: 100%;
+  display: block;
+  background: #315f58;
+}
+
+.company-query-head {
+  padding: 14px;
+  border-left: 4px solid #315f58;
+  background: #edf3ef;
+}
+
+.company-query-head span,
+.company-query-head h3,
+.company-query-head p {
+  margin: 0;
+}
+
+.company-query-head span {
+  color: #65716c;
+  font-size: 9px;
+}
+
+.company-query-head h3 {
+  margin-top: 4px;
+  font: 700 20px serif;
+}
+
+.company-query-head p {
+  margin-top: 5px;
+  color: #65716c;
+  font-size: 10px;
+}
+
+.company-query-head > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 5px 8px;
+  align-items: baseline;
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px solid #cdd9d2;
+}
+
+.company-query-head > div strong {
+  font-size: 15px;
+}
+
+.company-query-head > div small {
+  color: #65716c;
+  font-size: 8px;
+}
+
+.company-position-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.company-position {
+  border: 1px solid #dcd9cf;
+  border-radius: 6px;
+  background: #fffdf7;
+}
+
+.company-position > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #e5e2d8;
+}
+
+.company-position > header strong,
+.company-position > header span {
+  display: block;
+}
+
+.company-position > header strong {
+  font-size: 11px;
+}
+
+.company-position > header span {
+  margin-top: 3px;
+  color: #747b76;
+  font-size: 9px;
+}
+
+.company-position > header > b {
+  padding: 4px 6px;
+  background: #e9efe9;
+  color: #315f58;
+  font-size: 9px;
+}
+
+.company-position > header > b.full {
+  background: #fff0e9;
+  color: #a23d34;
+}
+
+.position-capacity {
+  padding: 8px 10px;
+}
+
+.position-capacity i {
+  margin: 0;
+}
+
+.position-capacity span {
+  display: block;
+  margin-top: 5px;
+  color: #69716d;
+  font-size: 8px;
+  text-align: right;
+}
+
+.company-workers {
+  border-top: 1px solid #ebe8df;
+}
+
+.company-worker {
+  width: 100%;
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  align-items: center;
+  padding: 7px 10px;
+  border-bottom: 1px solid #ebe8df;
+  background: transparent;
+  color: #263b37;
+  text-align: left;
+}
+
+.company-worker:last-child {
+  border-bottom: 0;
+}
+
+.company-worker span,
+.company-worker small {
+  display: block;
+  min-width: 0;
+}
+
+.company-worker span {
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.company-worker small {
+  color: #747b76;
+  font-size: 8px;
+}
+
+.company-worker b {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: #315f58;
+  font-size: 9px;
+}
+
+.player-worker {
+  background: #f5edda;
+}

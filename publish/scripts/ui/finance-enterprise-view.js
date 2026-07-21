@@ -60,7 +60,7 @@
       ${metric('每月债务', Game.view.money(data.monthlyDebt), data.monthlyDebt > 0 ? 'warning' : '', `${data.loans.length}笔贷款`)}
       ${metric('企业利润', Game.view.money(data.companyProfit), data.companyProfit < 0 ? 'negative' : 'positive', `${data.companies.length}家公司`)}
       ${metric('股票资产', Game.view.money(data.portfolio), '', `${data.boardSeats}个董事席位`)}
-      ${metric('拖欠税款', Game.view.money(data.backTaxes), data.backTaxes > 0 ? 'negative' : 'positive', data.backTaxes > 0 ? '将触发自动追缴' : '当前无欠税')}
+      ${metric('拖欠税款', Game.view.money(data.backTaxes), data.backTaxes > 0 ? 'negative' : 'positive', data.backTaxes > 0 ? '将触发自动追缴' : '年度自动扣缴')}
     </section>
     <nav class="finance-tabs" role="tablist" aria-label="金融与企业分类">${tabs}</nav>`;
   }

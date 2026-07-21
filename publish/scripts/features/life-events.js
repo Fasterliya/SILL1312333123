@@ -7,7 +7,7 @@
       id: 'curious_child', min: 4, max: 11, once: true,
       title: '窗外的新世界', text: '你对一件陌生事物产生了强烈兴趣，家人愿意陪你尝试。',
       options: [
-        ['read', '先去图书馆查资料', '智力与学习积累提高', { stats: { 智力: 4 }, study: 8 }],
+        ['read', '先去图书馆查资料', '学识经验与学习积累提高', { stats: { 智力: 4 }, study: 8 }],
         ['play', '直接动手探索', '健康与心情提高', { stats: { 健康: 3, 心情: 4 } }],
       ],
     },
@@ -15,9 +15,9 @@
       id: 'school_club', min: 8, max: 17, once: true,
       title: '社团招新', text: '学校开放了社团招新，你只能把主要精力投入一个方向。',
       options: [
-        ['science', '加入科技社', '智力提高，学习压力增加', { stats: { 智力: 6, 心情: -2 }, study: 10 }],
-        ['arts', '加入文艺社', '魅力与心情提高', { stats: { 魅力: 5, 心情: 4 } }],
-        ['sport', '加入运动队', '健康提高，学习积累略降', { stats: { 健康: 7 }, study: -4 }],
+        ['science', '加入科技社', '学识经验提高，学习压力增加', { stats: { 智力: 6, 心情: -2 }, study: 10 }],
+        ['arts', '加入文艺社', '交涉经验与心情提高', { stats: { 魅力: 5, 心情: 4 } }],
+        ['sport', '加入运动队', '健康与体能经验提高，学习积累略降', { stats: { 健康: 7, 力量: 5 }, study: -4 }],
       ],
     },
     {
@@ -33,7 +33,7 @@
       id: 'elder_community', min: 60, max: 120, once: true,
       title: '新的晚年生活', text: '社区邀请你参加长期活动，为退休后的生活建立新的节奏。',
       options: [
-        ['volunteer', '参加社区志愿服务', '心情、魅力和城市声望提高', { stats: { 心情: 6, 魅力: 3 }, city: 8 }],
+        ['volunteer', '参加社区志愿服务', '心情、交涉经验和城市声望提高', { stats: { 心情: 6, 魅力: 3 }, city: 8 }],
         ['family', '把时间留给家人', '家庭信任明显提高', { familyTrust: 10 }],
         ['quiet', '保持安静的个人生活', '健康提高', { stats: { 健康: 5 } }],
       ],
@@ -44,8 +44,9 @@
 
   function apply(state, effects) {
     Object.entries(effects.stats || {}).forEach(([key, value]) => {
-      if (value > 0 && ['智力', '魅力', '力量'].includes(key)) {
-        Game.characterAttributes.gain(state, key, value, '人生事件');
+      const ability = Game.characterAttributes.normalize(key);
+      if (value > 0 && ability) {
+        Game.characterAttributes.gain(state, ability, value, '人生事件');
       } else state.stats[key] = clamp((state.stats[key] || 0) + value);
     });
     state.money += effects.money || 0;

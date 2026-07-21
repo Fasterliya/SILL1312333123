@@ -74,11 +74,19 @@
     };
     const action = actions[type] || actions.chat;
     spend(state, action[0]);
-    if (type === 'exchange' && person.affection < 42) return { ok: false, message: '再熟悉一些后更容易交换联系方式' };
+    const negotiation = Game.characterAttributes.playerValue(state, '交涉');
+    const compatibility = Game.structuredTraits.compatibility(state.profile, person);
+    if (type === 'exchange' && person.affection + negotiation / 5 + compatibility / 2 < 52) {
+      return { ok: false, message: '交涉能力或关系熟悉度还不足以交换联系方式' };
+    }
+    const socialGain = U.clamp(Math.round((negotiation - 50) / 25 + compatibility / 6), -3, 5);
     person.interactions += 1;
-    person.affection = U.clamp(person.affection + action[1], 0, 100);
+    person.affection = U.clamp(person.affection + action[1] + socialGain, 0, 100);
     state.stats.心情 = U.clamp(state.stats.心情 + action[2], 0, 100);
-    if (type === 'study') Game.educationSystem.addPreparation(state, 4);
+    if (type === 'study') {
+      Game.educationSystem.addPreparation(state, 4);
+      Game.characterAttributes.gain(state, '学识', 0.45, '共同学习');
+    } else Game.characterAttributes.gain(state, '交涉', 0.25, '人际互动');
     if (type === 'exchange') {
       Game.people.addContact(state, person);
     } else if (person.affection >= 75 && person.relation === '同学') person.relation = '好友';

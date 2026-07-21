@@ -67,9 +67,7 @@
   }
 
   function statCards(state) {
-    return Object.entries(state.stats).map(([name, value]) => `
-      <div class="stat-item"><span>${name}</span><strong>${Math.round(value)}${name === '健康' ? '%' : ''}</strong>
-        <i><b style="width:${Math.max(0, Math.min(100, value))}%"></b></i></div>`).join('');
+    return Game.abilityView.cards(state);
   }
 
   function logCards(state) {

@@ -87,10 +87,6 @@
     const rng = seeded(seed || `${target.id}-${target.name}`);
     ensure(leftParent, leftParent.gender || gender, `${seed}-left`);
     ensure(rightParent, rightParent.gender || gender, `${seed}-right`);
-    const prior = {};
-    Game.characterTraits.kinds.forEach((kind) => {
-      prior[kind] = Game.characterTraits.effect(kind, target.congenital?.[kind]?.tier || 0).start;
-    });
     target.congenital = {};
     Game.characterTraits.kinds.forEach((kind) => {
       const mutations = [];
@@ -100,14 +96,9 @@
       ];
       target.congenital[kind] = entry(genes, mutations);
     });
-    if (target.stats && target.attributes?.version) {
-      Object.entries(Game.characterTraits.statKinds).forEach(([stat, kind]) => {
-        target.stats[stat] = Math.max(0, (target.stats[stat] || 0) - prior[kind]);
-      });
-      delete target.attributes;
-      delete target.academicAbility;
-    }
-    return finalize(target, gender);
+    finalize(target, gender);
+    Game.characterAttributes?.inheritPotential(target, leftParent, rightParent);
+    return target.congenital;
   }
 
   function names(target, gender) {

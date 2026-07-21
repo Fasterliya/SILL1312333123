@@ -13,8 +13,12 @@
     if (person.affection < 62) return { ok: false, message: '关系还没有亲密到适合告白' };
     const partnerCount = Relations.ensure(state).partners.length;
     const openness = ['开放', '洒脱', '自由'].includes(person.personality) ? 0.1 : 0;
+    const negotiation = Game.characterAttributes.playerValue(state, '交涉');
+    const charm = Game.characterAttributes.derivedCharm(state.profile);
+    const compatibility = Game.structuredTraits.compatibility(state.profile, person);
     const chance = U.clamp(
-      0.35 + (person.affection - 60) / 60 + openness - partnerCount * 0.06,
+      0.22 + (person.affection - 60) / 60 + negotiation / 500 + charm / 700
+        + compatibility / 100 + openness - partnerCount * 0.06,
       0.2,
       0.9,
     );
@@ -26,6 +30,7 @@
     person.relation = '恋人';
     Relations.addPartner(state, person.id, '恋人');
     Game.relationshipMemory.record(state, person, '关系', '确认了恋爱关系', 12, -4);
+    Game.characterAttributes.gain(state, '交涉', 1.2, '成功告白');
     Game.lifeDirector.addLog(
       state,
       '恋爱开始',

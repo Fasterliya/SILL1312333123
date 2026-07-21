@@ -26,17 +26,22 @@
   }
 
   function ability(state, job) {
-    const charm = Game.characterAttributes.playerValue(state, '魅力');
-    const intelligence = Game.characterAttributes.playerValue(state, '智力');
+    const categoryAbility = {
+      科学: '学识', 文学: '学识', 艺术: '交涉', 社交: '交涉', 商业: '管理', 运动: '体能',
+    }[job.category] || '学识';
+    const professional = Game.characterAttributes.playerValue(state, categoryAbility);
+    const negotiation = Game.characterAttributes.playerValue(state, '交涉');
+    const charm = Game.characterAttributes.derivedCharm(state.profile);
     if (['idoltrainee', 'idol-underground', 'idol'].includes(job.id)) {
-      return charm * 0.7 + state.stats.健康 * 0.2
+      return charm * 0.45 + negotiation * 0.25
+        + Game.characterAttributes.playerValue(state, '体能') * 0.2
         + traitBoost(state, '艺术') + (state.education.study || 0) * 0.04;
     }
     var isMatch = job.majors.includes(state.education.major);
     var majorRelevance = isMatch ? 35 + Math.floor((state.education.study || 0) / 100 * 37) : (state.education.university ? -15 : 0);
     var personality = job.category === '社交' && ['外向','乐观','热血'].includes(state.profile.personality) ? 6 : 0;
     var audience = job.recommendedGender === state.gender ? 8 : 0;
-    return intelligence * 0.55 + charm * 0.2 + state.education.study * 0.12
+    return professional * 0.55 + negotiation * 0.2 + state.education.study * 0.12
       + traitBoost(state, job.category) + majorRelevance + personality + audience;
   }
 
@@ -115,6 +120,7 @@
     state.career.lastRaiseMonth = state.totalMonths - 6;
     state.career.lastAutoRaiseMonth = state.totalMonths;
     state.career.jobStartMonth = state.totalMonths;
+    if (job.id === 'coser') Game.structuredTraits.addExperience(state.profile, 'coser');
     if (internshipBonus) state.career._internshipBonusUsed = true;
     const employerJob = { ...job, company: employer, companyId: job.companyId || `local-${state.location.city}-${job.id}` };
     if (job.freelance) Game.workplace.leave(state);
@@ -153,7 +159,9 @@
     state.career.performance = U.clamp(state.career.performance + performance, 0, 100);
     state.career.exp += exp;
     state.stats.心情 = U.clamp(state.stats.心情 + mood, 0, 100);
-    Game.characterAttributes.gain(state, '智力', intelligence, `职场行动:${type}`);
+    const growthAbility = type === 'network' ? '交涉'
+      : (state.career.management ? '管理' : '学识');
+    Game.characterAttributes.gain(state, growthAbility, intelligence, `职场行动:${type}`);
     Game.careerSpecialties.afterWork(state, type);
     Game.lifeDirector.addLog(state, '职场行动', label, 'good');
     return { ok: true, message: Game.economy.message(

@@ -101,9 +101,8 @@
     ];
     const attributes = [
       ['健康状态', Game.healthModel.npcStatus(state, person)],
-      ...['智力', '魅力', '力量'].map((stat) => [
-        stat, `${Math.round(person.stats?.[stat] || 0)} / 潜力${Game.characterAttributes.potential(person, stat)}`,
-      ]),
+      ...Game.abilityView.abilityRows(person),
+      ...Game.abilityView.traitRows(person),
     ];
     const life = [
       ['当前学业', person.educationName || person.school || '-'],

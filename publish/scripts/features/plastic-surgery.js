@@ -135,12 +135,12 @@
     };
 
     if (success) {
-      if (proc.charm) state.stats.魅力 = U.clamp(state.stats.魅力 + proc.charm, 0, 100);
+      if (proc.charm) Game.characterAttributes.adjustPresentation(state.profile, state.stats, proc.charm);
       applyChanges(state, proc);
       if (proc.hymenOnly) state.profile.hymenIntact = true;
       result.note = `手术成功，${proc.name}完成。`;
     } else {
-      if (proc.failCharm) state.stats.魅力 = U.clamp(state.stats.魅力 + proc.failCharm, 0, 100);
+      if (proc.failCharm) Game.characterAttributes.adjustPresentation(state.profile, state.stats, proc.failCharm);
       if (proc.failHealth) state.stats.健康 = U.clamp(state.stats.健康 + proc.failHealth, 0, 100);
       result.note = `手术失败，${proc.name}出现了并发症。`;
     }

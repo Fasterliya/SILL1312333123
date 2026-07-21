@@ -91,15 +91,18 @@
   }
 
   function candidateScore(person, job) {
-    const stats = person.stats || {};
     const education = Number(person.educationLevel) || 0;
-    const charm = Number(stats.魅力 ?? person.charm) || 50;
-    const intelligence = Number(stats.智力) || 50;
-    const health = Number(stats.健康) || 60;
+    const ability = {
+      科学: '学识', 文学: '学识', 艺术: '交涉', 社交: '交涉', 商业: '管理', 运动: '体能',
+    }[job.category] || '学识';
+    const professional = Game.characterAttributes.personValue(person, ability);
+    const negotiation = Game.characterAttributes.personValue(person, '交涉');
+    const charm = Game.characterAttributes.derivedCharm(person);
     if (['idoltrainee', 'idol-underground', 'idol'].includes(job.id)) {
-      return charm * 0.68 + health * 0.2 + education * 5;
+      return charm * 0.45 + negotiation * 0.25
+        + Game.characterAttributes.personValue(person, '体能') * 0.2 + education * 5;
     }
-    return intelligence * 0.58 + charm * 0.16 + education * 12;
+    return professional * 0.58 + negotiation * 0.16 + education * 12;
   }
 
   function canNpcEnter(state, person, job) {

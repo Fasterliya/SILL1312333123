@@ -73,6 +73,7 @@
     const sourceStats = identity.skin?.stats || state.stats;
     Game.characterAttributes.ensure(p, sourceStats, identity.skin ? null : state.education);
     const congenital = Game.congenitalTraits.names(p, identity.gender);
+    const structured = Game.abilityView.traitRows(p);
     Game.portraitSystem.renderPlayer(state, elements);
     elements.profileFacts.innerHTML = [
       ['年龄', `${U.age(state)}岁${Game.timeSystem.ageMonths(state) % 12}月`], ['身高', `${p.height.toFixed(1)} cm`],
@@ -83,11 +84,9 @@
         ? [['生育力', `${Game.demography.fertility(state, p)}%`]] : []),
     ].map(([label, text]) => `<div><span>${label}</span><b>${text}</b></div>`).join('');
     elements.traitGrid.innerHTML = [
-      ['性格', p.personality], ['人格特质', p.trait],
+      ['性格标签', `${p.personality} · ${p.trait}`],
       ['先天特质', congenital.join(' · ') || '无显著先天特质'],
-      ...['智力', '魅力', '力量'].map((stat) => [
-        `${stat}潜力`, `${Math.round(sourceStats[stat])} / ${Game.characterAttributes.potential(p, stat)}`,
-      ]),
+      ...structured, ...Game.abilityView.abilityRows(p, identity.skin ? null : state),
     ]
       .map(([label, text]) => `<div><span>${label}</span><strong>${text}</strong></div>`).join('');
     elements.geneFacts.innerHTML = [

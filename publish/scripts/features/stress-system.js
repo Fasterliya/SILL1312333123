@@ -29,10 +29,12 @@
   function add(state, amount, source) {
     const item = ensure(state);
     const before = item.level;
-    item.value = clamp(item.value + amount);
+    const factor = Game.structuredTraits?.stressFactor(state.profile, amount < 0) || 1;
+    const adjusted = Math.round(amount * factor);
+    item.value = clamp(item.value + adjusted);
     item.level = levelOf(item.value);
-    if (amount) {
-      item.history.push({ month: state.totalMonths, amount: Math.round(amount), source: source || '生活压力' });
+    if (adjusted) {
+      item.history.push({ month: state.totalMonths, amount: adjusted, source: source || '生活压力' });
       item.history = item.history.slice(-12);
     }
     trigger(state, before, item.level);

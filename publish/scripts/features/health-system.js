@@ -55,7 +55,7 @@
       const stamina = Game.staminaSystem?.spend(state, 10) || { ok: true };
       if (!stamina.ok) return stamina;
       state.health.lifestyleScore = U.clamp((state.health.lifestyleScore || 0) + 1.5, -10, 10);
-      Game.characterAttributes.gain(state, '力量', 1.5, '规律运动');
+      Game.characterAttributes.gain(state, '体能', 1.5, '规律运动');
       Game.stressSystem.reduce(state, 5, '规律运动');
     } else if (type === 'rest') {
       state.health.sleep = U.clamp(state.health.sleep + 1, 4, 10);
@@ -63,7 +63,7 @@
     } else return { ok: false, message: '未知的生活方式安排' };
     state.health.lastLifestyleMonth = state.totalMonths;
     Game.healthModel.sync(state);
-    return { ok: true, message: type === 'exercise' ? '完成规律运动，力量成长并缓解压力' : '安排充分休息，睡眠和压力得到改善' };
+    return { ok: true, message: type === 'exercise' ? '完成规律运动，体能经验增长并缓解压力' : '安排充分休息，睡眠和压力得到改善' };
   }
 
   function action(state, type, value) {

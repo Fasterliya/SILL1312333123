@@ -34,6 +34,8 @@
   function handleRelations(event, state) {
     const style = event.target.closest('[data-parenting-style]');
     if (style) return finish(Game.parenting.setStyle(state, style.dataset.parentingStyle)), true;
+    const focus = event.target.closest('[data-parenting-focus]');
+    if (focus) return finish(Game.parenting.setFocus(state, focus.dataset.parentingFocus)), true;
     const parenting = event.target.closest('[data-parenting-child]');
     if (parenting) {
       return finish(Game.parenting.act(

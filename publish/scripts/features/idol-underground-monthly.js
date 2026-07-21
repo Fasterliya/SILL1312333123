@@ -8,7 +8,7 @@
   function monthly(state) {
     const underground = Core.ensure(state);
     if (!underground.active || underground.fellTo) return;
-    state.stats.魅力 = U.clamp((state.stats.魅力 || 0) + 0.5, 0, 100);
+    Game.characterAttributes.gain(state, '交涉', 0.35, '地下偶像活动');
     if (state.totalMonths > underground.lastShowMonth) {
       const result = Game.undergroundIdolShows.monthlyShow(state);
       if (!result.ok) {

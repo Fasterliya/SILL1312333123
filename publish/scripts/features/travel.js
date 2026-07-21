@@ -13,8 +13,7 @@
   ].map(([name, cost, description, category]) => (
     { name, cost, description, kind: 'neighborhood', category }));
   const filterLabels = ['全部', 'daily:日常休闲', 'social:社交邂逅', 'creative:创作活动', 'night:深夜']; let activeFilter = '全部';
-  function ensureTravel(state) {
-    state.travel = state.travel && typeof state.travel === 'object' ? state.travel : {};
+  function ensureTravel(state) { state.travel = state.travel && typeof state.travel === 'object' ? state.travel : {};
     state.travel.encounters = Array.isArray(state.travel.encounters) ? state.travel.encounters : [];
     state.travel.localHistory = Array.isArray(state.travel.localHistory) ? state.travel.localHistory : []; return state.travel;
   }
@@ -28,19 +27,21 @@
     if ((effect.cost || 0) > state.money) return `资金不足，需要${Game.view.money(effect.cost)}`;
     const req = effect.requires || {};
     if (req.age && U.age(state) < req.age) return `需要年满${req.age}岁`;
-    const value = ['智力', '魅力', '力量'].includes(req.stat) ? Game.characterAttributes.playerValue(state, req.stat) : (state.stats[req.stat] || 0);
-    if (req.stat && value < req.min) return `${req.stat}需要达到${req.min}`;
+    const ability = Game.characterAttributes.normalize(req.stat);
+    const value = ability ? Game.characterAttributes.playerValue(state, ability) : (state.stats[req.stat] || 0);
+    if (req.stat && value < req.min) return `${ability || req.stat}需要达到${req.min}`;
     return '';
   }
   function requirementText(effect) {
     const parts = [];
     if (effect.cost) parts.push(`资金≥${Game.view.money(effect.cost)}`);
     if (effect.requires?.age) parts.push(`年龄≥${effect.requires.age}`);
-    if (effect.requires?.stat) parts.push(`${effect.requires.stat}≥${effect.requires.min}`);
+    if (effect.requires?.stat) parts.push(`${Game.characterAttributes.normalize(effect.requires.stat) || effect.requires.stat}≥${effect.requires.min}`);
     return parts.join(' · ') || '无额外门槛';
   }
   function rewardText(effect) {
-    const labels = { mood: '心情', charm: '魅力', intelligence: '智力', health: '健康', reputation: '声望' };
+    const labels = { mood: '心情', charm: '交涉经验', intelligence: '学识经验',
+      strength: '体能经验', health: '健康', reputation: '声望' };
     const gains = Object.entries(labels).filter(([key]) => effect[key])
       .map(([key, label]) => `${label}${effect[key] > 0 ? '+' : ''}${effect[key]}`);
     if (effect.score) gains.push(`评价+${effect.score}`);
@@ -64,11 +65,11 @@
   function applyEffect(state, ts, effect) {
     if (effect.cost) Game.economy.spend(state, effect.cost);
     if (effect.money) state.money += effect.money;
-    const changes = { 心情: effect.mood, 魅力: effect.charm, 智力: effect.intelligence, 健康: effect.health };
-    Object.entries(changes).forEach(([stat, delta]) => {
-      if (delta > 0 && ['智力', '魅力'].includes(stat)) Game.characterAttributes.gain(state, stat, delta, '街区旅途');
-      else if (delta) state.stats[stat] = U.clamp(state.stats[stat] + delta, 0, 100);
-    });
+    if (effect.mood) state.stats.心情 = U.clamp(state.stats.心情 + effect.mood, 0, 100);
+    if (effect.health) state.stats.健康 = U.clamp(state.stats.健康 + effect.health, 0, 100);
+    if (effect.intelligence) Game.characterAttributes.gain(state, '学识', effect.intelligence, '街区旅途');
+    if (effect.charm) Game.characterAttributes.gain(state, '交涉', effect.charm, '街区旅途');
+    if (effect.strength) Game.characterAttributes.gain(state, '体能', effect.strength, '街区旅途');
     state.cityLife = state.cityLife || { reputation: 0, familiarity: {} }; state.cityLife.familiarity ||= {};
     if (effect.reputation) state.cityLife.reputation = U.clamp((state.cityLife.reputation || 0) + effect.reputation, 0, 100);
     ts.score += effect.score || 0;
@@ -138,7 +139,7 @@
     const rating = ts.score >= 13 ? '深入探索' : (ts.score >= 9 ? '充实旅程' : '轻松到访');
     const summary = `${rating}，评分${ts.score}，遭遇风险${ts.riskCount}次。${ts.feedback}`;
     state.stats.心情 = U.clamp(state.stats.心情 + (ts.score >= 13 ? 6 : 3), 0, 100);
-    Game.stressSystem.reduce(state, ts.score >= 13 ? 8 : 4, '街区旅途');
+    Game.stressSystem.reduce(state, ts.score >= 13 ? 8 : 4, '街区旅途'); Game.structuredTraits.addExperience(state.profile, 'traveler');
     recordHistory(state, ts.placeName, ts.score, rating);
     state.travel.activeStage = null;
     Game.lifeDirector.addLog(state, '旅途归来', `${ts.placeName}：${summary}`, 'milestone');
@@ -147,9 +148,8 @@
   function renderEncounters(state) {
     const people = ensureTravel(state).encounters.slice(-6).reverse();
     if (!people.length) return '<p class="empty-state">完成社交选择后，可能在这里留下旅途相识。</p>';
-    return people.map((person) => Game.social.card(person, [
-      ['chat', '交谈'], ['meal', '请客'], ['exchange', '留联系方式'],
-    ])).join('');
+    return people.map((person) => Game.social.card(person,
+      [['chat', '交谈'], ['meal', '请客'], ['exchange', '留联系方式']])).join('');
   }
   function renderActive(state, ts) {
     if (ts.mode === 'convention') return Game.conventionTravelView.render(state, ts);

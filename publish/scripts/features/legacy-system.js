@@ -144,7 +144,7 @@
     state.health = { diet: '均衡饮食', sleep: 7, conditions: [], insurance: '基础医保',
       retirementFund: 0, pension: 0, retired: false, careLevel: 0 };
     state.stress = { value: Math.max(0, 70 - Math.round(heir.upbringing?.care || 50)), level: 0 };
-    state.parenting = { style: '均衡陪伴', educationFund: 0 };
+    state.parenting = { style: '均衡陪伴', educationFund: 0, focus: '学识' };
     state.eventState = { seen: {}, lastMonth: state.totalMonths - 4,
       history: state.eventState.history || [] };
     state.routine = { actionMonth: state.totalMonths, fatigue: 0,

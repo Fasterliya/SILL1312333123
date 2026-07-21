@@ -45,7 +45,7 @@
       <p><b>所属团体</b><span>${group?.name || '独立偶像'}</span></p>
       <p><b>团体状态</b><span>${group ? `${group.members}人 · 凝聚力${Math.round(group.cohesion)}` : '独立活动'}</span></p>
       <p><b>阶段</b><span>${Core.STAGE_LABELS[underground.stage] || '未知'}</span></p>
-      <p><b>魅力</b><span>${Math.round(state.stats.魅力 || 0)} · 每月自然+0.5</span></p>
+      <p><b>派生魅力</b><span>${Math.round(state.stats.魅力 || 0)} · 舞台活动积累交涉经验</span></p>
       <p><b>业内交易</b><span>${underground.producerAbuse}次</span></p>
       <p><b>强迫伤害</b><span>${underground.corruptionFromForced}次</span></p>
     </div>`;

@@ -134,7 +134,7 @@
       + Math.max(0, academic - 3) * 3 - rest * 5 - club * 2, 0, 100);
     state.education.examTechnique = U.clamp((state.education.examTechnique || 20) + tutor, 0, 100);
     state.stats.心情 = U.clamp((state.stats.心情 || 0) + club * 2 + rest, 0, 100);
-    state.stats.魅力 = U.clamp((state.stats.魅力 || 0) + club, 0, 100);
+    if (club) Game.characterAttributes.gain(state, '交涉', club * 0.35, '社团活动');
     plan.lastAppliedMonth = state.totalMonths;
     plan.monthsExecuted = (plan.monthsExecuted || 0) + 1;
     plan.lastGain = gained;

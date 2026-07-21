@@ -87,7 +87,7 @@
       if (current.tier === 1 && state.career.job) state.career.performance = U.clamp(state.career.performance + 1, 0, 100);
       if (current.tier === 1) state.stats.心情 = U.clamp(state.stats.心情 - 1, 0, 100);
       if (current.tier === 3) state.stats.健康 = U.clamp(state.stats.健康 + 1, 0, 100);
-      if (current.country !== '华夏') state.stats.魅力 = U.clamp(state.stats.魅力 + 1, 0, 100);
+      if (current.country !== '华夏') Game.characterAttributes.gain(state, '交涉', 0.5, '异国生活');
     }
   }
 

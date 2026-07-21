@@ -49,14 +49,19 @@
       ? sample.highlights.filter((item) => typeof item === 'string').slice(0, 2) : [];
     const operationCount = Number(context.operationCount) || 0;
     const operationScore = Number(context.operationScore) || 0;
+    const company = (state.companies || []).find((item) => item.id === event.organizer.companyId);
+    const brand = Game.conventionProgression?.audienceImpact(company, event, prep)
+      || { score: 0, strength: '', concern: '' };
     let score = prep.quality * 0.44 + prep.safety * 0.38 + prep.promotion * 0.18;
     score += operationCount ? clamp((operationScore - 50) * 0.12, -6, 6) : -4;
+    score += brand.score;
     if (sampleScore !== null) score = score * 0.85 + sampleScore * 0.15;
     if (context.incident) score -= context.incident.rate > 0.1 ? 20 : 9;
     score = Math.round(clamp(score));
     const strengths = [];
     const concerns = [];
     if (sampleHighlights.length) strengths.push(...sampleHighlights);
+    if (brand.strength) strengths.push(brand.strength);
     if (prep.quality >= 70) strengths.push('内容与场馆质量获得认可');
     if (prep.safety >= 70) strengths.push('现场秩序与安全感良好');
     if (prep.promotion >= 70 && prep.promotion - prep.safety < 20) {
@@ -65,6 +70,7 @@
     if (prep.guests.length) strengths.push('主嘉宾形成明确记忆点');
     if (operationCount === 3 && operationScore >= 65) strengths.push('三阶段现场运营执行稳定');
     if (context.incident) concerns.push(context.incident.name);
+    if (brand.concern) concerns.push(brand.concern);
     if (operationCount < 3) concerns.push('现场运营阶段存在缺口');
     if (prep.promotion - prep.safety >= 20) concerns.push('宣传热度超过现场承载能力');
     if (prep.safety < 55) concerns.push('拥挤与秩序问题较明显');

@@ -14,6 +14,11 @@
     const state = Game._getState?.();
     const license = target?.closest?.('[data-convention-license]');
     if (license) return run(Game.conventionCompany.qualify(state, license.dataset.conventionLicense));
+    const focus = target?.closest?.('[data-convention-focus]');
+    if (focus) {
+      const [companyId, focusId] = focus.dataset.conventionFocus.split('|');
+      return run(Game.conventionProgression.setFocus(state, companyId, focusId));
+    }
     const bid = target?.closest?.('[data-convention-bid]');
     if (bid) {
       const [editionId, companyId] = bid.dataset.conventionBid.split('|');

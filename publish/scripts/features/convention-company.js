@@ -20,6 +20,7 @@
     item.businessLines = [...new Set([...(item.businessLines || []), 'convention'])];
     item.conventionBase = { ...state.location };
     item.conventionReputation = Math.max(0, Number(item.conventionReputation) || 0);
+    Game.conventionProgression?.ensure(item);
     return { ok: true, message: `${item.name}取得漫展会展资质` };
   }
   function eventsFor(state, item) {
@@ -48,10 +49,11 @@
     if (data.bids[key]) return { ok: false, message: '本届投标结果已经确定' };
     if (state.money < bidCost) return { ok: false, message: `投标保证金需要${Game.view.money(bidCost)}` };
     Game.economy.spend(state, bidCost);
+    const access = Game.conventionProgression?.bidAccess(item, event) || { penalty: 0 };
     const context = Math.min(14, Math.round((item.investment || 0) / 50000)
       + (item.employees?.length || 0) * 2 + (item.conventionReputation || 0) / 10);
     const resolution = Game.actionResolver.resolve(state, {
-      primary: '管理', secondary: '心计', difficulty: 62,
+      primary: '管理', secondary: '心计', difficulty: 62 + access.penalty,
       context, variance: 7, label: `${event.name}承办投标`,
     });
     const won = resolution.score >= 55;
@@ -96,7 +98,8 @@
     Game.economy.spend(state, option.cost);
     const resolution = Game.actionResolver.resolve(state, {
       primary: stage.ability, secondary: '管理', difficulty: 55,
-      context: Math.min(10, item.employees?.length || 0), variance: 6,
+      context: Math.min(14, (item.employees?.length || 0)
+        + (Game.conventionProgression?.preparationContext(item, option.id) || 0)), variance: 6,
       label: `${event.name}${stage.name}`,
     });
     const patch = { budget: prep.budget + option.cost };

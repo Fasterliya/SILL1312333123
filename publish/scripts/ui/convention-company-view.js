@@ -51,11 +51,13 @@
   }
   function partnerMeta(type, offer) {
     const ability = `${offer.primary}+${offer.secondary} · 难度${offer.difficulty}`;
+    const continuity = offer.relationship ? ` · 往届合作${offer.relationship}届` : '';
+    const fit = offer.fitBonus ? ` · 品牌/关系加成+${offer.fitBonus}` : '';
     if (type === 'sponsor') {
-      return `合作收入 ${Game.view.money(offer.value)} · ${effectText(offer)} · ${ability}`;
+      return `合作收入 ${Game.view.money(offer.value)} · ${effectText(offer)} · ${ability}${continuity}${fit}`;
     }
     return `费用 ${Game.view.money(offer.fee)} · 客流+${offer.draw}
-      · ${effectText(offer)} · ${ability}`;
+      · ${effectText(offer)} · ${ability}${continuity}${fit}`;
   }
   function partnerGroup(state, event, company, type, open) {
     const accepted = type === 'sponsor' ? event.preparation.sponsors : event.preparation.guests;
@@ -66,7 +68,8 @@
         ? `合作收入 ${Game.view.money(item.value)}`
         : `邀请费 ${Game.view.money(item.fee)} · 客流+${item.draw}`;
       return `<div class="convention-partner-group selected"><span>${title}</span>
-        <strong>${escape(item.name)}</strong><small>${detail}</small></div>`;
+        <strong>${escape(item.name)}</strong><small>${detail}
+        ${item.relationship ? ` · 往届合作${item.relationship}届` : ''}</small></div>`;
     }
     if (!open) {
       return `<div class="convention-partner-group selected"><span>${title}</span>
@@ -130,12 +133,29 @@
     const bid = state.conventionCalendar?.bids?.[`${event.id}:${company.id}`];
     if (event.organizer.type === 'player') return '';
     if (Game.conventionCalendar.status(state, event).id !== 'announced') return '';
+    const access = Game.conventionProgression?.bidAccess(company, event);
     return `<article class="convention-tender"><div><span>${event.year}年${event.month}月 · ${event.city}</span>
-      <strong>${escape(event.name)}</strong><small>${escape(event.scale)} · 当前承办候选：${escape(event.organizer.name)}</small></div>
+      <strong>${escape(event.name)}</strong><small>${escape(event.scale)} · 当前承办候选：${escape(event.organizer.name)}
+      ${access ? ` · ${escape(access.label)}` : ''}</small></div>
       ${bid ? `<b>${bid.won ? '已中标' : '未中标'}</b>` : (
         `<button data-convention-bid="${escape(event.id)}|${escape(company.id)}">
         申请承办 · ${Game.view.money(Game.conventionCompany.bidCost)}</button>`
       )}</article>`;
+  }
+  function brandPanel(state, item) {
+    const model = Game.conventionProgression.model(item, state.totalMonths);
+    const contractLocked = Game.conventionProgression.activeContract(state, item);
+    const status = contractLocked ? '承办项目进行中，定位已锁定' : (model.canChange
+      ? (model.changeCost ? `调整费用 ${Game.view.money(model.changeCost)}` : '首次定位免费')
+      : `${model.remaining}个月后可调整`);
+    return `<section class="convention-brand"><header><div><span>${model.tier.name}</span>
+      <strong>${model.focus.name}</strong></div><small>已承办 ${model.data.completedEvents} 届 · ${status}</small></header>
+      <div>${model.focuses.map((focus) => (
+        `<button data-convention-focus="${escape(item.id)}|${focus.id}"
+        class="${focus.id === model.focus.id ? 'active' : ''}"
+        ${focus.id === model.focus.id || !model.canChange || contractLocked ? 'disabled' : ''}>
+        <strong>${focus.name}</strong><small>${focus.summary}</small></button>`
+      )).join('')}</div></section>`;
   }
   function companyBlock(state, entry) {
     const item = entry.company;
@@ -154,6 +174,7 @@
     return `<section class="convention-company-block"><header><div><span>${escape(item.name)}</span>
       <strong>漫展会展业务</strong><small>${escape(item.conventionBase?.country || state.location.country)}
       · 行业声誉 ${Math.round(item.conventionReputation || 0)}${audience}</small></div><b>已获资质</b></header>
+      ${brandPanel(state, item)}
       ${contracts.map((event) => contractCard(state, event, item)).join('')}
       ${history.length ? `<div class="convention-settlement-history"><h3>往届结算</h3>
       ${history.map((settlement) => settlementSummary(settlement)).join('')}</div>` : ''}

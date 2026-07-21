@@ -23,6 +23,8 @@
     const attempts = prep.partnerAttempts[type] || [];
     return catalog(type).map((offer) => ({
       ...offer, name: label(event, offer),
+      relationship: Game.conventionProgression?.partnerRelation(item, offer.id) || 0,
+      fitBonus: Game.conventionProgression?.partnerContext(item, offer.id) || 0,
       attempted: attempts.includes(offer.id),
       selected: accepted.some((entry) => entry.id === offer.id),
       categoryFull: accepted.length >= limits[type],
@@ -58,7 +60,8 @@
     if (failure) return { ok: false, message: failure };
     prep.partnerAttempts[type].push(offer.id);
     const context = Math.min(16, Math.round((item.conventionReputation || 0) / 8)
-      + (event.kind === 'only' && offer.themed ? 4 : 0));
+      + (event.kind === 'only' && offer.themed ? 4 : 0)
+      + (Game.conventionProgression?.partnerContext(item, offer.id) || 0));
     const resolution = Game.actionResolver.resolve(state, {
       primary: offer.primary, secondary: offer.secondary,
       difficulty: offer.difficulty, context, variance: 7,
@@ -77,6 +80,7 @@
     const accepted = {
       id: offer.id, name: label(event, offer), acceptedAt: state.totalMonths,
       value: offer.value || 0, draw: offer.draw || 0, fee: offer.fee || 0,
+      relationship: Game.conventionProgression?.partnerRelation(item, offer.id) || 0,
     };
     (type === 'sponsor' ? prep.sponsors : prep.guests).push(accepted);
     applyEffects(state, event, prep, offer, `partner:${type}:${offer.id}`);

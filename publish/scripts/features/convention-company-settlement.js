@@ -111,6 +111,9 @@
     item.conventionAudienceScore = Number.isFinite(item.conventionAudienceScore)
       ? Math.round(item.conventionAudienceScore * 0.65 + result.audienceScore * 0.35)
       : result.audienceScore;
+    Game.conventionProgression?.recordSettlement(
+      item, event, Game.conventionCalendar.preparation(state, event), result,
+    );
     item.events = Array.isArray(item.events) ? item.events : [];
     const incident = result.incident ? `，${result.incident.name}造成损失` : '，现场秩序稳定';
     item.events.push({

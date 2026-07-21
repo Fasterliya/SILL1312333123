@@ -19,6 +19,28 @@
     recovery: { label: '休整季度', type: null, condition: -8, heat: -2, reputation: 1 },
   });
 
+  function repairActiveProject(state, idol) {
+    const active = idol.activeProject;
+    if (!active || typeof active !== 'object' || !PROJECTS[active.id]) {
+      idol.activeProject = null;
+      return;
+    }
+    active.startedMonth = Number.isFinite(Number(active.startedMonth))
+      ? Number(active.startedMonth) : state.totalMonths;
+    active.progress = U.clamp(Math.round(Number(active.progress) || 0), 0, 3);
+    const fallbackMonth = active.startedMonth + active.progress;
+    active.lastProgressMonth = Number.isFinite(Number(active.lastProgressMonth))
+      ? Math.min(Number(active.lastProgressMonth), state.totalMonths)
+      : Math.min(fallbackMonth, state.totalMonths);
+    if (active.progress >= 3) {
+      active.progress = 2;
+      active.lastProgressMonth = Math.min(active.lastProgressMonth, state.totalMonths - 1);
+    }
+    if (state.pendingDecision?.type === 'idolProjectSelect') {
+      state.pendingDecision = null;
+    }
+  }
+
   function ensure(state) {
     const idol = Game.idolCore.ensure(state);
     idol.strategyId = STRATEGIES[idol.strategyId] ? idol.strategyId : 'stable';
@@ -28,6 +50,7 @@
     idol.projectHistory = Array.isArray(idol.projectHistory) ? idol.projectHistory.slice(-12) : [];
     idol.activeProject = idol.activeProject && typeof idol.activeProject === 'object'
       ? idol.activeProject : null;
+    repairActiveProject(state, idol);
     idol.nextProjectMonth = Number.isFinite(idol.nextProjectMonth)
       ? idol.nextProjectMonth : state.totalMonths;
     return idol;
@@ -97,7 +120,13 @@
     const idol = ensure(state);
     const project = PROJECTS[id];
     if (!project) return { ok: false, message: '没有这个季度企划' };
-    if (idol.activeProject) return { ok: false, message: '当前季度企划仍在制作' };
+    if (idol.activeProject) {
+      const active = PROJECTS[idol.activeProject.id];
+      return {
+        ok: true,
+        message: `${active?.label || '当前季度企划'}已在制作，重复选择已取消`,
+      };
+    }
     const error = validateProject(state, idol, project);
     if (error) return { ok: false, message: error };
     const cost = project.type ? Game.idolCore.RELEASES[project.type].cost : 0;

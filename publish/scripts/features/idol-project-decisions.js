@@ -45,15 +45,20 @@
   }
 
   function queueProject(state) {
+    const idol = Game.idolProjectCycle.ensure(state);
+    if (idol.activeProject) return false;
     state.pendingDecision = { type: 'idolProjectSelect' };
     state.timeSpeed = 0;
+    return true;
   }
 
   function resolve(state, value) {
     const type = state.pendingDecision?.type;
     if (type === 'idolCareerPlan') {
       const result = Game.idolProjectCycle.setStrategy(state, value);
-      if (result.ok) queueProject(state);
+      if (result.ok && !queueProject(state)) {
+        result.message += '，当前季度企划继续制作';
+      }
       return result;
     }
     if (type === 'idolProjectSelect') return Game.idolProjectCycle.startProject(state, value);

@@ -94,11 +94,9 @@
     if (burnout >= 50) gain = Math.round(gain * 0.7);
     if (burnout >= 80) gain = Math.round(gain * 0.3);
 
-    subData.studyHours += gain;
+    subData.studyHours = Math.min(240, subData.studyHours + gain);
     state.education.burnout = U.clamp(burnout + U.between(3, 8), 0, 100);
 
-    var msg = subject + '学习+' + gain + 'h';
-    U.log(msg);
     return { ok: true, message: subject + ' +' + gain + 'h' };
   }
 
@@ -108,35 +106,27 @@
     var map = getStageSubjects(state);
     var subjects = state.education.subjects;
     var keys = Object.keys(map);
+    var targetSubjects = Game.educationStudyPlan
+      ? Game.educationStudyPlan.targets(state) : [];
     var html = '<div class="subject-grid">';
     for (var i = 0; i < keys.length; i += 1) {
       var sub = keys[i];
       var maxScore = map[sub];
       var data = subjects[sub] || { studyHours: 0, examScore: 0, aptitude: 0 };
       var apt = data.aptitude || 0;
-      var stars;
-      if (apt >= 80) stars = 5;
-      else if (apt >= 65) stars = 4;
-      else if (apt >= 50) stars = 3;
-      else if (apt >= 35) stars = 2;
-      else stars = 1;
-
-      var starStr = '';
-      for (var s = 0; s < 5; s += 1) {
-        starStr += s < stars ? '★' : '☆';
-      }
-
       var hours = data.studyHours || 0;
       var pct = Math.min(100, Math.round((hours / 200) * 100));
       var examScore = data.examScore || 0;
+      var focused = targetSubjects.indexOf(sub) >= 0;
 
-      html += '<div class="subject-card">'
-        + '<div class="subject-name">' + escape(sub) + ' <span class="subject-max">' + maxScore + '分</span></div>'
-        + '<div class="subject-stars">' + starStr + '</div>'
-        + '<div class="progress-bar"><i style="width:' + pct + '%"></i><span>' + hours + '/200h</span></div>'
-        + '<div class="subject-exam">上次考试: ' + examScore + '分</div>'
-        + '<button class="btn-learn" data-learn-subject="' + escape(sub) + '">学习 -15体</button>'
-        + '</div>';
+      html += '<article class="subject-card' + (focused ? ' plan-focus' : '') + '">'
+        + '<div class="subject-copy"><div class="subject-name">' + escape(sub)
+        + '<span class="subject-max">' + maxScore + '分</span></div>'
+        + '<small>' + (focused ? '策略重点 · ' : '') + '擅长度 ' + apt + '</small></div>'
+        + '<button class="btn-learn" data-learn-subject="' + escape(sub)
+        + '" aria-label="加练' + escape(sub) + '" title="加练' + escape(sub) + '">＋</button>'
+        + '<div class="progress-bar"><i style="width:' + pct + '%"></i>'
+        + '<span>' + hours + 'h · 上次 ' + examScore + '分</span></div></article>';
     }
     html += '</div>';
     return html;
@@ -145,21 +135,50 @@
   function renderQuick(state) {
     if (!isStudent(state)) return '';
     var burnout = Math.round(state.education.burnout || 0);
-    return '<div class="quick-study subject-study"><header><strong>科目学习</strong>'
-      + '<span>疲劳 ' + burnout + '/100</span></header>' + render(state) + '</div>';
+    var plan = Game.educationStudyPlan
+      ? Game.educationStudyPlan.status(state)
+      : { plan: 'balanced', label: '均衡', text: '下月自动执行' };
+    var buttons = Object.keys(Game.educationStudyPlan?.plans || { balanced: '均衡' })
+      .map(function (id) {
+        var label = Game.educationStudyPlan.plans[id];
+        return '<button data-study-plan="' + id + '" class="'
+          + (plan.plan === id ? 'active' : '') + '">' + label + '</button>';
+      }).join('');
+    return '<div class="quick-study subject-study"><header><div><strong>学习计划</strong>'
+      + '<small>' + plan.text + '</small></div><span>疲劳 ' + burnout + '/100</span></header>'
+      + '<div class="study-plan" role="group" aria-label="每月自动学习策略">' + buttons + '</div>'
+      + render(state) + '</div>';
+  }
+
+  function restoreControl(target, scrollTop) {
+    root.requestAnimationFrame(function () {
+      var grid = document.querySelector('#quickStudyPanel .subject-grid');
+      if (grid) grid.scrollTop = scrollTop;
+      var selector = target.dataset.learnSubject ? '[data-learn-subject]' : '[data-study-plan]';
+      var key = target.dataset.learnSubject || target.dataset.studyPlan;
+      var next = Array.from(document.querySelectorAll(selector)).find(function (item) {
+        return (item.dataset.learnSubject || item.dataset.studyPlan) === key;
+      });
+      if (next) next.focus({ preventScroll: true });
+    });
   }
 
   function handleClick(event) {
-    var target = event.target.closest('[data-learn-subject]');
+    var target = event.target.closest('[data-learn-subject], [data-study-plan]');
     if (!target) return false;
     var state = Game._getState ? Game._getState() : null;
     if (!state) return false;
+    var grid = target.closest('.subject-study')?.querySelector('.subject-grid');
+    var scrollTop = grid?.scrollTop || 0;
     var subject = target.dataset.learnSubject;
-    var result = learnSubject(state, subject);
-    if (result.ok && Game.studyEvents) Game.studyEvents.maybeTrigger(state, subject);
+    var result = subject
+      ? learnSubject(state, subject)
+      : Game.educationStudyPlan.set(state, target.dataset.studyPlan);
+    if (subject && result.ok && Game.studyEvents) Game.studyEvents.maybeTrigger(state, subject);
     Game._refresh && Game._refresh();
     Game._save && Game._save();
     Game.view && Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
+    restoreControl(target, scrollTop);
     return true;
   }
 

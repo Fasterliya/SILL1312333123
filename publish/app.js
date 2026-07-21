@@ -82,6 +82,16 @@
 
   function startTimeLoop(){ startTimer(); }
   function resumeEducation(){ if(Game.educationFastForward.active(state)) setTimeSpeed(10); }
+  function startEducationFastForward(){
+    if(!state||state.pendingDecision||state.gameOver) return;
+    if(!Game.educationFastForward.active(state)){
+      var months = Game.educationFastForward.begin(state);
+      if(!months) return Game.view.showToast('当前没有可推进的升学节点','warning');
+      Game.view.showToast('已开启自动学习推进','good');
+      save();
+    }
+    setTimeSpeed(10);
+  }
 
 
   function switchTabs(event) {
@@ -113,7 +123,7 @@
         setTimeSpeed(0);
       }
     });
-    Game.view.el.examJumpBtn.addEventListener('click', () => { resumeEducation(); });
+    Game.view.el.examJumpBtn.addEventListener('click', startEducationFastForward);
     Game.view.el.decisionBody.addEventListener('click', (event) => {
       const choice = event.target.closest('[data-choice]');
       if (choice) Game.actions.decide(choice.dataset.choice);

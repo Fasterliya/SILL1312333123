@@ -92,6 +92,7 @@
   function monthly(state) {
     legacy.monthly(state);
     if (!Game.subjectPanel.isStudent(state)) return;
+    Game.educationStudyPlan.applyMonthly(state);
     const recovery = state.health.sleep >= 8 ? 7 : 4;
     state.education.burnout = U.clamp((state.education.burnout || 0) - recovery, 0, 100);
     syncLegacy(state);

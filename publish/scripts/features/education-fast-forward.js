@@ -67,8 +67,12 @@
     button.hidden = !target || Game.content.age(state) >= 18;
     if (!target) return;
     button.disabled = Boolean(state.pendingDecision || state.gameOver);
-    button.querySelector('span').textContent = state.education.focus || '均衡基础';
-    button.querySelector('strong').textContent = `推进至${target.label}`;
+    const running = active(state);
+    button.classList.toggle('active', running);
+    button.querySelector('span').textContent = running ? '自动推进中' : '升学快进';
+    button.querySelector('strong').textContent = running
+      ? `剩余${remaining(state)}个月`
+      : `推进至${target.label}`;
   }
 
   Game.educationFastForward = Object.freeze({

@@ -1,5 +1,5 @@
-.time-controls #examJumpBtn {
-  grid-column: 1 / -1;
+#examJumpBtn {
+  flex: 0 0 36px;
   min-height: 36px;
   padding: 5px 10px;
   display: flex;
@@ -7,20 +7,25 @@
   justify-content: space-between;
   gap: 10px;
   background: #765c35;
+  color: #fff;
 }
 
-.time-controls #examJumpBtn[hidden] {
+#examJumpBtn.active {
+  background: #315f58;
+}
+
+#examJumpBtn[hidden] {
   display: none;
 }
 
-.time-controls #examJumpBtn span {
+#examJumpBtn span {
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.time-controls #examJumpBtn strong {
+#examJumpBtn strong {
   flex: 0 0 auto;
   font-size: 12px;
 }

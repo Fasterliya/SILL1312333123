@@ -228,6 +228,7 @@
     };
     state.education.subjects = state.education.subjects && typeof state.education.subjects === 'object' ? state.education.subjects : {};
     state.education.burnout = Number.isFinite(state.education.burnout) ? state.education.burnout : 0;
+    state.education.studyPlan = ['balanced', 'weakness', 'strength'].includes(state.education.studyPlan) ? state.education.studyPlan : 'balanced';
     return state;
   }
 

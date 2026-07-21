@@ -67,8 +67,7 @@
 
   function health(state, data) {
     const positiveIncome = Math.max(0, Number(state.career?.salary) || 0)
-      + Math.max(0, data.companyProfit)
-      + Math.max(0, Game.assetsSystem?.monthlyIncome(state) || 0);
+      + Math.max(0, data.companyProfit);
     const burden = positiveIncome > 0 ? data.monthlyDebt / positiveIncome : (data.monthlyDebt ? 1 : 0);
     if (data.backTaxes > 0 || state.money < 0 || burden >= 0.6) {
       return ['高风险', 'negative', '欠税、负现金或月供压力正在侵蚀财务安全。'];

@@ -57,16 +57,6 @@
       finish(Game.propertySystem.repay(state, propertyRepay.dataset.propertyRepay));
       return true;
     }
-    const business = event.target.closest('[data-business]');
-    if (business) {
-      finish(Game.assetsSystem.buyBusiness(state, business.dataset.business));
-      return true;
-    }
-    const vehicle = event.target.closest('[data-vehicle]');
-    if (vehicle) {
-      finish(Game.assetsSystem.buyVehicle(state, vehicle.dataset.vehicle));
-      return true;
-    }
     const bankAction = event.target.closest('[data-bank-action]');
     if (bankAction) {
       const action = bankAction.dataset.bankAction;

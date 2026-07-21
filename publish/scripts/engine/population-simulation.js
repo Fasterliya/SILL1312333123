@@ -11,7 +11,8 @@
     records.forEach((record, index) => {
       const years = age(state, record);
       if (!record.j && years >= 22 && years <= 60 && Math.random() < 0.48) {
-        record.j = Game.cityPopulation.jobFor(city, index + state.year, years)?.id || '';
+        const job = Game.cityPopulation.jobFor(city, index + state.year, years);
+        if (job && Game.jobMarket.vacancies(state, job) > 0) record.j = job.id;
       }
     });
   }

@@ -3,20 +3,18 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
-  const C = Game.config;
 
   const LOAN_DEFS = {
     consumer:  { name: '消费贷款', collateral: '无',        max: 50000,  rate: 0.12, term: 24 },
-    business:  { name: '经营贷款', collateral: '已有产业',  max: Infinity, rate: 0.07, term: 60 },
+    business:  { name: '经营贷款', collateral: '名下公司',  max: Infinity, rate: 0.07, term: 60 },
     loanShark: { name: '高利贷',   collateral: '无',        max: 100000, rate: 0.35, term: 12 },
   };
 
   /* ---- helpers ---- */
 
   function businessTotal(state) {
-    return (state.assets.businesses || []).reduce(function (sum, id) {
-      var biz = C.businesses.find(function (item) { return item.id === id; });
-      return sum + (biz ? biz.price : 0);
+    return (state.companies || []).reduce(function (sum, company) {
+      return sum + Math.max(0, Number(company.investment) || 0);
     }, 0);
   }
 
@@ -71,7 +69,7 @@
 
     var maximum = maxForType(state, type);
     if (type === 'business' && maximum <= 0) {
-      return { ok: false, message: '需要先拥有产业才能申请经营贷款' };
+      return { ok: false, message: '需要先拥有公司才能申请经营贷款' };
     }
     if (amt > maximum) {
       return { ok: false, message: '贷款金额不能超过 ' + Game.view.money(maximum) };
@@ -180,77 +178,8 @@
     });
   }
 
-  function render(state) {
-    ensure(state);
-    var score = getCreditScore(state);
-    var color = score >= 70 ? '#4caf50' : (score >= 40 ? '#ff9800' : '#f44336');
-    var label = score >= 70 ? '优质信用 · 利率减半'
-      : (score < 30 ? '信用极差 · 仅可申请高利贷'
-        : (score < 50 ? '信用较差 · 利率上浮50%' : '普通信用'));
-
-    var scoreBar = '<section class="credit-section">'
-      + '<div><span>信用评分</span><strong style="color:' + color + '">' + score + '</strong></div>'
-      + '<i><b style="width:' + score + '%;background:' + color + '"></b></i>'
-      + '<small>' + label + '</small></section>';
-
-    var loansHtml = state.finance.loans.length
-      ? state.finance.loans.map(function (loan) {
-          var typeName = (LOAN_DEFS[loan.type] && LOAN_DEFS[loan.type].name) || loan.type;
-          return '<article class="loan-row">'
-            + '<div><strong>' + typeName + '</strong>'
-            + '<span>本金 ' + Game.view.money(loan.amount)
-            + ' · 利率 ' + (loan.rate * 100).toFixed(1) + '%'
-            + ' · 剩余 ' + loan.remainingMonths + ' 个月</span></div>'
-            + '<b>月供 ' + Game.view.money(loan.monthlyPayment) + '</b>'
-            + '<button data-bank-action="repay" data-bank-value="' + loan.id + '">还款</button>'
-            + '</article>';
-        }).join('')
-      : '<p class="empty-state">当前无贷款</p>';
-
-    var bizTotal = businessTotal(state);
-    var hasBiz = (state.assets.businesses || []).length > 0;
-
-    var applyRows = Object.keys(LOAN_DEFS).map(function (type) {
-      var info = LOAN_DEFS[type];
-      var maxAmt = type === 'business' ? Math.round(bizTotal * 0.7) : info.max;
-      var hasLoan = state.finance.loans.some(function (loan) { return loan.type === type; });
-      var disabled = false;
-      var btnText = '申请';
-      if (hasLoan) { disabled = true; btnText = '已有贷款'; }
-      else if (type === 'business' && (!hasBiz || maxAmt <= 0)) { disabled = true; btnText = '需要先拥有产业'; }
-
-      return '<article class="loan-apply-row">'
-        + '<div><strong>' + info.name + '</strong>'
-        + '<span>最高 ' + Game.view.money(maxAmt)
-        + ' · 基础利率 ' + (info.rate * 100).toFixed(1) + '%'
-        + ' · 期限 ' + info.term + ' 个月</span>'
-        + '<small>抵押：' + info.collateral + '</small></div>'
-        + '<button data-bank-action="apply" data-bank-type="' + type + '"'
-        + (disabled ? ' disabled' : '') + '>' + btnText + '</button>'
-        + '</article>';
-    }).join('');
-
-    var age = U.age(state);
-    var hasJob = Boolean(state.career.job);
-    var eligible = !hasJob && state.money < 1000 && age >= 18;
-
-    var welfareHtml = '<section class="welfare-section">'
-      + '<header><span>社会福利</span></header>'
-      + '<div class="welfare-status">'
-      + '<span>失业且现金不足 1000 时可领取低保</span>'
-      + '<strong>' + (eligible ? '符合申领条件'
-        : (hasJob ? '有工作者不符合' : (age < 18 ? '未成年不符合' : '现金超过 1000'))) + '</strong>'
-      + (eligible ? '<button data-bank-action="welfare">领取低保</button>' : '')
-      + '</div></section>';
-
-    return '<div class="bank-system">' + scoreBar
-      + '<section class="loan-section"><header><span>贷款管理</span></header>'
-      + '<h3>当前贷款</h3>' + loansHtml
-      + '<h3>申请贷款</h3>' + applyRows + '</section>'
-      + welfareHtml + '</div>';
-  }
-
   Game.bankSystem = Object.freeze({
-    ensure, getCreditScore, applyLoan, repayLoan, welfare, monthly, render,
+    definitions: LOAN_DEFS, businessTotal, maxForType,
+    ensure, getCreditScore, applyLoan, repayLoan, welfare, monthly,
   });
 }(window));

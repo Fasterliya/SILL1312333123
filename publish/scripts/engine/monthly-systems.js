@@ -9,6 +9,7 @@
     Game.propertySystem.monthly(state);
     Game.socialWorld.monthly(state);
     Game.populationSimulation.monthly(state);
+    Game.npcJobMigration?.monthly(state);
     Game.careerGrowth.monthly(state);
     Game.companyMarket.monthly(state);
     Game.careerSpecialties.monthly(state);

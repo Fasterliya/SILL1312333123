@@ -96,6 +96,8 @@
   <script src="./scripts/features/matchmaking.js" defer></script>
   <script src="./scripts/features/family-system.js" defer></script>
   <script src="./scripts/features/job-market-capacity.js" defer></script>
+  <script src="./scripts/features/job-market-rebalance.js" defer></script>
+  <script src="./scripts/features/npc-job-migration.js" defer></script>
   <script src="./scripts/features/career.js" defer></script>
   <script src="./scripts/features/career-ladders.js" defer></script>
   <script src="./scripts/features/career-history.js" defer></script>
@@ -140,6 +142,7 @@
   <script src="./scripts/features/rape-encounter.js" defer></script>
   <script src="./scripts/features/tax-system.js" defer></script>
   <script src="./scripts/features/bank-system.js" defer></script>
+  <script src="./scripts/ui/bank-view.js" defer></script>
   <script src="./scripts/features/company-system.js" defer></script>
   <script src="./scripts/features/stock-director.js" defer></script>
   <script src="./scripts/features/idol-underground-core.js" defer></script>
@@ -169,7 +172,7 @@
   <script src="./scripts/features/study-events.js" defer></script>
   <script src="./scripts/features/education-subject-integration.js" defer></script>
   <script src="./scripts/features/journey.js" defer></script>
-  <script src="./scripts/features/assets-system.js" defer></script>
+  <script src="./scripts/features/removed-assets.js" defer></script>
   <script src="./scripts/engine/npc-cultural-style.js" defer></script>
   <script src="./scripts/engine/npc-life-support.js" defer></script>
   <script src="./scripts/engine/npc-life.js" defer></script>
@@ -294,7 +297,6 @@
         <div class="module-directory">
           <button data-open-module="propertySubpage" data-module-title="不动产"><b>房</b><span><strong>不动产</strong><small>购入、还贷、市值与出售</small></span><i>›</i></button>
           <button data-open-module="stockSubpage" data-module-title="股票"><b>股</b><span><strong>股票</strong><small>查看行情并买卖持仓</small></span><i>›</i></button>
-          <button data-open-module="industrySubpage" data-module-title="产业与座驾"><b>产</b><span><strong>产业与座驾</strong><small>经营现金流与购买交通工具</small></span><i>›</i></button>
           <button data-open-module="financeSubpage" data-module-title="金融与企业"><b>企</b><span><strong>金融与企业</strong><small>贷款、福利、公司经营与董事会</small></span><i>›</i></button>
           <button data-open-module="legacySubpage" data-module-title="家庭延续"><b>承</b><span><strong>家庭延续</strong><small>代际记录、下一代、房产与资金</small></span><i>›</i></button>
         </div>
@@ -408,10 +410,6 @@
       <div class="module-view" id="stockSubpage"><section class="panel">
         <div class="panel-title"><h2>股票市场</h2><span>每月价格波动</span></div>
         <div id="stockPanel"></div>
-      </section></div>
-      <div class="module-view" id="industrySubpage"><section class="panel">
-        <div class="panel-title"><h2>产业与座驾</h2><span>长期资产</span></div>
-        <div id="industryPanel"></div>
       </section></div>
       <div class="module-view" id="financeSubpage"><div id="financePanel"></div></div>
       <div class="module-view" id="legacySubpage"><section class="panel">

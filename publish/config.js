@@ -107,8 +107,6 @@
     ],
     stocks: { 华夏科技: 32.4, 民生消费: 18.6, 绿色能源: 24.8 },
     companies: [],
-    businesses: [],
-    vehicles: [],
   };
 
   root.LifeGame = root.LifeGame || {};

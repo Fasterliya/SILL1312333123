@@ -78,23 +78,6 @@
     智能制造: 41.2, 医疗创新: 27.6, 城市交通: 16.8, 文化传媒: 22.3,
     东亚机器人: 53.1, 樱花消费: 19.4, 全球指数: 88.6,
   });
-  C.businesses.push(
-    { id: 'stall', name: '街角小摊', price: 18000, income: 900 },
-    { id: 'cafe', name: '社区咖啡馆', price: 120000, income: 5200 },
-    { id: 'studio', name: '创意工作室', price: 260000, income: 9800 },
-    { id: 'shop', name: '便利商店', price: 360000, income: 13200 },
-    { id: 'restaurant', name: '主题餐厅', price: 680000, income: 23800 },
-    { id: 'factory', name: '小型制造厂', price: 1600000, income: 52000 },
-    { id: 'hotel', name: '精品旅馆', price: 2800000, income: 76000 },
-    { id: 'techfirm', name: '科技创业公司', price: 5200000, income: 148000 },
-  );
-  C.vehicles.push(
-    { id: 'bike', name: '通勤自行车', price: 1800, mood: 1 },
-    { id: 'scooter', name: '城市电动车', price: 6800, mood: 2 },
-    { id: 'compact', name: '紧凑型轿车', price: 98000, mood: 4 },
-    { id: 'suv', name: '家庭旅行车', price: 260000, mood: 7 },
-    { id: 'sports', name: '双门跑车', price: 880000, mood: 12 },
-  );
   root.LifeGame.worldData = Object.freeze({
     japaneseName(gender) {
       return root.LifeGame.nameSystem.makeName('', gender, 'ja-JP');

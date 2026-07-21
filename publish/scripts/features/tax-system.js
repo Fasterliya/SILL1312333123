@@ -35,10 +35,6 @@
     /* career salary */
     const salaryIncome = (state.career.salary || 0) * 12;
 
-    /* business income (monthly x 12) */
-    const businessMonthly = Game.assetsSystem ? Game.assetsSystem.monthlyIncome(state) : 0;
-    const businessIncome = businessMonthly * 12;
-
     /* stock dividends (yearly delta) */
     const currentDividends = state.assets?.dividends || 0;
     const dividendIncome = Math.max(0, currentDividends - (state.tax._dividendBaseline || 0));
@@ -48,7 +44,7 @@
       Number(state.encounterEarnings) || Number(state.encounterIncome) || 0,
     ));
 
-    const totalIncome = salaryIncome + businessIncome + dividendIncome + encounterIncome;
+    const totalIncome = salaryIncome + dividendIncome + encounterIncome;
 
     /* gross tax */
     const grossTax = Math.round(totalIncome * rate);
@@ -161,8 +157,7 @@
 
     /* force liquidation if backTaxes exceed 3 months of income */
     if (state.tax.backTaxes > 0) {
-      const monthlyIncome = (state.career.salary || 0)
-        + (Game.assetsSystem ? Game.assetsSystem.monthlyIncome(state) : 0);
+      const monthlyIncome = state.career.salary || 0;
       if (state.tax.backTaxes > monthlyIncome * 3) {
         /* liquidate stocks */
         const stocks = state.assets?.stocks;

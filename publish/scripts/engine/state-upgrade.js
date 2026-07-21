@@ -178,8 +178,7 @@
     state.career.lastRaiseMonth ??= state.career.lastPromotionMonth ?? -6;
     state.career.lastAutoRaiseMonth ??= -12;
     state.assets ||= { house: null, mortgage: 0, stocks: {} };
-    state.assets.businesses ||= [];
-    state.assets.vehicles ||= [];
+    Game.removedAssets?.migrate(state);
     state.assets.dividends = Math.max(0, Number(state.assets.dividends) || 0);
     fillStocks(state);
     Game.socialWorld.ensure(state);
@@ -190,6 +189,7 @@
     state.routine.actions ||= { study: 0, sport: 0, social: 0, rest: 0 };
     delete state.routine.lastReport;
     state = Game.systemsState.ensure(state);
+    Game.jobMarketRebalance?.run(state);
     Game.taxSystem?.migratePending?.(state);
     return state;
   }

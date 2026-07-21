@@ -93,7 +93,7 @@
     if (state.brothelStage?.active || state.hookupStage?.active) return { ok: false, message: '请先完成当前深夜事件' };
     const blocked = unavailable(state, place);
     if (blocked) return { ok: false, message: blocked };
-    const cost = Math.round(place.cost * (state.assets?.vehicles?.length ? 0.5 : 1));
+    const cost = Math.round(place.cost);
     if (state.money < cost) return { ok: false, message: `前往${placeName}需要${Game.view.money(cost)}` };
     if (placeName !== '红灯区' && !Game.travelStages?.forPlace(placeName).length) {
       return { ok: false, message: '该地点路线尚未开放' };
@@ -172,7 +172,6 @@
       const active = renderActive(state, state.travel.activeStage);
       if (active) return active;
     }
-    const vehicle = state.assets?.vehicles?.length ? '座驾已生效，交通费减半' : '购买座驾可让交通费减半';
     const recent = state.travel.localHistory[0];
     const filtered = activeFilter === '全部' ? places(state)
       : places(state).filter((place) => place.category === activeFilter || place.kind === activeFilter);
@@ -181,14 +180,14 @@
       return `<button class="${activeFilter === value ? 'active' : ''}" data-travel-filter="${value}">${label}</button>`;
     }).join('');
     const cards = filtered.map((place) => {
-      const cost = Math.round(place.cost * (state.assets?.vehicles?.length ? 0.5 : 1));
+      const cost = Math.round(place.cost);
       const blocked = unavailable(state, place);
       return `<button class="travel-choice" data-travel-start="${place.name}" ${blocked ? 'disabled' : ''}>
         <span><strong>${place.name}</strong><small>${place.description}${blocked ? ` · ${blocked}` : ''}</small></span>
         <b>${Game.view.money(cost)}<br><span class="travel-category">${place.kind === 'landmark' ? '城市景观' : place.category}</span></b></button>`;
     }).join('');
     return `<section class="list-guide"><strong>${state.location.country} · ${state.location.city}</strong>
-      <span>${vehicle}。${recent ? `最近完成：${recent.place}（${recent.outcome || '已游览'}）。` : '选择目的地开始三段探索。'}</span></section>
+      <span>${recent ? `最近完成：${recent.place}（${recent.outcome || '已游览'}）。` : '选择目的地开始三段探索。'}</span></section>
       <nav class="filter-chips">${filters}</nav><div class="travel-grid">${cards || '<p class="empty-state">当前筛选没有匹配地点。</p>'}</div>
       <h3>旅途相识 · ${state.travel.encounters.length}位角色</h3>${renderEncounters(state)}`;
   }

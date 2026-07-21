@@ -36,7 +36,8 @@
     const years = (index * 5 + generation * 7 + state.year) % 21;
     next.i = `resident-${cityIndex}-${index}-g${generation}-${state.totalMonths}`;
     next.b = state.totalMonths - years * 12 - ((index + generation) % 12);
-    next.j = Game.cityPopulation.jobFor(city, seed, years)?.id || '';
+    const job = Game.cityPopulation.jobFor(city, seed, years);
+    next.j = job && Game.jobMarket.vacancies(state, job) > 0 ? job.id : '';
     next.l = Game.mortality.lifeMonths(next.i);
     next.q = generation;
     records[index] = next;

@@ -39,9 +39,26 @@
       || (person.job === job.name && (!job.companyId || person.companyId === job.companyId));
   }
 
+  function archiveStats(state, job, city) {
+    const archives = state.socialWorld?.cityArchives || {};
+    const ids = new Set();
+    let count = 0;
+    Object.entries(archives).forEach(([homeCity, records]) => {
+      (records || []).forEach((record) => {
+        if (!record?.i) return;
+        ids.add(record.i);
+        if ((record.d || homeCity) === city && record.j === job.id) count += 1;
+      });
+    });
+    return { count, ids };
+  }
+
   function occupied(state, job) {
     const city = jobCity(state, job);
-    let count = workers(state, job).length;
+    const archive = archiveStats(state, job, city);
+    let count = archive.count + workers(state, job).filter((person) => (
+      !archive.ids.has(person.residentKey || person.id)
+    )).length;
     if (state.career.jobId === job.id && state.career.company === job.company) count += 1;
     return count;
   }

@@ -157,7 +157,7 @@
       workplace: { companyId: null, departmentId: null, leaderId: null, rosterIds: [], reportIds: [] },
       romance: { partnerId: null, married: false, pendingBirth: 0, pendingBabies: 1,
         pendingBirthMotherId: null, conceptionCooldown: 0 },
-      assets: { house: null, mortgage: 0, stocks: stockState(), dividends: 0, businesses: [], vehicles: [] },
+      assets: { house: null, mortgage: 0, stocks: stockState(), dividends: 0 },
       matchmaking: { candidates: [] },
       travel: { activeId: null, activeIds: [], encounters: [], journey: null, history: [], localHistory: [] },
       specialModes: { skinHunter: false, activeSkinId: null, possessed: [] },

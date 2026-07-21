@@ -8,7 +8,7 @@
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
     'quickStudyPanel',
     'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'governmentPanel', 'travelPanel', 'journeyPanel',
-    'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
+    'propertyPanel', 'stockPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
     'statusPanel', 'financePanel', 'npcEventContainer',
     'hunterModePanel', 'possessedList',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
@@ -149,7 +149,6 @@
     Game.hunterMode.render(state);
     el.propertyPanel.innerHTML = Game.propertySystem.render(state);
     el.stockPanel.innerHTML = Game.marketView.render(state);
-    el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);
     el.healthPanel.innerHTML = Game.healthSystem.render(state);
     el.statusPanel.innerHTML = Game.systemHub.renderStatus(state);
     el.financePanel.innerHTML = Game.systemHub.renderFinance(state);

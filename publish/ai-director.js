@@ -76,7 +76,6 @@
 
   function finances(state) {
     const years = U.age(state);
-    state.money += Game.assetsSystem.monthlyIncome(state);
     if (state.career.job) {
       const taxRate = state.career.salary > 20000 ? 0.12 : 0.06;
       const net = Math.round(state.career.salary * (1 - taxRate));

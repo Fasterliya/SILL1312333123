@@ -11,7 +11,7 @@
   function done() {
     Game.educationStudyPlan?.ensureSemester(state());
     api.refresh();
-    Promise.resolve(api.save()).finally(() => api.resumeEducation?.());
+    api.save();
   }
 
   function trade(name, mode, lot) {
@@ -115,8 +115,8 @@
     Game.view.el.decision.hidden = !visible;
     if (!visible) return;
     if (d.type === 'semesterPlan') {
-      Game.view.el.decisionTitle.textContent = d.adjustment ? '调整本学期计划' : '制定本学期计划';
-      Game.view.el.decisionText.textContent = `${d.term.label}：把6个时间格分配给科目与生活安排。`;
+      Game.view.el.decisionTitle.textContent = d.adjustment ? '调整本学年计划' : '制定本学年计划';
+      Game.view.el.decisionText.textContent = `${d.term.label}：把${Game.educationStudyPlan.slotCount(current)}个时间格分配给科目与生活安排。`;
       Game.view.el.decisionBody.innerHTML = Game.educationPlanView.renderDecision(current);
       return;
     }

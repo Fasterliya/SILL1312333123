@@ -2,8 +2,7 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const U = Game.content;
-  const SLOT_COUNT = 6;
+  const U = Game.content, Capacity = Game.educationPlanCapacity;
   const extras = Object.freeze({
     rest: ['休息', '降低疲劳并改善状态'],
     club: ['社团', '提升心情与魅力'],
@@ -17,13 +16,8 @@
     const year = Number(state.year) || Game.config.startYear;
     const month = Number(state.month) || 1;
     const stage = state.education.schoolStage;
-    if (month >= 7) {
-      return { key: `${stage}:${year}-fall`, label: `${year}-${year + 1}学年上学期` };
-    }
-    if (month === 1) {
-      return { key: `${stage}:${year - 1}-fall`, label: `${year - 1}-${year}学年上学期` };
-    }
-    return { key: `${stage}:${year}-spring`, label: `${year - 1}-${year}学年下学期` };
+    const start = month >= 9 ? year : year - 1;
+    return { key: `${stage}:${start}-year`, label: `${start}-${start + 1}学年` };
   }
 
   function subjectKeys(state) {
@@ -38,12 +32,13 @@
     const allocation = emptyAllocation(state);
     allocation.rest = 1;
     allocation.club = 1;
+    const slotCount = Capacity.slots(state);
     const ranked = subjectKeys(state).sort((left, right) => {
       const a = state.education.subjects[left] || {};
       const b = state.education.subjects[right] || {};
       return (Number(a.studyHours) || 0) - (Number(b.studyHours) || 0);
     });
-    for (let index = 0; index < SLOT_COUNT - 2; index += 1) {
+    for (let index = 0; index < slotCount - 2; index += 1) {
       allocation[ranked[index % ranked.length]] += 1;
     }
     return allocation;
@@ -55,7 +50,7 @@
     Object.keys(draft).forEach((key) => {
       draft[key] = Math.max(0, Math.min(3, Number(current.allocation[key]) || 0));
     });
-    if (total(draft) !== SLOT_COUNT) return defaultAllocation(state);
+    if (total(draft) !== Capacity.slots(state)) return defaultAllocation(state);
     return draft;
   }
 
@@ -80,10 +75,10 @@
     const plan = state.education.semesterPlan;
     if (!plan || plan.key !== termInfo(state).key) {
       ensureSemester(state);
-      return { ok: true, message: '请先制定本学期计划' };
+      return { ok: true, message: '请先制定本学年计划' };
     }
     if ((plan.adjustmentsUsed || 0) >= 1) {
-      return { ok: false, message: '本学期的调整机会已经使用' };
+      return { ok: false, message: '本学年的调整机会已经使用' };
     }
     state.pendingDecision = {
       type: 'semesterPlan',
@@ -92,7 +87,7 @@
       adjustment: true,
     };
     state.timeSpeed = 0;
-    return { ok: true, message: '可以重新分配6个时间格' };
+    return { ok: true, message: `可以重新分配${Capacity.slots(state)}个时间格` };
   }
 
   function adjust(state, key, delta) {
@@ -100,7 +95,7 @@
     if (decision?.type !== 'semesterPlan' || !(key in decision.draft)) return false;
     const next = (Number(decision.draft[key]) || 0) + Number(delta);
     if (next < 0 || next > 3) return true;
-    if (delta > 0 && total(decision.draft) >= SLOT_COUNT) return true;
+    if (delta > 0 && total(decision.draft) >= Capacity.slots(state)) return true;
     decision.draft[key] = next;
     return true;
   }
@@ -151,14 +146,16 @@
 
   function resolve(state) {
     const decision = state.pendingDecision;
-    if (decision?.type !== 'semesterPlan' || total(decision.draft) !== SLOT_COUNT) {
-      return { ok: false, message: '需要正好分配6个时间格' };
+    const slotCount = Capacity.slots(state);
+    if (decision?.type !== 'semesterPlan' || total(decision.draft) !== slotCount) {
+      return { ok: false, message: `需要正好分配${slotCount}个时间格` };
     }
     const previous = state.education.semesterPlan;
     state.education.semesterPlan = {
       key: decision.term.key,
       label: decision.term.label,
       allocation: { ...decision.draft },
+      slotCount,
       adjustmentsUsed: decision.adjustment ? (previous?.adjustmentsUsed || 0) + 1 : 0,
       lastAppliedMonth: decision.adjustment ? previous?.lastAppliedMonth : null,
       monthsExecuted: decision.adjustment ? previous?.monthsExecuted || 0 : 0,
@@ -173,6 +170,8 @@
     if (decision?.type !== 'semesterPlan') return null;
     return {
       used: total(decision.draft),
+      limit: Capacity.slots(state),
+      intelligence: Capacity.intelligence(state),
       rows: [...subjectKeys(state), ...Object.keys(extras)].map((key) => ({
         key,
         count: decision.draft[key] || 0,
@@ -190,11 +189,12 @@
       label: active ? plan.label : '等待制定计划',
       allocation: active ? plan.allocation : {},
       months: active ? plan.monthsExecuted || 0 : 0,
+      limit: active ? plan.slotCount || total(plan.allocation) : Capacity.slots(state),
       canAdjust: Boolean(active && (plan.adjustmentsUsed || 0) < 1),
     };
   }
   Game.educationStudyPlan = Object.freeze({
-    SLOT_COUNT, extras, termInfo, ensureSemester, requestAdjustment, applyMonth,
+    slotCount: Capacity.slots, extras, termInfo, ensureSemester, requestAdjustment, applyMonth,
     adjust, resolve, decisionModel, status,
   });
 }(window));

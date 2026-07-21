@@ -13,7 +13,7 @@
     'hunterModePanel', 'possessedList',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
-    'decisionBody', 'examJumpBtn', 'timeBar', 'staminaRing', 'toast', 'tabPages',
+    'decisionBody', 'timeBar', 'staminaRing', 'toast', 'tabPages',
     'tabs', 'heroCanvas', 'resetBtn',
   ];
   const el = {};
@@ -160,7 +160,6 @@
     Game.drawSettings.render(state);
     Game.profile.render(state, el);
     Game.navigation.refreshDetail();
-    Game.educationFastForward.updateButton(state, el.examJumpBtn);
     renderTimeBar(state);
     if (state.stamina && el.staminaRing) {
       var pct = state.stamina.current / state.stamina.max * 100;

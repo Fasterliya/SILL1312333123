@@ -80,14 +80,14 @@
   function renderQuick(state) {
     if (!isStudent(state)) return '';
     const plan = Game.educationStudyPlan.status(state);
-    return `<div class="quick-study subject-study"><header><div><strong>本学期课表</strong>
+    return `<div class="quick-study subject-study"><header><div><strong>本学年课表</strong>
       <small>${escape(plan.label)} · 已执行${plan.months}个月</small></div>
       <span>疲劳 ${Math.round(state.education.burnout || 0)}/100</span></header>
       <div class="semester-schedule">${scheduleChips(state, plan.allocation)
-        || '<span>等待分配6个时间格</span>'}</div>
+        || `<span>等待分配${plan.limit}个时间格</span>`}</div>
       ${renderSubjects(state, plan.allocation)}
       <button class="study-plan-edit" type="button" data-study-plan-edit
-        ${plan.canAdjust ? '' : 'disabled'}>${plan.canAdjust ? '调整本学期计划' : '本学期已调整'}</button></div>`;
+        ${plan.canAdjust ? '' : 'disabled'}>${plan.canAdjust ? '调整本学年计划' : '本学年已调整'}</button></div>`;
   }
 
   function render(state) {

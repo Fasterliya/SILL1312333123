@@ -60,7 +60,6 @@
         Game.timeLoop.setSpeed(0);
       }
     });
-    Game.view.el.examJumpBtn.addEventListener('click', Game.timeLoop.startEducationFastForward);
     Game.view.el.decisionBody.addEventListener('click', (event) => {
       const choice = event.target.closest('[data-choice]');
       if (choice) Game.actions.decide(choice.dataset.choice);
@@ -150,7 +149,7 @@
       Game.characterChat.configure({ getState: () => state, refresh, save });
       Game.appearance.configure({ getState: () => state });
       Game.actions.configure({
-        getState: () => state, refresh, save, resumeEducation: Game.timeLoop.resumeEducation,
+        getState: () => state, refresh, save,
       });
       Game.familySystem.configure({ getState: () => state, refresh, save });
       Game.interactionRouter.configure({ getState: () => state, refresh, save, finish });

@@ -25,10 +25,6 @@
       current.stamina.current = current.stamina.max;
       shouldSave = true;
       Game.examSystem?.checkReveal(current);
-      if (current.education.fastForwardTarget
-        && current.totalMonths >= current.education.fastForwardTarget) {
-        Game.educationFastForward.complete(current);
-      }
     }
     if (current.pendingDecision || current.gameOver) {
       current.timeSpeed = 0;
@@ -63,22 +59,6 @@
     startTimer();
   }
 
-  function resumeEducation() {
-    if (Game.educationFastForward.active(state())) setSpeed(10);
-  }
-
-  function startEducationFastForward() {
-    const current = state();
-    if (!current || current.pendingDecision || current.gameOver) return;
-    if (!Game.educationFastForward.active(current)) {
-      const months = Game.educationFastForward.begin(current);
-      if (!months) return Game.view.showToast('当前没有可推进的升学节点', 'warning');
-      Game.view.showToast('已开启自动学习推进', 'good');
-      api.save();
-    }
-    setSpeed(10);
-  }
-
   function configure(options) {
     api = options;
   }
@@ -87,7 +67,5 @@
     configure,
     start,
     setSpeed,
-    resumeEducation,
-    startEducationFastForward,
   });
 }(window));

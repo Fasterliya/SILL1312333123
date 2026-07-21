@@ -29,6 +29,10 @@
   function render(state) {
     return `${base.render(state)}${Game.conventionCompanyView.render(state)}`;
   }
+  function monthly(state) {
+    base.monthly(state);
+    Game.conventionCompanySettlement?.monthly(state);
+  }
 
-  Game.companySystem = Object.freeze({ ...base, handleClick, render });
+  Game.companySystem = Object.freeze({ ...base, handleClick, render, monthly });
 }(window));

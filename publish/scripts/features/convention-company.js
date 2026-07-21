@@ -118,6 +118,7 @@
       company: item,
       licensed: licensed(item),
       events: eventsFor(state, item),
+      settlements: Game.conventionCompanySettlement?.recent(state, item.id) || [],
     }));
   }
 

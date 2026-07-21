@@ -185,6 +185,52 @@
   font-size: 9px;
 }
 
+.convention-settlement {
+  margin-top: 8px;
+  padding: 8px;
+  border-left: 3px solid #577a65;
+  background: #edf5ef;
+}
+
+.convention-settlement.loss {
+  border-left-color: #9a5961;
+  background: #f8eaea;
+}
+
+.convention-settlement span,
+.convention-settlement strong,
+.convention-settlement small {
+  display: block;
+}
+
+.convention-settlement span {
+  color: #607168;
+  font-size: 8px;
+}
+
+.convention-settlement strong {
+  margin-top: 3px;
+  color: #35483d;
+  font-size: 11px;
+}
+
+.convention-settlement small {
+  margin-top: 4px;
+  color: #65716a;
+  font-size: 9px;
+}
+
+.convention-settlement-history {
+  margin-top: 10px;
+  border-top: 1px solid #ddd5d7;
+}
+
+.convention-settlement-history h3 {
+  margin: 9px 0 0;
+  color: #66575b;
+  font-size: 10px;
+}
+
 @media (max-width: 420px) {
   .convention-company-license,
   .convention-tender {

@@ -52,19 +52,15 @@
   }
 
   function companyDirectory(state) {
-    const companies = [...Game.careerSystem.board(state).filter((job) => !job.freelance)
-      .reduce((items, job) => {
-        const current = items.get(job.companyId) || {
-          name: job.company, industry: job.industry, parent: job.parentCompany || '', positions: 0,
-        };
-        current.positions += 1;
-        items.set(job.companyId, current);
-        return items;
-      }, new Map()).values()];
+    const jobs = Game.careerSystem.board(state);
+    const counts = jobs.reduce((items, job) => items.set(
+      job.companyId, (items.get(job.companyId) || 0) + 1,
+    ), new Map());
+    const companies = Game.companyCatalog.inCity(state.location.city);
     return `<details class="company-directory"><summary>本地特色公司 · ${companies.length}家</summary>
       <div>${companies.map((company) => (
-        `<article><strong>${company.name}</strong><span>${company.industry} · ${company.positions}个职位
-        ${company.parent ? ` · ${company.parent}旗下` : ''}</span></article>`
+        `<article><strong>${company.name}</strong><span>${company.specialty} ·
+        ${counts.get(company.id) || company.positions.length}个职位</span></article>`
       )).join('')}</div></details>`;
   }
 
@@ -78,7 +74,7 @@
       || job.industry === jobFilter);
     const level = Game.careerSystem.qualification(state);
     const guide = `<section class="list-guide career-guide"><strong>当前资格：${Game.careerSystem.qualificationLabel(level)}</strong>
-      <span>招聘仅显示当前城市的本地公司、当地分公司与本地独立职业。</span></section>`;
+      <span>招聘由当前城市的6家特色公司与本地独立职业提供。</span></section>`;
     const cards = jobs.length ? jobs.map((job) => {
       const locked = !Game.careerSystem.eligible(state, job);
       return `<article class="job-card ${locked ? 'locked' : ''}">
@@ -87,7 +83,7 @@
         <b>${money(job.salary)}</b>
         <button data-job-detail="${job.id}">${locked ? '门槛' : '查看'}</button></article>`;
     }).join('') : '<p class="empty-state">当前筛选没有职位。</p>';
-    const companies = new Set(jobs.map((job) => job.company)).size;
+    const companies = Game.companyCatalog.inCity(state.location.city).length;
     return `${currentJob(state, money)}${companyDirectory(state)}${guide}${chips(filters, jobFilter, 'data-job-filter')}
       <div class="market-title">${state.location.city} · ${companies}家公司 · ${jobs.length}个职位</div>
       <div class="job-list">${cards}</div>`;

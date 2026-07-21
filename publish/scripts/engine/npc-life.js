@@ -97,7 +97,7 @@
 
       /* Build weighted job pool */
       const pool = [];
-      const jobs = C.jobs.filter((item) => (
+      const jobs = Game.companyCatalog.jobsInCity(person.currentCity || person.metCity || state.location.city).filter((item) => (
         (item.education || 0) <= eduLevel
         && (!item.adultOnly || age >= 18)
         && (!item.recommendedGender || item.recommendedGender === person.gender)
@@ -149,7 +149,7 @@
     }
 
     /* fallback: standard random selection for male NPCs or if weighted pool empty */
-    const job = U.random(C.jobs.filter((item) => (
+    const job = U.random(Game.companyCatalog.jobsInCity(person.currentCity || person.metCity || state.location.city).filter((item) => (
       (item.education || 0) <= person.educationLevel
       && (!item.adultOnly || age >= 18)
       && (!item.recommendedGender || item.recommendedGender === person.gender)

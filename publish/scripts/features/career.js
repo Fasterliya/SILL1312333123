@@ -4,28 +4,8 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const C = Game.config;
   const U = Game.content;
-  function cityInfo(state) {
-    return C.cities.find((item) => item.city === state.location.city)
-      || { city: state.location.city, province: state.location.province, country: '华夏', tier: 3, cost: 6000 };
-  }
-
-  function localize(job, city) {
-    if (job.freelance) {
-      return { ...job, company: `${city.city}${job.company}`, companyId: `local-${city.city}-${job.id}`,
-        parentCompany: '个人独立经营', branchCity: city.city };
-    }
-    if (job.cities?.length && !job.cities.includes(city.city)) return null;
-    const company = Game.companyCatalog.find(job.companyId);
-    if (company?.city === city.city) return job;
-    const parentCompany = company?.parent || job.company || '企业集团';
-    return { ...job, company: `${job.company || parentCompany} · ${city.city}分公司`,
-      companyId: `branch-${city.city}-${job.companyId || job.id}`, parentCompany, branchCity: city.city };
-  }
-
   function board(state) {
-    const city = cityInfo(state);
-    return C.jobs.filter((job) => city.tier <= job.tier)
-      .map((job) => localize(job, city)).filter(Boolean);
+    return Game.companyCatalog.jobsInCity(state.location.city);
   }
 
   function traitBoost(state, category) {

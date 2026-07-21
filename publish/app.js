@@ -115,6 +115,7 @@
       state = Game.stateUpgrade.upgradeState(snapshot);
       Game.navigation.closeModule();
       Game.educationStudyPlan.ensureSemester(state);
+      Game.companyCatalog.normalizeCareer(state);
       Game.profile.updateGrowth(state);
       Game.npcLife.update(state);
       refresh();
@@ -151,6 +152,7 @@
       Game.familySystem.configure({ getState: () => state, refresh, save });
       Game.interactionRouter.configure({ getState: () => state, refresh, save, finish });
       Game.educationStudyPlan.ensureSemester(state);
+      Game.companyCatalog.normalizeCareer(state);
       Game.profile.updateGrowth(state);
       Game.npcLife.update(state);
       if (!['家中', '已毕业'].includes(state.education.school)) {

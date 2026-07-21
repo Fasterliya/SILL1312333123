@@ -29,9 +29,7 @@
   }
   function jobFor(cityName, index, age) {
     if (age < 22 || age > 64) return null;
-    const local = Game.config.jobs.filter((job) => !job.freelance && job.cities?.includes(cityName));
-    const general = Game.config.jobs.filter((job) => !job.freelance && !job.cities?.length);
-    const source = local.length && index % 4 !== 0 ? local : general;
+    const source = Game.companyCatalog.jobsInCity(cityName).filter((job) => !job.freelance);
     return source.length ? source[(index * 7) % source.length] : null;
   }
   function createRecord(state, city, index, cityIndex) {
@@ -86,7 +84,8 @@
   }
   function applyCareer(person, record, cityName) {
     const age = Math.floor((person.populationMonth - record.b) / 12);
-    const job = Game.config.jobs.find((item) => item.id === record.j);
+    const source = Game.config.jobs.find((item) => item.id === record.j);
+    const job = Game.companyCatalog.localizeJob(source, cityName);
     if (!job) {
       if (age >= 65) person.job = '退休居民';
       return;

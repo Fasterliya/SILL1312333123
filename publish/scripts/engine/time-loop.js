@@ -2,7 +2,7 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
-  const SPEED_MS = { 0: 0, 1: 2000, 5: 400, 10: 200 };
+  const SPEED_MS = { 0: 0, 1: 1000, 5: 400, 10: 200 };
   let api = null;
   let timer = null;
 

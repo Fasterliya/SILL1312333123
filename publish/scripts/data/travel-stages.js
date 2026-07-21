@@ -44,7 +44,7 @@
           effect('清晰的路线让后续探索更从容。', { intelligence: 2, score: 3 })],
         ['record', `从最有代表性的角度记录${place}`,
           effect('你留下了一张能代表此地气质的照片。', { mood: 4, charm: 1, score: 3 }, {},
-            { chance: 0.2, stat: '心情', delta: -2, text: '拥挤与等待让兴致稍减。' })],
+            { chance: 0.2, stat: '压力', delta: 2, text: '拥挤与等待增加了少量压力。' })],
         social,
       ],
       [
@@ -64,7 +64,7 @@
           effect('善意得到回应，你在当地留下了好口碑。', { reputation: 3, mood: 4, strength: 1, score: 5 },
             { stat: '体能', min: 40 })],
         ['linger', `多停留一会儿等待${place}的最佳光线`,
-          effect('等待带来了漂亮的收尾画面。', { mood: 7, score: 5 }, { stat: '心情', min: 35 },
+          effect('等待带来了漂亮的收尾画面。', { mood: 7, score: 5 }, { stat: '体能', min: 35 },
             { chance: 0.18, stat: '健康', delta: -2, text: '久留让身体略感疲惫。' })],
       ],
     ];

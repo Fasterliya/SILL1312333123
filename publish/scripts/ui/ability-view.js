@@ -12,9 +12,8 @@
   function abilityRows(target, state) {
     Game.characterAttributes.ensure(target, state?.stats || target.stats, state?.education);
     const rows = Game.characterAttributes.abilities.map((ability) => {
-      const progress = Game.characterAttributes.progress(target, ability, state);
-      return [ability, `${progress.current} · 有效 ${progress.effective}`
-        + ` · 经验 ${progress.xp}/100 · 潜力 ${progress.potential}`];
+      const progress = Game.characterAttributes.progress(target, ability);
+      return [ability, `${progress.current} · 经验 ${progress.xp}/100 · 潜力 ${progress.potential}`];
     });
     rows.push(['派生魅力', `${Game.characterAttributes.derivedCharm(target)} · 外貌、气质与交涉共同形成`]);
     return rows;
@@ -35,13 +34,12 @@
     const stress = Game.stressSystem.ensure(state);
     const states = [
       ['健康', clamp(state.stats.健康), `${clamp(state.stats.健康)}%`],
-      ['心情', clamp(state.stats.心情), clamp(state.stats.心情)],
       ['压力', clamp(stress.value / 3.99), `Lv${stress.level} · ${stress.value}`],
       ['疲劳', fatigue(state), fatigue(state)],
     ];
     const abilityCards = Game.characterAttributes.abilities.map((ability) => {
-      const item = Game.characterAttributes.progress(state.profile, ability, state);
-      return [ability, item.current, `${item.current}/${item.effective}`];
+      const item = Game.characterAttributes.progress(state.profile, ability);
+      return [ability, item.current, item.current];
     });
     abilityCards.push(['魅力', Game.characterAttributes.derivedCharm(state.profile),
       `${Game.characterAttributes.derivedCharm(state.profile)} · 派生`]);

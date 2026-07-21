@@ -134,7 +134,7 @@
       month: C.startMonth,
       totalMonths: 0,
       profile: profile(gender, father, mother),
-      stats: { 健康: between(72, 94), 心情: between(68, 90), 智力: between(46, 66), 魅力: between(42, 68) },
+      stats: { 健康: between(72, 94), 智力: between(46, 66), 魅力: between(42, 68) },
       money: between(300, 1800),
       familyWealth: between(90000, 850000),
       family,

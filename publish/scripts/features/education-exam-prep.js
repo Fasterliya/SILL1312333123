@@ -40,7 +40,7 @@
       options: [
         { value: 'mock', label: '完整模拟考 · 应试能力提高，疲劳明显增加' },
         { value: 'weakness', label: '弱科冲刺 · 最弱两科增加学习积累' },
-        { value: 'rest', label: '调整作息 · 降低疲劳并改善心情' },
+        { value: 'rest', label: '调整作息 · 降低疲劳并缓解压力' },
       ],
     };
   }

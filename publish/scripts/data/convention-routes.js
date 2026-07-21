@@ -50,7 +50,7 @@
       step: 2, total: 4, title: '同人摊位 · 在作品中选路',
       text: '摊主、限定商品和交流区带来不同收获，消费并不是唯一的推进方式。',
       options: [
-        option('market-zine', '购买一本喜欢的同人志', '花费 80 元，获得明确的收藏与心情回报。',
+        option('market-zine', '购买一本喜欢的同人志', '花费 80 元，获得收藏并缓解压力。',
           'market-finale', { cost: 80, mood: 6, score: 5, result: '你买到了一本很合口味的同人志。' }),
         option('market-talk', '询问摊主的创作过程', '通过交流获得创作经验。',
           'market-finale', { intelligence: 3, charm: 1, score: 4,
@@ -79,7 +79,7 @@
       step: 3, total: 4, title: 'Coser 互动 · 选择交流方式',
       text: '对方的角色与服装都已明确，尊重作品和现场礼仪更容易建立关系。',
       options: [
-        option('coser-photo', '先礼貌询问能否合影', '稳妥提升好感和心情。',
+        option('coser-photo', '先礼貌询问能否合影', '稳妥提升好感并缓解压力。',
           'coser-finale', { mood: 5, score: 5, affection: 8, result: '对方整理好造型，和你完成了一张合影。' }),
         option('coser-lore', '聊这个角色的剧情与设定', '学识达到 40 时可以选择。',
           'coser-finale', { intelligence: 2, score: 6, affection: 10,
@@ -97,7 +97,7 @@
           '', { score: 6, affection: 5, contact: true, finish: true,
             requires: { stat: '交涉', min: 45 },
             result: '你们交换了联系方式，约好下次活动再见。' }),
-        option('coser-together', '结伴继续逛完剩余展区', '获得更多好感和心情，但不自动保存联系人。',
+        option('coser-together', '结伴继续逛完剩余展区', '获得更多好感并缓解压力，但不自动保存联系人。',
           '', { mood: 6, score: 5, affection: 8, finish: true,
             result: '你们结伴逛完了剩余展区。' }),
         option('coser-goodbye', '礼貌道别，把相遇留在今天', '轻量收尾，不改变长期关系。',

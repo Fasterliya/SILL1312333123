@@ -5,7 +5,7 @@
   const U = Game.content, Capacity = Game.educationPlanCapacity, Groups = Game.educationSubjectGroups;
   const extras = Object.freeze({
     rest: ['休息', '降低疲劳并改善状态'],
-    club: ['社团', '提升心情与魅力'],
+    club: ['社团', '缓解压力并积累交涉经验'],
     tutor: ['补习', '强化当前最弱科目'],
   });
   const isStudent = (state) => Game.subjectPanel.isStudent(state);

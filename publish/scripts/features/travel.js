@@ -40,7 +40,7 @@
     return parts.join(' · ') || '无额外门槛';
   }
   function rewardText(effect) {
-    const labels = { mood: '心情', charm: '交涉经验', intelligence: '学识经验',
+    const labels = { charm: '交涉经验', intelligence: '学识经验',
       strength: '体能经验', health: '健康', reputation: '声望' };
     const gains = Object.entries(labels).filter(([key]) => effect[key])
       .map(([key, label]) => `${label}${effect[key] > 0 ? '+' : ''}${effect[key]}`);
@@ -65,7 +65,7 @@
   function applyEffect(state, ts, effect) {
     if (effect.cost) Game.economy.spend(state, effect.cost);
     if (effect.money) state.money += effect.money;
-    if (effect.mood) state.stats.心情 = U.clamp(state.stats.心情 + effect.mood, 0, 100);
+    if (effect.mood) Game.legacyMood.apply(state, effect.mood, '街区旅途');
     if (effect.health) state.stats.健康 = U.clamp(state.stats.健康 + effect.health, 0, 100);
     if (effect.intelligence) Game.characterAttributes.gain(state, '学识', effect.intelligence, '街区旅途');
     if (effect.charm) Game.characterAttributes.gain(state, '交涉', effect.charm, '街区旅途');
@@ -79,7 +79,8 @@
     let riskText = '';
     if (effect.risk && Math.random() < effect.risk.chance) {
       const risk = effect.risk;
-      state.stats[risk.stat] = U.clamp(state.stats[risk.stat] + risk.delta, 0, 100);
+      if (risk.stat === '压力') Game.stressSystem.add(state, risk.delta, '旅途风险');
+      else state.stats[risk.stat] = U.clamp(state.stats[risk.stat] + risk.delta, 0, 100);
       ts.riskCount += 1;
       riskText = ` ${risk.text}`;
     }
@@ -138,7 +139,6 @@
     state.cityLife.familiarity[city] = U.clamp((state.cityLife.familiarity[city] || 0) + 2, 0, 100);
     const rating = ts.score >= 13 ? '深入探索' : (ts.score >= 9 ? '充实旅程' : '轻松到访');
     const summary = `${rating}，评分${ts.score}，遭遇风险${ts.riskCount}次。${ts.feedback}`;
-    state.stats.心情 = U.clamp(state.stats.心情 + (ts.score >= 13 ? 6 : 3), 0, 100);
     Game.stressSystem.reduce(state, ts.score >= 13 ? 8 : 4, '街区旅途'); Game.structuredTraits.addExperience(state.profile, 'traveler');
     recordHistory(state, ts.placeName, ts.score, rating);
     state.travel.activeStage = null;

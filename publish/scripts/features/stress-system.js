@@ -56,10 +56,8 @@
       + Math.max(0, Math.ceil((fatigue - 65) / 20));
     if (sleep < 6) delta += 3;
     else if (sleep < 7) delta += 1;
-    if ((state.stats?.心情 || 0) >= 78) delta -= 2;
     if (sleep >= 8) delta -= 1;
     if (delta) add(state, delta, '月度生活负担');
-    if (item.level >= 2) state.stats.心情 = Game.content.clamp(state.stats.心情 - item.level, 0, 100);
   }
 
   function effects(state) {
@@ -75,10 +73,10 @@
     const level = ensure(state).level;
     return {
       title: `压力突破 · 等级 ${level}`,
-      text: '你已经无法继续忽视精神负担。选择一种应对方式，会影响工作、金钱或心情。',
+      text: '你已经无法继续忽视精神负担。选择一种应对方式，会影响工作、金钱或压力。',
       options: [
         { value: 'rest', label: '暂停事务休整 · 压力-35，绩效-6' },
-        { value: 'talk', label: '向亲友倾诉 · 压力-22，心情+4' },
+        { value: 'talk', label: '向亲友倾诉 · 压力-30' },
         { value: 'therapy', label: '寻求专业帮助 · 花费2000，压力-55' },
       ],
     };
@@ -90,8 +88,7 @@
       Game.economy.spend(state, 2000);
       reduce(state, 55, '专业帮助');
     } else if (value === 'talk') {
-      reduce(state, 22, '向亲友倾诉');
-      state.stats.心情 = Game.content.clamp(state.stats.心情 + 4, 0, 100);
+      reduce(state, 30, '向亲友倾诉');
     } else if (value === 'rest') {
       reduce(state, 35, '暂停事务休整');
       state.career.performance = Math.max(0, (state.career.performance || 0) - 6);

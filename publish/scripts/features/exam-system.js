@@ -20,7 +20,7 @@
     es.startDay = absoluteDay(state);
     es.revealedMonth = state.totalMonths + 1;
     es.result = result;
-    Game.lifeDirector.addLog(state, type, type+'考试结束。成绩将在下个月公布。心情-5(焦虑等待)。', 'normal');
+    Game.lifeDirector.addLog(state, type, `${type}考试结束。成绩将在下个月公布，等待结果增加了压力。`, 'normal');
     state.stats.心情 = U.clamp(state.stats.心情 - 5, 0, 100);
     return { ok: true, message: type + '已结束，等待公布成绩' };
   }

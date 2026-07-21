@@ -98,7 +98,7 @@
   function applyEffect(state, ts, option) {
     const effect = option.effect || {};
     if (effect.cost) Game.economy.spend(state, effect.cost);
-    if (effect.mood) state.stats.心情 = U.clamp(state.stats.心情 + effect.mood, 0, 100);
+    if (effect.mood) Game.legacyMood.apply(state, effect.mood, '漫展体验');
     if (effect.health) state.stats.健康 = U.clamp(state.stats.健康 + effect.health, 0, 100);
     if (effect.intelligence) Game.characterAttributes.gain(state, '学识', effect.intelligence, '城市漫展');
     if (effect.charm) Game.characterAttributes.gain(state, '交涉', effect.charm, '城市漫展');
@@ -129,7 +129,6 @@
     state.cityLife.familiarity[state.location.city] = U.clamp(
       (state.cityLife.familiarity[state.location.city] || 0) + 3, 0, 100,
     );
-    state.stats.心情 = U.clamp(state.stats.心情 + (ts.score >= 18 ? 6 : 3), 0, 100);
     Game.stressSystem.reduce(state, ts.score >= 18 ? 9 : 5, '漫展体验');
     Game.structuredTraits.addExperience(state.profile, 'traveler');
     state.travel.localHistory.unshift({

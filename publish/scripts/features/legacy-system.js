@@ -132,7 +132,6 @@
     state.profile.styleStage = -1;
     state.stats = {
       健康: U.clamp(Math.round(heir.stats?.健康 || 45 + (heir.upbringing?.health || 50) * 0.45), 0, 100),
-      心情: U.clamp(Math.round(40 + heir.affection * 0.4), 0, 100),
       智力: U.clamp(Math.round(heir.stats?.智力 || 35 + (heir.upbringing?.education || 30) * 0.5), 0, 100),
       魅力: U.clamp(Math.round(heir.stats?.魅力 || 40 + (heir.upbringing?.independence || 30) * 0.35), 0, 100),
       力量: U.clamp(Math.round(heir.stats?.力量 || 45 + (heir.upbringing?.health || 30) * 0.35), 0, 100),

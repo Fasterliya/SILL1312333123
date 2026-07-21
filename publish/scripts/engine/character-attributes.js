@@ -81,6 +81,7 @@
     return ensure(person, person?.stats, { level: person?.educationLevel });
   }
   function ensurePlayer(state) {
+    Game.legacyMood.ensure(state);
     const data = ensure(state.profile, state.stats, state.education);
     state.abilities = state.profile.abilities;
     state.abilityGrowth = state.profile.abilityGrowth;
@@ -89,12 +90,11 @@
   function stateMultiplier(state) {
     if (!state) return 1;
     const health = clamp(state.stats?.健康 ?? 60) / 100;
-    const mood = clamp(state.stats?.心情 ?? 60) / 100;
     const stress = Game.stressSystem?.ensure(state).level || 0;
     const staminaMax = Math.max(1, Number(state.stamina?.max) || 100);
     const stamina = Number.isFinite(state.stamina?.current) ? state.stamina.current : staminaMax;
     const fatigue = 1 - clamp(100 - stamina / staminaMax * 100, 0, 100) / 180;
-    return clamp((0.65 + health * 0.2 + mood * 0.15) * fatigue - stress * 0.06, 0.25, 1.1);
+    return clamp((0.75 + health * 0.25) * fatigue - stress * 0.06, 0.25, 1.1);
   }
   function gainFor(target, sourceStats, name, base, source, state) {
     const ability = normalize(name);
@@ -128,10 +128,8 @@
     const stamina = Number.isFinite(state.stamina?.current) ? state.stamina.current : staminaMax;
     const fatigue = clamp(100 - stamina / staminaMax * 100, 0, 100);
     const health = clamp(state.stats?.健康 ?? 60);
-    const mood = clamp(state.stats?.心情 ?? 60);
     let penalty = stress * 3 + Math.round(fatigue / (ability === '体能' ? 10 : 20));
     if (health < 50) penalty += Math.round((50 - health) / (ability === '体能' ? 4 : 8));
-    if (mood < 40) penalty += Math.round((40 - mood) / 10);
     return penalty;
   }
   function playerlessValue(target, name) {

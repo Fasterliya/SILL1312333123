@@ -41,6 +41,7 @@
       if (ts.coserIds.some((id) => Game.people.find(state, id)?.cosplay === costume.name)) continue;
       ts.coserIds.push(createCoser(state, costume, ts).id);
     }
+    Game.conventionParticipant?.styleRoster(state, ts);
   }
 
   function start(state, edition) {
@@ -55,9 +56,7 @@
       editionId: event.id, themeName: event.themeName, series: event.series,
       organizerName: event.organizer.name,
       role: registration.role, intent: registration.intent,
-      quality: event.preparation?.quality ?? 50,
-      safety: event.preparation?.safety ?? 50,
-      promotion: event.preparation?.promotion ?? 50,
+      ...(Game.conventionParticipant?.travelContext(event) || {}),
       score: 0, feedback: '抵达会场，先选择最想体验的区域。',
       path: [], total: 4, coserIds: [], selectedCoserId: null, riskCount: 0,
     };
@@ -189,7 +188,7 @@
       step: ts.path.length + 1, total: ts.total || node?.total || 4,
       feedback: ts.feedback, score: ts.score,
       eventName: ts.placeName, themeName: ts.themeName,
-      roleName: role, intentName: intent,
+      roleName: role, intentName: intent, arrangement: ts.arrangement || '',
       options: options(state, ts),
       people: ts.coserIds.map((id) => Game.people.find(state, id)).filter(Boolean),
       selectedId: ts.selectedCoserId,

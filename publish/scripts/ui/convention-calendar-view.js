@@ -72,6 +72,18 @@
       `<option value="${item.id}" ${item.id === selected ? 'selected' : ''}>${escape(item.name)}</option>`
     )).join('');
   }
+  function lineup(item) {
+    const partners = [...item.preparation.sponsors, ...item.preparation.guests]
+      .map((entry) => entry.name);
+    const operations = item.preparation.operations.decisions.map((decision) => (
+      Game.conventionCatalog.operationPhases.flatMap((phase) => phase.options)
+        .find((option) => option.id === decision.optionId)?.name
+    )).filter(Boolean);
+    const entries = [...partners, ...operations];
+    if (!entries.length) return '';
+    return `<section class="convention-zones"><h3>合作与现场安排</h3>
+      <div>${entries.map((entry) => `<span>${escape(entry)}</span>`).join('')}</div></section>`;
+  }
   function detail(state, item) {
     const status = Game.conventionCalendar.status(state, item);
     const registration = state.conventionCalendar?.registrations?.[item.id];
@@ -98,6 +110,7 @@
       <div><dt>宣传热度</dt><dd>${item.preparation.promotion}/100</dd></div></dl>
       <section class="convention-zones"><h3>开放展区</h3><div>${item.zones.map((zone) => (
         `<span>${escape(zone)}</span>`)).join('')}</div></section>
+      ${lineup(item)}
       <div class="convention-registration"><label>参展身份<select data-convention-role>
       ${optionList(Game.conventionCatalog.roles, registration?.role || 'visitor')}</select></label>
       <label>参展目的<select data-convention-intent>

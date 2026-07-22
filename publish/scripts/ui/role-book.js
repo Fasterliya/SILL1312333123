@@ -16,11 +16,40 @@
       || Boolean(person.schoolHistory?.length);
   }
 
+  function isCradleInmate(person) {
+    return Boolean(person.cradleImprisoned || person.cradleInmate
+      || person.cradleStatus === 'imprisoned' || person.cradle?.imprisoned
+      || person.institution === '摇篮改造机构');
+  }
+
+  function playerCradleRecord(state) {
+    const cradle = state.cradle;
+    if (!cradle?.imprisoned || (cradle.city && cradle.city !== state.location.city)) return null;
+    const identity = Game.hunterMode.identity(state);
+    return {
+      id: 'player-profile',
+      name: identity.name,
+      relation: '本人',
+      currentCity: state.location.city,
+      job: '摇篮改造机构',
+      status: '健康',
+      portraitUrl: identity.profile?.portraitUrl || null,
+      cradleInmate: true,
+      isPlayerRecord: true,
+    };
+  }
+
   function peopleFor(state) {
     const all = Game.people.all(state).filter((person) => person.id !== 'player-profile');
-    if (filter === 'city') return Game.socialWorld.cityPeople(state, state.location.city);
-    if (filter === 'overseas-cn') return Game.socialWorld.cityPeople(state, state.location.city)
-      .filter((person) => person.culture === '华夏');
+    const local = Game.socialWorld.cityPeople(state, state.location.city);
+    if (filter === 'city') return local;
+    if (filter === 'specter-local') return local.filter((person) => person.specterPossessed);
+    if (filter === 'cradle-local') {
+      const inmates = local.filter(isCradleInmate);
+      const player = playerCradleRecord(state);
+      return player ? [player, ...inmates] : inmates;
+    }
+    if (filter === 'overseas-cn') return local.filter((person) => person.culture === '华夏');
     if (filter === 'school') return all.filter(isClassmate);
     if (filter === 'work') return all.filter((person) => (
       state.career.company && person.company === state.career.company
@@ -30,18 +59,25 @@
   }
 
   function card(state, person) {
+    const cradle = isCradleInmate(person);
     const local = person.currentCity === state.location.city;
-    const reachable = person.phoneUnlocked || person.school === state.education.school
+    const reachable = person.isPlayerRecord || person.phoneUnlocked || person.school === state.education.school
       || Game.people.isExternal(state, person) || state.family.some((item) => item.id === person.id);
     const place = person.currentCity || person.careerCity || person.homeCity || '去向未明';
-    const status = person.status === '已故' ? '已故 · 纪念档案'
-      : (reachable ? '可联系' : (local ? '同城，可尝试重逢' : '未留联系方式'));
+    const special = person.specterPossessed ? '幽诡寄生' : (cradle ? '摇篮收容中' : '');
+    const status = person.isPlayerRecord ? '当前囚禁档案'
+      : (person.status === '已故' ? '已故 · 纪念档案'
+      : (reachable ? '可联系' : (local ? '同城，可尝试重逢' : '未留联系方式')));
+    const openAttrs = person.isPlayerRecord
+      ? 'data-open-module="roleArchive" data-module-title="角色档案"'
+      : `data-character-id="${escape(person.id)}"`;
     return `<article class="directory-person">
-      <button class="person-avatar" type="button" data-character-id="${escape(person.id)}"
+      <button class="person-avatar" type="button" ${openAttrs}
         aria-label="查看${escape(person.name)}详情">${Game.portraitSystem.avatar(person)}</button>
-      <div><strong>${escape(person.name)}</strong><span>${escape(person.relation)} · ${escape(place)}</span>
+      <div><strong>${escape(person.name)}</strong><span>${escape(person.relation)} · ${escape(place)}
+      ${special ? ` · ${escape(special)}` : ''}</span>
       <small>${escape(person.job || person.educationName || person.school || '当地生活')} · ${status}</small></div>
-      <button class="directory-open" type="button" data-character-id="${escape(person.id)}">查看</button>
+      <button class="directory-open" type="button" ${openAttrs}>查看</button>
     </article>`;
   }
 
@@ -51,7 +87,8 @@
     const inJapan = state.location.country === '日本';
     if (filter === 'overseas-cn' && !inJapan) filter = 'city';
     const filters = [
-      ['city', '当前城市'], ['school', '同窗校友'], ['work', '同事'],
+      ['city', '当前城市'], ['specter-local', '本地幽诡'], ['cradle-local', '本地摇篮'],
+      ['school', '同窗校友'], ['work', '同事'],
       ['contact', '可联系'], ['all', '全部人物'],
     ];
     if (inJapan) filters.splice(1, 0, ['overseas-cn', '华侨']);

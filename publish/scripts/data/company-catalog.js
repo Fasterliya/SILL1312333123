@@ -3,7 +3,7 @@
 
   const Game = root.LifeGame;
   const C = Game.config;
-  const VENUE_JOBS = new Set(['idol-underground', 'idoltrainee', 'idol']);
+  const VENUE_JOBS = new Set(['idol-underground', 'idoltrainee', 'idol', 'magicalgirl']);
   const INDEPENDENT_JOBS = new Set(['prostitute']);
   const archetypes = [
     {

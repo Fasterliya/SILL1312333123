@@ -111,12 +111,15 @@
     Core.ensure(state);
     const entries = Core.spouseEntries(state);
     if (!entries.length) return '';
-    return `<details class="system-fold">
-      <summary>婚姻冲突 · ${entries.length}位配偶</summary>
+    var maxSuspicion = Math.max.apply(null, entries.map(function (e) {
+      return Math.round(Core.profile(state, e.id).suspicion);
+    }));
+    var alertColor = maxSuspicion >= 75 ? 'var(--ui-red, #a8453a)' : (maxSuspicion >= 45 ? 'var(--ui-gold, #b88a35)' : 'var(--ui-green, #315f58)');
+    return `<div style="margin-top:8px;padding:10px;border:1px solid var(--ui-line);border-radius:6px;border-left:4px solid ${alertColor};background:var(--ui-paper)">
+      <p style="font-size:10px;font-weight:700;margin:0 0 6px;color:var(--ui-ink)">婚姻关系 · ${entries.length}位配偶</p>
       <div class="partner-list">${entries.map((entry) => renderRow(state, entry)).join('')}</div>
-      <p class="system-note">出轨${state.romance.affairCount}次 · 线索按配偶分别累积；
-        坦白、否认、冷静与复合会留下长期后果。</p>
-    </details>`;
+      <p style="font-size:9px;color:var(--ui-muted);margin:4px 0 0">出轨${state.romance.affairCount}次 · 线索按配偶分别累积；坦白、否认、冷静与复合会留下长期后果。</p>
+    </div>`;
   }
 
   function finish(result) {

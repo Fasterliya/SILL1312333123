@@ -22,7 +22,7 @@
   const incomes = Object.freeze({ create: 350, stream: 520, sponsor: 900, convention: 680 });
 
   function application(state, job) {
-    const primary = ['idoltrainee', 'idol-underground', 'idol'].includes(job.id)
+    const primary = ['idoltrainee', 'idol-underground', 'idol', 'magicalgirl'].includes(job.id)
       ? '魅力' : (categoryAbility[job.category] || '学识');
     const matchingMajor = job.majors.includes(state.education.major) ? 10 : 0;
     const context = matchingMajor + (job.recommendedGender === state.gender ? 4 : 0);

@@ -33,9 +33,9 @@
 
   function handleRelations(event, state) {
     const style = event.target.closest('[data-parenting-style]');
-    if (style) return finish(Game.parenting.setStyle(state, style.dataset.parentingStyle)), true;
+    if (style) return finish(Game.parenting.setStyle(state, style.dataset.parentingStyle, style.dataset.parentingChild || null)), true;
     const focus = event.target.closest('[data-parenting-focus]');
-    if (focus) return finish(Game.parenting.setFocus(state, focus.dataset.parentingFocus)), true;
+    if (focus) return finish(Game.parenting.setFocus(state, focus.dataset.parentingFocus, focus.dataset.parentingChild || null)), true;
     const parenting = event.target.closest('[data-parenting-child]');
     if (parenting) {
       return finish(Game.parenting.act(
@@ -183,6 +183,10 @@
     if (Game.travelInteractions?.handleClick?.(event)) return;
     if (Game.portraitGallery.handleClick(event)) return;
     if (Game.hunterMode.handleClick(event)) return;
+    if (Game.supernaturalSpecter?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.magicalGirlSystem?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.cradleInstitution?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.adoptionSystem?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.saveManager.handleClick(event)) return;
     if (Game.roleBook.handleClick(event)) return;
     if (Game.appearance.handleClick(event)) return;

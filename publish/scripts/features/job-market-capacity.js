@@ -4,7 +4,7 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const LOW_THRESHOLD = new Set([
     'idoltrainee', 'idol-underground', 'welfare', 'coser', 'vtuber',
-    'fashionblog', 'prostitute',
+    'fashionblog', 'prostitute', 'magicalgirl',
   ]);
 
   function hash(value) {
@@ -26,6 +26,7 @@
     if (job.id === 'idoltrainee') return 10;
     if (job.id === 'idol-underground') return 6;
     if (job.id === 'idol') return 3;
+    if (job.id === 'magicalgirl') return 5;
     if (job.freelance) return 5 + (hash(`${cityName}:${job.id}`) % 4);
     const city = Game.config.cities.find((item) => item.city === cityName);
     const base = city?.tier === 1 ? 4 : (city?.tier === 2 ? 3 : 2);

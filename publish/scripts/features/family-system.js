@@ -43,8 +43,18 @@
   }
 
   function detailActions(state, person) {
-    const actions = [['chat', '聊天'], ['dine', '聚餐'], ['gift', '送礼'], ['outing', '出游'], ['support', '支持']];
-    if (['儿子', '女儿'].includes(person.relation)) actions.push(...Game.parenting.detailActions(person));
+    var age = U.personAge(state, person);
+    var actions = [['chat', '聊天'], ['dine', '聚餐'], ['gift', '送礼'], ['outing', '出游'], ['support', '支持']];
+    if (['儿子', '女儿'].includes(person.relation) && age < 18) {
+      actions.push.apply(actions, Game.parenting.detailActions(person));
+    }
+    if (['儿子', '女儿'].includes(person.relation) && age >= 18) {
+      actions.push(['support', '经济支援'], ['chat', '关心近况']);
+    }
+    if (['养子', '养女'].includes(person.relation)) {
+      if (age < 18) actions.push.apply(actions, Game.parenting.detailActions(person));
+      else actions.push(['chat', '关心近况']);
+    }
     if (Game.relationshipCore.hasPartner(state, person.id)) {
       actions.push(['date', '约会'], ['propose', '求婚']);
     } else if (person.relation === '朋友') {

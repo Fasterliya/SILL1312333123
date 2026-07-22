@@ -21,6 +21,10 @@
   function refresh() {
     Game.healthSafety.repair(state);
     Game.view.render(state);
+    Game.supernaturalView?.render(state);
+    Game.cradleView?.render(state);
+    Game.familyDashboard?.render(state);
+    Game.adoptionSystem?.renderOrphanage(state);
     Game.lifeLoop.render(state);
     Game.actions.renderDecision();
   }

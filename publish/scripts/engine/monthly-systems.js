@@ -44,6 +44,10 @@
     Game.universityLife?.monthly(state);
     Game.lifeResumeSync?.monthly(state);
     Game.specialCareerRanks?.sync(state);
+    Game.supernaturalSpecter?.monthly(state);
+    Game.familyEvents?.monthly(state);
+    Game.magicalGirlSystem?.monthly(state);
+    Game.cradleInstitution?.monthly(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

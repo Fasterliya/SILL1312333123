@@ -3,7 +3,7 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const preference = '崇洋媚外';
-  const preferenceChance = 22;
+  const preferenceChance = 5;
   const kimonoNames = new Set([
     '白绯巫女服', '夏日花火浴衣', '樱纹小纹和服', '成人式振袖',
     '毕业袴套装', '和风羽织外套', '町娘和服',

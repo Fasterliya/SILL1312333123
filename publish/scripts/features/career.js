@@ -35,7 +35,7 @@
     const professional = check(categoryAbility);
     const negotiation = check('交涉');
     const charm = Game.characterAttributes.derivedCharm(state.profile);
-    if (['idoltrainee', 'idol-underground', 'idol'].includes(job.id)) {
+    if (['idoltrainee', 'idol-underground', 'idol', 'magicalgirl'].includes(job.id)) {
       return charm * 0.45 + negotiation * 0.25
         + check('体能') * 0.2
         + traitBoost(state, '艺术') + (state.education.study || 0) * 0.04;
@@ -131,6 +131,7 @@
     else Game.workplace.join(state, employerJob);
     Game.creatorCareer.onJobChange(state);
     Game.idolSystem?.onJobChange(state);
+    Game.magicalGirlCore?.onJobChange(state);
     if (job.id === 'idol-underground') {
       const underground = Game.undergroundIdol.ensure(state);
       underground.active = true;

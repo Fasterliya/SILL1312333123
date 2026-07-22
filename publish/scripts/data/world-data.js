@@ -66,6 +66,7 @@
     { id: 'convention', name: '漫展活动执行', company: '次元城市会展', industry: '会展活动', salary: 7000, need: 50, category: '社交', majors: ['现代服务', '数字媒体'], education: 1, tier: 3, cities: [] },
     { id: 'pimp', name: '皮条客', company: '自营妓院', industry: '风俗业', salary: 8000, need: 30, category: '社交', majors: [], education: 0, tier: 3, cities: [], freelance: true, recommendedGender: '男' },
     { id: 'blackmarket', name: '黑市商人', company: '地下市场', industry: '黑市', salary: 5000, need: 25, category: '商业', majors: [], education: 0, tier: 3, cities: [], freelance: true },
+    { id: 'magicalgirl', name: '魔法少女', company: '隐界·契约之间', industry: '魔法界', salary: 0, need: 60, category: '艺术', majors: [], education: 0, tier: 3, cities: [], freelance: false, recommendedGender: '女', adultOnly: false, minAge: 12, hidden: true },
   );
 
   C.houses.push(

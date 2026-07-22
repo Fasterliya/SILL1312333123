@@ -51,6 +51,12 @@
       if (systemResult.ok) done();
       return;
     }
+    if (['gen-respect', 'gen-strict', 'gen-compromise'].includes(value)) {
+      var genResult = Game.familyEvents.resolveGenerationConflict(current, value);
+      Game.view.showToast(genResult.message, genResult.ok ? 'good' : 'warning');
+      if (genResult.ok) done();
+      return;
+    }
     if (['lifeEvent', 'succession'].includes(decision.type)) {
       const system = decision.type === 'lifeEvent' ? Game.lifeEvents : Game.legacySystem;
       const result = system.resolve(current, value);
@@ -103,6 +109,14 @@
       Game.view.showToast(result.message, 'good');
     } else if (decision.type === 'internship') {
       Game.universityLife.resolveInternship(current, value);
+    } else if (decision.type === 'mgContract') {
+      if (value === 'accept-mg') {
+        var mgResult = Game.magicalGirlContract.acceptContract(current, decision.data);
+        Game.view.showToast(mgResult.message, mgResult.ok ? 'good' : 'warning');
+      } else {
+        var declineResult = Game.magicalGirlContract.declineContract(current, decision.data);
+        Game.view.showToast(declineResult.message, declineResult.ok ? 'good' : 'warning');
+      }
     }
     current.pendingDecision = null;
     done();

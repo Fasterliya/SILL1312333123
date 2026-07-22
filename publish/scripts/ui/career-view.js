@@ -38,6 +38,10 @@
       var wHtml = Game.welfareCareer.render(state);
       if (wHtml) return '<section class="career-panel">' + wHtml + '</section>';
     }
+    /* magical girl — standalone */
+    if (state.career.jobId === 'magicalgirl') {
+      return Game.magicalGirlView ? Game.magicalGirlView.render(state) : '<section class="career-panel"><p class="empty-state">魔法少女系统未加载。</p></section>';
+    }
     /* vtuber — standalone */
     if (state.career.jobId === 'vtuber') {
       if (!Game.vtuberCareer) return '<section class="career-panel"><p class="empty-state">虚拟主播系统未加载。</p></section>';

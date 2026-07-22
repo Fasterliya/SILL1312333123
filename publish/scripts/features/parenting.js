@@ -45,16 +45,28 @@
     return { ok: true, message: Game.economy.message(state, `${child.name}的成长状态得到提升`) };
   }
 
-  function setStyle(state, style) {
+  function setStyle(state, style, childId) {
     if (!styles[style]) return { ok: false, message: '没有这种养育方式' };
+    if (childId) {
+      var child = children(state).find(function (p) { return p.id === childId; });
+      if (!child) return { ok: false, message: '未找到该子女' };
+      child.upbringing.style = style;
+      return { ok: true, message: child.name + '的养育方式调整为' + style };
+    }
     state.parenting.style = style;
-    return { ok: true, message: `家庭养育方式调整为${style}` };
+    return { ok: true, message: '家庭养育方式调整为' + style };
   }
 
-  function setFocus(state, focus) {
+  function setFocus(state, focus, childId) {
     if (!focuses.includes(focus)) return { ok: false, message: '没有这个教育方向' };
+    if (childId) {
+      var child = children(state).find(function (p) { return p.id === childId; });
+      if (!child) return { ok: false, message: '未找到该子女' };
+      child.upbringing.focus = focus;
+      return { ok: true, message: child.name + '的教育方向调整为' + focus };
+    }
     ensureState(state).focus = focus;
-    return { ok: true, message: `子女教育方向调整为${focus}` };
+    return { ok: true, message: '子女教育方向调整为' + focus };
   }
 
   function tendencyBonus(tendency, focus) {
@@ -92,8 +104,10 @@
 
   function monthly(state) {
     ensureState(state);
-    const gains = styles[state.parenting.style] || styles.均衡陪伴;
+    var defaultGains = styles[state.parenting.style] || styles.均衡陪伴;
     children(state).forEach((child) => {
+      var gains = child.upbringing && child.upbringing.style && styles[child.upbringing.style]
+        ? styles[child.upbringing.style] : defaultGains;
       const age = U.personAge(state, child);
       if (child.status !== '健康' || age > 18) return;
       if (age === 18 && (state.totalMonths - child.birthMonth) % 12 !== 0) return;
@@ -145,16 +159,27 @@
     )).join('');
     const cards = children(state).map((child) => {
       const up = child.upbringing;
-      const traits = Game.structuredTraits.display(child);
-      const education = child.educationProgress;
+      const childStyle = up && up.style ? up.style : state.parenting.style;
+      const childFocus = up && up.focus ? up.focus : state.parenting.focus;
+      const styleBtns = Object.keys(styles).map(function (s) {
+        return '<button class="' + (childStyle === s ? 'active' : '') + '" data-parenting-style="' + s + '" data-parenting-child="' + child.id + '" style="min-height:26px;padding:1px 6px;font-size:8px">' + s + '</button>';
+      }).join('');
+      const focusBtns = focuses.map(function (f) {
+        return '<button class="' + (childFocus === f ? 'active' : '') + '" data-parenting-focus="' + f + '" data-parenting-child="' + child.id + '" style="min-height:26px;padding:1px 6px;font-size:8px">' + f + '</button>';
+      }).join('');
+      var traits = Game.structuredTraits.display(child);
+      var education = child.educationProgress;
       return `<article class="growth-card"><button class="person-avatar" type="button"
         data-character-id="${child.id}" aria-label="查看${child.name}详情">${Game.portraitSystem.avatar(child)}</button>
         <div class="growth-main"><strong>${child.name} · ${U.personAge(state, child)}岁</strong>
         <span>关爱 ${Math.round(up.care)} · 学业 ${Math.round(up.education)} · 自主 ${Math.round(up.independence)} · 健康 ${Math.round(up.health)}</span>
-        <small>儿童倾向 ${traits.childhood || '6岁形成'} · ${traits.education}${education ? ` · 教育积累 ${Math.round(education.points)}` : ''}</small></div>
+        <small>儿童倾向 ${traits.childhood || '6岁形成'} · ${traits.education}${education ? ` · 教育积累 ${Math.round(education.points)}` : ''}</small>
+        <small style="color:var(--ui-green)">个人养育：${childStyle} · ${childFocus}</small></div>
         <div class="growth-actions">${detailActions(child).map(([type, label]) => (
           `<button data-parenting-child="${child.id}" data-parenting-action="${type.slice(7)}">${label}</button>`
-        )).join('')}</div></article>`;
+        )).join('')}</div>
+        <div style="margin-top:4px;display:flex;gap:2px;flex-wrap:wrap">${styleBtns}</div>
+        <div style="margin-top:2px;display:flex;gap:2px;flex-wrap:wrap">${focusBtns}</div></article>`;
     }).join('');
     return `<section class="list-guide"><strong>当前方式：${state.parenting.style} · ${state.parenting.focus}教育</strong>
       <span>教育储备 ${Game.view.money(state.parenting.educationFund)}；每年按儿童倾向、监护人能力与压力结算。</span></section>

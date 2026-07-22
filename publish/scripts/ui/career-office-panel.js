@@ -110,7 +110,7 @@
   function usesLegacyPanel(state) {
     if (state.companyCreationStage?.active) return true;
     const jobId = state.career.jobId || '';
-    if (['pimp', 'blackmarket', 'prostitute', 'welfare', 'idol-underground'].includes(jobId)) return true;
+    if (['pimp', 'blackmarket', 'prostitute', 'welfare', 'idol-underground', 'magicalgirl'].includes(jobId)) return true;
     if (Game.idolSystem?.isIdolJob?.(jobId)) return true;
     return Boolean(Game.creatorCareer?.isCreator?.(state));
   }

@@ -115,6 +115,10 @@
   <script src="./scripts/ui/femboy-portrait-prompt.js" defer></script>
   <script src="./scripts/ui/portrait-prompt.js" defer></script>
   <script src="./scripts/ui/portrait-system.js" defer></script>
+  <script src="./scripts/ui/supernatural-view.js" defer></script>
+  <script src="./scripts/ui/magical-girl-view.js" defer></script>
+  <script src="./scripts/ui/cradle-view.js" defer></script>
+  <script src="./scripts/ui/family-dashboard.js" defer></script>
   <script src="./scripts/ui/ability-view.js" defer></script>
   <script src="./scripts/ui/profile.js" defer></script>
   <script src="./scripts/features/relationship-core.js" defer></script>
@@ -194,6 +198,13 @@
   <script src="./scripts/ui/task-center.js" defer></script>
   <script src="./scripts/features/npc-initiative-view.js" defer></script>
   <script src="./scripts/features/npc-initiative.js" defer></script>
+  <script src="./scripts/features/supernatural-specter.js" defer></script>
+  <script src="./scripts/features/magical-girl-core.js" defer></script>
+  <script src="./scripts/features/magical-girl-contract.js" defer></script>
+  <script src="./scripts/features/magical-girl-system.js" defer></script>
+  <script src="./scripts/features/cradle-institution.js" defer></script>
+  <script src="./scripts/features/family-events.js" defer></script>
+  <script src="./scripts/features/adoption-system.js" defer></script>
   <script src="./scripts/features/rape-encounter.js" defer></script>
   <script src="./scripts/features/tax-system.js" defer></script>
   <script src="./scripts/features/bank-system.js" defer></script>
@@ -331,6 +342,7 @@
           <button data-open-module="roleAppearance" data-module-title="外观与穿着"><b>装</b><span><strong>外观与穿着</strong><small>发型、气质及三部位穿搭</small></span><i>›</i></button>
           <button data-open-module="hunterModeSubpage" data-module-title="特殊模式"><b>猎</b><span><strong>特殊模式</strong><small>开启或关闭皮物猎手</small></span><i>›</i></button>
           <button data-open-module="possessedSubpage" data-module-title="皮物列表"><b>皮</b><span><strong>皮物列表</strong><small>查看已夺取的人生与立绘</small></span><i>›</i></button>
+          <button data-open-module="orphanageSubpage" data-module-title="城市福利院"><b>院</b><span><strong>城市福利院</strong><small>收养6-12岁无家孩童</small></span><i>›</i></button>
         </div>
       </div>
 
@@ -417,6 +429,10 @@
       <div class="module-view" id="possessedSubpage"><section class="panel">
         <div class="panel-title"><h2>皮物列表</h2><span>人生角色与立绘档案</span></div>
         <div id="possessedList"></div>
+      </section></div>
+      <div class="module-view" id="orphanageSubpage"><section class="panel">
+        <div class="panel-title"><h2>城市福利院</h2><span>收养无家孩童</span></div>
+        <div id="orphanageList"></div>
       </section></div>
       <div class="module-view" id="familySubpage"><section class="panel">
         <div class="panel-title"><h2>家庭关系</h2><span>点击头像查看详情</span></div>

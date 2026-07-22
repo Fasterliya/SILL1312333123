@@ -79,6 +79,11 @@
     state.travel.journey ||= null;
     state.worldPeople = Array.isArray(state.worldPeople) ? state.worldPeople : [];
     Game.hunterMode.ensure(state);
+    Game.supernaturalSpecter?.ensure?.(state);
+    Game.magicalGirlCore?.ensure?.(state);
+    Game.cradleInstitution?.ensure?.(state);
+    Game.familyEvents?.ensure?.(state);
+    Game.adoptionSystem?.ensure?.(state);
     if (sourceVersion < 11) {
       const candidates = state.contacts.filter((person) => (
         person.relation === '相亲对象' && person.id !== state.romance?.partnerId

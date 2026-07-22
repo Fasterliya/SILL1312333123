@@ -59,7 +59,7 @@
   function status(state) {
     const job = Game.config.jobs.find((item) => item.id === state.career.jobId);
     const special = ['pimp', 'blackmarket', 'prostitute', 'welfare',
-      'idol-underground', 'idoltrainee', 'idol'];
+      'idol-underground', 'idoltrainee', 'idol', 'magicalgirl'];
     if (!job || job.freelance || special.includes(job.id)) return null;
     const line = lineFor(job);
     const ladder = LADDERS[line];

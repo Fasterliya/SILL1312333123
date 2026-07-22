@@ -58,8 +58,9 @@
     { id: 'portraitblog', name: '写真博主', company: '个人影像频道', industry: '内容创作', salary: 7600, need: 54, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
     { id: 'styleblog', name: '穿搭博主', company: '个人穿搭频道', industry: '内容创作', salary: 8200, need: 56, category: '艺术', majors: ['数字媒体', '现代服务'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
     { id: 'coser', name: '职业Coser', company: '个人角色创作室', industry: '内容创作', salary: 8500, need: 58, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
-    { id: 'welfare', name: '福利姬', company: '个人福利频道', industry: '内容创作', salary: 9500, need: 48, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女' },
+    { id: 'welfare', name: '福利姬', company: '个人福利频道', industry: '内容创作', salary: 9500, need: 48, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true, recommendedGender: '女', adultOnly: true },
     { id: 'prostitute', name: '妓女', company: '风月场所', industry: '风俗业', salary: 12000, need: 35, category: '社交', majors: [], education: 0, tier: 3, cities: [], freelance: false, recommendedGender: '女', adultOnly: true },
+    { id: 'idol-underground', name: '地下偶像', company: '城市Livehouse', industry: '娱乐业', salary: 800, need: 38, category: '艺术', majors: [], education: 0, tier: 3, cities: ['北京', '上海', '深圳', '成都', '长沙', '首尔', '东京', '大阪'], freelance: false, recommendedGender: '女', adultOnly: false, minAge: 12 },
     { id: 'idoltrainee', name: '偶像练习生', company: '偶像事务所', industry: '娱乐业', salary: 1500, need: 45, category: '艺术', majors: [], education: 0, tier: 3, cities: ['北京', '上海', '深圳', '成都', '长沙', '首尔', '东京'], freelance: false, recommendedGender: '女', adultOnly: false, minAge: 12 },
     { id: 'idol', name: '偶像艺人', company: '偶像事务所', industry: '娱乐业', salary: 8000, need: 55, category: '艺术', majors: ['数字媒体'], education: 1, tier: 2, cities: ['北京', '上海', '深圳', '成都', '长沙', '首尔', '东京'], freelance: false, recommendedGender: '女', adultOnly: false, minAge: 16 },
     { id: 'illustrator', name: '自由插画师', company: '个人插画工作室', industry: '内容创作', salary: 7800, need: 62, category: '艺术', majors: ['数字媒体'], education: 1, tier: 3, cities: [], freelance: true },
@@ -77,23 +78,6 @@
     智能制造: 41.2, 医疗创新: 27.6, 城市交通: 16.8, 文化传媒: 22.3,
     东亚机器人: 53.1, 樱花消费: 19.4, 全球指数: 88.6,
   });
-  C.businesses.push(
-    { id: 'stall', name: '街角小摊', price: 18000, income: 900 },
-    { id: 'cafe', name: '社区咖啡馆', price: 120000, income: 5200 },
-    { id: 'studio', name: '创意工作室', price: 260000, income: 9800 },
-    { id: 'shop', name: '便利商店', price: 360000, income: 13200 },
-    { id: 'restaurant', name: '主题餐厅', price: 680000, income: 23800 },
-    { id: 'factory', name: '小型制造厂', price: 1600000, income: 52000 },
-    { id: 'hotel', name: '精品旅馆', price: 2800000, income: 76000 },
-    { id: 'techfirm', name: '科技创业公司', price: 5200000, income: 148000 },
-  );
-  C.vehicles.push(
-    { id: 'bike', name: '通勤自行车', price: 1800, mood: 1 },
-    { id: 'scooter', name: '城市电动车', price: 6800, mood: 2 },
-    { id: 'compact', name: '紧凑型轿车', price: 98000, mood: 4 },
-    { id: 'suv', name: '家庭旅行车', price: 260000, mood: 7 },
-    { id: 'sports', name: '双门跑车', price: 880000, mood: 12 },
-  );
   root.LifeGame.worldData = Object.freeze({
     japaneseName(gender) {
       return root.LifeGame.nameSystem.makeName('', gender, 'ja-JP');

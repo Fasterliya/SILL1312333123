@@ -70,6 +70,12 @@
   function render(state, elements) {
     const identity = Game.hunterMode.identity(state);
     const p = identity.profile;
+    const sourceStats = identity.skin?.stats || state.stats;
+    Game.characterAttributes.ensure(
+      p, sourceStats, identity.skin ? null : state.education, U.age(state),
+    );
+    const congenital = Game.congenitalTraits.names(p, identity.gender);
+    const structured = Game.abilityView.traitRows(p);
     Game.portraitSystem.renderPlayer(state, elements);
     elements.profileFacts.innerHTML = [
       ['年龄', `${U.age(state)}岁${Game.timeSystem.ageMonths(state) % 12}月`], ['身高', `${p.height.toFixed(1)} cm`],
@@ -79,7 +85,11 @@
       ...(identity.gender === '女' && state.romance.married
         ? [['生育力', `${Game.demography.fertility(state, p)}%`]] : []),
     ].map(([label, text]) => `<div><span>${label}</span><b>${text}</b></div>`).join('');
-    elements.traitGrid.innerHTML = [['性格', p.personality], ['特质', p.trait]]
+    elements.traitGrid.innerHTML = [
+      ['性格标签', `${p.personality} · ${p.trait}`],
+      ['先天特质', congenital.join(' · ') || '无显著先天特质'],
+      ...structured, ...Game.abilityView.abilityRows(p, identity.skin ? null : state),
+    ]
       .map(([label, text]) => `<div><span>${label}</span><strong>${text}</strong></div>`).join('');
     elements.geneFacts.innerHTML = [
       ['DNA编码', p.genetics.code], ['脸型', p.faceShape], ['五官比例', p.featureProportions],
@@ -125,6 +135,7 @@
     const target = Game.people.find(state, targetId);
     if (!target) return false;
     if (Game.cosplayCatalog.overrides(target, field)) return false;
+    if (!(Game.npcFemboyCareer?.allowsAppearance(target, field, nextValue) ?? true)) return false;
     if (field.startsWith('clothing.')) target.clothing[key] = nextValue;
     else target[field] = nextValue;
     if (field === 'bodyType') Game.npcLife.syncGrowth(state, target);

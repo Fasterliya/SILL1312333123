@@ -1,0 +1,257 @@
+.quick-study.subject-study {
+  padding: 10px;
+}
+
+.subject-study header div {
+  min-width: 0;
+}
+
+.subject-study header small {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: #66726f;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.semester-schedule {
+  display: flex;
+  gap: 4px;
+  padding-bottom: 7px;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.semester-schedule::-webkit-scrollbar {
+  display: none;
+}
+
+.semester-schedule span {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border: 1px solid #cbd6d0;
+  border-radius: 4px;
+  background: #fffdf7;
+  color: #315f58;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.subject-study .subject-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  max-height: min(27dvh, 210px);
+  padding: 0 2px 2px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.subject-study .subject-card {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 7px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #dedcd2;
+  border-radius: 6px;
+  background: #fffdf7;
+}
+
+.subject-study .subject-card.plan-focus {
+  border-color: #8ba59c;
+  background: #f4f8f2;
+}
+
+.subject-study .subject-copy {
+  min-width: 0;
+}
+
+.subject-study .subject-name {
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+  color: #303b37;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.subject-study .subject-max {
+  flex: 0 0 auto;
+  color: #7d857f;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.subject-study .subject-copy small {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #6f7772;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subject-forecast {
+  color: #a44539;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.subject-study .progress-bar {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 14px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: #e3e7e2;
+}
+
+.subject-study .progress-bar i {
+  display: block;
+  height: 100%;
+  background: #8ba59c;
+}
+
+.subject-study .progress-bar span {
+  position: absolute;
+  inset: 0 4px;
+  overflow: hidden;
+  color: #263b37;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.study-plan-edit {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 7px;
+  border: 1px solid #315f58;
+  border-radius: 5px;
+  background: #315f58;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.semester-detail {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.semester-detail strong {
+  font-size: 13px;
+}
+
+.semester-detail span {
+  color: #66726f;
+  font-size: 10px;
+}
+
+.semester-plan-meter {
+  min-height: 42px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 4px solid #315f58;
+  background: #eef2eb;
+}
+
+.semester-plan-meter span {
+  color: #66726f;
+  font-size: 10px;
+}
+
+.semester-plan-meter strong {
+  font-size: 16px;
+}
+
+.semester-plan-list {
+  display: grid;
+  gap: 5px;
+  max-height: min(48dvh, 390px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.semester-plan-row {
+  min-height: 52px;
+  padding: 5px 6px 5px 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px 24px 44px;
+  gap: 5px;
+  align-items: center;
+  border: 1px solid #ddd9cd;
+  border-radius: 5px;
+  background: #fffdf7;
+}
+
+.semester-plan-row div {
+  min-width: 0;
+}
+
+.semester-plan-row strong,
+.semester-plan-row small {
+  display: block;
+}
+
+.semester-plan-row strong {
+  font-size: 12px;
+}
+
+.semester-plan-row small {
+  margin-top: 3px;
+  overflow: hidden;
+  color: #6c7571;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.decision-body .semester-plan-row button {
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: #edf3ef;
+  color: #315f58;
+  font-size: 18px;
+  text-align: center;
+}
+
+.semester-plan-row b {
+  text-align: center;
+}
+
+.decision-body .semester-plan-confirm {
+  min-height: 48px;
+  background: #315f58;
+  color: #fff;
+  text-align: center;
+}
+
+@media (max-width: 360px) {
+  .subject-study .subject-card {
+    padding: 7px;
+  }
+
+  .semester-plan-row {
+    grid-template-columns: minmax(0, 1fr) 44px 20px 44px;
+  }
+}

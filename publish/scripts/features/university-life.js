@@ -11,7 +11,11 @@
   function monthly(state) {
     if (!isUniversityStudent(state)) return;
 
-    state.education.universityMonth = (state.education.universityMonth || 0) + 1;
+    const elapsed = Game.timeSystem?.educationElapsed?.(state) || 0;
+    state.education.universityMonth = Math.max(
+      (state.education.universityMonth || 0) + 1,
+      elapsed,
+    );
     state.education.universityYear = Math.ceil(state.education.universityMonth / 12);
 
     var month = state.education.universityMonth;
@@ -24,8 +28,8 @@
       }
     }
 
-    // Year 4 (month 42): trigger thesis
-    if (month === 42 && !state.education._thesisTriggered) {
+    // Year 4 completion: thesis is the hard graduation gate.
+    if (month >= 48 && !state.education._thesisTriggered) {
       state.education._thesisTriggered = true;
       triggerThesis(state);
     }
@@ -51,11 +55,19 @@
   }
 
   function triggerThesis(state) {
-    if (state.stats.智力 > 25) {
-      state.education.graduated = true;
+    const thesisHours = state.education.subjects?.['毕业论文']?.studyHours || 0;
+    const internship = state.career._internshipBonus || state.career.exp > 0 ? 8 : 0;
+    const learning = Game.characterAttributes.personValue(state.profile, '学识');
+    const score = learning * 1.2 + Math.min(100, thesisHours) * 0.37 + internship;
+    if (score >= 52) {
+      state.education.thesisPassed = true;
       state.education.nextThesisMonth = 0;
       state.pendingDecision = null;
-      Game.lifeDirector.addLog(state, '论文答辩', '论文答辩通过！你正式毕业了。', 'milestone');
+      Game.lifeDirector.addLog(state, '论文答辩', '论文答辩通过，毕业手续进入最终审核。', 'milestone');
+      Game.taskCenter?.add(state, {
+        key: `thesis-pass-${state.totalMonths}`, type: 'notice',
+        title: '论文答辩通过', text: '毕业手续将在学校审核后完成。',
+      });
     } else {
       state.education.nextThesisMonth = state.totalMonths + 6;
       state.pendingDecision = {
@@ -74,8 +86,9 @@
         return school.id === state.education.universityId || school.name === state.education.university;
       });
       var prestige = university && Game.schoolLines ? Game.schoolLines.institutionResource(university) : 50;
-      var intellect = state.stats.智力 || 50;
-      var successRate = U.clamp(prestige / 100 * 0.45 + intellect / 100 * 0.35 + 0.05, 0.1, 0.9);
+      var learning = Game.characterAttributes.personValue(state.profile, '学识');
+      var successRate = U.clamp(prestige / 100 * 0.45
+        + Game.learningAttribute.checkValue(learning) / 100 * 0.35 + 0.05, 0.1, 0.9);
 
       if (Math.random() < successRate) {
         state.career._internshipBonus = true;
@@ -96,7 +109,12 @@
     return '';
   }
 
+  function canGraduate(state) {
+    return !isUniversityStudent(state) || state.education.thesisPassed === true;
+  }
+
   Game.universityLife = Object.freeze({
-    isUniversityStudent, monthly, triggerInternship, triggerThesis, resolveInternship, render,
+    isUniversityStudent, monthly, triggerInternship, triggerThesis, resolveInternship,
+    canGraduate, render,
   });
 }(window));

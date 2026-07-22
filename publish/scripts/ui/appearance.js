@@ -42,7 +42,8 @@
     if (activeField !== 'bodyType') return true;
     const female = ['幼小', '小胸', '丰满', '匀称', '娇小纤细'];
     const male = ['幼小', '清瘦', '匀称', '健壮'];
-    return (profile.gender === '女' ? female : male).includes(item.name);
+    const feminineCareer = Game.npcFemboyCareer?.active(profile);
+    return (profile.gender === '女' || feminineCareer ? female : male).includes(item.name);
   }
 
   function render() {
@@ -55,13 +56,13 @@
     const years = activeTargetId ? Game.content.personAge(state, profile) : Game.content.age(state);
     const key = keyFor(activeField);
     const selected = currentValue(profile, activeField);
-    const items = (optionsFor(key) || []).filter((entry) => visible(entry, years) && bodyMatches(entry, {
-      ...profile,
-      gender: activeTargetId ? profile.gender : identity.gender,
-    }))
+    const candidate = { ...profile, gender: activeTargetId ? profile.gender : identity.gender };
+    const items = (optionsFor(key) || []).filter((entry) => visible(entry, years)
+      && bodyMatches(entry, candidate)
+      && (Game.npcFemboyCareer?.allowsAppearance(candidate, activeField, entry.name) ?? true))
       .sort((a, b) => Number(recommended(b, profile, years)) - Number(recommended(a, profile, years)));
     const availableFilters = activeField === 'cosplay'
-      ? ['全部', '东方Project', '星穹铁道', '鸣潮', '原神', '蔚蓝档案'] : filters;
+      ? ['全部', ...Game.cosplayCatalog.series] : filters;
     const chips = availableFilters.map((filter) => (
       `<button class="${filter === activeFilter ? 'active' : ''}" data-style-filter="${filter}">${filter}</button>`
     )).join('');

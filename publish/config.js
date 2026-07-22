@@ -2,7 +2,7 @@
   'use strict';
 
   const config = {
-    version: 26,
+    version: 28,
     title: '华夏人生',
     storageKey: 'huaxia-life:v1',
     startYear: 2026,
@@ -107,8 +107,6 @@
     ],
     stocks: { 华夏科技: 32.4, 民生消费: 18.6, 绿色能源: 24.8 },
     companies: [],
-    businesses: [],
-    vehicles: [],
   };
 
   root.LifeGame = root.LifeGame || {};

@@ -8,11 +8,12 @@
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
     'quickStudyPanel',
     'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'governmentPanel', 'travelPanel', 'journeyPanel',
-    'propertyPanel', 'stockPanel', 'industryPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
+    'propertyPanel', 'stockPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
+    'statusPanel', 'financePanel', 'npcEventContainer',
     'hunterModePanel', 'possessedList',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
     'portraitPromptInput', 'profileEditor', 'traitGrid', 'geneFacts', 'decision', 'decisionTitle', 'decisionText',
-    'decisionBody', 'examJumpBtn', 'timeBar', 'staminaRing', 'toast', 'tabPages',
+    'decisionBody', 'timeBar', 'staminaRing', 'toast', 'tabPages',
     'tabs', 'heroCanvas', 'resetBtn',
   ];
   const el = {};
@@ -66,9 +67,7 @@
   }
 
   function statCards(state) {
-    return Object.entries(state.stats).map(([name, value]) => `
-      <div class="stat-item"><span>${name}</span><strong>${value}</strong>
-        <i><b style="width:${value}%"></b></i></div>`).join('');
+    return Game.abilityView.cards(state);
   }
 
   function logCards(state) {
@@ -148,13 +147,16 @@
     Game.hunterMode.render(state);
     el.propertyPanel.innerHTML = Game.propertySystem.render(state);
     el.stockPanel.innerHTML = Game.marketView.render(state);
-    el.industryPanel.innerHTML = Game.assetsSystem.render(state, money);
     el.healthPanel.innerHTML = Game.healthSystem.render(state);
+    el.statusPanel.innerHTML = Game.systemHub.renderStatus(state);
+    el.financePanel.innerHTML = Game.systemHub.renderFinance(state);
+    Game.npcInitiative.setStateRef(state);
+    Game.taskCenter?.updateTrigger(state);
+    el.npcEventContainer.innerHTML = Game.npcInitiative.renderEventBadge(state);
     el.legacyPanel.innerHTML = Game.legacySystem.render(state);
     Game.drawSettings.render(state);
     Game.profile.render(state, el);
     Game.navigation.refreshDetail();
-    Game.educationFastForward.updateButton(state, el.examJumpBtn);
     renderTimeBar(state);
     if (state.stamina && el.staminaRing) {
       var pct = state.stamina.current / state.stamina.max * 100;
@@ -168,15 +170,7 @@
   }
 
   function renderTimeBar(state) {
-    var s = state.timeSpeed || 0;
-    var d = state.day || 1;
-    var speeds = [[0,'⏸'],[1,'▶'],[5,'▶▶'],[10,'▶▶▶']];
-    el.timeBar.innerHTML = '<span class="time-date">' + state.year + '年' + state.month + '月' + d + '日</span>'
-      + '<div class="time-progress"><i class="bar-track"><b style="width:' + (d*100/30) + '%"></b></i>'
-      + '<small>本月剩余 ' + (30-d) + ' 天</small></div>'
-      + '<div class="time-controls">' + speeds.map(function(sp) {
-        return '<button data-time-speed="' + sp[0] + '" class="' + (s===sp[0]?'active':'') + '">' + sp[1] + '</button>';
-      }).join('') + '</div>';
+    Game.timeBarView.render(el.timeBar, state);
   }
 
   function showToast(message, tone) {
@@ -187,5 +181,5 @@
     toastTimer = root.setTimeout(() => { el.toast.hidden = true; }, 2400);
   }
 
-  Game.view = Object.freeze({ el, init, render, showToast, money, drawHero });
+  Game.view = Object.freeze({ el, init, render, renderTimeBar, showToast, money, drawHero });
 }(window));

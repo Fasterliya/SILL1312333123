@@ -24,7 +24,8 @@
   function ensurePerson(person) {
     if (!person) return person;
     if (!Number.isInteger(person.lifeExpectancyMonths) || person.lifeExpectancyMonths < 1) {
-      person.lifeExpectancyMonths = lifeMonths(person.id || person.name);
+      const resilience = Game.congenitalTraits?.healthBonus(person) || 0;
+      person.lifeExpectancyMonths = lifeMonths(person.id || person.name) + resilience * 6;
     }
     person.status ||= '健康';
     person.deceasedAt = Number.isFinite(person.deceasedAt) ? person.deceasedAt : null;

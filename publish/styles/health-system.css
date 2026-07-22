@@ -1,7 +1,131 @@
+.health-overview {
+  padding: 16px;
+  border: 1px solid #cfd9d5;
+  background: #f7fbf9;
+  box-shadow: 0 8px 22px rgba(35, 63, 56, 0.08);
+}
+
+.health-overview header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.health-kicker,
+.health-overview h3,
+.health-overview p,
+.health-overview header > strong small {
+  display: block;
+}
+
+.health-kicker {
+  color: #397167;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.health-overview h3 {
+  margin: 4px 0 3px;
+  color: #203c37;
+  font-size: 20px;
+}
+
+.health-overview p {
+  margin: 0;
+  color: #65736f;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.health-overview header > strong {
+  color: #285d54;
+  font-size: 34px;
+  line-height: 1;
+  text-align: right;
+}
+
+.health-overview header > strong small {
+  margin-top: 4px;
+  color: #7b8985;
+  font-size: 10px;
+}
+
+.health-meter {
+  position: relative;
+  height: 10px;
+  margin: 15px 0 13px;
+  overflow: hidden;
+  background: #dfe8e4;
+}
+
+.health-meter i {
+  display: block;
+  height: 100%;
+  background: #3b8274;
+}
+
+.health-meter b {
+  position: absolute;
+  top: -2px;
+  width: 2px;
+  height: 14px;
+  background: #b24a3b;
+}
+
+.health-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.health-metric-grid div {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #dce4e0;
+  background: #fff;
+}
+
+.health-metric-grid span,
+.health-metric-grid strong,
+.health-metric-grid small {
+  display: block;
+}
+
+.health-metric-grid span,
+.health-metric-grid small {
+  color: #6f7c78;
+  font-size: 10px;
+}
+
+.health-metric-grid strong {
+  margin: 4px 0;
+  color: #263b37;
+  font-size: 15px;
+}
+
 .health-module {
   margin-top: 12px;
   border: 1px solid #dedbd0;
   background: #fff;
+}
+
+.stress-panel {
+  border-left: 3px solid #cf6d3c;
+}
+
+.stress-meter {
+  height: 8px;
+  margin: 10px 0 6px;
+  overflow: hidden;
+  background: #e8e0d2;
+  border-radius: 4px;
+}
+
+.stress-meter i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #d6a642, #c84d3f);
 }
 
 .health-module > header {
@@ -38,12 +162,35 @@
 }
 
 .health-primary {
-  width: calc(100% - 24px);
+  width: 100%;
   min-height: 48px;
-  margin: 12px;
+  padding: 10px 12px;
   background: #263b37;
   color: #fff;
   font-weight: 800;
+  text-align: left;
+}
+
+.health-primary span,
+.health-primary small {
+  display: block;
+}
+
+.health-primary small {
+  margin-top: 3px;
+  color: #d6e2de;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.health-action-stack {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.health-action-stack .study-actions {
+  margin: 0;
 }
 
 .disease-list {
@@ -96,7 +243,7 @@
 }
 
 .health-module .system-note {
-  padding-top: 12px;
+  padding-top: 0;
 }
 
 .portrait-stage-picker {
@@ -209,9 +356,67 @@
 }
 
 .surgery-btn small,
-.surgery-btn b {
+.surgery-btn b,
+.surgery-btn em {
   color: #66726f;
   font-size: 10px;
+}
+
+.surgery-btn em {
+  color: #397167;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.surgery-status {
+  position: relative;
+  margin: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  overflow: hidden;
+  border: 1px solid #d7dedb;
+  background: #f7fbf9;
+}
+
+.surgery-status span,
+.surgery-status strong,
+.surgery-status small {
+  display: block;
+}
+
+.surgery-status span,
+.surgery-status small {
+  color: #687773;
+  font-size: 10px;
+}
+
+.surgery-status strong {
+  margin: 3px 0;
+  color: #263b37;
+  font-size: 14px;
+}
+
+.surgery-status > b {
+  flex: 0 0 auto;
+  color: #397167;
+  font-size: 13px;
+}
+
+.surgery-status i {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b8274 var(--progress), #dfe8e4 var(--progress));
+}
+
+.surgery-status.cooldown {
+  border-color: #e2d6bb;
+  background: #fff9ed;
 }
 
 .surgery-history {
@@ -246,5 +451,9 @@
 
   .disease-row button {
     width: 100%;
+  }
+
+  .surgery-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -7,7 +7,7 @@
     return !person.populationResident || person.phoneUnlocked || person.interactions > 0
       || person.portraitUrl || person.portraitGallery?.length || person.familyMaterialized
       || (state.travel?.activeIds || []).includes(person.id)
-      || person.aiChat?.messages?.length || person.fashion?.temporaryCosplay
+      || person.fashion?.temporaryCosplay
       || person.secretParentage || state.relationshipSecrets?.records?.some((record) => (
         record.participants?.includes(person.id)
       ));

@@ -8,11 +8,15 @@
     styleblog: 'styleblog',
     portraitblog: 'portraitblog',
     welfare: 'welfare',
+    coser: 'coser',
     虚拟主播: 'vtuber',
     美妆博主: 'beautyblog',
     穿搭博主: 'styleblog',
     写真博主: 'portraitblog',
     福利姬: 'welfare',
+    职业Coser: 'coser',
+    业余Coser: 'coser',
+    受邀嘉宾Coser: 'coser',
   });
   const tuning = Object.freeze({
     vtuber: { cute: 1.15, sexy: 0.55, fashion: 0.75, cosplay: 1.35 },
@@ -20,6 +24,7 @@
     styleblog: { cute: 0.9, sexy: 0.8, fashion: 1.35, cosplay: 0.75 },
     portraitblog: { cute: 0.95, sexy: 1.15, fashion: 0.95, cosplay: 1 },
     welfare: { cute: 1, sexy: 1.4, fashion: 0.7, cosplay: 0.9 },
+    coser: { cute: 1.25, sexy: 0.65, fashion: 0.9, cosplay: 1.45 },
   });
 
   function value(profile, field) {
@@ -32,7 +37,9 @@
 
   function details(profile, rawJobId) {
     const jobId = jobAliases[rawJobId] || '';
-    if (!tuning[jobId]) return { multiplier: 1, cute: 0, sexy: 0, fashion: 0, cosplay: 0, combo: 0 };
+    if (!tuning[jobId]) return {
+      multiplier: 1, cute: 0, sexy: 0, fashion: 0, cosplay: 0, combo: 0, careerBonus: 0,
+    };
     const top = value(profile, 'clothing.top');
     const socks = value(profile, 'clothing.socks');
     const hair = value(profile, 'hairstyle');
@@ -72,11 +79,12 @@
     if (cosText && /制服|学院|女仆|巫女|洋装/.test(cosText)) cosplayBonus += 0.03;
 
     const weights = tuning[jobId];
+    const careerBonus = Game.npcFemboyCareer?.styleBonus(profile, jobId) || 0;
     const bonus = cute * weights.cute + sexy * weights.sexy
-      + fashion * weights.fashion + cosplayBonus * weights.cosplay + combo;
+      + fashion * weights.fashion + cosplayBonus * weights.cosplay + combo + careerBonus;
     return {
-      multiplier: Math.min(1.8, Math.max(1, 1 + bonus)),
-      cute, sexy, fashion, cosplay: cosplayBonus, combo,
+      multiplier: Math.min(2, Math.max(1, 1 + bonus)),
+      cute, sexy, fashion, cosplay: cosplayBonus, combo, careerBonus,
     };
   }
 

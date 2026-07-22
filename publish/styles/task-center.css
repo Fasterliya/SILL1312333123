@@ -1,0 +1,138 @@
+.task-center-btn {
+  position: relative;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 50%;
+  background: rgba(30, 53, 51, 0.72);
+  color: #fff;
+  box-shadow: none;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.task-center-btn > span {
+  font-size: 21px;
+  line-height: 1;
+}
+
+.task-center-btn b {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: #cf463d;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.task-center-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 609;
+  background: rgb(24 29 38 / 42%);
+}
+
+.task-center-sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 610;
+  max-height: min(68dvh, 560px);
+  padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 16px 16px 0 0;
+  background: #fff;
+  box-shadow: 0 -8px 28px rgb(24 29 38 / 20%);
+}
+
+.task-center-sheet header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin: 6px 0 12px;
+}
+
+.task-center-sheet header small {
+  color: #7d8591;
+  font-size: 12px;
+}
+
+.task-center-sheet h2 {
+  margin: 2px 0 0;
+  color: #252b35;
+  font-size: 20px;
+}
+
+.task-center-sheet header b {
+  color: #6c7480;
+  font-size: 13px;
+}
+
+.task-center-list {
+  display: grid;
+  gap: 8px;
+}
+
+.task-center-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #dde1e7;
+  border-radius: 8px;
+  background: #f8f9fb;
+}
+
+.task-center-row small {
+  color: #8a929e;
+  font-size: 11px;
+}
+
+.task-center-row strong {
+  display: block;
+  margin-top: 2px;
+  color: #303743;
+  font-size: 14px;
+}
+
+.task-center-row p {
+  margin: 4px 0 0;
+  color: #68717e;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.task-center-row button,
+.task-center-close {
+  min-width: 56px;
+  min-height: 44px;
+  border: 1px solid #cad0d9;
+  border-radius: 8px;
+  background: #fff;
+  color: #344556;
+}
+
+.task-center-close {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.decision-later {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border: 1px solid #c9cec9;
+  border-radius: 6px;
+  background: #fff;
+  color: #53605b;
+  font-size: 12px;
+}

@@ -107,6 +107,7 @@
 
   function act(state, action) {
     if (!state.career.job) return { ok: false, message: '当前没有工作' };
+    if (action === 'promote-industry') return Game.careerGrowth.requestTitle(state, 'industry');
     if (action === 'lead') return Game.careerGrowth.requestTitle(state, 'management');
     if (action === 'promote-management') return Game.careerGrowth.requestTitle(state, 'management');
     if (action === 'promote-professional') return Game.careerGrowth.requestTitle(state, 'professional');
@@ -130,9 +131,11 @@
     const leader = Game.people.find(state, state.workplace.leaderId);
     const peers = people.filter((person) => person.id !== leader?.id).slice(0, 6);
     const track = state.career.titleTrack;
-    const options = track === 'staff'
-      ? [['promote-management', '申请管理提拔'], ['promote-professional', '申请专业晋级']]
-      : [[`promote-${track}`, `申请${track === 'management' ? '管理提拔' : '专业晋级'}`]];
+    const options = Game.careerLadders
+      ? [['promote-industry', '申请职级晋升']]
+      : (track === 'staff'
+        ? [['promote-management', '申请管理提拔'], ['promote-professional', '申请专业晋级']]
+        : [[`promote-${track}`, `申请${track === 'management' ? '管理提拔' : '专业晋级'}`]]);
     const management = `<div class="system-actions">${options.map(([id, label]) => (
       `<button data-workplace-action="${id}">${label}</button>`
     )).join('')}</div><p class="system-note">${Game.careerGrowth.titleName(state)}

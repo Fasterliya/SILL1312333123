@@ -13,7 +13,6 @@
     }
     return value >>> 0;
   }
-
   function seeded(seed) {
     let value = hash(String(seed || 'life'));
     return () => {
@@ -24,7 +23,6 @@
       return ((next ^ (next >>> 14)) >>> 0) / 4294967296;
     };
   }
-
   function weighted(definition, rng) {
     const total = definition.values.reduce((sum, item) => sum + item.weight, 0);
     let cursor = rng() * total;
@@ -33,7 +31,6 @@
       return cursor <= 0;
     }) || definition.values[0];
   }
-
   const allele = (entry) => ({ value: entry.value, dominance: entry.dominance });
   const pick = (pair, rng) => pair[Math.floor(rng() * pair.length)] || pair[0];
 
@@ -44,19 +41,16 @@
     if (value === '丰满') return '丰润骨架';
     return '匀称骨架';
   }
-
   function hairTendency(value) {
     if (String(value).includes('卷')) return '轻微卷曲';
     if (String(value).includes('层次') || String(value).includes('碎')) return '自然层次';
     return '直顺';
   }
-
   function existing(target, key) {
     if (key === 'bodyFrame') return target.bodyFrame || bodyFrame(target.bodyType);
     if (key === 'hairStyleTendency') return target.hairStyleTendency || hairTendency(target.hairstyle);
     return target[key];
   }
-
   function expression(loci, maxHeight, code) {
     const rng = seeded(code);
     const expressed = {};
@@ -75,12 +69,10 @@
     expressed.maxHeight = Math.round(((maxHeight[0] + maxHeight[1]) / 2) * 10) / 10;
     return expressed;
   }
-
   function codeFor(loci, maxHeight) {
     const raw = keys().map((key) => loci[key].map((item) => item.value).join('/')).join('|');
     return `DNA-${hash(`${raw}|${maxHeight.join('/')}`).toString(36).toUpperCase()}`;
   }
-
   function apply(target, expressed, preserve) {
     const fields = ['hairColor', 'hairStyleTendency', 'eyeColor', 'faceShape', 'featureProportions',
       'bodyFrame', 'temperament', 'developmentTendency', 'molePosition', 'freckles', 'distinctiveFeature', 'maxHeight'];
@@ -90,7 +82,6 @@
       }
     });
   }
-
   function founder(target, gender, seed, preserve) {
     const rng = seeded(seed || `${target.name}-${target.id}`);
     const loci = {};
@@ -118,6 +109,7 @@
     }
     target.genetics = genetics;
     apply(target, genetics.expressed, preserve);
+    Game.congenitalTraits?.founder(target, gender, `${seed}-congenital`);
     return genetics;
   }
 
@@ -160,6 +152,7 @@
     apply(target, target.genetics.expressed, false);
     cosmeticInheritance(target, leftParent);
     cosmeticInheritance(target, rightParent);
+    Game.congenitalTraits?.inheritInto(target, gender, leftParent, rightParent, `${seed}-congenital`);
     return target;
   }
 
@@ -181,6 +174,7 @@
       ...(target.genetics.expressed || {}),
     };
     apply(target, target.genetics.expressed, preserve);
+    Game.congenitalTraits?.ensure(target, gender, `${seed}-congenital`);
     return target.genetics;
   }
 

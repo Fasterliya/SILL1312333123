@@ -71,8 +71,10 @@
     const effect = choice[2];
     state.money += effect.money || 0;
     state.stats.心情 = U.clamp(state.stats.心情 + (effect.mood || 0), 0, 100);
-    state.stats.魅力 = U.clamp(state.stats.魅力 + (effect.charm || 0), 0, 100);
-    state.stats.智力 = U.clamp(state.stats.智力 + (effect.intelligence || 0), 0, 100);
+    if (effect.charm) Game.characterAttributes.gain(state, '交涉', effect.charm, '远途旅行');
+    if (effect.intelligence && Game.subjectPanel.isStudent(state)) {
+      Game.educationSystem.addPreparation(state, effect.intelligence * 2);
+    }
     state.cityLife.reputation = U.clamp(state.cityLife.reputation + (effect.reputation || 0), 0, 100);
     journey.score += effect.score || 0;
     const person = Game.people.find(state, journey.encounterId) || (effect.meet ? encounter(state, item) : null);
@@ -82,6 +84,7 @@
       state.travel.history.unshift({ routeId: item.id, city: item.city, country: item.country,
         score: journey.score, month: state.totalMonths });
       state.travel.history = state.travel.history.slice(0, 20);
+      Game.structuredTraits.addExperience(state.profile, 'traveler');
       state.travel.journey = null;
       Game.lifeDirector.addLog(state, '国际旅途归来', `你结束${item.city}之旅，文化体验评分 ${journey.score}。`, 'milestone');
       return { ok: true, message: `${item.city}旅途完成，评分 ${journey.score}` };

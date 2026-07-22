@@ -131,10 +131,10 @@
     state.profile.id = 'player-profile';
     state.profile.styleStage = -1;
     state.stats = {
-      健康: U.clamp(Math.round(45 + (heir.upbringing?.health || 50) * 0.45), 0, 100),
-      心情: U.clamp(Math.round(40 + heir.affection * 0.4), 0, 100),
-      智力: U.clamp(Math.round(35 + (heir.upbringing?.education || 30) * 0.5), 0, 100),
-      魅力: U.clamp(Math.round(40 + (heir.upbringing?.independence || 30) * 0.35), 0, 100),
+      健康: U.clamp(Math.round(heir.stats?.健康 || 45 + (heir.upbringing?.health || 50) * 0.45), 0, 100),
+      智力: U.clamp(Math.round(heir.stats?.智力 || 35 + (heir.upbringing?.education || 30) * 0.5), 0, 100),
+      魅力: U.clamp(Math.round(heir.stats?.魅力 || 40 + (heir.upbringing?.independence || 30) * 0.35), 0, 100),
+      力量: U.clamp(Math.round(heir.stats?.力量 || 45 + (heir.upbringing?.health || 30) * 0.35), 0, 100),
     };
     state.money = inherited;
     state.education = education(heir, age);
@@ -142,7 +142,8 @@
     state.romance = { partnerId: null, married: false, pendingBirth: 0 };
     state.health = { diet: '均衡饮食', sleep: 7, conditions: [], insurance: '基础医保',
       retirementFund: 0, pension: 0, retired: false, careLevel: 0 };
-    state.parenting = { style: '均衡陪伴', educationFund: 0 };
+    state.stress = { value: Math.max(0, 70 - Math.round(heir.upbringing?.care || 50)), level: 0 };
+    state.parenting = { style: '均衡陪伴', educationFund: 0, focus: '学识' };
     state.eventState = { seen: {}, lastMonth: state.totalMonths - 4,
       history: state.eventState.history || [] };
     state.routine = { actionMonth: state.totalMonths, fatigue: 0,
@@ -152,6 +153,9 @@
     state.gameOver = false;
     addHeirHousehold(state, heir);
     Game.systemsState.ensure(state);
+    Game.characterAttributes.ensurePlayer(state);
+    Game.stressSystem.ensure(state);
+    Game.healthModel.ensure(state);
     Game.profile.updateGrowth(state);
     Game.npcLife.update(state);
     Game.lifeDirector.addLog(state, `第${state.generation}代人生`,

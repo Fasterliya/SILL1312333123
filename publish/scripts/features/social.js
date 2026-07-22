@@ -46,57 +46,15 @@
   function spend(state, amount) {
     Game.economy.spend(state, amount);
   }
-  function romance(state, person, type) {
-    const age = U.age(state);
-    if (type === 'confess') {
-      if (age < 16) return { ok: false, message: '16岁后才能认真表达感情' };
-      if (state.romance.partnerId) return { ok: false, message: '你已经有稳定交往对象' };
-      if (person.affection < 62) return { ok: false, message: '关系还没有亲密到适合告白' };
-      const accepted = Math.random() < U.clamp(0.35 + (person.affection - 60) / 60, 0.35, 0.9);
-      if (!accepted) {
-        person.affection = Math.max(0, person.affection - 4);
-        return { ok: false, message: `${person.name}暂时没有接受告白` };
-      }
-      Game.people.addContact(state, person);
-      state.romance.partnerId = person.id;
-      person.relation = '恋人';
-      Game.relationshipMemory.record(state, person, '关系', '确认了恋爱关系', 12, -4);
-      Game.lifeDirector.addLog(state, '恋爱开始', `你与${person.name}确认了恋爱关系。`, 'milestone');
-      return { ok: true, message: `${person.name}接受了你的告白` };
-    }
-    if (type === 'date') {
-      if (state.romance.partnerId && state.romance.partnerId !== person.id) {
-        return { ok: false, message: '你已有稳定交往对象' };
-      }
-      spend(state, 220);
-      person.affection = U.clamp(person.affection + U.between(6, 10), 0, 100);
-      state.stats.心情 = U.clamp(state.stats.心情 + 5, 0, 100);
-      Game.relationshipMemory.record(state, person, '约会', '共同度过了一次约会', 7, -2);
-      return { ok: true, message: Game.economy.message(state, `约会很愉快，好感达到 ${person.affection}`) };
-    }
-    if (type !== 'propose') return null;
-    if (state.romance.partnerId !== person.id) return { ok: false, message: '需要先建立恋爱关系' };
-    const legalAge = state.gender === '男' ? 22 : 20;
-    if (age < legalAge) return { ok: false, message: `${legalAge}岁后才能登记结婚` };
-    if (person.affection < 82) return { ok: false, message: '好感达到82后更适合求婚' };
-    const decision = Game.demography.proposalDecision(state, person);
-    if (!decision.accepted) return { ok: false, message: person.gender === '女'
-      ? `${person.name}没有接受求婚 · 择偶评估 ${decision.score}/${decision.threshold}`
-      : `${person.name}希望再考虑一段时间` };
-    spend(state, 20000);
-    state.romance.married = true;
-    person.relation = '配偶';
-    Object.assign(person, {
-      npcMarried: true, npcMarriedAtAge: U.personAge(state, person),
-      spouseId: state.profile.id, spouseName: state.name,
-    });
-    state.contacts = state.contacts.filter((item) => item.id !== person.id);
-    if (!state.family.some((item) => item.id === person.id)) state.family.push(person);
-    Game.relationshipMemory.record(state, person, '家庭', '共同组建了家庭', 16, -8);
-    Game.lifeDirector.addLog(state, '步入婚姻', `你与${person.name}组成了家庭。`, 'milestone');
-    return { ok: true, message: Game.economy.message(state, '求婚成功，你们结婚了') };
+  function interactionConfig(type, compatibility) {
+    const secondary = type === 'study' ? '学识'
+      : (['gift', 'meal'].includes(type) ? '管理' : (type === 'exchange' ? '心计' : '魅力'));
+    const difficulty = type === 'exchange' ? 58 : (type === 'gift' ? 42 : 48);
+    return {
+      primary: '交涉', secondary, difficulty, context: compatibility,
+      variance: 6, label: type === 'exchange' ? '交换联系方式' : '人际互动',
+    };
   }
-
   function interact(state, id, type) {
     const person = Game.people.find(state, id);
     if (!person || person.status !== '健康') return { ok: false, message: '无法联系这位角色' };
@@ -107,35 +65,44 @@
       var st = Game.staminaSystem.spend(state, cost);
       if (!st.ok) return st;
     }
-    const romantic = romance(state, person, type);
+    const romantic = Game.socialRomance.act(state, person, type);
     if (romantic) {
       person.interactions += 1;
       return romantic;
     }
     const actions = {
-      chat: [0, U.between(3, 6), 2, '你们分享了最近的生活。'],
-      study: [0, U.between(3, 5), 0, '你们一起讨论课程，学习积累增加。'],
-      hangout: [80, U.between(5, 8), 4, '你们结伴度过了轻松的课余时间。'],
-      phone: [0, U.between(2, 5), 2, '一通电话让关系没有中断。'],
-      meal: [120, U.between(5, 8), 4, '你们一起吃饭，聊了许多近况。'],
-      gift: [300, U.between(7, 11), 3, '你认真挑选了一份礼物。'],
-      movie: [160, U.between(5, 9), 5, '你们看了一场印象深刻的电影。'],
-      walk: [0, U.between(3, 7), 3, '你们边走边聊，关系更加自然。'],
-      exchange: [0, 3, 2, '你提出交换联系方式。'],
+      chat: [0, U.between(3, 6), '你们分享了最近的生活。'],
+      study: [0, U.between(3, 5), '你们一起讨论课程，学习积累增加。'],
+      hangout: [80, U.between(5, 8), '你们结伴度过了轻松的课余时间。'],
+      phone: [0, U.between(2, 5), '一通电话让关系没有中断。'],
+      meal: [120, U.between(5, 8), '你们一起吃饭，聊了许多近况。'],
+      gift: [300, U.between(7, 11), '你认真挑选了一份礼物。'],
+      movie: [160, U.between(5, 9), '你们看了一场印象深刻的电影。'],
+      walk: [0, U.between(3, 7), '你们边走边聊，关系更加自然。'],
+      exchange: [0, 3, '你提出交换联系方式。'],
     };
     const action = actions[type] || actions.chat;
     spend(state, action[0]);
-    if (type === 'exchange' && person.affection < 42) return { ok: false, message: '再熟悉一些后更容易交换联系方式' };
+    const compatibility = Game.structuredTraits.compatibility(state.profile, person);
+    const resolution = Game.actionResolver.resolve(state, interactionConfig(type, compatibility));
+    const familiarity = person.affection + person.interactions * 2;
+    if (type === 'exchange' && (familiarity < 42 || !resolution.success)) {
+      return { ok: false, message: `还未能交换联系方式；${Game.actionResolver.summary(resolution)}` };
+    }
     person.interactions += 1;
-    person.affection = U.clamp(person.affection + action[1], 0, 100);
-    state.stats.心情 = U.clamp(state.stats.心情 + action[2], 0, 100);
-    if (type === 'study') Game.educationSystem.addPreparation(state, 4);
+    const affectionGain = Math.max(1, Math.round(action[1] * resolution.multiplier));
+    person.affection = U.clamp(person.affection + affectionGain, 0, 100);
+    if (type === 'study') {
+      Game.educationSystem.addPreparation(state, 4);
+    } else Game.characterAttributes.gain(state, '交涉', 0.25, '人际互动');
     if (type === 'exchange') {
       Game.people.addContact(state, person);
     } else if (person.affection >= 75 && person.relation === '同学') person.relation = '好友';
-    Game.lifeDirector.addLog(state, `与${person.name}互动`, action[3], 'good');
-    Game.relationshipMemory.record(state, person, '日常互动', action[3], Math.max(2, action[1] - 2), -1);
-    return { ok: true, message: Game.economy.message(state, `${person.name}的好感提升到 ${person.affection}`) };
+    Game.lifeDirector.addLog(state, `与${person.name}互动`, action[2], 'good');
+    Game.relationshipMemory.record(state, person, '日常互动', action[2], Math.max(2, affectionGain - 2), -1);
+    return { ok: true, actionResolution: resolution, message: Game.economy.message(
+      state, `${person.name}的好感提升到 ${person.affection}；${Game.actionResolver.summary(resolution)}`,
+    ) };
   }
 
   function card(person, actions) {
@@ -189,8 +156,11 @@
     const actions = [['chat', '聊天'], ['meal', '约饭'], ['gift', '送礼'], ['walk', '散步']];
     if (person.school === state.education.school) actions.splice(1, 0, ['study', '共学']);
     if (!person.phoneUnlocked) actions.push(['exchange', '交换联系方式']);
-    if (state.romance.partnerId === person.id) actions.push(['date', '约会'], ['propose', '求婚']);
-    else if (!state.romance.partnerId && U.age(state) >= 16 && person.affection >= 62) actions.push(['confess', '告白']);
+    if (Game.relationshipCore.hasPartner(state, person.id)) {
+      actions.push(['date', '约会'], ['propose', '求婚']);
+    } else if (U.age(state) >= 16 && person.affection >= 62) {
+      actions.push(['confess', '告白']);
+    }
     else if (person.relation === '相亲对象') actions.push(['date', '约会']);
     if (Game.relationshipSecrets.available(state, person)) actions.push(['secret-date', '隐秘约会']);
     if (person.gender === '女' && person.status === '健康' && U.personAge(state, person) >= 18

@@ -1,0 +1,140 @@
+.idol-career-card {
+  gap: 9px;
+}
+
+.idol-career-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.idol-career-metrics span {
+  min-width: 0;
+  padding: 8px 4px;
+  background: #f5f2e8;
+  color: #66726f;
+  font-size: 9px;
+  text-align: center;
+}
+
+.idol-career-metrics b {
+  display: block;
+  margin-top: 3px;
+  color: #263b37;
+  font-size: 13px;
+}
+
+.idol-cycle-section {
+  display: grid;
+  gap: 7px;
+}
+
+.idol-cycle-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.idol-cycle-title strong {
+  color: #263b37;
+  font-size: 12px;
+}
+
+.idol-cycle-title span {
+  color: #66726f;
+  font-size: 9px;
+}
+
+.idol-strategies {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.idol-strategies button,
+.idol-project-pick {
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 4px;
+  border: 1px solid #c9d5d1;
+  background: #fffdf7;
+  color: #315f58;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.idol-strategies button.active,
+.idol-project-pick {
+  border-color: #315f58;
+  background: #315f58;
+  color: #fff;
+}
+
+.idol-strategies button:disabled {
+  opacity: 0.45;
+}
+
+.idol-project-progress {
+  height: 7px;
+  overflow: hidden;
+  background: #dfe4df;
+}
+
+.idol-project-progress b {
+  display: block;
+  height: 100%;
+  background: #b38a2d;
+  transition: width 180ms ease-out;
+}
+
+.idol-career-note {
+  margin: 0;
+  padding: 8px 10px;
+  border-left: 3px solid #b38a2d;
+  background: #fff8e8;
+  color: #695b3b;
+  font-size: 10px;
+}
+
+.idol-secondary {
+  border-top: 1px solid #deddd5;
+  padding-top: 8px;
+}
+
+.idol-secondary summary {
+  color: #315f58;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.idol-secondary .creator-actions {
+  margin-top: 8px;
+}
+
+.idol-member-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 7px;
+}
+
+.idol-member-list span {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 6px 7px;
+  background: #f5f2e8;
+  font-size: 9px;
+}
+
+.idol-member-list em {
+  color: #66726f;
+  font-style: normal;
+}
+
+@media (max-width: 360px) {
+  .idol-strategies {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

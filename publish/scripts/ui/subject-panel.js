@@ -1,155 +1,146 @@
 (function initSubjectPanel(root) {
   'use strict';
 
-  var Game = root.LifeGame = root.LifeGame || {};
-  var U = Game.content;
-
-  var STAGE_SUBJECTS = {
-    primary: { '语文': 100, '数学': 100, '英语': 100, '科学': 100 },
-    middle: { '语文': 130, '数学': 130, '英语': 130, '政治': 50, '历史': 50, '物理': 100, '化学': 100 },
-    high: { '语文': 150, '数学': 150, '英语': 150 },
-    vocational: { '语文': 100, '数学': 100, '英语': 100, '专业技能': 150 },
+  const Game = root.LifeGame = root.LifeGame || {};
+  const STAGE_SUBJECTS = {
+    primary: { 语文: 100, 数学: 100, 英语: 100, 科学: 100 },
+    middle: { 语文: 130, 数学: 130, 英语: 130, 政治: 50, 历史: 50, 物理: 100, 化学: 100 },
+    high: { 语文: 150, 数学: 150, 英语: 150 },
+    vocational: { 语文: 150, 数学: 150, 英语: 150, 专业技能: 300 },
+    university: { 专业核心: 100, 通识课程: 100, 外语: 100, 毕业论文: 100 },
   };
 
+  function escape(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[char]));
+  }
+
+  function isStudent(state) {
+    return ['primary', 'middle', 'high', 'vocational', 'university']
+      .includes(state.education.schoolStage);
+  }
+
   function getStageSubjects(state) {
-    var stage = state.education.stage;
-    var map = Object.assign({}, STAGE_SUBJECTS[stage] || STAGE_SUBJECTS.primary);
+    const stage = state.education.schoolStage;
+    const map = { ...(STAGE_SUBJECTS[stage] || {}) };
     if (stage === 'high') {
-      var track = state.education.track;
-      if (track === '物理' || track === '历史') map[track] = 100;
-      var electives = state.education.electives || [];
-      electives.forEach(function (sub) {
-        if (sub) map[sub] = 100;
+      if (['物理', '历史'].includes(state.education.track)) map[state.education.track] = 100;
+      (state.education.electives || []).forEach((subject) => {
+        if (subject) map[subject] = 100;
       });
     }
     return map;
   }
 
-  function subjectHash(str) {
-    var h = 0;
-    for (var i = 0; i < str.length; i += 1) {
-      h = ((h << 5) - h) + str.charCodeAt(i);
-      h |= 0;
+  function subjectHash(value) {
+    let hash = 0;
+    for (let index = 0; index < value.length; index += 1) {
+      hash = ((hash << 5) - hash) + value.charCodeAt(index);
+      hash |= 0;
     }
-    return Math.abs(h);
-  }
-
-  function calcAptitude(name, subject) {
-    return 34 + (subjectHash(subject + name) % 54);
+    return Math.abs(hash);
   }
 
   function ensureSubjects(state) {
-    if (!state.education.subjects) state.education.subjects = {};
-    var subjects = state.education.subjects;
-    var map = getStageSubjects(state);
-    var keys = Object.keys(map);
-    for (var i = 0; i < keys.length; i += 1) {
-      var sub = keys[i];
-      if (!subjects[sub]) {
-        subjects[sub] = { studyHours: 0, examScore: 0, aptitude: 0 };
-      }
-      if (subjects[sub].aptitude === 0) {
-        subjects[sub].aptitude = calcAptitude(state.name, sub);
-      }
+    state.education.subjects = state.education.subjects
+      && typeof state.education.subjects === 'object' ? state.education.subjects : {};
+    if (state.education.schoolStage === 'high' && !state.education.highSubjectReset) {
+      ['生物', '地理'].forEach((subject) => {
+        if (!state.education.subjects[subject]) return;
+        state.education.subjects[subject].studyHours = 0;
+        state.education.subjects[subject].examScore = 0;
+      });
+      state.education.highSubjectReset = true;
     }
+    Object.keys(getStageSubjects(state)).forEach((subject) => {
+      const current = state.education.subjects[subject] || {};
+      current.studyHours = Math.max(0, Math.min(200, Number(current.studyHours) || 0));
+      current.examScore = Math.max(0, Number(current.examScore) || 0);
+      const learning = Game.characterAttributes.personValue(state.profile, '学识');
+      const generated = 34 + (subjectHash(subject + state.name) % 54);
+      current.aptitudeBase = Number.isFinite(Number(current.aptitudeBase))
+        ? Number(current.aptitudeBase)
+        : (Number.isFinite(Number(current.aptitude)) ? Number(current.aptitude) : generated);
+      current.intelligenceBonus = Math.round((learning - 20) * 0.5);
+      current.aptitude = Math.max(10, Math.min(100,
+        Math.round(current.aptitudeBase + current.intelligenceBonus)));
+      current.stage ||= state.education.schoolStage;
+      state.education.subjects[subject] = current;
+    });
   }
 
-  function learnSubject(state, subject) {
-    var staminaResult = Game.staminaSystem && Game.staminaSystem.spend
-      ? Game.staminaSystem.spend(state, U.between(15, 20))
-      : null;
-    if (staminaResult && !staminaResult.ok) return staminaResult;
-
+  function aptitude(state, subject) {
     ensureSubjects(state);
-    var subData = state.education.subjects[subject];
-    if (!subData) {
-      state.education.subjects[subject] = { studyHours: 0, examScore: 0, aptitude: 0 };
-      subData = state.education.subjects[subject];
-    }
-    if (subData.aptitude === 0) {
-      subData.aptitude = calcAptitude(state.name, subject);
-    }
+    return Number(state.education.subjects[subject]?.aptitude) || 40;
+  }
 
-    var stats = state.stats || {};
-    var efficiency = subData.aptitude / 100 * 0.6 + (stats.智力 || 0) / 100 * 0.3 + 0.1;
-    var baseGain = U.between(8, 15);
-    var gain = Math.round(baseGain * efficiency);
+  function scheduleChips(state, allocation) {
+    const labels = { rest: '休息', club: '社团', tutor: '补习' };
+    return Object.entries(allocation || {}).filter(([, count]) => count > 0)
+      .map(([key, count]) => `<span>${escape(labels[key] || key)} ×${count}</span>`).join('');
+  }
 
-    var burnout = state.education.burnout || 0;
-    if (burnout >= 50) gain = Math.round(gain * 0.7);
-    if (burnout >= 80) gain = Math.round(gain * 0.3);
+  function renderSubjects(state, allocation) {
+    ensureSubjects(state);
+    return `<div class="subject-grid">${Object.entries(getStageSubjects(state)).map(([subject, cap]) => {
+      const data = state.education.subjects[subject];
+      const range = Game.subjectEducation?.predictedRange(state, subject, cap) || [0, 0];
+      const group = Game.educationSubjectGroups?.groupFor(state, subject) || subject;
+      const slots = Game.educationSubjectGroups?.allocationFor(state, allocation, subject) || 0;
+      return `<article class="subject-card ${slots ? 'plan-focus' : ''}">
+        <div class="subject-copy"><div class="subject-name">${escape(subject)}
+          <span class="subject-max">${cap}分</span></div>
+          <small>天赋 ${data.aptitude}${data.intelligenceBonus
+            ? `（学识${data.intelligenceBonus > 0 ? '+' : ''}${data.intelligenceBonus}）` : ''}
+            · ${group} ${slots}格</small></div>
+        <strong class="subject-forecast">${range[0]}–${range[1]}</strong>
+        <div class="progress-bar"><i style="width:${Math.min(100, data.studyHours / 2)}%"></i>
+          <span>${data.studyHours}h · 上次 ${data.examScore}/${data.examCap || cap}</span></div></article>`;
+    }).join('')}</div>`;
+  }
 
-    subData.studyHours += gain;
-    state.education.burnout = U.clamp(burnout + U.between(3, 8), 0, 100);
-
-    var msg = subject + '学习+' + gain + 'h';
-    U.log(msg);
-    return { ok: true, message: subject + ' +' + gain + 'h' };
+  function renderQuick(state) {
+    if (!isStudent(state)) return '';
+    const plan = Game.educationStudyPlan.status(state);
+    return `<div class="quick-study subject-study"><header><div><strong>本学年课表</strong>
+      <small>${escape(plan.label)} · 已执行${plan.months}个月</small></div>
+      <span>疲劳 ${Math.round(state.education.burnout || 0)}/100</span></header>
+      <div class="semester-schedule">${scheduleChips(state, plan.allocation)
+        || `<span>等待分配${plan.limit}个时间格</span>`}</div>
+      ${renderSubjects(state, plan.allocation)}
+      <button class="study-plan-edit" type="button" data-study-plan-edit
+        ${plan.canAdjust ? '' : 'disabled'}>${plan.canAdjust ? '调整本学年计划' : '本学年已调整'}</button></div>`;
   }
 
   function render(state) {
-    ensureSubjects(state);
-    var map = getStageSubjects(state);
-    var subjects = state.education.subjects;
-    var keys = Object.keys(map);
-    var html = '<div class="subject-grid">';
-    for (var i = 0; i < keys.length; i += 1) {
-      var sub = keys[i];
-      var maxScore = map[sub];
-      var data = subjects[sub] || { studyHours: 0, examScore: 0, aptitude: 0 };
-      var apt = data.aptitude || 0;
-      var stars;
-      if (apt >= 80) stars = 5;
-      else if (apt >= 65) stars = 4;
-      else if (apt >= 50) stars = 3;
-      else if (apt >= 35) stars = 2;
-      else stars = 1;
-
-      var starStr = '';
-      for (var s = 0; s < 5; s += 1) {
-        starStr += s < stars ? '★' : '☆';
-      }
-
-      var hours = data.studyHours || 0;
-      var pct = Math.min(100, Math.round((hours / 200) * 100));
-      var examScore = data.examScore || 0;
-
-      html += '<div class="subject-card">'
-        + '<div class="subject-name">' + sub + ' <span class="subject-max">' + U.safe(maxScore) + '分</span></div>'
-        + '<div class="subject-stars">' + starStr + '</div>'
-        + '<div class="progress-bar"><i style="width:' + pct + '%"></i><span>' + hours + '/200h</span></div>'
-        + '<div class="subject-exam">上次考试: ' + examScore + '分</div>'
-        + '<button class="btn-learn" data-learn-subject="' + U.safe(sub) + '">学习 -15体</button>'
-        + '</div>';
-    }
-    html += '</div>';
-    return html;
+    if (!isStudent(state)) return '';
+    const plan = Game.educationStudyPlan.status(state);
+    return `<section class="semester-detail"><strong>${escape(plan.label)}</strong>
+      <span>${scheduleChips(state, plan.allocation) || '尚未制定课表'}</span></section>
+      ${renderSubjects(state, plan.allocation)}`;
   }
 
   function handleClick(event) {
-    var target = event.target;
-    while (target && target !== event.currentTarget) {
-      var subject = target.getAttribute && target.getAttribute('data-learn-subject');
-      if (subject) {
-        var state = Game.state;
-        if (!state) return;
-        var result = learnSubject(state, subject);
-        if (result && result.message) {
-          Game.toast && Game.toast.show(result.message);
-        }
-        Game.ui && Game.ui.refresh && Game.ui.refresh();
-        return;
-      }
-      target = target.parentNode;
+    if (!event.target.closest('[data-study-plan-edit]')) return false;
+    const state = Game._getState?.();
+    if (!state) return false;
+    const result = Game.educationStudyPlan.requestAdjustment(state);
+    Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
+    if (result.ok) {
+      Game._refresh?.();
+      Game._save?.();
     }
+    return true;
   }
 
   Game.subjectPanel = Object.freeze({
-    getStageSubjects: getStageSubjects,
-    ensureSubjects: ensureSubjects,
-    learnSubject: learnSubject,
-    render: render,
-    handleClick: handleClick,
+    getStageSubjects,
+    isStudent,
+    ensureSubjects,
+    aptitude,
+    render,
+    renderQuick,
+    handleClick,
   });
-
 }(window));

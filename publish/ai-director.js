@@ -6,23 +6,14 @@
   const U = Game.content;
 
   function addLog(state, title, text, tone) {
-    const entry = U.log(title, text, tone, state.totalMonths);
+    const entry = U.log(title, Game.legacyMood.cleanText(text), tone, state.totalMonths);
     Object.assign(entry, { generation: state.generation, ageMonth: state.totalMonths - state.playerBornAt });
     state.logs.unshift(entry);
     state.logs = state.logs.slice(0, 60);
   }
 
   function subjects(state) {
-    const years = U.age(state);
-    if (years <= 11) return C.subjectCaps.primary;
-    if (years <= 14) return C.subjectCaps.middle;
-    if (state.education.schoolStage === 'vocational') {
-      return { 语文: 150, 数学: 150, 英语: 150, 专业技能: 300 };
-    }
-    const selected = [state.education.track || '物理', ...(state.education.electives.length
-      ? state.education.electives : ['化学', '生物'])];
-    return Object.assign({}, C.subjectCaps.highBase,
-      Object.fromEntries(selected.map((name) => [name, 100])));
+    return Game.subjectPanel.getStageSubjects(state);
   }
 
   function exam(state, label) {
@@ -32,8 +23,10 @@
   function schoolMilestones(state) {
     const years = U.age(state);
     const stage = state.education.schoolStage;
+    if (Game.examSystem?.duringExam(state)) return;
     if (stage === 'university'
-      && Game.timeSystem.educationElapsed(state) >= state.education.durationMonths) {
+      && Game.timeSystem.educationElapsed(state) >= state.education.durationMonths
+      && Game.universityLife?.canGraduate(state)) {
       Game.social.archiveSchool(state);
       addLog(state, '大学毕业', `你从${state.education.university}毕业，获得${state.education.major}专业学历。`, 'milestone');
       state.education.graduated = true;
@@ -73,14 +66,16 @@
 
   function regularExam(state) {
     const years = U.age(state);
+    if (Game.examSystem?.duringExam(state)) return;
     if (years < 6 || years > 17 || ![1, 6].includes(state.month)) return;
     if ((years === 15 || years === 18) && state.month === 6) return;
-    exam(state, state.month === 1 ? '期末考试' : '期中考试');
+    const label = state.month === 1 ? '期末考试' : '期中考试';
+    const result = exam(state, label);
+    if (Game.examSystem) Game.examSystem.conductExam(state, label, result);
   }
 
   function finances(state) {
     const years = U.age(state);
-    state.money += Game.assetsSystem.monthlyIncome(state);
     if (state.career.job) {
       const taxRate = state.career.salary > 20000 ? 0.12 : 0.06;
       const net = Math.round(state.career.salary * (1 - taxRate));
@@ -126,14 +121,18 @@
   function randomEvent(state) {
     if (Math.random() > 0.12) return;
     const events = [
-      ['平凡小确幸', '天气很好，你和家人一起吃了顿热腾腾的饭。', '心情', 4],
+      ['平凡小确幸', '天气很好，你和家人一起吃了顿热腾腾的饭。', '压力', -4],
       ['偶感风寒', '换季时你有些不舒服，休息了几天。', '健康', -5],
-      ['读到好书', '一本书让你对世界多了一层理解。', '智力', 3],
+      ['读到好书', '一本书让你对世界多了一层理解。', '学时', 5],
       ['运动时刻', '你坚持活动身体，状态比以前轻盈。', '健康', 3],
     ];
     const [title, text, stat, delta] = U.random(events);
-    state.stats[stat] = U.clamp(state.stats[stat] + delta, 0, 100);
-    addLog(state, title, text, delta > 0 ? 'good' : 'normal');
+    const ability = Game.characterAttributes.normalize(stat);
+    if (stat === '压力') Game.stressSystem.add(state, delta, title);
+    else if (stat === '学时') Game.educationSystem.addPreparation(state, delta);
+    else if (ability && delta > 0) Game.characterAttributes.gain(state, ability, delta, title);
+    else state.stats[stat] = U.clamp(state.stats[stat] + delta, 0, 100);
+    addLog(state, title, text, stat === '压力' ? (delta < 0 ? 'good' : 'normal') : (delta > 0 ? 'good' : 'normal'));
   }
 
   function tick(state) {
@@ -160,6 +159,7 @@
     while (advanced < months && !state.pendingDecision && !state.gameOver) {
       tick(state);
       advanced += 1;
+      Game.examSystem?.checkReveal(state);
     }
     return { state, requested: months, advanced, interrupted: advanced < months };
   }

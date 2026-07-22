@@ -34,6 +34,8 @@
   function handleRelations(event, state) {
     const style = event.target.closest('[data-parenting-style]');
     if (style) return finish(Game.parenting.setStyle(state, style.dataset.parentingStyle)), true;
+    const focus = event.target.closest('[data-parenting-focus]');
+    if (focus) return finish(Game.parenting.setFocus(state, focus.dataset.parentingFocus)), true;
     const parenting = event.target.closest('[data-parenting-child]');
     if (parenting) {
       return finish(Game.parenting.act(
@@ -134,74 +136,47 @@
     }
     const bankRepay = event.target.closest('[data-bank-repay]');
     if (bankRepay) return finish(Game.bankSystem?.repayLoan(state, bankRepay.dataset.bankRepay) || { ok: false }), true;
+    const psych = event.target.closest('[data-psych-action]');
+    if (psych) {
+      const result = psych.dataset.psychAction === 'rehab'
+        ? Game.psychology.rehab(state)
+        : Game.psychology.reduceGuilt(state, psych.dataset.psychMethod);
+      return finish(result), true;
+    }
+    if (event.target.closest('[data-criminal-blackmarket]')) {
+      return finish(Game.criminalSystem.enterBlackMarket(state)), true;
+    }
+    const frequency = event.target.closest('[data-npc-frequency]');
+    if (frequency) {
+      Game.npcInitiative.changeFrequency(state, frequency.dataset.npcFrequency);
+      return finish({ ok: true, message: 'NPC主动事件频率已更新' }), true;
+    }
     const companyFire = event.target.closest('[data-company-fire]');
     if (companyFire) return finish(Game.companySystem?.fireEmployee(state, companyFire.dataset.companyId, companyFire.dataset.employeeId) || { ok: false }), true;
     return false;
   }
 
-  function handleAssets(event, state) {
-    const marketFilter = event.target.closest('[data-market-filter]');
-    if (marketFilter) {
-      Game.marketView.setFilter(marketFilter.dataset.marketFilter);
-      api.refresh();
-      return true;
-    }
-    const companyStock = event.target.closest('[data-company-stock]');
-    if (companyStock) return Game.marketView.openDetail(state, companyStock.dataset.companyStock), true;
-    const stockTrade = event.target.closest('[data-stock-company]');
-    if (stockTrade) {
-      Game.actions.trade(stockTrade.dataset.stockCompany, stockTrade.dataset.trade, stockTrade.dataset.lot);
-      Game.marketView.openDetail(state, stockTrade.dataset.stockCompany);
-      return true;
-    }
-    const journeyStart = event.target.closest('[data-journey-start]');
-    if (journeyStart) return finish(Game.journeySystem.start(state, journeyStart.dataset.journeyStart)), true;
-    const journeyChoice = event.target.closest('[data-journey-choice]');
-    if (journeyChoice) return finish(Game.journeySystem.choose(state, journeyChoice.dataset.journeyChoice)), true;
-    if (Game.travelInteractions?.handleClick(event)) return true;
-    const roam = event.target.closest('[data-roam-area]');
-    if (roam) return finish(Game.travelSystem.roam(state, roam.dataset.roamArea)), true;
-    const propertyBuy = event.target.closest('[data-property-buy]');
-    if (propertyBuy) return finish(Game.propertySystem.buy(state, Number(propertyBuy.dataset.propertyBuy))), true;
-    if (event.target.closest('[data-property-sell]')) {
-      if (root.confirm('确定出售当前房产并结清剩余贷款吗？')) finish(Game.propertySystem.sell(state));
-      return true;
-    }
-    const propertyRepay = event.target.closest('[data-property-repay]');
-    if (propertyRepay) return finish(Game.propertySystem.repay(state, propertyRepay.dataset.propertyRepay)), true;
-    const business = event.target.closest('[data-business]');
-    if (business) return finish(Game.assetsSystem.buyBusiness(state, business.dataset.business)), true;
-    const vehicle = event.target.closest('[data-vehicle]');
-    if (vehicle) return finish(Game.assetsSystem.buyVehicle(state, vehicle.dataset.vehicle)), true;
-    const bankAction = event.target.closest('[data-bank-action]');
-    if (bankAction) return finish(Game.bankSystem?.applyLoan(state, bankAction.dataset.bankAction, Number(bankAction.dataset.loanAmount)) || { ok: false }), true;
-    const companyAction = event.target.closest('[data-company-action]');
-    if (companyAction) {
-      const action = companyAction.dataset.companyAction;
-      if (action === 'create') Game.companySystem?.startCreation(state);
-      else if (action === 'invest') Game.companySystem?.investMore(state, companyAction.dataset.companyId, Number(companyAction.dataset.amount));
-      else if (action === 'sell') Game.companySystem?.sellCompany(state, companyAction.dataset.companyId);
-      else if (action === 'close') Game.companySystem?.closeCompany(state, companyAction.dataset.companyId);
-      api.refresh(); return true;
-    }
-    const companyHire = event.target.closest('[data-company-hire]');
-    if (companyHire) return finish(Game.companySystem?.hireEmployee(state, companyHire.dataset.companyId) || { ok: false }), true;
-    return false;
-  }
-
   function handle(event) {
+    if (Game.financeEnterpriseView?.handleClick?.(event)) return;
+    if (Game.companyDirectoryView?.handleClick?.(event)) return;
+    if (Game.educationPlanView?.handleClick?.(event)) return;
+    if (Game.taskCenter?.handleClick?.(event)) return;
+    if (Game.npcInitiative?.handleClick?.(event)) return;
     if (Game.relationshipPanel?.handleClick?.(event)) return;
-    if (Game.npcInitiative?.handleEventClick?.(event)) return;
-    if (Game.undergroundIdol?.handleClick?.(event)) return;
-    if (Game.careerPanels?.handleClick?.(event)) return;
+    if (Game.subjectPanel?.handleClick?.(event)) return;
+    if (Game.companySystem?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.undergroundIdol?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.economicCareerActions?.handleClick?.(event)) return;
+    if (Game.careerPanelActions?.handleClick?.(event)) return;
+    if (Game.careerPanels?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.encounterSystem?.handleClick?.(event)) return;
-    if (Game.brothelSystem?.handleClick?.(event)) return;
-    if (Game.hookupSystem?.handleClick?.(event)) return;
+    if (Game.brothelSystem?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.hookupSystem?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.idolSystem?.handleClick?.(event)) return;
     if (Game.familyConflict?.handleClick?.(event)) return;
+    if (Game.conventionCalendarInteractions?.handleClick?.(event)) return;
     if (Game.travelInteractions?.handleClick?.(event)) return;
     if (Game.portraitGallery.handleClick(event)) return;
-    if (Game.characterChat.handleClick(event)) return;
     if (Game.hunterMode.handleClick(event)) return;
     if (Game.saveManager.handleClick(event)) return;
     if (Game.roleBook.handleClick(event)) return;
@@ -212,7 +187,7 @@
     const state = api.getState();
     if (Game.extendedInteractions.handle(event, state, finish)) return;
     if (handleRelations(event, state) || handleCareer(event, state) || handleLifeSystems(event, state)) return;
-    handleAssets(event, state);
+    Game.interactionRouterAssets?.handle(event, state, finish, api.refresh);
   }
 
   function configure(options) { api = options; }

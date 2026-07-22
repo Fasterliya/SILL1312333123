@@ -10,12 +10,20 @@
     }[char]));
   }
 
-  function recordEvent(state, person, event, detail) {
+  function recordEvent(state, person, event, detail, eventMonth) {
     if (!person.lifeResume) person.lifeResume = [];
-    const age = U.personAge(state, person);
-    person.lifeResume.push({ age, event, detail, month: state.totalMonths });
+    const month = Number.isFinite(eventMonth) ? eventMonth : state.totalMonths;
+    const birthMonth = Number.isFinite(person.birthMonth)
+      ? person.birthMonth : (person === state.profile ? (state.playerBornAt || 0) : 0);
+    const age = Math.max(0, Math.floor((month - birthMonth) / 12));
+    const duplicate = person.lifeResume.some((entry) => (
+      entry.event === event && entry.detail === detail && entry.month === month
+    ));
+    if (duplicate) return false;
+    person.lifeResume.push({ age, event, detail, month });
+    person.lifeResume.sort((left, right) => (left.month || 0) - (right.month || 0));
 
-    if (person.lifeResume.length <= 30) return;
+    if (person.lifeResume.length <= 30) return true;
 
     const entries = person.lifeResume;
     const lastEntry = entries[entries.length - 1];
@@ -32,6 +40,7 @@
 
     const removeIndices = new Set(candidates.slice(0, removeCount).map(function (item) { return item.index; }));
     person.lifeResume = entries.filter(function (_, index) { return !removeIndices.has(index); });
+    return true;
   }
 
   function backfillResume(state, person) {
@@ -53,18 +62,19 @@
         var schoolName = record.school || record.schoolName || '';
         if (!schoolName) return;
         var endedAt = Number.isFinite(record.endedAt) ? record.endedAt : birthMonth + 6 * 12;
-        var entryAge = Math.max(0, Math.floor((endedAt - birthMonth) / 12));
+        var startedAt = Number.isFinite(record.startedAt) ? record.startedAt : endedAt - 36;
+        var entryAge = Math.max(0, Math.floor((startedAt - birthMonth) / 12));
         entries.push({
           age: entryAge,
           event: '入学',
           detail: '进入' + schoolName,
-          month: record.startedAt || (endedAt - 36),
+          month: startedAt,
         });
       });
     } else if (person.educationName && person.educationStage && person.educationStage !== 'home') {
       var stageStart = {
         kindergarten: 3, primary: 6, middle: 12, high: 15, vocational: 15,
-        university: 18, workforce: 22, graduate: 22,
+        university: 18, workforce: 18, graduate: 22,
       };
       var startAge = stageStart[person.educationStage] || 6;
       entries.push({
@@ -72,6 +82,18 @@
         event: '入学',
         detail: '进入' + person.educationName,
         month: birthMonth + startAge * 12,
+      });
+    }
+    if (person.droppedOut) {
+      var dropoutAge = Math.max(12, Number(person.dropoutAge) || 16);
+      entries = entries.filter(function (entry) {
+        return !(entry.event === '入学' && entry.detail === '进入' + person.educationName);
+      });
+      entries.push({
+        age: dropoutAge,
+        event: '辍学',
+        detail: '离开' + (person.dropoutSchool || person.educationName || '学校') + '进入社会',
+        month: birthMonth + dropoutAge * 12,
       });
     }
 
@@ -130,27 +152,32 @@
     person.lifeResume = entries.slice(0, 30);
   }
 
+  function category(event) {
+    if (/入学|毕业|辍学|升学/.test(event)) return ['education', '学业'];
+    if (/职业|就业|入职|迁居|偶像|公司/.test(event)) return ['career', '事业'];
+    if (/结婚|离婚|生育|家庭/.test(event)) return ['family', '家庭'];
+    if (/去世|被捕|坠落|伤/.test(event)) return ['risk', '变故'];
+    return ['life', '人生'];
+  }
+
   function renderResume(person) {
     var entries = person.lifeResume || [];
-    if (entries.length === 0) {
-      return '<div class="timeline"><p style="text-align:center;color:#8c918d;font-size:12px;padding:12px;">暂无人生履历记录</p></div>';
-    }
-
-    var isDeceased = person.status === '已故';
-
+    if (!entries.length) return '<p class="resume-empty">暂无人生履历记录</p>';
+    var latest = entries[entries.length - 1];
+    var firstAge = Math.max(0, Number(entries[0].age) || 0);
+    var latestAge = Math.max(firstAge, Number(latest.age) || 0);
     var cards = entries.map(function (entry, index) {
-      var side = index % 2 === 0 ? 'left' : 'right';
-      var isLast = index === entries.length - 1;
-      var deceasedClass = (isLast && isDeceased) ? ' deceased' : '';
-
-      return '<article class="timeline-card ' + side + deceasedClass + '">'
-        + '<time>' + entry.age + '岁</time>'
-        + '<strong>' + escape(entry.event) + '</strong>'
-        + '<span>' + escape(entry.detail) + '</span>'
-        + '</article>';
+      var type = category(entry.event);
+      var deceased = index === entries.length - 1 && person.status === '已故' ? ' deceased' : '';
+      return '<article class="resume-entry ' + type[0] + deceased + '">'
+        + '<time><b>' + Math.max(0, Number(entry.age) || 0) + '</b><span>岁</span></time>'
+        + '<div><header><strong>' + escape(entry.event) + '</strong><small>' + type[1] + '</small></header>'
+        + '<p>' + escape(entry.detail) + '</p></div></article>';
     }).join('');
-
-    return '<div class="timeline">' + cards + '</div>';
+    return '<div class="resume-overview"><div><span>记录</span><strong>' + entries.length + '项</strong></div>'
+      + '<div><span>跨度</span><strong>' + firstAge + '–' + latestAge + '岁</strong></div>'
+      + '<div><span>最近</span><strong>' + escape(latest.event) + '</strong></div></div>'
+      + '<div class="resume-list">' + cards + '</div>';
   }
 
   Game.lifeResume = Object.freeze({

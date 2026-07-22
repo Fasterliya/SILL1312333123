@@ -17,16 +17,39 @@
   <link rel="stylesheet" href="./styles/character-tools.css">
   <link rel="stylesheet" href="./styles/feature-cards.css">
   <link rel="stylesheet" href="./styles/time-controls.css">
+  <link rel="stylesheet" href="./styles/npc-events.css">
+  <link rel="stylesheet" href="./styles/task-center.css">
+  <link rel="stylesheet" href="./styles/subject-study.css">
+  <link rel="stylesheet" href="./styles/system-polish.css">
+  <link rel="stylesheet" href="./styles/idol-trainee.css">
+  <link rel="stylesheet" href="./styles/idol-career-cycle.css">
+  <link rel="stylesheet" href="./styles/special-career-ranks.css">
+  <link rel="stylesheet" href="./styles/finance-enterprise.css">
+  <link rel="stylesheet" href="./styles/finance-company.css">
+  <link rel="stylesheet" href="./styles/company-workforce.css">
+  <link rel="stylesheet" href="./styles/life-resume.css">
+  <link rel="stylesheet" href="./styles/convention-travel.css">
+  <link rel="stylesheet" href="./styles/convention-career.css">
+  <link rel="stylesheet" href="./styles/convention-calendar-layout.css">
+  <link rel="stylesheet" href="./styles/convention-company.css">
   <script src="./config.js" defer></script>
   <script src="./scripts/data/special-characters.js" defer></script>
   <script src="./scripts/data/name-catalog.js" defer></script>
   <script src="./scripts/data/family-naming.js" defer></script>
   <script src="./scripts/data/world-data.js" defer></script>
+  <script src="./scripts/data/city-businesses.js" defer></script>
   <script src="./scripts/data/city-attractions.js" defer></script>
   <script src="./scripts/data/travel-stages.js" defer></script>
   <script src="./scripts/data/university-catalog.js" defer></script>
   <script src="./scripts/features/school-lines.js" defer></script>
   <script src="./scripts/data/company-catalog.js" defer></script>
+  <script src="./scripts/data/character-traits.js" defer></script>
+  <script src="./scripts/engine/structured-traits.js" defer></script>
+  <script src="./scripts/engine/learning-attribute.js" defer></script>
+  <script src="./scripts/engine/legacy-mood.js" defer></script>
+  <script src="./scripts/engine/character-attributes.js" defer></script>
+  <script src="./scripts/engine/action-resolver.js" defer></script>
+  <script src="./scripts/engine/congenital-traits.js" defer></script>
   <script src="./genetics-catalog.js" defer></script>
   <script src="./genetics.js" defer></script>
   <script src="./scripts/engine/genetics-growth.js" defer></script>
@@ -34,8 +57,14 @@
   <script src="./scripts/data/cosplay-wuwa.js" defer></script>
   <script src="./scripts/data/cosplay-genshin.js" defer></script>
   <script src="./scripts/data/cosplay-blue-archive.js" defer></script>
+  <script src="./scripts/data/cosplay-anime.js" defer></script>
   <script src="./scripts/data/cosplay-catalog.js" defer></script>
+  <script src="./scripts/data/convention-catalog.js" defer></script>
   <script src="./content.js" defer></script>
+  <script src="./scripts/features/npc-femboy-career.js" defer></script>
+  <script src="./scripts/data/health-data.js" defer></script>
+  <script src="./scripts/features/stress-system.js" defer></script>
+  <script src="./scripts/features/health-model.js" defer></script>
   <script src="./scripts/engine/female-youth-style.js" defer></script>
   <script src="./scripts/engine/demography.js" defer></script>
   <script src="./scripts/engine/civic-system.js" defer></script>
@@ -43,7 +72,8 @@
   <script src="./scripts/engine/company-market.js" defer></script>
   <script src="./scripts/engine/time-system.js" defer></script>
   <script src="./scripts/engine/education-system.js" defer></script>
-  <script src="./scripts/features/education-fast-forward.js" defer></script>
+  <script src="./scripts/features/education-character-integration.js" defer></script>
+  <script src="./scripts/engine/time-loop.js" defer></script>
   <script src="./scripts/engine/people.js" defer></script>
   <script src="./scripts/engine/world-culture.js" defer></script>
   <script src="./scripts/engine/social-world.js" defer></script>
@@ -55,6 +85,8 @@
   <script src="./scripts/features/life-events.js" defer></script>
   <script src="./scripts/features/relationship-memory.js" defer></script>
   <script src="./scripts/features/household-system.js" defer></script>
+  <script src="./scripts/features/relationship-secrets-core.js" defer></script>
+  <script src="./scripts/features/relationship-secrets-life.js" defer></script>
   <script src="./scripts/features/relationship-secrets.js" defer></script>
   <script src="./scripts/features/relationship-secrets-view.js" defer></script>
   <script src="./scripts/features/parenting.js" defer></script>
@@ -73,48 +105,127 @@
   <script src="./scripts/ui/portrait-gallery.js" defer></script>
   <script src="./scripts/ui/portrait-intent.js" defer></script>
   <script src="./scripts/ui/portrait-age-prompt.js" defer></script>
+  <script src="./scripts/ui/femboy-portrait-prompt.js" defer></script>
   <script src="./scripts/ui/portrait-prompt.js" defer></script>
   <script src="./scripts/ui/portrait-system.js" defer></script>
-  <script src="./scripts/features/character-chat.js" defer></script>
+  <script src="./scripts/ui/ability-view.js" defer></script>
   <script src="./scripts/ui/profile.js" defer></script>
+  <script src="./scripts/features/relationship-core.js" defer></script>
+  <script src="./scripts/features/social-romance.js" defer></script>
   <script src="./scripts/features/social.js" defer></script>
   <script src="./scripts/ui/role-book.js" defer></script>
   <script src="./scripts/features/matchmaking.js" defer></script>
   <script src="./scripts/features/family-system.js" defer></script>
+  <script src="./scripts/features/job-market-capacity.js" defer></script>
+  <script src="./scripts/features/job-market-rebalance.js" defer></script>
+  <script src="./scripts/features/npc-job-migration.js" defer></script>
   <script src="./scripts/features/career.js" defer></script>
+  <script src="./scripts/features/career-action-resolution.js" defer></script>
+  <script src="./scripts/features/career-ladders.js" defer></script>
+  <script src="./scripts/features/career-history.js" defer></script>
   <script src="./scripts/features/creator-style-growth.js" defer></script>
   <script src="./scripts/features/creator-economy.js" defer></script>
   <script src="./scripts/features/creator-growth-actions.js" defer></script>
   <script src="./scripts/features/creator-career.js" defer></script>
+  <script src="./scripts/features/economic-career-state.js" defer></script>
+  <script src="./scripts/features/special-career-ranks.js" defer></script>
+  <script src="./scripts/ui/economic-career-panels.js" defer></script>
+  <script src="./scripts/controllers/economic-career-actions.js" defer></script>
   <script src="./scripts/ui/career-view.js" defer></script>
+  <script src="./scripts/ui/company-directory-view.js" defer></script>
+  <script src="./scripts/data/convention-routes.js" defer></script>
+  <script src="./scripts/features/convention-schedule.js" defer></script>
+  <script src="./scripts/features/convention-calendar.js" defer></script>
+  <script src="./scripts/features/convention-franchise.js" defer></script>
+  <script src="./scripts/features/convention-coser-career.js" defer></script>
+  <script src="./scripts/features/convention-travel.js" defer></script>
+  <script src="./scripts/features/convention-participant.js" defer></script>
+  <script src="./scripts/features/convention-audience-feedback.js" defer></script>
+  <script src="./scripts/ui/convention-travel-view.js" defer></script>
   <script src="./scripts/features/travel.js" defer></script>
+  <script src="./scripts/ui/convention-calendar-view.js" defer></script>
+  <script src="./scripts/features/convention-calendar-interactions.js" defer></script>
   <script src="./scripts/features/travel-interactions.js" defer></script>
   <script src="./scripts/features/encounter-system.js" defer></script>
   <script src="./scripts/features/brothel-system.js" defer></script>
   <script src="./scripts/features/hookup-system.js" defer></script>
   <script src="./scripts/features/plastic-surgery.js" defer></script>
+  <script src="./scripts/features/cosmetic-care.js" defer></script>
+  <script src="./scripts/features/npc-creator-style.js" defer></script>
+  <script src="./scripts/features/convention-coser-roster.js" defer></script>
+  <script src="./scripts/ui/health-view.js" defer></script>
+  <script src="./scripts/features/idol-core.js" defer></script>
+  <script src="./scripts/features/idol-trainee-state.js" defer></script>
+  <script src="./scripts/features/idol-trainee-schedule.js" defer></script>
+  <script src="./scripts/features/idol-trainee-decisions.js" defer></script>
+  <script src="./scripts/features/idol-trainee-view.js" defer></script>
+  <script src="./scripts/features/idol-activities.js" defer></script>
+  <script src="./scripts/features/idol-career.js" defer></script>
+  <script src="./scripts/features/idol-production.js" defer></script>
+  <script src="./scripts/features/idol-project-cycle.js" defer></script>
+  <script src="./scripts/features/idol-project-decisions.js" defer></script>
+  <script src="./scripts/features/idol-debut-view.js" defer></script>
   <script src="./scripts/features/idol-system.js" defer></script>
+  <script src="./scripts/features/family-conflict-core.js" defer></script>
+  <script src="./scripts/features/family-conflict-actions.js" defer></script>
   <script src="./scripts/features/family-conflict.js" defer></script>
   <script src="./scripts/features/criminal-system.js" defer></script>
   <script src="./scripts/features/psychology-system.js" defer></script>
+  <script src="./scripts/features/psychology-ability-integration.js" defer></script>
+  <script src="./scripts/features/npc-initiative-core.js" defer></script>
+  <script src="./scripts/features/npc-initiative-generators-social.js" defer></script>
+  <script src="./scripts/features/npc-initiative-generators-risk.js" defer></script>
+  <script src="./scripts/features/npc-initiative-effects-social.js" defer></script>
+  <script src="./scripts/features/npc-initiative-effects-risk.js" defer></script>
+  <script src="./scripts/features/npc-initiative-effects-trauma.js" defer></script>
+  <script src="./scripts/ui/task-center.js" defer></script>
+  <script src="./scripts/features/npc-initiative-view.js" defer></script>
   <script src="./scripts/features/npc-initiative.js" defer></script>
   <script src="./scripts/features/rape-encounter.js" defer></script>
   <script src="./scripts/features/tax-system.js" defer></script>
   <script src="./scripts/features/bank-system.js" defer></script>
+  <script src="./scripts/ui/bank-view.js" defer></script>
   <script src="./scripts/features/company-system.js" defer></script>
+  <script src="./scripts/features/company-ability-integration.js" defer></script>
+  <script src="./scripts/features/convention-company.js" defer></script>
+  <script src="./scripts/features/convention-progression.js" defer></script>
+  <script src="./scripts/features/convention-partners.js" defer></script>
+  <script src="./scripts/features/convention-operations.js" defer></script>
+  <script src="./scripts/features/convention-company-settlement.js" defer></script>
+  <script src="./scripts/ui/convention-company-view.js" defer></script>
+  <script src="./scripts/features/convention-company-integration.js" defer></script>
   <script src="./scripts/features/stock-director.js" defer></script>
+  <script src="./scripts/features/idol-underground-core.js" defer></script>
+  <script src="./scripts/features/idol-underground-shows.js" defer></script>
+  <script src="./scripts/features/idol-underground-decisions.js" defer></script>
+  <script src="./scripts/features/idol-underground-fall.js" defer></script>
+  <script src="./scripts/features/idol-underground-career.js" defer></script>
+  <script src="./scripts/features/idol-underground-monthly.js" defer></script>
+  <script src="./scripts/features/idol-underground-view.js" defer></script>
   <script src="./scripts/features/idol-underground.js" defer></script>
   <script src="./scripts/ui/career-panels.js" defer></script>
+  <script src="./scripts/ui/career-office-panel.js" defer></script>
+  <script src="./scripts/ui/career-panel-actions.js" defer></script>
   <script src="./scripts/features/stamina-system.js" defer></script>
   <script src="./scripts/ui/subject-panel.js" defer></script>
+  <script src="./scripts/features/education-subject-groups.js" defer></script>
+  <script src="./scripts/features/education-plan-capacity.js" defer></script>
+  <script src="./scripts/features/education-study-plan.js" defer></script>
+  <script src="./scripts/features/education-exam-prep.js" defer></script>
+  <script src="./scripts/ui/education-plan-view.js" defer></script>
   <script src="./scripts/ui/life-resume.js" defer></script>
+  <script src="./scripts/features/life-resume-people.js" defer></script>
+  <script src="./scripts/features/life-resume-sync.js" defer></script>
+  <script src="./scripts/features/relationship-conflict.js" defer></script>
   <script src="./scripts/features/relationship-panel.js" defer></script>
   <script src="./scripts/features/exam-system.js" defer></script>
   <script src="./scripts/features/study-events.js" defer></script>
+  <script src="./scripts/features/education-subject-integration.js" defer></script>
   <script src="./scripts/features/journey.js" defer></script>
-  <script src="./scripts/features/assets-system.js" defer></script>
+  <script src="./scripts/features/removed-assets.js" defer></script>
   <script src="./scripts/engine/npc-cultural-style.js" defer></script>
   <script src="./scripts/engine/npc-life-support.js" defer></script>
+  <script src="./scripts/engine/npc-education-paths.js" defer></script>
   <script src="./scripts/engine/npc-life.js" defer></script>
   <script src="./scripts/engine/npc-career-life.js" defer></script>
   <script src="./scripts/engine/family-links.js" defer></script>
@@ -128,14 +239,18 @@
   <script src="./scripts/engine/career-growth.js" defer></script>
   <script src="./scripts/ui/market-view.js" defer></script>
   <script src="./scripts/ui/life-loop.js" defer></script>
+  <script src="./scripts/ui/time-bar-view.js" defer></script>
   <script src="./ai-director.js" defer></script>
-  <script src="./scripts/ui/life-resume.js" defer></script>
   <script src="./scripts/ui/navigation.js" defer></script>
   <script src="./scripts/ui/appearance.js" defer></script>
+  <script src="./scripts/ui/finance-enterprise-view.js" defer></script>
+  <script src="./scripts/ui/system-hub.js" defer></script>
   <script src="./view.js" defer></script>
   <script src="./scripts/controllers/admissions.js" defer></script>
+  <script src="./scripts/controllers/system-decisions.js" defer></script>
   <script src="./scripts/controllers/actions.js" defer></script>
   <script src="./scripts/controllers/extended-interactions.js" defer></script>
+  <script src="./scripts/controllers/interaction-router-assets.js" defer></script>
   <script src="./scripts/controllers/interaction-router.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
@@ -150,6 +265,11 @@
             data-open-module="saveManagerSubpage" data-module-title="存档管理">▣</button>
           <button class="icon-btn" type="button" title="绘画设置" aria-label="绘画设置"
             data-open-module="drawSettingsSubpage" data-module-title="绘画设置">⚙</button>
+          <button class="icon-btn task-center-btn" type="button" title="待办事项"
+            aria-label="打开待办事项，0项" data-task-open>
+            <span aria-hidden="true">✉</span>
+            <b class="task-center-count" hidden>0</b>
+          </button>
           <button class="icon-btn" id="resetBtn" type="button" title="重新开始" aria-label="重新开始">↻</button>
         </div>
       </div>
@@ -180,7 +300,7 @@
         <section class="panel goal-panel" id="goalPanel"></section>
         <section id="quickStudyPanel" hidden></section>
         <details class="fold-section" open>
-          <summary><span>当前状态</span><small>人生属性</small></summary>
+          <summary><span>状态与属性</span><small>属性稳定且不会被消耗</small></summary>
           <div class="fold-content">
             <div class="stat-grid" id="statGrid"></div>
           </div>
@@ -216,6 +336,7 @@
           <button data-open-module="studySubpage" data-module-title="学习"><b>学</b><span><strong>学习</strong><small>学校、考试成绩与升学进度</small></span><i>›</i></button>
           <button data-open-module="careerSubpage" data-module-title="求职"><b>职</b><span><strong>求职</strong><small>浏览岗位并承担录取风险</small></span><i>›</i></button>
           <button data-open-module="healthSubpage" data-module-title="健康"><b>康</b><span><strong>健康</strong><small>健康检测、疾病治疗与整容</small></span><i>›</i></button>
+          <button data-open-module="statusSubpage" data-module-title="状态与风险"><b>险</b><span><strong>状态与风险</strong><small>心理、犯罪记录与NPC主动事件</small></span><i>›</i></button>
           <button data-open-module="citySubpage" data-module-title="迁居"><b>迁</b><span><strong>迁居</strong><small>前往其他城市寻找不同机会</small></span><i>›</i></button>
           <button data-open-module="governmentSubpage" data-module-title="市政府"><b>政</b><span><strong>市政府</strong><small>户口迁移、登记姓名与当地文化</small></span><i>›</i></button>
           <button data-open-module="travelSubpage" data-module-title="街区旅途"><b>游</b><span><strong>街区旅途</strong><small>上街探索，一次遇到三位新角色</small></span><i>›</i></button>
@@ -227,13 +348,20 @@
         <div class="module-directory">
           <button data-open-module="propertySubpage" data-module-title="不动产"><b>房</b><span><strong>不动产</strong><small>购入、还贷、市值与出售</small></span><i>›</i></button>
           <button data-open-module="stockSubpage" data-module-title="股票"><b>股</b><span><strong>股票</strong><small>查看行情并买卖持仓</small></span><i>›</i></button>
-          <button data-open-module="industrySubpage" data-module-title="产业与座驾"><b>产</b><span><strong>产业与座驾</strong><small>经营现金流与购买交通工具</small></span><i>›</i></button>
+          <button data-open-module="financeSubpage" data-module-title="金融与企业"><b>企</b><span><strong>金融与企业</strong><small>贷款、福利、公司经营与董事会</small></span><i>›</i></button>
           <button data-open-module="legacySubpage" data-module-title="家庭延续"><b>承</b><span><strong>家庭延续</strong><small>代际记录、下一代、房产与资金</small></span><i>›</i></button>
         </div>
       </div>
     </section>
 
-    <div class="time-bar" id="timeBar"> <span class="time-date">2026年7月1日</span> <div class="time-progress"><i class="bar-track"><b style="width:3%"></b></i><small>本月剩余 29 天</small></div> <div class="time-controls"> <button data-time-speed="0" class="active">P</button> <button data-time-speed="1">1x</button> <button data-time-speed="5">5x</button> <button data-time-speed="10">10x</button> </div> </div> <div class="stamina-ring" id="staminaRing"> <svg viewBox="0 0 100 100"><circle class="stamina-bg" cx="50" cy="50" r="40"/><circle class="stamina-fg" cx="50" cy="50" r="40" stroke-dasharray="251 251" stroke-dashoffset="0"/></svg> <span>100/100</span> </div> <button id="examJumpBtn" type="button" hidden><span>均衡基础</span><strong>推进至中考前1个月</strong></button> </main>
+    <div class="stamina-row" aria-label="精力状态">
+      <div class="stamina-ring" id="staminaRing">
+        <svg viewBox="0 0 100 100"><circle class="stamina-bg" cx="50" cy="50" r="40"/><circle class="stamina-fg" cx="50" cy="50" r="40" stroke-dasharray="251 251" stroke-dashoffset="0"/></svg>
+        <span>100/100</span>
+      </div>
+    </div>
+    <div class="time-bar" id="timeBar"></div>
+  </main>
 
   <section class="screen-layer" id="moduleScreen" hidden aria-label="功能子菜单">
     <header class="screen-header">
@@ -309,6 +437,7 @@
         <div class="panel-title"><h2>健康</h2><span>检测、治疗与整容</span></div>
         <div id="healthPanel"></div>
       </section></div>
+      <div class="module-view" id="statusSubpage"><div id="statusPanel"></div></div>
       <div class="module-view" id="citySubpage"><section class="panel">
         <div class="panel-title"><h2>城市迁移</h2><span>城市列表</span></div>
         <div id="cityPanel"></div>
@@ -333,10 +462,7 @@
         <div class="panel-title"><h2>股票市场</h2><span>每月价格波动</span></div>
         <div id="stockPanel"></div>
       </section></div>
-      <div class="module-view" id="industrySubpage"><section class="panel">
-        <div class="panel-title"><h2>产业与座驾</h2><span>长期资产</span></div>
-        <div id="industryPanel"></div>
-      </section></div>
+      <div class="module-view" id="financeSubpage"><div id="financePanel"></div></div>
       <div class="module-view" id="legacySubpage"><section class="panel">
         <div class="panel-title"><h2>家庭延续</h2><span>多代人生</span></div>
         <div id="legacyPanel"></div>
@@ -379,5 +505,6 @@
   </div>
   <div class="toast" id="toast" role="status" hidden></div>
   <div id="encounterOverlayContainer"></div>
+  <div id="npcEventContainer"></div>
 </body>
 </html>

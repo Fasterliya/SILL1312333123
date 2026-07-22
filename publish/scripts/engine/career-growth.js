@@ -10,6 +10,8 @@
 
   function titleName(state) {
     if (!state.career.job) return '待业';
+    const industry = Game.careerLadders?.status(state);
+    if (industry) return `${industry.title} · ${state.career.job}`;
     const track = state.career.titleTrack;
     if (!titles[track]) return state.career.job;
     return `${titles[track][state.career.titleRank] || titles[track].at(-1)} · ${state.career.job}`;
@@ -38,6 +40,8 @@
   }
 
   function requestTitle(state, track) {
+    const industry = Game.careerLadders?.status(state);
+    if (industry) return requestIndustryTitle(state, industry);
     if (!titles[track]) return { ok: false, message: '没有这个晋升方向' };
     if (state.career.titleTrack !== 'staff' && state.career.titleTrack !== track) {
       return { ok: false, message: '进入晋升序列后不能直接跨线申请' };
@@ -62,6 +66,36 @@
     Game.workplace.onTitlePromotion(state);
     Game.lifeDirector.addLog(state, '职级提拔', `你被提拔为${next}，进入${track === 'management' ? '管理' : '专业'}晋升线。`, 'milestone');
     return { ok: true, message: `提拔成功：${next}，月薪 ${Game.view.money(state.career.salary)}` };
+  }
+
+  function requestIndustryTitle(state, info) {
+    if (!info.rule) return { ok: false, message: '当前行业已经达到最高职级' };
+    if (info.nextRank > info.ceiling) {
+      return { ok: false, message: `${info.nextTitle}受学历或毕业成绩限制，当前最高可到L${info.ceiling}` };
+    }
+    if (state.totalMonths - state.career.lastTitleMonth < 12) {
+      return { ok: false, message: '距离上次职级评审不足12个月' };
+    }
+    if (!info.eligible) {
+      return { ok: false, message: `${info.nextTitle}要求绩效${info.rule.performance}、经验${info.rule.exp}、年资${info.rule.years}年` };
+    }
+    state.career.lastTitleMonth = state.totalMonths;
+    if (Math.random() >= info.chance) {
+      return { ok: false, message: `${info.nextTitle}评审未通过，参考概率 ${Math.round(info.chance * 100)}%` };
+    }
+    const currentSalaryRate = Game.careerLadders.RULES[info.rank].salary;
+    state.career.titleTrack = 'industry';
+    state.career.titleRank = info.nextRank;
+    state.career.management = info.nextRank >= 3;
+    state.career.salary = Math.round(state.career.salary * info.rule.salary / currentSalaryRate);
+    state.career.performance = Math.max(12, state.career.performance - 18);
+    Game.workplace.onTitlePromotion(state);
+    Game.careerHistory?.add(state, {
+      kind: 'promotion', title: `晋升为${info.nextTitle}`,
+      detail: `${info.line}行业职级提升`, salary: state.career.salary,
+    });
+    Game.lifeDirector.addLog(state, '职级提拔', `你被提拔为${info.nextTitle}。`, 'milestone');
+    return { ok: true, message: `提拔成功：${info.nextTitle}，月薪 ${Game.view.money(state.career.salary)}` };
   }
 
   function monthly(state) {

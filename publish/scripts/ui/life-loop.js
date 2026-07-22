@@ -39,7 +39,8 @@
     const pending = decisionGoal(state);
     if (pending) return pending;
     if (years < 3) return { title: '健康成长', detail: '保持健康达到80', value: state.stats.健康, target: 80 };
-    if (years < 6) return { title: '探索世界', detail: '保持心情达到80', value: state.stats.心情, target: 80 };
+    if (years < 6) return { title: '探索世界', detail: '将压力维持在低位',
+      value: Math.max(0, 100 - Game.stressSystem.ensure(state).value), target: 70 };
     if (['primary', 'middle', 'high', 'vocational'].includes(state.education.schoolStage)) {
       const exam = nextExam(state);
       const target = state.education.schoolStage === 'primary' ? 45

@@ -114,7 +114,7 @@
     }
     Game.educationSystem.ensurePerson(target);
     const upbringing = target.upbringing?.education || 20;
-    const base = target.academicScore || target.academicAbility * 0.82 + target.studyHabit * 0.18;
+    const base = target.academicScore || Game.learningAttribute.checkValue(target.academicAbility) * 0.82 + target.studyHabit * 0.18;
     const rating = base * 0.78 + target.studyHabit * 0.06 + upbringing * 0.16;
     return clamp(220 + rating * 5.2, 0, 750);
   }

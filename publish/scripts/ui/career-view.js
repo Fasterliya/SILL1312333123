@@ -14,7 +14,8 @@
   }
 
   function chance(state, job) {
-    return Math.round(U.clamp(0.18 + (Game.careerSystem.ability(state, job) - job.need) / 105, 0.08, 0.92) * 100);
+    if (!Game.jobMarket.vacancies(state, job)) return 0;
+    return Math.round(Game.careerSystem.applicationChance(state, job).chance * 100);
   }
 
   function workActions(state) {
@@ -29,6 +30,9 @@
   function currentJob(state, money) {
     if (!state.career.job) return '<p class="empty-state">当前没有工作。先筛选方向，再打开职位详情确认应聘。</p>';
 
+    if (Game.economicCareerPanels?.supports(state)) {
+      return Game.economicCareerPanels.routePanel(state, money);
+    }
     // Route to career panels if available
     if (Game.careerPanels) return Game.careerPanels.routePanel(state, money);
 
@@ -49,19 +53,16 @@
   }
 
   function companyDirectory(state) {
-    const companies = [...Game.careerSystem.board(state).filter((job) => !job.freelance)
-      .reduce((items, job) => {
-        const current = items.get(job.companyId) || {
-          name: job.company, industry: job.industry, parent: job.parentCompany || '', positions: 0,
-        };
-        current.positions += 1;
-        items.set(job.companyId, current);
-        return items;
-      }, new Map()).values()];
+    if (Game.companyDirectoryView) return Game.companyDirectoryView.render(state);
+    const jobs = Game.careerSystem.board(state);
+    const counts = jobs.reduce((items, job) => items.set(
+      job.companyId, (items.get(job.companyId) || 0) + 1,
+    ), new Map());
+    const companies = Game.companyCatalog.inCity(state.location.city);
     return `<details class="company-directory"><summary>本地特色公司 · ${companies.length}家</summary>
       <div>${companies.map((company) => (
-        `<article><strong>${company.name}</strong><span>${company.industry} · ${company.positions}个职位
-        ${company.parent ? ` · ${company.parent}旗下` : ''}</span></article>`
+        `<article><strong>${company.name}</strong><span>${company.specialty} ·
+        ${counts.get(company.id) || company.positions.length}个职位</span></article>`
       )).join('')}</div></details>`;
   }
 
@@ -75,16 +76,18 @@
       || job.industry === jobFilter);
     const level = Game.careerSystem.qualification(state);
     const guide = `<section class="list-guide career-guide"><strong>当前资格：${Game.careerSystem.qualificationLabel(level)}</strong>
-      <span>招聘仅显示当前城市的本地公司、当地分公司与本地独立职业。</span></section>`;
+      <span>学历只决定能否投递；岗位空缺、能力与竞争强度共同决定录取。</span></section>`;
     const cards = jobs.length ? jobs.map((job) => {
       const locked = !Game.careerSystem.eligible(state, job);
+      const market = Game.jobMarket.summary(state, job);
       return `<article class="job-card ${locked ? 'locked' : ''}">
         <div><strong>${job.name}</strong><span>${job.company} · ${job.industry}</span>
-        <small>${Game.careerSystem.requirementLabel(job.education || 0)} · 录取率${chance(state, job)}%</small></div>
+        <small>${Game.careerSystem.requirementLabel(job.education || 0)} · 空缺${market.vacancies}/${market.demand}
+        · ${market.competition} · 录取率${chance(state, job)}%</small></div>
         <b>${money(job.salary)}</b>
         <button data-job-detail="${job.id}">${locked ? '门槛' : '查看'}</button></article>`;
     }).join('') : '<p class="empty-state">当前筛选没有职位。</p>';
-    const companies = new Set(jobs.map((job) => job.company)).size;
+    const companies = Game.companyCatalog.inCity(state.location.city).length;
     return `${currentJob(state, money)}${companyDirectory(state)}${guide}${chips(filters, jobFilter, 'data-job-filter')}
       <div class="market-title">${state.location.city} · ${companies}家公司 · ${jobs.length}个职位</div>
       <div class="job-list">${cards}</div>`;
@@ -102,20 +105,23 @@
     if (!job) return;
     const company = Game.companyCatalog.find(job.companyId);
     const allowed = Game.careerSystem.eligible(state, job);
+    const market = Game.jobMarket.summary(state, job);
     const facts = [
       ['公司/主体', job.company], ['母公司/集团', company?.parent || job.parentCompany || '独立单位'],
       ['工作方式', job.freelance ? '自由职业' : '单位岗位'],
       ['所在城市', state.location.city], ['参考月收入', Game.view.money(job.salary)],
       ['学历要求', Game.careerSystem.requirementLabel(job.education || 0)],
       ['当前资格', Game.careerSystem.qualificationLabel(Game.careerSystem.qualification(state))],
+      ['岗位需求', `${market.demand}人`], ['当前在岗', `${market.occupied}人`],
+      ['剩余空缺', `${market.vacancies}人 · ${market.competition}`],
       ['参考录取率', `${chance(state, job)}%`], ['主要职责', duties(job)],
     ];
     Game.navigation.openDetail(job.name, `<section class="job-detail-head"><p>${job.industry}</p>
       <h3>${job.name}</h3><span>${job.company}</span></section>
       <section class="detail-facts">${facts.map(([label, value]) => (
         `<div><span>${label}</span><strong>${value}</strong></div>`)).join('')}</section>
-      <section class="job-apply-bar"><button data-job-apply="${job.id}" ${allowed ? '' : 'disabled'}>
-      ${allowed ? '确认应聘' : '当前资格不足'}</button></section>`, 'job');
+      <section class="job-apply-bar"><button data-job-apply="${job.id}" ${allowed && market.vacancies ? '' : 'disabled'}>
+      ${!allowed ? '当前资格不足' : (market.vacancies ? '确认应聘' : '岗位已饱和')}</button></section>`, 'job');
   }
 
   function renderCities(state) {

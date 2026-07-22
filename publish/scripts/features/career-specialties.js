@@ -43,7 +43,7 @@
     if (type === 'mentor') {
       Game.economy.spend(state, 1200);
       state.career.skills[id] = U.clamp(skill + 12, 0, 100);
-      state.stats.魅力 = U.clamp(state.stats.魅力 + 2, 0, 100);
+      Game.characterAttributes.gain(state, '交涉', 1.2, '行业导师');
       return { ok: true, message: Game.economy.message(state, '导师反馈让你的专业路径更清晰') };
     }
     const chance = U.clamp(0.35 + skill / 160 + state.career.performance / 260, 0.35, 0.92);

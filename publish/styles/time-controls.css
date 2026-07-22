@@ -1,26 +1,112 @@
-.time-controls #examJumpBtn {
-  grid-column: 1 / -1;
-  min-height: 36px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.time-bar {
+  flex: 0 0 auto;
+  padding: 8px max(10px, env(safe-area-inset-right))
+    max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+  display: grid;
+  gap: 7px;
+  border-top: 1px solid #172c29;
+  background: #263b37;
+  color: #fff;
+}
+
+.time-overview {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
   gap: 10px;
-  background: #765c35;
+  align-items: center;
 }
 
-.time-controls #examJumpBtn[hidden] {
-  display: none;
+.time-date strong,
+.time-date small {
+  display: block;
 }
 
-.time-controls #examJumpBtn span {
-  margin: 0;
+.time-date strong {
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.time-date small {
+  margin-top: 3px;
+  color: #aebdb8;
+  font-size: 9px;
+}
+
+.time-bar .time-progress {
+  min-width: 0;
+}
+
+.time-bar .time-progress > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.time-bar .time-progress span,
+.time-bar .time-progress small {
+  color: #aebdb8;
+  font-size: 9px;
+}
+
+.time-bar .time-progress strong {
   overflow: hidden;
+  color: #f4d691;
+  font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.time-controls #examJumpBtn strong {
-  flex: 0 0 auto;
+.time-bar .bar-track {
+  height: 5px;
+  margin: 4px 0 2px;
+  background: #3c5751;
+}
+
+.time-bar .bar-track b {
+  background: #d2a84f;
+  transition: width 180ms ease-out;
+}
+
+.time-bar .time-controls {
+  padding: 2px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
+  border: 1px solid #46615b;
+  border-radius: 5px;
+  background: #1d302d;
+}
+
+.time-bar .time-controls button,
+.time-bar .time-controls button:last-child {
+  min-width: 0;
+  min-height: 44px;
+  padding: 4px 2px;
+  display: grid;
+  place-content: center;
+  gap: 1px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #bed0ca;
+  text-align: center;
+}
+
+.time-bar .time-controls button b {
   font-size: 12px;
+  line-height: 1;
+}
+
+.time-bar .time-controls button small {
+  margin: 0;
+  color: inherit;
+  font-size: 8px;
+  line-height: 1;
+}
+
+.time-bar .time-controls button.active {
+  background: #d2a84f;
+  color: #1f302c;
 }

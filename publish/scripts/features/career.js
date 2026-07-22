@@ -4,28 +4,8 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const C = Game.config;
   const U = Game.content;
-  function cityInfo(state) {
-    return C.cities.find((item) => item.city === state.location.city)
-      || { city: state.location.city, province: state.location.province, country: '华夏', tier: 3, cost: 6000 };
-  }
-
-  function localize(job, city) {
-    if (job.freelance) {
-      return { ...job, company: `${city.city}${job.company}`, companyId: `local-${city.city}-${job.id}`,
-        parentCompany: '个人独立经营', branchCity: city.city };
-    }
-    if (job.cities?.length && !job.cities.includes(city.city)) return null;
-    const company = Game.companyCatalog.find(job.companyId);
-    if (company?.city === city.city) return job;
-    const parentCompany = company?.parent || job.company || '企业集团';
-    return { ...job, company: `${job.company || parentCompany} · ${city.city}分公司`,
-      companyId: `branch-${city.city}-${job.companyId || job.id}`, parentCompany, branchCity: city.city };
-  }
-
   function board(state) {
-    const city = cityInfo(state);
-    return C.jobs.filter((job) => city.tier <= job.tier)
-      .map((job) => localize(job, city)).filter(Boolean);
+    return Game.companyCatalog.jobsInCity(state.location.city);
   }
 
   function traitBoost(state, category) {
@@ -46,11 +26,25 @@
   }
 
   function ability(state, job) {
+    const categoryAbility = {
+      科学: '学识', 文学: '学识', 艺术: '交涉', 社交: '交涉', 商业: '管理', 运动: '体能',
+    }[job.category] || '学识';
+    const check = (name) => Game.characterAttributes.checkValue(
+      Game.characterAttributes.playerValue(state, name),
+    );
+    const professional = check(categoryAbility);
+    const negotiation = check('交涉');
+    const charm = Game.characterAttributes.derivedCharm(state.profile);
+    if (['idoltrainee', 'idol-underground', 'idol'].includes(job.id)) {
+      return charm * 0.45 + negotiation * 0.25
+        + check('体能') * 0.2
+        + traitBoost(state, '艺术') + (state.education.study || 0) * 0.04;
+    }
     var isMatch = job.majors.includes(state.education.major);
     var majorRelevance = isMatch ? 35 + Math.floor((state.education.study || 0) / 100 * 37) : (state.education.university ? -15 : 0);
     var personality = job.category === '社交' && ['外向','乐观','热血'].includes(state.profile.personality) ? 6 : 0;
     var audience = job.recommendedGender === state.gender ? 8 : 0;
-    return state.stats.智力 * 0.55 + state.stats.魅力 * 0.2 + state.education.study * 0.12
+    return professional * 0.55 + negotiation * 0.2 + state.education.study * 0.12
       + traitBoost(state, job.category) + majorRelevance + personality + audience;
   }
 
@@ -83,13 +77,20 @@
   }
 
   function apply(state, jobId) {
-    if (U.age(state) < 18) return { ok: false, message: '成年后才能正式求职' };
-    if (state.health?.retired) return { ok: false, message: '当前已办理退休，不再参加全职招聘' };
-    if (state.education.university && !state.education.graduated) return { ok: false, message: '完成大学学业后才能全职求职' };
     const job = board(state).find((item) => item.id === jobId);
     if (!job) return { ok: false, message: '当前城市没有这个岗位' };
+    if (U.age(state) < (job.minAge || 18)) {
+      return { ok: false, message: `${job.minAge || 18}岁后才能申请这个岗位` };
+    }
+    if (state.health?.retired) return { ok: false, message: '当前已办理退休，不再参加全职招聘' };
+    if (state.education.university && !state.education.graduated) return { ok: false, message: '完成大学学业后才能全职求职' };
     if (!eligible(state, job)) return { ok: false, message: `该职位要求${requirementLabel(job.education || 0)}` };
-    const chance = U.clamp(0.18 + (ability(state, job) - job.need) / 105, 0.08, 0.92);
+    const market = Game.jobMarket.summary(state, job);
+    if (!market.vacancies) {
+      return { ok: false, message: `${job.company}的${job.name}岗位已经饱和` };
+    }
+    const assessment = Game.careerActionResolution.application(state, job);
+    const chance = assessment.chance;
     const accepted = Math.random() < chance;
     const employer = job.company || `${state.location.city}${job.industry || '城市'}企业`;
     state.career.applications.push({
@@ -99,14 +100,21 @@
     state.career.applications = state.career.applications.slice(-30);
     if (!accepted) {
       Game.lifeDirector.addLog(state, '求职未录取', `${employer}婉拒了${job.name}申请。`, 'normal');
-      return { ok: false, message: `${employer}未录取，参考概率 ${Math.round(chance * 100)}%` };
+      return { ok: false, message: `${employer}未录取，${Game.actionResolver.summary(assessment)}`
+        + `，参考概率 ${Math.round(chance * 100)}%` };
+    }
+    if (state.career.job && state.career.jobId !== job.id) {
+      Game.careerHistory?.add(state, {
+        kind: 'leave', title: `离开${state.career.company || '原单位'}`, detail: `结束${state.career.job}工作`,
+      });
     }
     state.career.job = job.name;
     state.career.jobId = job.id;
     state.career.company = employer;
-    state.career.salary = Math.round(job.salary * Game.cityLife.salaryFactor(state));
+    const internshipBonus = state.career._internshipBonus && !state.career._internshipBonusUsed;
+    state.career.salary = Math.round(job.salary * Game.cityLife.salaryFactor(state) * (internshipBonus ? 1.3 : 1));
     state.career.level = 0;
-    state.career.exp = 0;
+    state.career.exp = internshipBonus ? 24 : 0;
     state.career.performance = 10;
     state.career.lastPromotionMonth = state.totalMonths - 6;
     state.career.management = false;
@@ -115,13 +123,24 @@
     state.career.lastTitleMonth = state.totalMonths - 12;
     state.career.lastRaiseMonth = state.totalMonths - 6;
     state.career.lastAutoRaiseMonth = state.totalMonths;
+    state.career.jobStartMonth = state.totalMonths;
+    if (job.id === 'coser') Game.structuredTraits.addExperience(state.profile, 'coser');
+    if (internshipBonus) state.career._internshipBonusUsed = true;
     const employerJob = { ...job, company: employer, companyId: job.companyId || `local-${state.location.city}-${job.id}` };
     if (job.freelance) Game.workplace.leave(state);
     else Game.workplace.join(state, employerJob);
     Game.creatorCareer.onJobChange(state);
     Game.idolSystem?.onJobChange(state);
+    if (job.id === 'idol-underground') {
+      const underground = Game.undergroundIdol.ensure(state);
+      underground.active = true;
+      underground.stage = underground.stage || 'trainee';
+      underground.agencyName ||= employer;
+    }
     Game.lifeDirector.addLog(state, '获得工作', `你加入${employer}担任${job.name}。`, 'milestone');
-    return { ok: true, message: `${employer}录取了你` };
+    Game.careerHistory?.add(state, { kind: 'hire', title: `加入${employer}`,
+      detail: `担任${job.name}`, company: employer, salary: state.career.salary });
+    return { ok: true, message: `${employer}录取了你，${Game.actionResolver.summary(assessment)}` };
   }
 
   function work(state, type) {
@@ -129,22 +148,23 @@
     if (type === 'promotion') return Game.careerGrowth.requestRaise(state);
     if (Game.staminaSystem) { var st = Game.staminaSystem.spend(state, 15); if (!st.ok) return st; }
     const actions = {
-      focus: [8, 5, -3, 0, '专注完成关键任务', 0, 0],
-      network: [5, 3, 1, 2, '主动结识同事与合作伙伴', 0, 0],
-      train: [4, 8, -1, 2, '参加培训并提升专业能力', 0, 0],
-      overtime: [12, 7, -6, 0, '加班冲刺重要项目', 0, 0],
-      create: [8, 7, 2, 1, '发布了一组新作品', 350, 80],
-      stream: [7, 6, -1, 1, '完成了一场直播', 520, 60],
-      sponsor: [10, 5, -2, 0, '完成一次品牌合作', 900, 150],
-      convention: [12, 8, 4, 1, '参加城市漫展并经营个人展位', 680, 260],
+      focus: [8, 5, 0, '专注完成关键任务', 0, 0],
+      network: [5, 3, 2, '主动结识同事与合作伙伴', 0, 0],
+      train: [4, 8, 2, '参加培训并提升专业能力', 0, 0],
+      overtime: [12, 7, 0, '加班冲刺重要项目', 0, 0],
+      create: [8, 7, 1, '发布了一组新作品', 350, 80],
+      stream: [7, 6, 1, '完成了一场直播', 520, 60],
+      sponsor: [10, 5, 0, '完成一次品牌合作', 900, 150],
+      convention: [12, 8, 1, '参加城市漫展并经营个人展位', 680, 260],
     };
-    const [performance, exp, mood, intelligence, label, income, cost] = actions[type] || actions.focus;
+    const [performance, exp, intelligence, label, income, cost] = actions[type] || actions.focus;
     state.money += income;
     Game.economy.spend(state, cost);
     state.career.performance = U.clamp(state.career.performance + performance, 0, 100);
     state.career.exp += exp;
-    state.stats.心情 = U.clamp(state.stats.心情 + mood, 0, 100);
-    state.stats.智力 = U.clamp(state.stats.智力 + intelligence, 0, 100);
+    const growthAbility = type === 'network' ? '交涉'
+      : (state.career.management ? '管理' : '学识');
+    Game.characterAttributes.gain(state, growthAbility, intelligence, `职场行动:${type}`);
     Game.careerSpecialties.afterWork(state, type);
     Game.lifeDirector.addLog(state, '职场行动', label, 'good');
     return { ok: true, message: Game.economy.message(
@@ -160,6 +180,8 @@
     const currentJob = C.jobs.find((item) => item.id === state.career.jobId);
     if (state.career.job && !currentJob?.freelance) {
       Game.lifeDirector.addLog(state, '离开原岗位', `迁居让你结束了${state.career.company || ''}${state.career.job}的工作。`, 'normal');
+      Game.careerHistory?.add(state, { kind: 'leave',
+        title: `离开${state.career.company || '原单位'}`, detail: `结束${state.career.job}工作` });
       Object.assign(state.career, {
         job: null, jobId: null, company: null, salary: 0, exp: 0,
         performance: 0, lastPromotionMonth: -12, management: false, titleTrack: 'staff', titleRank: 0,

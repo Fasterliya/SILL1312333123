@@ -1,117 +1,169 @@
 (function initCompanyCatalog(root) {
   'use strict';
 
-  const C = root.LifeGame.config;
-  const brands = {
-    华夏: ['云岚智能装备', '九州供应链', '拾光文化传媒', '安城民生服务'],
-    日本: ['青叶精密系统', '东町商事', '白鹭映像', '和光城市服务'],
-    韩国: ['汉江数字工程', '新罗流通', '星光内容工场', '大韩生活服务'],
-    新加坡: ['海峡数据港', '狮城贸易', '滨海创意网络', '城市宜居集团'],
-    法国: ['塞纳工业设计', '左岸商贸', '光影文化工坊', '都会公共服务'],
-    英国: ['泰晤士工程系统', '王冠供应链', '北辰传媒', '联合城市服务'],
-    美国: ['先锋云端科技', '大陆商业网络', '自由港创意', '都会基础设施'],
-  };
+  const Game = root.LifeGame;
+  const C = Game.config;
+  const VENUE_JOBS = new Set(['idol-underground', 'idoltrainee', 'idol']);
+  const INDEPENDENT_JOBS = new Set(['prostitute']);
   const archetypes = [
     {
-      industry: '工程科技',
+      industry: '科技研发', specialty: '软件、产品与数据研发',
       roles: [
-        ['平台系统工程师', 3, 78, '科学', ['计算机科学', '数据科学']],
-        ['智能设备工程师', 2, 70, '科学', ['智能制造', '机电技术']],
-        ['数据安全分析员', 2, 68, '商业', ['数据科学', '计算机科学']],
+        ['软件开发工程师', 3, 76, '科学', ['计算机科学', '数据科学']],
+        ['产品运营经理', 2, 68, '社交', ['计算机科学', '工商管理']],
+        ['数据分析专员', 2, 70, '商业', ['数据科学', '金融学']],
       ],
     },
     {
-      industry: '商贸物流',
+      industry: '商贸金融', specialty: '供应链、财务与客户业务',
       roles: [
-        ['供应链计划师', 2, 70, '商业', ['工商管理', '现代服务']],
-        ['国际客户经理', 2, 66, '社交', ['国际商务', '金融学']],
-        ['门店运营主管', 1, 58, '商业', ['现代服务', '工商管理']],
+        ['供应链计划师', 2, 66, '商业', ['工商管理', '现代服务']],
+        ['财务分析专员', 3, 74, '商业', ['金融学', '工商管理']],
+        ['商务客户经理', 1, 58, '社交', ['工商管理', '现代服务']],
       ],
     },
     {
-      industry: '文化传媒',
+      industry: '文化创意', specialty: '内容、视觉与城市活动',
       roles: [
-        ['影像内容制作人', 2, 68, '艺术', ['数字媒体', '动画设计', '视觉传达']],
-        ['展览与活动策划', 2, 63, '社交', ['文化产业管理', '新闻传播']],
-        ['品牌传播编辑', 1, 57, '文学', ['新闻传播', '国际关系']],
+        ['视觉设计师', 2, 66, '艺术', ['数字媒体']],
+        ['内容策划编辑', 2, 62, '文学', ['数字媒体', '教育学']],
+        ['活动制作人', 1, 58, '社交', ['现代服务', '工商管理']],
       ],
     },
     {
-      industry: '城市民生',
+      industry: '城市服务', specialty: '公共设施、健康与教育服务',
       roles: [
-        ['公共设施工程师', 2, 68, '科学', ['建筑工程', '机电技术']],
-        ['城区运营调度员', 1, 56, '商业', ['现代服务', '工商管理']],
-        ['社区健康协调员', 2, 62, '社交', ['临床医学', '心理学', '公共管理']],
+        ['公共设施工程师', 2, 66, '科学', ['建筑工程', '机电技术']],
+        ['健康服务协调员', 2, 64, '社交', ['临床医学', '现代服务']],
+        ['教育项目专员', 3, 70, '文学', ['教育学', '工商管理']],
+      ],
+    },
+    {
+      industry: '生活消费', specialty: '门店、餐饮与旅行体验',
+      roles: [
+        ['门店运营主管', 1, 54, '商业', ['现代服务', '工商管理']],
+        ['餐饮产品主理人', 1, 52, '艺术', ['现代服务']],
+        ['旅行体验顾问', 1, 55, '社交', ['现代服务', '工商管理']],
+      ],
+    },
+    {
+      industry: '演艺娱乐', specialty: 'Livehouse、舞台与艺人运营',
+      roles: [
+        ['舞台运营专员', 1, 54, '社交', ['现代服务', '数字媒体']],
+        ['现场音响师', 1, 60, '科学', ['机电技术', '数字媒体']],
+        ['艺人统筹', 2, 64, '社交', ['数字媒体', '工商管理']],
       ],
     },
   ];
+  const industryGroups = [
+    ['科技', '工程', '制造', '游戏', '数据'],
+    ['金融', '商业', '物流', '交通', '商贸'],
+    ['传媒', '创意', '文化', '会展', '内容'],
+    ['医疗', '教育', '公共', '法律', '建筑'],
+    ['服务', '餐饮', '技能', '生活', '旅游'],
+    ['娱乐', '偶像', '演艺'],
+  ];
 
   function salary(city, companyIndex, roleIndex) {
-    const cityBase = city.tier === 1 ? 9800 : (city.tier === 2 ? 7600 : 6200);
-    const foreign = city.country === '华夏' ? 1 : 1.22;
-    return Math.round((cityBase + companyIndex * 700 + roleIndex * 850) * foreign / 100) * 100;
+    const base = city.tier === 1 ? 9800 : (city.tier === 2 ? 7600 : 6200);
+    const overseas = city.country === '华夏' ? 1 : 1.2;
+    return Math.round((base + companyIndex * 450 + roleIndex * 850) * overseas / 100) * 100;
   }
 
   C.cities.forEach((city, cityIndex) => {
+    const names = Game.cityBusinesses.names(city.city);
     archetypes.forEach((type, companyIndex) => {
       const companyId = `city-c-${cityIndex}-${companyIndex}`;
-      const brand = (brands[city.country] || brands.华夏)[companyIndex];
       const company = {
-        id: companyId,
-        name: `${city.city}${brand}`,
-        parent: companyIndex < 3 ? `${brand}集团` : '',
-        city: city.city,
-        country: city.country,
-        industry: type.industry,
-        positions: [],
+        id: companyId, name: names[companyIndex], parent: '', city: city.city,
+        country: city.country, industry: type.industry, specialty: type.specialty, positions: [],
       };
       type.roles.forEach(([name, education, need, category, majors], roleIndex) => {
         const id = `${companyId}-r${roleIndex}`;
         company.positions.push(id);
         C.jobs.push({
-          id,
-          name,
-          company: company.name,
-          companyId,
-          industry: type.industry,
-          salary: salary(city, companyIndex, roleIndex),
-          need,
-          category,
-          majors,
-          education,
-          tier: 3,
-          cities: [city.city],
-          minAge: 18,
+          id, name, company: company.name, companyId, industry: type.industry,
+          salary: salary(city, companyIndex, roleIndex), need, category, majors,
+          education, tier: 3, cities: [city.city], minAge: 18, localCompany: true,
         });
       });
       C.companies.push(company);
     });
   });
 
-  const companyNames = new Map(C.companies.map((company) => [company.name, company]));
-  C.jobs.forEach((job, index) => {
-    if (job.freelance) return;
-    let company = companyNames.get(job.company);
-    if (!company) {
-      const city = job.cities?.[0] || '全国';
-      company = {
-        id: `employer-${index}`, name: job.company || `城市企业${index + 1}`,
-        parent: '', city, country: C.cities.find((item) => item.city === city)?.country || '华夏',
-        industry: job.industry || '综合', positions: [],
-      };
-      C.companies.push(company);
-      companyNames.set(company.name, company);
-    }
-    job.companyId ||= company.id;
-    if (!company.positions.includes(job.id)) company.positions.push(job.id);
-  });
+  function companyIndex(industry) {
+    const text = String(industry || '');
+    const index = industryGroups.findIndex((group) => group.some((name) => text.includes(name)));
+    return index < 0 ? 4 : index;
+  }
 
-  root.LifeGame.companyCatalog = Object.freeze({
+  function companyFor(cityName, industry) {
+    return C.companies.find((company) => (
+      company.city === cityName && company.industry === archetypes[companyIndex(industry)].industry
+    )) || null;
+  }
+
+  function localizeJob(job, cityName) {
+    if (!job) return null;
+    if (job.localCompany) return job.cities?.includes(cityName) ? job : null;
+    if (job.freelance) {
+      return { ...job, company: `${cityName}${job.company}`, companyId: `local-${cityName}-${job.id}`,
+        parentCompany: '个人独立经营', branchCity: cityName };
+    }
+    if (INDEPENDENT_JOBS.has(job.id)) {
+      return { ...job, company: `${cityName}${job.company}`, companyId: `local-${cityName}-${job.id}`,
+        parentCompany: '本地独立场所', branchCity: cityName };
+    }
+    const company = companyFor(cityName, VENUE_JOBS.has(job.id) ? '娱乐业' : job.industry);
+    if (!company) return null;
+    return { ...job, company: company.name, companyId: company.id, industry: company.industry,
+      parentCompany: '', branchCity: cityName, cities: [cityName] };
+  }
+
+  function available(job, cityName) {
+    return Boolean(
+      (job.localCompany && job.cities?.includes(cityName))
+      || job.freelance
+      || VENUE_JOBS.has(job.id)
+      || INDEPENDENT_JOBS.has(job.id)
+      || (job.cities?.length && job.cities.includes(cityName)),
+    );
+  }
+
+  function jobsInCity(cityName) {
+    const city = C.cities.find((item) => item.city === cityName);
+    return C.jobs.filter((job) => available(job, cityName)
+      && (!city || city.tier <= (job.tier || 3)))
+      .map((job) => localizeJob(job, cityName)).filter(Boolean);
+  }
+
+  function normalizeCareer(state) {
+    if (!state?.career?.jobId || !state.location?.city) return false;
+    const source = C.jobs.find((job) => job.id === state.career.jobId);
+    const local = localizeJob(source, state.location.city);
+    if (!local || state.career.company === local.company) return false;
+    state.career.company = local.company;
+    if (state.workplace?.companyId) state.workplace.companyId = local.companyId;
+    (state.workplace?.rosterIds || []).forEach((id) => {
+      const person = Game.people?.find?.(state, id);
+      if (person) {
+        person.company = local.company;
+        person.companyId = local.companyId;
+      }
+    });
+    return true;
+  }
+
+  Game.companyCatalog = Object.freeze({
     find(id) {
       return C.companies.find((company) => company.id === id) || null;
     },
     inCity(city) {
       return C.companies.filter((company) => company.city === city);
     },
+    companyFor,
+    localizeJob,
+    jobsInCity,
+    normalizeCareer,
   });
 }(window));

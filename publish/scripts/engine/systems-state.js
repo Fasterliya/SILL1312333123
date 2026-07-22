@@ -46,9 +46,7 @@
       from: Game.nameSystem.normalizeName(item.from, person.gender, culture),
       to: Game.nameSystem.normalizeName(item.to, person.gender, culture),
     })) : [];
-    person.aiChat = person.aiChat && typeof person.aiChat === 'object' ? person.aiChat : {};
-    person.aiChat.messages = Array.isArray(person.aiChat.messages) ? person.aiChat.messages.slice(-10) : [];
-    person.aiChat.lastAction ||= '';
+    delete person.aiChat;
     Game.npcFashion.ensurePerson(state, person);
     person.sexWork = person.sexWork && typeof person.sexWork === 'object' ? person.sexWork : {};
     if (person.gender === '女') {
@@ -89,7 +87,7 @@
       state.matchmaking.candidates.push(...candidates);
       state.contacts = state.contacts.filter((person) => !candidates.includes(person));
     }
-    state.version = 27; state.day = Math.max(1, Math.min(30, Number(state.day) || 1)); state.timeSpeed = [0, 1, 5, 10].includes(state.timeSpeed) ? state.timeSpeed : 0; state.stamina = state.stamina && typeof state.stamina === 'object' ? state.stamina : { current: 100, max: 100 };
+    state.version = 28; state.day = Math.max(1, Math.min(30, Number(state.day) || 1)); state.timeSpeed = [0, 1, 5, 10, 30, 90].includes(state.timeSpeed) ? state.timeSpeed : 0; state.stamina = state.stamina && typeof state.stamina === 'object' ? state.stamina : { current: 100, max: 100 };
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {
@@ -120,6 +118,8 @@
     state.health.stdHistory = Array.isArray(state.health.stdHistory) ? state.health.stdHistory : [];
     state.health.lastCheckupMonth = Number.isFinite(state.health.lastCheckupMonth) ? state.health.lastCheckupMonth : -12;
     state.health.cosmeticProcedures = Array.isArray(state.health.cosmeticProcedures) ? state.health.cosmeticProcedures.slice(-8) : [];
+    state.health.cosmeticSurgery = state.health.cosmeticSurgery
+      && typeof state.health.cosmeticSurgery === 'object' ? state.health.cosmeticSurgery : {};
     state.romance.suspicion = Number.isFinite(state.romance.suspicion) ? state.romance.suspicion : 0;
     state.romance.affairCount = Math.max(0, Number(state.romance.affairCount) || 0);
     state.idol = state.idol && typeof state.idol === 'object' ? state.idol : {
@@ -228,6 +228,7 @@
     };
     state.education.subjects = state.education.subjects && typeof state.education.subjects === 'object' ? state.education.subjects : {};
     state.education.burnout = Number.isFinite(state.education.burnout) ? state.education.burnout : 0;
+    state.education.semesterPlan = state.education.semesterPlan && typeof state.education.semesterPlan === 'object' ? state.education.semesterPlan : null;
     return state;
   }
 

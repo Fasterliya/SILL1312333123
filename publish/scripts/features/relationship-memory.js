@@ -35,15 +35,5 @@
     });
   }
 
-  function render(person) {
-    const memories = Array.isArray(person.memories) ? person.memories : [];
-    const rows = memories.length ? memories.slice(0, 6).map((memory) => (
-      `<div class="memory-row"><span>第${memory.generation || 1}代 · ${memory.kind}</span><strong>${memory.text}</strong></div>`
-    )).join('') : '<p class="empty-state">继续互动后，这里会记录共同经历。</p>';
-    return `<details class="record-section"><summary><span>关系记忆</span>
-      <small>信任 ${person.trust || 0} · 矛盾 ${person.conflict || 0}</small></summary>
-      <div class="memory-list">${rows}</div></details>`;
-  }
-
-  Game.relationshipMemory = Object.freeze({ ensure, record, monthly, render });
+  Game.relationshipMemory = Object.freeze({ ensure, record, monthly });
 }(window));

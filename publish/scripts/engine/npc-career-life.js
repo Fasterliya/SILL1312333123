@@ -41,6 +41,8 @@
     const age = U.personAge(state, person);
     person.npcIdol = person.npcIdol || { stage: 'trainee', fans: 500, trainingMonths: 0 };
     const idol = person.npcIdol;
+    if (idol.cohortManaged && idol.stage === 'trainee'
+      && state.career.jobId === 'idoltrainee' && state.idol?.stage === 'trainee') return;
 
     if (idol.stage === 'trainee') {
       idol.trainingMonths += 1;
@@ -95,6 +97,7 @@
       else if (job === '职业Coser') monthlyCosplayer(state, person);
       else if (job === '虚拟主播') monthlyVtuber(state, person);
       else if (['美妆博主', '写真博主', '穿搭博主'].includes(job)) monthlyBeautybLogger(state, person);
+      Game.npcCreatorStyle?.monthlyPerson(state, person);
     });
   }
 

@@ -44,7 +44,7 @@
     'subsurface scattering',
     'soft bloom',
     'light particles',
-    'clean background',
+    'clean softly colored environmental background',
     'soft depth of field',
     'bright atmosphere',
     'official key visual',
@@ -61,7 +61,6 @@
     ['skirt', /裙/],
     ['pants', /裤/],
   ];
-
   function clean(value) {
     const text = String(value || '')
       .replace(/婴儿软底鞋/g, '柔软底鞋').replace(/婴儿连体衣/g, '柔软连体衣')
@@ -94,22 +93,23 @@
     const years = player ? Game.content.age(state) : Game.content.personAge(state, target);
     return Math.max(0, Math.min(120, Math.floor(Number(years) || 0)));
   }
-
   function appearanceLines(state, target, player) {
     const years = ageFor(state, target, player);
     const height = Number(target.height || 0);
+    const actualGender = player ? Game.hunterMode.identity(state).gender : target.gender;
+    const visualGender = Game.femboyPortraitPrompt?.visualGender(target, actualGender) || actualGender;
     const selectedAgeStage = Game.portraitAgePrompt.resolve(years, target.portraitAgeStage);
     const protectedAge = years <= 18 || Game.portraitAgePrompt.isProportion(selectedAgeStage);
     const hideExactAge = protectedAge || Game.portraitAgePrompt.valid(target.portraitAgeStage);
     const marks = [target.molePosition, target.freckles, target.distinctiveFeature]
       .filter((item) => item && !String(item).startsWith('无')).map(clean).filter(Boolean).join(', ');
     const identity = [
-      `gender: ${player ? Game.hunterMode.identity(state).gender : target.gender}`,
+      `gender: ${actualGender}`,
       hideExactAge ? '' : `age: ${years} years old`,
       `body_type: ${clean(target.bodyType)}, ${clean(target.bodyFrame)}`,
       `height: ${height.toFixed(1)} cm`,
-        ...Game.portraitAgePrompt.lines(years,
-          player ? Game.hunterMode.identity(state).gender : target.gender, target.portraitAgeStage),
+      ...Game.portraitAgePrompt.lines(years, visualGender, target.portraitAgeStage),
+      ...(Game.femboyPortraitPrompt?.lines(target, years) || []),
     ];
     return {
       years,
@@ -165,7 +165,7 @@
       : [defaultPose, 'front view', 'slightly dynamic pose', 'looking at viewer',
         'natural gesture', 'elegant posture', 'empty relaxed hands'];
     const finalLighting = intent.scene
-      ? lighting.filter((line) => line !== 'clean background') : lighting;
+      ? lighting.filter((line) => line !== 'clean softly colored environmental background') : lighting;
     const proportionSafeDirection = appearance.years <= 18
       ? `PROPORTION-SAFE PLAYER DIRECTION, follow only when modest and non-suggestive: ${intent.direction}`
       : intent.direction;

@@ -1,0 +1,476 @@
+:root {
+  --ui-ink: #263b37;
+  --ui-muted: #69736f;
+  --ui-line: #d8d5c9;
+  --ui-paper: #fffdf7;
+  --ui-soft: #f4f1e8;
+  --ui-green: #315f58;
+  --ui-green-soft: #edf3ef;
+  --ui-red: #a8453a;
+  --ui-red-soft: #fff0ed;
+  --ui-gold: #b88a35;
+}
+.task-center-sheet,
+.npc-event-sheet {
+  border-top: 1px solid var(--ui-line);
+  border-radius: 8px 8px 0 0;
+  background: var(--ui-paper);
+  box-shadow: 0 -10px 30px rgb(38 59 55 / 18%);
+}
+
+.task-center-overlay,
+.npc-event-overlay {
+  background: rgb(25 39 36 / 52%);
+}
+
+.task-center-sheet header,
+.npc-event-sheet header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e8e4d9;
+}
+
+.task-center-sheet header small,
+.npc-event-sheet header small {
+  color: var(--ui-red);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.task-center-sheet h2,
+.npc-event-sheet h2 {
+  color: var(--ui-ink);
+  font-family: serif;
+}
+
+.task-center-row {
+  border-color: var(--ui-line);
+  border-left: 3px solid var(--ui-green);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.task-center-row strong,
+.npc-event-sheet > p {
+  color: var(--ui-ink);
+}
+
+.task-center-row button,
+.event-option-btn {
+  border-color: #c6d2ce;
+  border-radius: 6px;
+  background: var(--ui-green-soft);
+  color: var(--ui-green);
+  font-weight: 800;
+}
+
+.task-center-close,
+.npc-event-close,
+.decision-later {
+  border-color: var(--ui-line);
+  background: transparent;
+  color: var(--ui-muted);
+}
+
+.task-center-btn {
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(30, 53, 51, 0.72);
+  color: #fff;
+  box-shadow: none;
+}
+
+.task-center-btn b {
+  background: #c23b32;
+}
+
+.subject-study .subject-card {
+  border-color: var(--ui-line);
+  background: var(--ui-paper);
+  box-shadow: 0 2px 7px rgb(38 59 55 / 6%);
+}
+
+.subject-study .subject-name {
+  color: var(--ui-ink);
+}
+
+.subject-study .subject-stars {
+  color: var(--ui-gold);
+}
+
+.subject-study .btn-learn {
+  border-color: var(--ui-green);
+  background: var(--ui-green);
+}
+
+.career-panel {
+  color: var(--ui-ink);
+}
+
+.career-panel > .filter-chips,
+.underground-tabs {
+  padding: 4px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-soft);
+}
+
+.career-panel > .filter-chips button,
+.underground-tabs button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.career-panel > .filter-chips button.active,
+.underground-tabs button.active {
+  background: var(--ui-green);
+  color: #fff;
+}
+
+.work-dashboard {
+  display: grid;
+  gap: 10px;
+}
+
+.work-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.work-metrics > div {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #e1ded3;
+  background: var(--ui-paper);
+}
+
+.work-metrics span,
+.work-metrics strong {
+  display: block;
+}
+
+.work-metrics span {
+  color: var(--ui-muted);
+  font-size: 10px;
+}
+
+.work-metrics strong {
+  margin-top: 4px;
+  color: var(--ui-ink);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.work-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.work-actions button,
+.partner-actions button {
+  min-height: 44px;
+  border: 1px solid #c6d2ce;
+  border-radius: 5px;
+  background: var(--ui-green-soft);
+  color: var(--ui-green);
+  font-weight: 800;
+}
+
+.promotion-ladder {
+  display: grid;
+  gap: 10px;
+}
+
+.promotion-current {
+  padding: 12px;
+  border-left: 4px solid var(--ui-gold);
+  background: #fff8e8;
+}
+
+.promotion-current strong,
+.promotion-current small {
+  display: block;
+}
+
+.promotion-current strong {
+  font: 700 17px serif;
+}
+
+.promotion-current small {
+  margin-top: 4px;
+  color: var(--ui-muted);
+}
+
+.promotion-next {
+  padding: 11px;
+  border: 1px solid var(--ui-line);
+  background: #fff;
+}
+
+.promotion-next > span,
+.promotion-prob {
+  display: block;
+  font-weight: 800;
+}
+
+.promotion-conditions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin: 9px 0;
+}
+
+.promotion-conditions span {
+  padding: 6px;
+  background: var(--ui-soft);
+  color: var(--ui-muted);
+  font-size: 10px;
+}
+
+.promotion-prob {
+  color: var(--ui-red);
+  font-size: 11px;
+}
+
+.ladder-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ladder-step {
+  position: relative;
+  min-height: 42px;
+  padding: 10px 10px 10px 28px;
+  border-left: 2px solid #d8d5c9;
+  color: var(--ui-muted);
+}
+
+.ladder-step .ladder-dot {
+  position: absolute;
+  top: 15px;
+  left: -6px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--ui-paper);
+  border-radius: 50%;
+  background: #b7b9b3;
+}
+
+.ladder-step.done,
+.ladder-step.current {
+  border-left-color: var(--ui-green);
+  color: var(--ui-ink);
+}
+
+.ladder-step.done .ladder-dot,
+.ladder-step.current .ladder-dot {
+  background: var(--ui-green);
+}
+
+.ladder-step.current {
+  background: var(--ui-green-soft);
+}
+
+.ladder-step small {
+  float: right;
+  color: var(--ui-red);
+  font-size: 10px;
+}
+
+.career-special-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.career-special-stack > .career-panel {
+  padding: 12px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-paper);
+}
+
+.panel-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #e7e3d7;
+}
+
+.panel-title h2 {
+  margin: 0;
+  color: var(--ui-ink);
+  font: 700 17px serif;
+}
+
+.panel-title span {
+  color: var(--ui-muted);
+  font-size: 10px;
+}
+
+.appointment-list,
+.partner-list,
+.black-market-items,
+.career-history {
+  display: grid;
+  gap: 7px;
+}
+
+.appointment-row,
+.vip-row,
+.black-market-item,
+.history-entry,
+.partner-row {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #e0ddd2;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.appointment-row,
+.vip-row,
+.history-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.appointment-row strong,
+.appointment-row span,
+.vip-row strong,
+.vip-row span,
+.history-entry strong,
+.history-entry span {
+  display: block;
+}
+
+.appointment-row span,
+.vip-row span,
+.history-entry span,
+.history-entry small {
+  margin-top: 3px;
+  color: var(--ui-muted);
+  font-size: 10px;
+}
+
+.appointment-row button,
+.vip-row button,
+.black-market-item button {
+  min-height: 40px;
+  border: 1px solid #c6d2ce;
+  border-radius: 5px;
+  background: var(--ui-green-soft);
+  color: var(--ui-green);
+  font-weight: 800;
+}
+
+.black-market-items {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.black-market-item {
+  display: grid;
+  gap: 7px;
+}
+
+.bm-prices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  color: var(--ui-muted);
+  font-size: 10px;
+}
+
+.bm-stock {
+  color: var(--ui-red);
+  font-size: 11px;
+}
+
+.partner-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.partner-row > div small,
+.partner-row > div span {
+  display: block;
+  color: var(--ui-muted);
+  font-size: 10px;
+}
+
+.partner-actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.partner-actions button:last-child {
+  border-color: #e0bbb5;
+  background: var(--ui-red-soft);
+  color: var(--ui-red);
+}
+
+.idol-card {
+  border: 1px solid var(--ui-line);
+  background: var(--ui-paper);
+}
+
+.idol-card > header {
+  border-left-color: var(--ui-gold);
+  background: #fff8e8;
+}
+
+.idol-card [data-idol-action="signLoveBan"],
+.idol-card [data-idol-action="hireSecurity"] {
+  border-color: #d5c28e;
+  background: #fff8e8;
+  color: #785a20;
+}
+
+.underground-idol-card > header {
+  border-left-color: var(--ui-red);
+  background: var(--ui-red-soft);
+}
+
+.underground-decision,
+.underground-warning {
+  padding: 11px;
+  border-left: 4px solid var(--ui-red);
+  background: var(--ui-red-soft);
+  color: #742d27;
+}
+
+.underground-decision p,
+.underground-warning {
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+@media (max-width: 420px) {
+  .work-metrics,
+  .black-market-items,
+  .promotion-conditions {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment-row,
+  .vip-row,
+  .history-entry,
+  .partner-row {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment-row button,
+  .vip-row button {
+    width: 100%;
+  }
+}

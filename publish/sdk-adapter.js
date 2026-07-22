@@ -2,6 +2,10 @@
   'use strict';
 
   const Game = root.LifeGame = root.LifeGame || {};
+  const globalDrawNegative = [
+    'white background, pure white background, blank white backdrop, white studio background, isolated on white',
+    'text, letters, words, typography, caption, subtitle, speech bubble, logo, signature, watermark',
+  ].join(', ');
 
   function sdk() {
     return root.dzmm || null;
@@ -52,7 +56,11 @@
       code: 'SDK_UNAVAILABLE',
       retryable: false,
     });
-    const result = await sdk().draw.generate(options);
+    const request = {
+      ...options,
+      negativePrompt: [options?.negativePrompt, globalDrawNegative].filter(Boolean).join(', '),
+    };
+    const result = await sdk().draw.generate(request);
     if (!result || !Array.isArray(result.images) || typeof result.images[0] !== 'string') {
       throw Object.assign(new Error('图片服务没有返回有效立绘'), {
         code: 'NO_OUTPUT_IMAGES',

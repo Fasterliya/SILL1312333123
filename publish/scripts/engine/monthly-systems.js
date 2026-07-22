@@ -9,6 +9,7 @@
     Game.propertySystem.monthly(state);
     Game.socialWorld.monthly(state);
     Game.populationSimulation.monthly(state);
+    Game.npcJobMigration?.monthly(state);
     Game.careerGrowth.monthly(state);
     Game.companyMarket.monthly(state);
     Game.careerSpecialties.monthly(state);
@@ -17,7 +18,9 @@
     Game.householdSystem.monthly(state);
     Game.relationshipSecrets.monthly(state);
     Game.creatorCareer.monthly(state);
+    Game.stressSystem.monthly(state);
     Game.healthSystem.monthly(state);
+    Game.cosmeticCare?.monthly(state);
     Game.npcFashion.monthly(state);
     Game.encounterSystem?.ensure(state);
     Game.brothelSystem?.ensure(state);
@@ -25,6 +28,7 @@
     Game.idolSystem?.monthly(state);
     Game.npcCareerLife?.monthly(state);
     Game.familyConflict?.monthly(state);
+    Game.relationshipConflict?.monthly(state);
     Game.criminalSystem?.monthly(state);
     Game.psychology?.monthly(state);
     Game.npcInitiative?.monthly(state);
@@ -34,6 +38,8 @@
     Game.stockDirector?.monthly(state);
     Game.undergroundIdol?.monthly(state);
     Game.universityLife?.monthly(state);
+    Game.lifeResumeSync?.monthly(state);
+    Game.specialCareerRanks?.sync(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

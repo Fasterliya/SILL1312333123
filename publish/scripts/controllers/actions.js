@@ -8,10 +8,10 @@
   function state() {
     return api.getState();
   }
-
   function done() {
+    Game.educationStudyPlan?.ensureSemester(state());
     api.refresh();
-    Promise.resolve(api.save()).finally(() => api.resumeEducation?.());
+    api.save();
   }
 
   function trade(name, mode, lot) {
@@ -39,6 +39,18 @@
     const current = state();
     const decision = current.pendingDecision;
     if (!decision) return;
+    if (decision.type === 'semesterPlan') {
+      const result = Game.educationStudyPlan.resolve(current);
+      Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
+      if (result.ok) done();
+      return;
+    }
+    const systemResult = Game.systemDecisions?.resolve(current, value);
+    if (systemResult) {
+      Game.view.showToast(systemResult.message, systemResult.ok ? 'good' : 'warning');
+      if (systemResult.ok) done();
+      return;
+    }
     if (['lifeEvent', 'succession'].includes(decision.type)) {
       const system = decision.type === 'lifeEvent' ? Game.lifeEvents : Game.legacySystem;
       const result = system.resolve(current, value);
@@ -99,8 +111,24 @@
   function renderDecision() {
     const current = state();
     const d = current.pendingDecision;
-    Game.view.el.decision.hidden = !d;
-    if (!d) return;
+    const visible = Boolean(d);
+    Game.view.el.decision.hidden = !visible;
+    if (!visible) return;
+    if (d.type === 'semesterPlan') {
+      Game.view.el.decisionTitle.textContent = d.adjustment ? '调整本学年计划' : '制定本学年计划';
+      Game.view.el.decisionText.textContent = `${d.term.label}：把${Game.educationStudyPlan.slotCount(current)}个时间格分配给科目与生活安排。`;
+      Game.view.el.decisionBody.innerHTML = Game.educationPlanView.renderDecision(current);
+      return;
+    }
+    const systemContent = Game.systemDecisions?.content(current);
+    if (systemContent) {
+      Game.view.el.decisionTitle.textContent = systemContent.title;
+      Game.view.el.decisionText.textContent = systemContent.text;
+      Game.view.el.decisionBody.innerHTML = systemContent.options.map((item) => (
+        `<button data-choice="${item.value}">${item.label}</button>`
+      )).join('');
+      return;
+    }
     if (['lifeEvent', 'succession'].includes(d.type)) {
       const content = d.type === 'lifeEvent' ? Game.lifeEvents.render(current) : Game.legacySystem.renderDecision(current);
       if (!content) {

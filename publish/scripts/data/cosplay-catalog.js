@@ -33,6 +33,7 @@
       '角色专属长短袜、过膝袜、腿环、绑带与校园制服腿部层次',
       '与角色制服同色系的制服鞋、运动鞋或短靴，保留鞋型与装饰细节',
     ],
+    ...(Game.cosplayAnimeDetails || {}),
   };
   function stripWeapons(value) {
     return String(value || '')
@@ -54,6 +55,7 @@
     const alias = {
       星穹铁道: 'Honkai Star Rail', 鸣潮: 'Wuthering Waves', 东方Project: 'Touhou Project',
       原神: 'Genshin Impact', 蔚蓝档案: 'Blue Archive',
+      ...(Game.cosplayAnimeAliases || {}),
     }[series] || series;
     return `角色识别：${series}（${alias}）${character}官方角色COS，高辨识度完整还原。主体服装与发型：${safePrompt}。材质与颜色：${material}。头饰与配饰：${accessory}。袜装与腿部：${legwear}。鞋履：${shoes}。标志性元素：保留主体描述中的发型配色、徽记、纹样、随身日常配件与角色主题元素`;
   }
@@ -163,10 +165,13 @@
     ? Game.cosplayGenshin.map(([name, prompt]) => make('原神', name, prompt)) : [];
   const blueArchive = Array.isArray(Game.cosplayBlueArchive)
     ? Game.cosplayBlueArchive.map(([name, prompt]) => make('蔚蓝档案', name, prompt)) : [];
+  const anime = Array.isArray(Game.cosplayAnime)
+    ? Game.cosplayAnime.map(([series, name, prompt]) => make(series, name, prompt)) : [];
   const items = [{
     name: '无', series: '基础', character: '无', prompt: '', tags: ['基础'],
     minAge: 0, maxAge: 120, personalities: [], temperaments: [],
-  }, ...touhou, ...starRail, ...wuwa, ...genshin, ...blueArchive];
+  }, ...touhou, ...starRail, ...wuwa, ...genshin, ...blueArchive, ...anime];
+  const series = [...new Set(items.filter((item) => item.name !== '无').map((item) => item.series))];
   const find = (name) => items.find((item) => item.name === name) || items[0];
   const covered = new Set(['hairColor', 'hairstyle', 'clothing.top', 'clothing.shoes']);
 
@@ -188,6 +193,6 @@
   }
 
   Game.cosplayCatalog = Object.freeze({
-    items: Object.freeze(items), find, overrides, effectiveValue, stripWeapons,
+    items: Object.freeze(items), series: Object.freeze(series), find, overrides, effectiveValue, stripWeapons,
   });
 }(window));

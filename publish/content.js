@@ -123,7 +123,7 @@
     father.childrenCount = family.filter((item) => ['哥哥', '姐姐', '弟弟', '妹妹'].includes(item.relation)).length + 1;
     mother.childrenCount = father.childrenCount;
     return {
-      version: 26,
+      version: 28,
       updatedAt: new Date().toISOString(),
       name: makeName(surname, gender),
       surname,
@@ -134,7 +134,7 @@
       month: C.startMonth,
       totalMonths: 0,
       profile: profile(gender, father, mother),
-      stats: { 健康: between(72, 94), 心情: between(68, 90), 智力: between(46, 66), 魅力: between(42, 68) },
+      stats: { 健康: between(72, 94), 智力: between(46, 66), 魅力: between(42, 68) },
       money: between(300, 1800),
       familyWealth: between(90000, 850000),
       family,
@@ -157,7 +157,7 @@
       workplace: { companyId: null, departmentId: null, leaderId: null, rosterIds: [], reportIds: [] },
       romance: { partnerId: null, married: false, pendingBirth: 0, pendingBabies: 1,
         pendingBirthMotherId: null, conceptionCooldown: 0 },
-      assets: { house: null, mortgage: 0, stocks: stockState(), dividends: 0, businesses: [], vehicles: [] },
+      assets: { house: null, mortgage: 0, stocks: stockState(), dividends: 0 },
       matchmaking: { candidates: [] },
       travel: { activeId: null, activeIds: [], encounters: [], journey: null, history: [], localHistory: [] },
       specialModes: { skinHunter: false, activeSkinId: null, possessed: [] },

@@ -8,7 +8,7 @@
     'statGrid', 'eventList', 'familyList', 'classmatesList', 'phoneList',
     'quickStudyPanel',
     'matchmakingList', 'educationPanel', 'careerPanel', 'cityPanel', 'governmentPanel', 'travelPanel', 'journeyPanel',
-    'propertyPanel', 'stockPanel', 'parentingPanel', 'healthPanel', 'legacyPanel',
+    'propertyPanel', 'stockPanel', 'parentingPanel', 'healthPanel', 'legacyPanel', 'cradleNetworkPanel',
     'statusPanel', 'financePanel', 'npcEventContainer',
     'hunterModePanel', 'possessedList',
     'portraitSlot', 'portraitStatus', 'generatePortraitBtn', 'profileFacts',
@@ -141,6 +141,7 @@
     el.careerPanel.innerHTML = Game.careerView.renderCareer(state, money);
     el.cityPanel.innerHTML = Game.careerView.renderCities(state);
     el.governmentPanel.innerHTML = Game.civicSystem.render(state);
+    Game.cradleNetwork?.render(state, el.cradleNetworkPanel);
     el.travelPanel.innerHTML = Game.travelSystem.render(state);
     el.journeyPanel.innerHTML = Game.journeySystem.render(state);
     Game.roleBook.render(state);

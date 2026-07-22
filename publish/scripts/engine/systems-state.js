@@ -82,6 +82,7 @@
     Game.supernaturalSpecter?.ensure?.(state);
     Game.magicalGirlCore?.ensure?.(state);
     Game.cradleInstitution?.ensure?.(state);
+    Game.cradleNetwork?.ensure?.(state);
     Game.familyEvents?.ensure?.(state);
     Game.adoptionSystem?.ensure?.(state);
     if (sourceVersion < 11) {

@@ -167,12 +167,21 @@
     var supernatural = state.supernatural;
     if (!supernatural.enabled) return;
     if (supernatural.specters.length >= MAX_SPECTERS) return;
-    if (Math.random() > SPAWN_CHANCE) return;
+    var count = supernatural.specters.length;
+    if (!count) {
+      var fallback = Math.min(24, Math.max(0, Number(state.totalMonths) || 0));
+      supernatural.spawnDryMonths = Number.isFinite(supernatural.spawnDryMonths)
+        ? Math.max(0, supernatural.spawnDryMonths + 1) : fallback + 1;
+    } else supernatural.spawnDryMonths = 0;
+    var chance = count ? 0.008
+      : Math.min(0.16, SPAWN_CHANCE + supernatural.spawnDryMonths * 0.004);
+    var persistent = !count && state.totalMonths >= 72;
+    if (!persistent && Math.random() > chance) return;
     var candidates = validHostCandidates(state);
     if (!candidates.length) return;
     var target = selectHostTarget(state, candidates);
     if (target && possessTarget(state, target)) {
-      var rel = hostRelation(state, { hostId: target.id });
+      supernatural.spawnDryMonths = 0;
       if (supernatural.playerAwareness >= 50) {
         Game.lifeDirector.addLog(state, '不祥之兆', '直觉告诉你，' + target.name + '似乎有什么与往日不同。', 'warning');
       }
@@ -509,6 +518,10 @@
         corruptFamilyInRedLight(state, specter);
         feedOnVictim(state, specter);
       }
+    }
+
+    if (state.totalMonths >= 72 && supernatural.specters.length === 0) {
+      trySpawnSpecter(state);
     }
 
     if (supernatural.specters.length > 0) {

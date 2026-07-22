@@ -49,6 +49,7 @@
     Game.familyEvents?.monthly(state);
     Game.magicalGirlSystem?.monthly(state);
     Game.cradleInstitution?.monthly(state);
+    Game.cradleNetwork?.monthly(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

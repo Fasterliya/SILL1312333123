@@ -39,6 +39,7 @@
   <link rel="stylesheet" href="./styles/welfare-career.css">
   <link rel="stylesheet" href="./styles/vtuber-career.css">
   <link rel="stylesheet" href="./styles/coser-career.css">
+  <link rel="stylesheet" href="./styles/cradle-network.css">
   <script src="./config.js" defer></script>
   <script src="./scripts/data/special-characters.js" defer></script>
   <script src="./scripts/data/name-catalog.js" defer></script>
@@ -199,12 +200,14 @@
   <script src="./scripts/features/npc-initiative-view.js" defer></script>
   <script src="./scripts/features/npc-initiative.js" defer></script>
   <script src="./scripts/features/supernatural-specter.js" defer></script>
+  <script src="./scripts/features/specter-hunt-balance.js" defer></script>
   <script src="./scripts/features/specter-ecology.js" defer></script>
   <script src="./scripts/features/specter-host-recovery.js" defer></script>
   <script src="./scripts/features/magical-girl-core.js" defer></script>
   <script src="./scripts/features/magical-girl-contract.js" defer></script>
   <script src="./scripts/features/magical-girl-system.js" defer></script>
   <script src="./scripts/features/cradle-institution.js" defer></script>
+  <script src="./scripts/features/cradle-network.js" defer></script>
   <script src="./scripts/features/family-events.js" defer></script>
   <script src="./scripts/features/adoption-system.js" defer></script>
   <script src="./scripts/features/rape-encounter.js" defer></script>
@@ -366,6 +369,7 @@
           <button data-open-module="statusSubpage" data-module-title="状态与风险"><b>险</b><span><strong>状态与风险</strong><small>心理、犯罪记录与NPC主动事件</small></span><i>›</i></button>
           <button data-open-module="citySubpage" data-module-title="迁居"><b>迁</b><span><strong>迁居</strong><small>前往其他城市寻找不同机会</small></span><i>›</i></button>
           <button data-open-module="governmentSubpage" data-module-title="市政府"><b>政</b><span><strong>市政府</strong><small>户口迁移、登记姓名与当地文化</small></span><i>›</i></button>
+          <button id="cradleNetworkEntry" hidden data-open-module="cradleNetworkSubpage" data-module-title="摇篮总部"><b>篮</b><span><strong>摇篮</strong><small>全华夏监禁任务册与改造进度</small></span><i>›</i></button>
           <button data-open-module="travelSubpage" data-module-title="街区旅途"><b>游</b><span><strong>街区旅途</strong><small>上街探索，一次遇到三位新角色</small></span><i>›</i></button>
           <button data-open-module="journeySubpage" data-module-title="国际旅途"><b>旅</b><span><strong>国际旅途</strong><small>汇率、文化适应与多阶段社交</small></span><i>›</i></button>
         </div>
@@ -476,6 +480,10 @@
       <div class="module-view" id="governmentSubpage"><section class="panel">
         <div class="panel-title"><h2>市政府</h2><span>户籍与姓名登记</span></div>
         <div id="governmentPanel"></div>
+      </section></div>
+      <div class="module-view" id="cradleNetworkSubpage"><section class="panel cradle-network-page">
+        <div class="panel-title"><h2>摇篮组织 · 上海总部</h2><span>全华夏任务档案</span></div>
+        <div id="cradleNetworkPanel"></div>
       </section></div>
       <div class="module-view" id="travelSubpage"><section class="panel">
         <div class="panel-title"><h2>街区旅途</h2><span>自由探索</span></div>

@@ -90,9 +90,7 @@
       }
     }
     if (guardian?.player) {
-      if (guardian.consumeMagic !== false) {
-        state.magicalGirl.magicPower = Math.max(0, state.magicalGirl.magicPower - 6);
-      }
+      if (guardian.consumeMagic !== false) state.magicalGirl.magicPower = Math.max(0, state.magicalGirl.magicPower - 6);
       Game.magicalGirlCore?.onKill(state);
     }
     Game.lifeDirector.addLog(state, '魔法少女狩猎',
@@ -102,6 +100,7 @@
     return true;
   }
   function intercept(state, specter, victim) {
+    if (!Game.specterHuntBalance?.canIntercept(specter)) return false;
     var guards = protectors(state, specter);
     if (!guards.length) return false;
     var chance = Math.min(0.82, 0.38 + guards.length * 0.1);
@@ -175,7 +174,8 @@
       return rank[b.stage] - rank[a.stage];
     })[0];
     var guards = protectors(state, target);
-    if (!guards.length || Math.random() > Math.min(0.58, 0.16 + guards.length * 0.1)) return;
+    if (!guards.length || !Game.specterHuntBalance?.track(state, target, guards.length).ready) return;
+    if (Math.random() > Math.min(0.34, 0.08 + guards.length * 0.06)) return;
     state.supernatural.lastGuardianHuntMonth = state.totalMonths;
     var guardian = guards[Math.floor(Math.random() * guards.length)];
     target.exposed = true;
@@ -187,7 +187,6 @@
       target.lastFeedMonth = state.totalMonths;
     }
   }
-
   Game.specterEcology = Object.freeze({
     ensureSpecter: ensureSpecter,
     recordPossession: recordPossession,

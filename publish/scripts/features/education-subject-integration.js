@@ -11,8 +11,9 @@
     const hours = U.clamp(Number(data.studyHours) || 0, 0, 200);
     const aptitude = U.clamp(Number(data.aptitude) || 0, 0, 100);
     const burnout = U.clamp(Number(state.education.burnout) || 0, 0, 100);
-    return U.clamp(Math.sqrt(hours / 200) * 60 + aptitude * 0.2
-      + Game.characterAttributes.playerValue(state, '学识') * 0.25 - burnout * 0.15, 0, 100);
+    const technique = U.clamp(Number(state.education.examTechnique) || 20, 0, 100);
+    return U.clamp(Math.sqrt(hours / 200) * 85 + aptitude * 0.1
+      + technique * 0.05 - burnout * 0.08, 0, 100);
   }
 
   function readiness(state) {
@@ -42,9 +43,6 @@
     }[state.education.schoolStage] || 0.05;
     const difficulty = paper?.penalty ?? stageDifficulty;
     const debuff = U.clamp(Number(state.education._examDebuff) || 0, 0, 0.3);
-    const learningRate = Game.learningAttribute.examRate(
-      Game.characterAttributes.playerValue(state, '学识'),
-    );
     const scores = {};
     Object.entries(subjects).forEach(([subject, cap]) => {
       const data = state.education.subjects[subject] || { studyHours: 0, aptitude: 40 };
@@ -56,9 +54,9 @@
       const school = Game.schoolLines.cityResource(state.location.city) / 100;
       const technique = U.clamp(Number(state.education.examTechnique) || 20, 0, 100) / 100;
       const random = (U.between(-10, 10) + U.between(-8, 8)) / 200;
-      const rate = U.clamp(0.17 + knowledge * 0.38 + aptitude * 0.14
-        + learningRate + condition + school * 0.05
-        + technique * 0.04 - debuff - difficulty + random, 0.15, 0.95);
+      const rate = U.clamp(0.34 + knowledge * 0.58 + aptitude * 0.03
+        + condition + school * 0.02 + technique * 0.03
+        - debuff - difficulty * 0.25 + random, 0.15, 0.98);
       scores[subject] = U.clamp(Math.round(cap * rate), 0, cap);
     });
     const total = Object.values(scores).reduce((sum, value) => sum + value, 0);
@@ -133,13 +131,14 @@
     const knowledge = Math.sqrt(U.clamp(Number(data.studyHours) || 0, 0, 200) / 200);
     const aptitude = U.clamp(Number(data.aptitude) || 40, 0, 100) / 100;
     const school = Game.schoolLines.cityResource(state.location.city) / 100;
-    const learningRate = Game.learningAttribute.examRate(
-      Game.characterAttributes.playerValue(state, '学识'),
-    );
-    const base = U.clamp(0.17 + knowledge * 0.38 + aptitude * 0.14
-      + learningRate + school * 0.05 - 0.05, 0.15, 0.9);
-    return [Math.round(cap * U.clamp(base - 0.07, 0.15, 0.95)),
-      Math.round(cap * U.clamp(base + 0.07, 0.15, 0.95))];
+    const condition = (state.stats.健康 || 0) / 100 * 0.03
+      + (state.stats.心情 || 0) / 100 * 0.025
+      + U.clamp((state.health.sleep || 7) / 8, 0.5, 1.1) * 0.025;
+    const technique = U.clamp(Number(state.education.examTechnique) || 20, 0, 100) / 100;
+    const base = U.clamp(0.34 + knowledge * 0.58 + aptitude * 0.03
+      + condition + school * 0.02 + technique * 0.03 - 0.02, 0.15, 0.98);
+    return [Math.round(cap * U.clamp(base - 0.04, 0.15, 0.98)),
+      Math.round(cap * U.clamp(base + 0.04, 0.15, 0.98))];
   }
 
   function render(state) {

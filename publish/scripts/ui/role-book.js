@@ -64,7 +64,11 @@
     const reachable = person.isPlayerRecord || person.phoneUnlocked || person.school === state.education.school
       || Game.people.isExternal(state, person) || state.family.some((item) => item.id === person.id);
     const place = person.currentCity || person.careerCity || person.homeCity || '去向未明';
-    const special = person.specterPossessed ? '幽诡寄生' : (cradle ? '摇篮收容中' : '');
+    const possessedAge = Number.isFinite(person.specterPossessedAtAge)
+      ? `${person.specterPossessedAtAge}岁时被寄生` : '';
+    const special = person.specterPossessed
+      ? ['幽诡寄生', possessedAge].filter(Boolean).join(' · ')
+      : (cradle ? '摇篮收容中' : '');
     const status = person.isPlayerRecord ? '当前囚禁档案'
       : (person.status === '已故' ? '已故 · 纪念档案'
       : (reachable ? '可联系' : (local ? '同城，可尝试重逢' : '未留联系方式')));

@@ -46,6 +46,7 @@
       s.victims = Array.isArray(s.victims) ? s.victims : [];
       s.alertLevel = Math.max(0, Math.min(100, Number(s.alertLevel) || 0));
       s.hp = Number.isFinite(s.hp) ? s.hp : specterHpByType(s.type);
+      Game.specterEcology?.ensureSpecter(state, s);
     });
     current.playerAwareness = Math.max(0, Math.min(100, Number(current.playerAwareness) || 0));
     current.spiritCorruption = Math.max(0, Math.min(100, Number(current.spiritCorruption) || 0));
@@ -123,7 +124,7 @@
     return pool[0] || null;
   }
 
-  function possessTarget(state, person) {
+  function possessTarget(state, person, origin) {
     if (!person) return false;
     person.specterPossessed = true;
     person.specterOrigin = '';
@@ -146,8 +147,11 @@
       victims: [],
       alertLevel: 0,
       hp: specterHpByType(type),
+      parentHostId: origin && origin.sourceHostId || '',
+      generation: Math.max(1, Number(origin && origin.generation) || 1),
     };
     state.supernatural.specters.push(specter);
+    Game.specterEcology?.recordPossession(state, person, specter);
     if (!person.psychology || typeof person.psychology !== 'object') person.psychology = {};
     person.psychology.sexAddiction = U.between(65, 85);
     person.psychology.corruption = U.between(55, 75);
@@ -349,28 +353,7 @@
   }
 
   function feedOnVictim(state, specter) {
-    if (specter.stage !== '掠食') return;
-    if (state.totalMonths - specter.lastFeedMonth < U.between(2, 4)) return;
-    if (Math.random() > 0.14) return;
-
-    var candidates = validHostCandidates(state).filter(function (p) {
-      return !p.specterPossessed;
-    });
-    if (!candidates.length) return;
-
-    var victim = candidates[Math.floor(Math.random() * candidates.length)];
-    victim.status = '失踪';
-    victim.deceasedAt = state.totalMonths;
-    specter.victims.push(victim.id);
-    specter.lastFeedMonth = state.totalMonths;
-    if (victim.specterPossessed) return;
-
-    var isKnown = state.family.some(function (p) { return p.id === victim.id; })
-      || state.contacts.some(function (p) { return p.id === victim.id; });
-
-    if (isKnown && specter.exposed) {
-      Game.lifeDirector.addLog(state, '熟人失踪', victim.name + '突然音讯全无。你隐约知道这与' + (hostPerson(state, specter) || {}).name + '有关，却无法证明。', 'warning');
-    }
+    Game.specterEcology?.feed(state, specter);
   }
 
   function startCombat(state, specter) {
@@ -620,7 +603,11 @@
       var clueText = '';
       if (s.stage === '潜伏') clueText = '行为完全正常，毫无破绽';
       else if (s.stage === '显形') clueText = '体温偏低，夜晚行踪诡异，性欲异常旺盛';
-      else clueText = '皮相溃烂，已猎食 ' + s.victims.length + ' 名无辜者';
+      else {
+        var feeding = s.feeding && s.feeding.victimId
+          ? ' · 当前吞噬进度 ' + Math.round(s.feeding.progress || 0) + '%' : '';
+        clueText = '皮相溃烂，已猎食 ' + s.victims.length + ' 名无辜者' + feeding;
+      }
       var btn = s.exposed ? '' : '<button type="button" class="btn-small" data-specter-confront="' + s.hostId + '">当面质问</button>';
       return '<div class="specter-clue"><p><b>' + name + '</b> · ' + rel + ' · 阶段：' + stageText + '</p><p class="hint">' + clueText + '</p>' + btn + '</div>';
     }).join('');
@@ -636,5 +623,6 @@
     renderCombat: renderCombat,
     renderSpecterClues: renderSpecterClues,
     startCombat: startCombat,
+    possessTarget: possessTarget,
   });
 }(window));

@@ -15,7 +15,7 @@
     } else {
       html += '<div class="magical-actions" style="margin-top:10px;padding:12px;border:1px solid var(--ui-line, #d8d5c9);border-radius:6px;background:var(--ui-paper, #fffdf7)">'
         + '<h3 style="font-size:13px;font-weight:700;margin:0 0 6px;color:var(--ui-ink)">魔法少女行动</h3>'
-        + '<p style="font-size:10px;color:var(--ui-muted, #69736f);margin:0 0 10px">无薪水。力量来自猎杀。灵魂宝石每月自然消耗 2 点，击杀幽诡回复 5 点。</p>';
+        + '<p style="font-size:10px;color:var(--ui-muted, #69736f);margin:0 0 10px">无薪水。力量来自猎杀。你会自动巡夜保护本地居民，也可以主动追踪幽诡。灵魂宝石每月自然消耗 2 点。</p>';
 
       if (!mg.wish) {
         html += '<button type="button" data-mg-wish style="min-height:44px;padding:8px 12px;border:1px solid var(--ui-line);border-radius:6px;background:var(--ui-green-soft, #edf3ef);color:var(--ui-green, #315f58);font-size:11px;font-weight:750;width:100%;margin-bottom:8px">许下愿望</button>';
@@ -23,7 +23,9 @@
         html += '<p style="font-size:10px;margin:0 0 8px;color:var(--ui-muted);font-style:italic">愿望：「' + mg.wish + '」</p>';
       }
 
-      var specterCount = state.supernatural ? state.supernatural.specters.length : 0;
+      var specterCount = Game.specterEcology
+        ? Game.specterEcology.localSpecters(state).length
+        : (state.supernatural ? state.supernatural.specters.length : 0);
       var canPatrol = mg.magicPower > 0 && specterCount > 0;
       var patrolLabel = !mg.magicPower
         ? '魔力枯竭——无法巡逻'

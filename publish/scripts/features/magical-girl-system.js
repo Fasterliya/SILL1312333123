@@ -78,6 +78,7 @@
         state.timeSpeed = 0;
       }
     }
+    if (!state.pendingDecision) Game.specterEcology?.monthlyProtection(state);
   }
 
   function startPatrol(state) {
@@ -85,7 +86,9 @@
     if (!mg.active) return { ok: false, message: '你不是魔法少女' };
     if (mg.magicPower <= 0) return { ok: false, message: '魔力已枯竭，无法进行巡逻' };
     if (mg.activeMission) return { ok: false, message: '你已经在执行猎杀任务中' };
-    var specters = state.supernatural ? state.supernatural.specters : [];
+    var specters = Game.specterEcology
+      ? Game.specterEcology.localSpecters(state)
+      : (state.supernatural ? state.supernatural.specters : []);
     if (!specters.length) return { ok: false, message: '当前城市感知不到幽诡的气息' };
 
     var target = specters.find(function (s) { return s.exposed || state.supernatural.playerAwareness >= 30; }) || U.random(specters);
@@ -140,7 +143,7 @@
 
     if (choice.bonus) {
       mission.bonuses.atk = (mission.bonuses.atk || 0) + (choice.bonus.atk || 0);
-      mission.bonuses.awareness = (mission.bonuses.awareness || 0) + (choice.bonuses.awareness || 0);
+      mission.bonuses.awareness = (mission.bonuses.awareness || 0) + (choice.bonus.awareness || 0);
     }
 
     var resultText = choice.result.replace(/\{familiar\}/g, mg.familiar || '使魔').replace(/\{hostName\}/g, mission.hostName);

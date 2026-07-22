@@ -174,6 +174,11 @@
     if (Game.hookupSystem?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.idolSystem?.handleClick?.(event)) return;
     if (Game.familyConflict?.handleClick?.(event)) return;
+    if (Game.psychology?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.criminalSystem?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.welfareCareer?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.vtuberCareer?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.coserCareer?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.conventionCalendarInteractions?.handleClick?.(event)) return;
     if (Game.travelInteractions?.handleClick?.(event)) return;
     if (Game.portraitGallery.handleClick(event)) return;

@@ -31,6 +31,10 @@
     Game.relationshipConflict?.monthly(state);
     Game.criminalSystem?.monthly(state);
     Game.psychology?.monthly(state);
+    Game.mentalBreakdown?.monthly(state);
+    Game.welfareCareer?.welfareMonthly(state);
+    Game.vtuberCareer?.vtuberMonthly(state);
+    Game.coserCareer?.coserMonthly(state);
     Game.npcInitiative?.monthly(state);
     Game.taxSystem?.monthly(state);
     Game.bankSystem?.monthly(state);

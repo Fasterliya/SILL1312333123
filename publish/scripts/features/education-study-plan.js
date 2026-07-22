@@ -107,15 +107,22 @@
     }).slice(0, count);
   }
 
+  function studyEfficiency(state) {
+    const raw = Game.characterAttributes.personValue(state.profile, '学识');
+    return 0.8 + U.clamp((raw || 20) / 50, 0, 0.4);
+  }
+
   function applyMonth(state) {
     const plan = state.education.semesterPlan;
     if (!plan || plan.key !== termInfo(state).key || plan.lastAppliedMonth === state.totalMonths) return null;
     Game.subjectPanel.ensureSubjects(state);
+    const efficiency = studyEfficiency(state);
     let gained = 0;
     Groups.subjects(state).forEach((subject) => {
       const data = state.education.subjects[subject];
       const aptitudeBonus = data.aptitude >= 75 ? 1 : 0;
-      const gain = 2 + aptitudeBonus + Groups.allocationFor(state, plan.allocation, subject) * 5;
+      const allocation = Groups.allocationFor(state, plan.allocation, subject);
+      const gain = Math.round((2 + aptitudeBonus + allocation * 5) * efficiency);
       const previous = Number(data.studyHours) || 0;
       data.studyHours = Math.min(200, previous + gain);
       gained += data.studyHours - previous;
@@ -124,7 +131,7 @@
     weakestSubjects(state, 2).forEach((subject) => {
       const data = state.education.subjects[subject];
       const previous = data.studyHours;
-      data.studyHours = Math.min(200, previous + tutor * 4);
+      data.studyHours = Math.min(200, previous + Math.round(tutor * 4 * efficiency));
       gained += data.studyHours - previous;
     });
     const rest = plan.allocation.rest || 0;
@@ -138,7 +145,7 @@
     plan.lastAppliedMonth = state.totalMonths;
     plan.monthsExecuted = (plan.monthsExecuted || 0) + 1;
     plan.lastGain = gained;
-    return { gained };
+    return { gained, efficiency: Math.round(efficiency * 100) };
   }
 
   function resolve(state) {

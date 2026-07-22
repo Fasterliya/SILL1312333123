@@ -192,7 +192,7 @@
       femaleStamina: 100, femaleStaminaMax: 100, arousal: 0, orgasmCount: 0,
       climaxThreshold: 75, semenGauge: 0, maxSemen: 100,
       position: '正常位', positionsTried: [],
-      actionLog: [],
+      actionLog: [], _satisfaction: 0,
       isRape: false, victimResistance: 100, victimCorruption: 0, usedAphrodisiac: false, usedDrug: false,
     };
     return state.encounter;
@@ -292,6 +292,12 @@
         state.encounter.semenGauge + pos.semen + U.between(-3, 5));
     }
 
+    /* welfare姬 satisfaction tracking */
+    if (state.career?.jobId === 'welfare' && state.encounter.mode === 'hookup') {
+      var satisfyGain = { '正常位': 8, '后入位': 12, '骑乘位': 15, '侧卧位': 6, '口交': 18 }[posName] || 8;
+      state.encounter._satisfaction = (state.encounter._satisfaction || 0) + satisfyGain + U.between(-3, 5);
+    }
+
     if (state.encounter.isRape) {
       var dec = state.encounter.usedDrug ? U.between(20, 30) : (state.encounter.usedAphrodisiac ? U.between(12, 20) : U.between(8, 15));
       state.encounter.victimResistance = U.clamp(state.encounter.victimResistance - dec, 0, 100);
@@ -354,6 +360,17 @@
     } else if (enc.mode === 'hookup') {
       state.stats.心情 = U.clamp(state.stats.心情 + U.between(6, 14), 0, 100);
       state.career.burnout = U.clamp((state.career.burnout || 0) - 4, 0, 100);
+      if (state.career.jobId === 'welfare' && partner) {
+        Game.welfareCareer?.addRegularClient(state, partner.id || 'anonymous');
+        var satisfaction = (enc._satisfaction || 0);
+        var tipRate = Math.min(0.3, satisfaction / 100);
+        var tip = Math.round((partner.wealth ? partner.wealth * 0.00005 : 800) * (1 + tipRate));
+        state.money += tip;
+        if (satisfaction >= 80) {
+          Game.lifeDirector.addLog(state, '金主满意',
+            '金主对你的服务非常满意，额外留下了' + Game.view.money(tip) + '小费。', 'good');
+        }
+      }
     }
 
     /* pregnancy */

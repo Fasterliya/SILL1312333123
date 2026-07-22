@@ -1,0 +1,103 @@
+.coser-panel {
+  padding: 12px;
+  border: 1px solid #d5d0cc;
+  border-left: 4px solid #b88a35;
+  border-radius: 6px;
+  background: #fffaf4;
+}
+
+.coser-stats {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin: 8px 0;
+}
+
+.coser-stats div {
+  padding: 8px 7px; border: 1px solid #e8dfd2; border-radius: 4px; background: #fff;
+}
+
+.coser-stats span { display: block; color: #8a7a60; font-size: 8px; }
+.coser-stats strong { display: block; margin-top: 2px; color: #4a3820; font-size: 12px; font-weight: 750; }
+
+.coser-actions {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 8px;
+}
+
+.coser-actions button {
+  min-height: 40px; border: 1px solid #c9d5d1; border-radius: 5px;
+  background: #edf3ef; color: #315f58; font-size: 10px; font-weight: 750;
+}
+
+.coser-fold {
+  margin-top: 6px; border: 1px solid #e8dfd2; border-radius: 5px; background: #fff;
+}
+
+.coser-fold summary {
+  min-height: 44px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; font-size: 11px;
+}
+
+.coser-fold summary strong { color: #4a3820; }
+.coser-fold summary span { color: #8a7a60; font-size: 9px; }
+
+.coser-wardrobe-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding: 0 10px 8px;
+}
+
+.wardrobe-item {
+  padding: 8px; border: 1px solid #e8dfd2; border-radius: 4px; background: #faf8f4;
+}
+
+.wardrobe-item.active { border-color: #b88a35; background: #fff8e8; box-shadow: inset 0 0 0 1px #b88a35; }
+.wardrobe-item.worn { opacity: 0.7; }
+
+.wardrobe-item strong { display: block; color: #4a3820; font-size: 10px; overflow-wrap: anywhere; }
+.wardrobe-item small { display: block; color: #8a7a60; font-size: 8px; margin-top: 1px; }
+.wardrobe-item span { display: block; color: #b88a35; font-size: 8px; margin-top: 2px; font-weight: 750; }
+.wardrobe-item.worn span { color: #9a5961; }
+
+.wardrobe-actions { display: flex; gap: 4px; margin-top: 5px; }
+.wardrobe-actions button {
+  min-height: 24px; padding: 2px 8px; border: 1px solid #b88a35; border-radius: 3px;
+  background: #fff8e8; color: #6b4f1a; font-size: 9px;
+}
+
+.wardrobe-buy { padding: 0 10px 8px; }
+.wardrobe-buy button {
+  width: 100%; min-height: 36px; border: 1px dashed #b88a35; border-radius: 4px;
+  background: #fffdf5; color: #6b4f1a; font-size: 10px;
+}
+
+.contest-list { padding: 0 10px 8px; display: grid; gap: 4px; }
+
+.contest-row {
+  padding: 6px 8px; border-left: 3px solid #d5d0cc; background: #faf8f4;
+  border-radius: 0 4px 4px 0;
+}
+
+.contest-row.win { border-left-color: #b88a35; background: #fff8e8; }
+
+.contest-row span { display: block; color: #6b4f1a; font-size: 10px; font-weight: 750; }
+.contest-row strong { display: block; color: #4a3820; font-size: 11px; margin-top: 2px; }
+.contest-row small { display: block; color: #8a7a60; font-size: 9px; margin-top: 1px; }
+
+@media (max-width: 420px) {
+  .coser-wardrobe-grid { grid-template-columns: 1fr; }
+  .coser-actions { grid-template-columns: 1fr 1fr; }
+  .coser-buy-grid { grid-template-columns: 1fr; }
+}
+
+.coser-buy-panel h4 { margin: 0 0 8px; color: #4a3820; font-size: 13px; }
+
+.coser-buy-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px;
+}
+
+.buy-item {
+  padding: 10px; border: 1px solid #e8dfd2; border-radius: 5px;
+  background: #fff; cursor: pointer;
+}
+
+.buy-item.locked { opacity: 0.4; cursor: default; }
+
+.buy-item strong { display: block; color: #4a3820; font-size: 11px; overflow-wrap: anywhere; }
+.buy-item small { display: block; color: #8a7a60; font-size: 9px; margin-top: 3px; }
+.buy-item b { display: block; margin-top: 5px; color: #b88a35; font-size: 12px; font-weight: 800; }

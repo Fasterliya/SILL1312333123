@@ -4,7 +4,7 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const LOW_THRESHOLD = new Set([
     'idoltrainee', 'idol-underground', 'welfare', 'coser', 'vtuber',
-    'beautyblog', 'prostitute',
+    'fashionblog', 'prostitute',
   ]);
 
   function hash(value) {

@@ -13,6 +13,9 @@
     p.withdrawalMonths = Number.isFinite(p.withdrawalMonths) ? p.withdrawalMonths : 0;
     p.guilt = U.clamp(Number(p.guilt) || 0, 0, 100);
     p.corruption = U.clamp(Number(p.corruption) || 0, 0, 100);
+    p.trauma = U.clamp(Number(p.trauma) || 0, 0, 100);
+    p.breakdowns = Array.isArray(p.breakdowns) ? p.breakdowns.slice(-8) : [];
+    p.lastTraumaMonth = Number.isFinite(p.lastTraumaMonth) ? p.lastTraumaMonth : -1;
     return p;
   }
 
@@ -46,6 +49,24 @@
   function addCorruption(state, amount) {
     ensure(state);
     state.psychology.corruption = U.clamp(state.psychology.corruption + amount, 0, 100);
+  }
+
+  function addTrauma(state, amount, source) {
+    ensure(state);
+    state.psychology.trauma = U.clamp(state.psychology.trauma + amount, 0, 100);
+    state.psychology.lastTraumaMonth = state.totalMonths;
+    if (amount >= 10) {
+      Game.lifeDirector.addLog(state, '心理创伤',
+        (source || '近期经历') + '在你心中留下了深深的伤痕。', 'normal');
+      Game.stressSystem.add(state, Math.round(amount * 1.5), '心理创伤');
+    }
+  }
+
+  function reduceTrauma(state, amount, method) {
+    ensure(state);
+    state.psychology.trauma = U.clamp(state.psychology.trauma - amount, 0, 100);
+    Game.lifeDirector.addLog(state, '创伤愈合',
+      (method || '时间') + '让伤口开始慢慢愈合。', 'good');
   }
 
   /* ---- rehab ---- */
@@ -194,6 +215,47 @@
       }
     }
 
+    /* player trauma effects */
+    if (p.trauma >= 90) {
+      state.stats.智力 = U.clamp(state.stats.智力 - 15, 0, 100);
+      if (!state.pendingDecision && Math.random() < 0.06) {
+        state.pendingDecision = { type: 'psychology', subtype: 'playerSuicidal' };
+        Game.lifeDirector.addLog(state, '深渊边缘',
+          '你站在阳台边，看着下面的街道。跳下去就都结束了，不是吗？', 'milestone');
+      }
+    } else if (p.trauma >= 70) {
+      state.stats.魅力 = U.clamp(state.stats.魅力 - 10, 0, 100);
+      state.stats.交涉 = U.clamp(state.stats.交涉 - 8, 0, 100);
+      if (state.month === 1) {
+        Game.lifeDirector.addLog(state, 'PTSD症状',
+          '即使是日常的场景，也会突然把你拉回那个时刻。手心出汗，呼吸急促。', 'normal');
+      }
+    } else if (p.trauma >= 45) {
+      state.stats.交涉 = U.clamp(state.stats.交涉 - 5, 0, 100);
+      if (Math.random() < 0.08) {
+        Game.stressSystem.add(state, 4, 'PTSD闪回');
+        Game.lifeDirector.addLog(state, '闪回',
+          '毫无预兆的，那段记忆又浮现在眼前。你的身体不受控制地颤抖起来。', 'normal');
+      }
+    } else if (p.trauma >= 20) {
+      if (state.month === 6 && Math.random() < 0.5) {
+        Game.lifeDirector.addLog(state, '隐隐作痛',
+          '有些事情虽然过去了，但留下的痕迹不会轻易消失。你偶尔仍会想起那段经历。', 'normal');
+      }
+    }
+
+    /* player trauma natural decay */
+    if (p.trauma > 0) {
+      var decayRate = p.trauma >= 60 ? 0.6 : p.trauma >= 30 ? 0.8 : 1.0;
+      var hasSupport = state.romance.married || (state.family || []).some(function (f) {
+        return (f.relation === '朋友' || f.relation === '恋人') && (f.affection || 0) >= 70;
+      });
+      if (hasSupport) decayRate *= 1.4;
+      var monthsSinceTrauma = state.totalMonths - (p.lastTraumaMonth || state.totalMonths);
+      if (monthsSinceTrauma >= 6) decayRate *= 1.3;
+      p.trauma = Math.max(0, p.trauma - decayRate);
+    }
+
     /* NPC monthly processing */
     const allPeople = Game.people ? Game.people.all(state) : [];
     allPeople.forEach((npc) => {
@@ -237,6 +299,9 @@
     }
     if (d.subtype === 'suicideCall') {
       return resolveSuicideCall(state, choiceId);
+    }
+    if (d.subtype === 'playerSuicidal') {
+      return resolvePlayerSuicidal(state, choiceId);
     }
     return { ok: false, message: '未知的心理决策类型' };
   }
@@ -321,6 +386,47 @@
     return { ok: false, message: '无效的选择' };
   }
 
+  function resolvePlayerSuicidal(state, choiceId) {
+    var p = ensure(state);
+    if (choiceId === 'call_hotline') {
+      p.trauma = U.clamp(p.trauma - 35, 0, 100);
+      Game.stressSystem.reduce(state, 40, '心理咨询热线');
+      Game.lifeDirector.addLog(state, '求救',
+        '你颤抖着拨通了热线电话。对面的声音温柔而坚定，陪你度过了最难熬的两个小时。', 'milestone');
+      state.pendingDecision = null;
+      return { ok: true, message: '热线救了你。创伤大幅减轻。' };
+    }
+    if (choiceId === 'reach_out') {
+      var supporter = (state.family || []).find(function (f) {
+        return (f.affection || 0) >= 60 && (f.relation === '朋友' || f.relation === '恋人');
+      });
+      if (supporter) {
+        p.trauma = U.clamp(p.trauma - 25, 0, 100);
+        Game.stressSystem.reduce(state, 25, '朋友支持');
+        supporter.affection = U.clamp((supporter.affection || 0) + 8, 0, 100);
+        Game.lifeDirector.addLog(state, '倾诉',
+          supporter.name + '听你说完了一切，什么都没说，只是紧紧地抱住了你。', 'milestone');
+        state.pendingDecision = null;
+        return { ok: true, message: '朋友的陪伴让你重新看到了希望。' };
+      }
+      p.trauma = U.clamp(p.trauma - 8, 0, 100);
+      Game.lifeDirector.addLog(state, '独白',
+        '你对着空荡荡的房间说了很久。没有人回应，但说出来本身就已经是一种释放。', 'normal');
+      state.pendingDecision = null;
+      return { ok: true, message: '说出来让你稍微好受了一些。' };
+    }
+    if (choiceId === 'shut_down') {
+      p.trauma = U.clamp(p.trauma + 8, 0, 100);
+      Game.stressSystem.add(state, 20, '自我封闭');
+      state.stats.心情 = U.clamp((state.stats.心情 || 0) - 25, 0, 100);
+      Game.lifeDirector.addLog(state, '封闭',
+        '你把自己锁在房间里，拉上所有窗帘。黑暗中，只有自己的呼吸声。', 'normal');
+      state.pendingDecision = null;
+      return { ok: true, message: '你选择独自承受。黑暗暂时给了你安全感，但阴影仍在加深。' };
+    }
+    return { ok: false, message: '无效的选择' };
+  }
+
   /* ---- decision render ---- */
   function renderDecision(state) {
     const d = state.pendingDecision;
@@ -347,6 +453,18 @@
           { value: 'save', label: '立即赶过去 · 60%成功挽救' },
           { value: 'family', label: '通知其家人 · 40%成功介入' },
           { value: 'ignore', label: '忽略这个电话 · 愧疚+40' },
+        ],
+      };
+    }
+
+    if (d.subtype === 'playerSuicidal') {
+      return {
+        title: '深渊边缘',
+        text: '你已经很久没有真正笑过了。每一天醒来都是一场战斗。站在高处往下看的时候，跳下去的想法越来越清晰、越来越诱人。',
+        options: [
+          { value: 'call_hotline', label: '拨打心理援助热线 · 创伤-35，压力-40' },
+          { value: 'reach_out', label: '联系最亲近的人 · 创伤-25，需要好感≥60的朋友' },
+          { value: 'shut_down', label: '独自承受 · 创伤+8，压力+20' },
         ],
       };
     }
@@ -381,6 +499,9 @@
     const corruptionLevel = p.corruption < 30 ? '纯净'
       : (p.corruption < 50 ? '微妙'
       : (p.corruption < 80 ? '堕落' : '黑暗'));
+    const traumaLevel = p.trauma < 20 ? '平稳'
+      : (p.trauma < 45 ? '轻微创伤'
+      : (p.trauma < 70 ? '中度PTSD' : (p.trauma < 90 ? '重度PTSD' : '崩溃边缘')));
 
     const rehabCost = (() => {
       const countryCost = { '华夏': 5000, '日本': 8000, '美国': 15000, '新加坡': 12000 };
@@ -399,8 +520,12 @@
       </div>`
       : '';
 
+    const traumaBtn = p.trauma >= 30
+      ? `<button class="wide-action" data-psych-action="trauma-therapy">接受心理咨询 · ${Game.view.money(3000)}</button>`
+      : '';
+
     return `<section class="panel">
-      <div class="panel-title"><h2>心理状态</h2><span>成瘾 · 愧疚 · 腐化</span></div>
+      <div class="panel-title"><h2>心理状态</h2><span>成瘾 · 愧疚 · 腐化 · 创伤</span></div>
       ${barHtml(p.sexAddiction, sexLevel, '性瘾',
         p.sexAddiction >= 85 ? '性瘾已失控，生活和工作全面崩坏'
         : (p.sexAddiction >= 70 ? '性瘾严重，偶尔不受控制前往红灯区'
@@ -413,6 +538,12 @@
       ${barHtml(p.corruption, corruptionLevel, '腐化',
         p.corruption >= 80 ? '黑暗的气息让周围人感到不安'
         : (p.corruption > 50 ? '普通的亲密已无法让你感到兴奋' : ''))}
+      ${barHtml(p.trauma, traumaLevel, '创伤',
+        p.trauma >= 90 ? '你站在深渊边缘，每时每刻都在与自杀念头搏斗'
+        : (p.trauma >= 70 ? '严重的PTSD症状：闪回、噩梦、社交回避'
+        : (p.trauma >= 45 ? '中度创伤反应：对特定场景的强烈焦虑'
+        : (p.trauma >= 20 ? '轻微创伤，偶尔的情绪波动和不安' : ''))))}
+      ${traumaBtn}
     </section>`;
   }
 
@@ -437,11 +568,26 @@
       Game.view.showToast(result.message, result.ok ? 'good' : 'warning');
       return true;
     }
+    if (action === 'trauma-therapy') {
+      if (state.money < 3000) {
+        Game.view.showToast('心理咨询需要3000元', 'warning');
+        return true;
+      }
+      Game.economy.spend(state, 3000);
+      var reduction = 15 + Math.floor(Math.random() * 11);
+      state.psychology.trauma = U.clamp(state.psychology.trauma - reduction, 0, 100);
+      Game.stressSystem.reduce(state, 15, '心理咨询');
+      Game.lifeDirector.addLog(state, '心理咨询',
+        '咨询师没有评判你，只是安静地倾听。当你说出那些埋藏已久的话时，眼泪终于流了下来。', 'good');
+      Game._refresh();
+      Game.view.showToast('创伤减轻' + reduction + '点，压力缓解', 'good');
+      return true;
+    }
     return false;
   }
 
   Game.psychology = Object.freeze({
-    ensure, addAddiction, addGuilt, addCorruption,
+    ensure, addAddiction, addGuilt, addCorruption, addTrauma, reduceTrauma,
     monthly, rehab, reduceGuilt, npcSexAddictionText,
     render, renderDecision, resolve, handleClick,
   });

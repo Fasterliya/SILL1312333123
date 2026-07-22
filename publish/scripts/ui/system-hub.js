@@ -17,8 +17,26 @@
   function renderStatus(state) {
     return (Game.stressSystem?.render(state) || '')
       + (Game.psychology?.render(state) || '')
+      + (Game.mentalBreakdown ? renderMentalBuffs(state) : '')
       + (Game.criminalSystem?.render(state) || '')
       + npcSettings(state);
+  }
+
+  function renderMentalBuffs(state) {
+    var m = Game.mentalBreakdown.ensure(state);
+    if (!m.recoveryBuffs.length && !m.breakdownCount) return '';
+    var buffs = m.recoveryBuffs.map(function (b) {
+      var cls = b.effect && (b.effect.negotiation < 0 || b.effect.social < 0 || b.effect.health < 0) ? ' negative' : '';
+      var desc = b.effect ? Object.entries(b.effect).map(function (pair) {
+        return (pair[1] < 0 ? '' : '+') + pair[1] + ' ' + pair[0];
+      }).join(' · ') : '';
+      return '<div class="mental-buff' + cls + '">' + b.name
+        + '<span>剩余' + b.months + '个月' + (desc ? ' · ' + desc : '') + '</span></div>';
+    }).join('');
+    return '<section class="panel mental-breakdown-panel"><div class="panel-title"><h2>精神状态</h2>'
+      + '<span>崩坏' + m.breakdownCount + '次 · 阈值' + m.breakdownThreshold + '</span></div>'
+      + (buffs ? '<div class="mental-buff-list">' + buffs + '</div>' : '')
+      + '</section>';
   }
 
   function renderFinance(state) {

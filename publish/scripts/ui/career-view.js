@@ -33,7 +33,34 @@
     if (Game.economicCareerPanels?.supports(state)) {
       return Game.economicCareerPanels.routePanel(state, money);
     }
-    // Route to career panels if available
+    /* welfare姬 — standalone */
+    if (state.career.jobId === 'welfare' && Game.welfareCareer) {
+      var wHtml = Game.welfareCareer.render(state);
+      if (wHtml) return '<section class="career-panel">' + wHtml + '</section>';
+    }
+    /* vtuber — standalone */
+    if (state.career.jobId === 'vtuber') {
+      if (!Game.vtuberCareer) return '<section class="career-panel"><p class="empty-state">虚拟主播系统未加载。</p></section>';
+      try {
+        var vHtml = Game.vtuberCareer.render(state);
+        if (vHtml) return '<section class="career-panel">' + vHtml + '</section>';
+        return '<section class="career-panel"><p class="empty-state">vtuber render返回空。</p></section>';
+      } catch (e) {
+        return '<section class="career-panel"><p class="empty-state">vtuber错误: ' + (e.message||'') + '</p></section>';
+      }
+    }
+    /* coser — standalone */
+    if (state.career.jobId === 'coser') {
+      if (!Game.coserCareer) return '<section class="career-panel"><p class="empty-state">Coser系统未加载。</p></section>';
+      try {
+        var cHtml = Game.coserCareer.render(state);
+        if (cHtml) return '<section class="career-panel">' + cHtml + '</section>';
+        return '<section class="career-panel"><p class="empty-state">coser render返回空。</p></section>';
+      } catch (e) {
+        return '<section class="career-panel"><p class="empty-state">coser错误: ' + (e.message||'') + '</p></section>';
+      }
+    }
+    /* Route to career panels */
     if (Game.careerPanels) return Game.careerPanels.routePanel(state, money);
 
     // Fallback: original logic

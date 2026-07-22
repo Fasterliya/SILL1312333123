@@ -1,0 +1,382 @@
+.welfare-panel {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #dfd2d6;
+  border-left: 4px solid #a33b56;
+  border-radius: 6px;
+  background: #fbf6f7;
+}
+
+.welfare-panel .panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.welfare-panel .panel-title h2 {
+  margin: 0;
+  font-size: 13px;
+  color: #5a3440;
+}
+
+.welfare-tiers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.welfare-tier {
+  padding: 8px 6px;
+  border: 1px solid #e0cfd4;
+  border-radius: 5px;
+  text-align: center;
+  background: #fff;
+  opacity: 0.6;
+}
+
+.welfare-tier.active {
+  border-color: #a33b56;
+  background: #fdf2f5;
+  opacity: 1;
+  box-shadow: inset 0 0 0 1px #a33b56;
+}
+
+.welfare-tier strong {
+  display: block;
+  color: #5a3440;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.welfare-tier small {
+  display: block;
+  margin-top: 2px;
+  color: #8a6a73;
+  font-size: 8px;
+}
+
+.welfare-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.welfare-stats div {
+  padding: 7px;
+  border: 1px solid #e8dbdf;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.welfare-stats span {
+  display: block;
+  color: #8a7278;
+  font-size: 8px;
+}
+
+.welfare-stats strong {
+  display: block;
+  margin-top: 2px;
+  color: #5a3440;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.welfare-clients {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid #e8dbdf;
+}
+
+.welfare-clients h4,
+.welfare-fans h4 {
+  margin: 0 0 5px;
+  color: #6b4a55;
+  font-size: 11px;
+}
+
+.welfare-client {
+  padding: 5px 7px;
+  border-bottom: 1px solid #ece0e4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.welfare-client span {
+  color: #4a353b;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.welfare-client small {
+  color: #8a7278;
+  font-size: 9px;
+}
+
+.welfare-fans {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid #e8dbdf;
+}
+
+.fan-breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+.fan-breakdown span {
+  padding: 5px 7px;
+  background: #fff;
+  border-radius: 3px;
+  color: #6b4a55;
+  font-size: 10px;
+}
+
+.fan-breakdown b {
+  float: right;
+  font-weight: 800;
+}
+
+.welfare-outfits {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid #e8dbdf;
+}
+
+.welfare-outfits > span {
+  display: block;
+  margin-bottom: 5px;
+  color: #6b4a55;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.outfit-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.outfit-buttons button {
+  min-height: 52px;
+  padding: 7px 8px;
+  border: 1px solid #e0cfd4;
+  border-radius: 5px;
+  background: #fff;
+  text-align: left;
+}
+
+.outfit-buttons button.active {
+  border-color: #a33b56;
+  background: #fdf2f5;
+  box-shadow: inset 0 0 0 1px #a33b56;
+}
+
+.outfit-buttons button strong {
+  display: block;
+  color: #5a3440;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.outfit-buttons button small {
+  display: block;
+  margin-top: 2px;
+  color: #8a6a73;
+  font-size: 9px;
+}
+
+.outfit-current {
+  display: block;
+  margin-top: 4px;
+  color: #a33b56;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.welfare-kept {
+  padding: 9px;
+  border: 1px solid #cfc6ae;
+  border-left: 4px solid #a77a22;
+  border-radius: 5px;
+  background: #fffaf0;
+  margin-bottom: 8px;
+}
+
+.welfare-kept strong {
+  display: block;
+  color: #6b4f1a;
+  font-size: 12px;
+}
+
+.welfare-kept span {
+  display: block;
+  margin-top: 3px;
+  color: #493b24;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.welfare-kept small {
+  display: block;
+  margin-top: 4px;
+  color: #8a7340;
+  font-size: 9px;
+}
+
+.kept-btn {
+  float: right;
+  min-height: 22px;
+  padding: 2px 7px;
+  border: 1px solid #a77a22;
+  border-radius: 3px;
+  background: #fffaf0;
+  color: #6b4f1a;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+@media (max-width: 420px) {
+  .welfare-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .fan-breakdown {
+    grid-template-columns: 1fr;
+  }
+
+  .outfit-buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.welfare-creator-actions {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e8dbdf;
+}
+
+.creator-title {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.creator-title span {
+  display: block;
+  margin-bottom: 3px;
+  color: #6b4a55;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.creator-title input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #e0cfd4;
+  border-radius: 4px;
+  background: #fff;
+  color: #5a3440;
+  font-size: 11px;
+  box-sizing: border-box;
+}
+
+.welfare-action-btns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.welfare-action-btns button {
+  min-height: 40px;
+  border: 1px solid #c9d5d1;
+  border-radius: 5px;
+  background: #edf3ef;
+  color: #315f58;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.welfare-action-btns button:disabled {
+  opacity: 0.4;
+  background: #e8e3e4;
+  color: #8a6a73;
+  border-color: #ddd3d6;
+}
+
+.welfare-creator-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.welfare-creator-metrics span {
+  padding: 5px 4px;
+  text-align: center;
+  background: #fff;
+  border-radius: 3px;
+  color: #6b4a55;
+  font-size: 8px;
+}
+
+.welfare-creator-metrics b {
+  display: block;
+  margin-top: 2px;
+  color: #5a3440;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.welfare-hookup {
+  padding: 12px;
+  border: 1px solid #dfd2d6;
+  border-left: 4px solid #a33b56;
+  border-radius: 6px;
+  background: #fbf6f7;
+  margin-bottom: 10px;
+}
+
+.welfare-hookup .panel-title {
+  margin-bottom: 6px;
+}
+
+.welfare-hookup .panel-title h3 {
+  margin: 0;
+  color: #a33b56;
+  font-size: 13px;
+}
+
+.welfare-hookup p {
+  margin: 0 0 8px;
+  color: #5a3440;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.welfare-hookup-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.welfare-hookup-actions button {
+  min-height: 42px;
+  border: 1px solid #e0cfd4;
+  border-radius: 5px;
+  background: #fff;
+  color: #5a3440;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.welfare-hookup-actions button:first-child {
+  border-color: #a33b56;
+  background: #fdf2f5;
+  color: #a33b56;
+}

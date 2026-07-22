@@ -10,10 +10,12 @@
       Game.characterAttributes.personValue(person, '学识'),
     );
     const habit = Number(person.studyHabit) || 50;
+    const progress = Number(person.educationProgress) || 0;
+    const progressShield = U.clamp(progress / 300, 0, 0.4);
     const base = age < 18 ? 0.04 : 0.025;
-    const risk = base + Math.max(0, 52 - ability) * 0.004
-      + Math.max(0, 45 - habit) * 0.004;
-    return U.clamp(age >= 18 ? risk * 0.7 : risk, 0.02, age < 18 ? 0.3 : 0.18);
+    const risk = (base + Math.max(0, 56 - ability) * 0.0035
+      + Math.max(0, 48 - habit) * 0.0035) * (1 - progressShield);
+    return U.clamp(age >= 18 ? risk * 0.7 : risk, 0.015, age < 18 ? 0.28 : 0.16);
   }
 
   function maybeDropout(state, person, age, city) {
@@ -63,7 +65,7 @@
     if (job.id === 'idol' && young && charm > 60 && (person.fashion?.cosplayInterest || 0) > 30) return 150;
     if (job.id === 'coser' && cosplay) return 170;
     if (job.id === 'vtuber' && cute && young) return 130;
-    if (job.id === 'beautyblog' && charm > 55) return 120;
+    if (job.id === 'fashionblog' && charm > 55) return 120;
     return 100;
   }
 

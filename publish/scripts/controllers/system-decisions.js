@@ -15,6 +15,9 @@
     idolCareerPlan: () => Game.idolProjectDecisions,
     idolProjectSelect: () => Game.idolProjectDecisions,
     idolProjectReview: () => Game.idolProjectDecisions,
+    mental_breakdown: () => Game.mentalBreakdown,
+    stalking: () => Game.conventionRisk,
+    kept_proposal: () => Game.welfareCareer,
   };
 
   function content(state) {

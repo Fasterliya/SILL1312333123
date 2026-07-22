@@ -1,0 +1,309 @@
+.stress-panel {
+  border-left: 4px solid #cf6d3c;
+  background: #fffbf7;
+  margin-top: 10px;
+}
+
+.stress-panel .panel-title span {
+  color: #cf6d3c;
+}
+
+.stress-meter {
+  height: 10px;
+  margin: 10px 0 8px;
+  overflow: hidden;
+  background: #e8e0d2;
+  border-radius: 5px;
+}
+
+.stress-meter i {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #d6a642, #c84d3f);
+  transition: width 180ms ease-out;
+}
+
+.stress-levels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.stress-levels span {
+  padding: 3px 0;
+  text-align: center;
+  font-size: 8px;
+  color: #9a9180;
+  border-radius: 3px;
+}
+
+.stress-levels span.active {
+  color: #fff;
+  background: #cf6d3c;
+  font-weight: 750;
+}
+
+.system-note {
+  margin: 0;
+  color: #8a7a60;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.system-note em {
+  color: #c84d3f;
+  font-style: normal;
+}
+
+/* psychology bars */
+.psych-bar {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid #e2d9dc;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.psych-bar:first-of-type {
+  margin-top: 0;
+}
+
+.psych-bar > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 11px;
+  color: #4a3f43;
+}
+
+.psych-bar > span strong {
+  color: #7a4b5a;
+  font-size: 14px;
+}
+
+.psych-bar > span small {
+  margin-left: auto;
+  color: #948488;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.psych-bar .bar-track {
+  display: block;
+  height: 5px;
+  overflow: hidden;
+  background: #e8e3e4;
+  border-radius: 3px;
+}
+
+.psych-bar .bar-track b {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: #8e5170;
+  transition: width 180ms ease-out;
+}
+
+.psych-bar .bar-track b.critical {
+  background: linear-gradient(90deg, #a33b56, #9a2828);
+  animation: psych-pulse 2s infinite;
+}
+
+@keyframes psych-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+/* criminal status */
+.criminal-status .panel-title span {
+  font-weight: 750;
+}
+
+.criminal-status .stat-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.criminal-status .stat-bar > span {
+  font-size: 10px;
+  color: #5a4a4d;
+}
+
+.criminal-status .stat-bar .bar-track {
+  height: 8px;
+  overflow: hidden;
+  background: #e8e0d5;
+  border-radius: 4px;
+  grid-column: 1;
+}
+
+.criminal-status .stat-bar .bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 180ms ease-out;
+}
+
+.criminal-status .stat-bar em {
+  font-size: 12px;
+  font-weight: 800;
+  color: #4a3235;
+  text-align: right;
+}
+
+.criminal-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.criminal-stats-grid + .criminal-stats-grid {
+  margin-top: 6px;
+}
+
+.criminal-stats-grid div {
+  min-width: 0;
+  padding: 8px 7px;
+  border: 1px solid #e2d9dc;
+  border-radius: 5px;
+  background: #fcf9fa;
+  text-align: center;
+}
+
+.criminal-stats-grid span {
+  display: block;
+  color: #877b7e;
+  font-size: 8px;
+  line-height: 1.3;
+}
+
+.criminal-stats-grid strong {
+  display: block;
+  margin-top: 3px;
+  color: #4a3235;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.jail-history-row {
+  padding: 7px 9px;
+  border-left: 3px solid #9a5961;
+  background: #f8eded;
+  margin-top: 4px;
+  border-radius: 0 4px 4px 0;
+}
+
+.jail-history-row span {
+  display: block;
+  color: #5a383d;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.jail-history-row small {
+  display: block;
+  margin-top: 2px;
+  color: #877477;
+  font-size: 9px;
+}
+
+.jail-event-log {
+  margin-top: 8px;
+}
+
+.jail-event-log h4 {
+  margin: 0 0 5px;
+  color: #5a484c;
+  font-size: 11px;
+}
+
+.jail-event-entry {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e8e0e2;
+  font-size: 10px;
+  color: #4a3a3d;
+  line-height: 1.4;
+}
+
+.jail-event-entry:last-child {
+  border-bottom: none;
+}
+
+.jail-event-entry small {
+  display: block;
+  margin-top: 1px;
+  color: #948486;
+  font-size: 8px;
+}
+
+/* jail actions */
+.jail-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.jail-actions button {
+  min-height: 40px;
+  padding: 7px 8px;
+  border: 1px solid #d4c8cb;
+  border-radius: 5px;
+  background: #fcf8f9;
+  color: #5a3a42;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.jail-actions button.danger {
+  border-color: #da9a9a;
+  background: #ffeeee;
+  color: #9a2828;
+}
+
+/* wide action buttons */
+.wide-action {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 5px;
+  border: 1px solid #c9d5d1;
+  border-radius: 5px;
+  background: #edf3ef;
+  color: #315f58;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.wide-action.costly {
+  background: #fff8e8;
+  border-color: #cfc6ae;
+  color: #805b17;
+}
+
+@media (max-width: 420px) {
+  .stress-levels {
+    gap: 2px;
+  }
+
+  .stress-levels span {
+    font-size: 7px;
+    padding: 2px 0;
+  }
+
+  .criminal-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .jail-actions {
+    grid-template-columns: 1fr;
+  }
+}

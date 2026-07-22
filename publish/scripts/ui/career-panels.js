@@ -549,9 +549,26 @@
       if (undergroundHtml) return '<section class="career-panel">' + undergroundHtml + '</section>';
     }
 
-    /* Sex work */
-    if (jobId === 'prostitute' || jobId === 'welfare') {
+    /* Sex work (prostitute only) */
+    if (jobId === 'prostitute') {
       return sexWorkPanel(state);
+    }
+
+    /* Welfare姬 — standalone panel */
+    if (jobId === 'welfare' && Game.welfareCareer) {
+      return '<section class="career-panel">' + Game.welfareCareer.render(state) + '</section>';
+    }
+
+    /* VTuber — standalone panel */
+    if (jobId === 'vtuber') {
+      if (!Game.vtuberCareer) return '<section class="career-panel"><p class="empty-state">虚拟主播系统未加载，请刷新页面。</p></section>';
+      try {
+        var vtuberHtml = Game.vtuberCareer.render(state);
+        if (vtuberHtml) return '<section class="career-panel">' + vtuberHtml + '</section>';
+        return '<section class="career-panel"><p class="empty-state">虚拟主播面板渲染为空，请检查存档。</p></section>';
+      } catch (e) {
+        return '<section class="career-panel"><p class="empty-state">虚拟主播面板加载失败: ' + (e.message || '未知错误') + '</p></section>';
+      }
     }
 
     /* Creator-type */

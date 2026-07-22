@@ -99,11 +99,16 @@
   function render(state) {
     const item = ensure(state);
     const effect = effects(state);
+    var levelsHtml = labels.map(function (l, i) {
+      return '<span class="' + (i <= item.level ? 'active' : '') + '">' + l + '</span>';
+    }).join('');
     return `<section class="panel stress-panel"><div class="panel-title"><h2>压力</h2>
-      <span>等级 ${item.level} · ${labels[item.level]}</span></div>
+      <span>${labels[item.level]}</span></div>
+      <div class="stress-levels">${levelsHtml}</div>
       <div class="stress-meter"><i style="width:${item.value / 3.99}%"></i></div>
-      <p class="system-note">${item.value}/399 · 健康修正 ${effect.health}
-      · 学习修正 ${effect.learning} · 社交修正 ${effect.social}</p></section>`;
+      <p class="system-note">${item.value}/399 · 健康 <em>${effect.health}</em>
+      · 学习 <em>${effect.learning}</em> · 社交 <em>${effect.social}</em>
+      ${item.level >= 3 ? ' <em>· 崩坏风险</em>' : ''}</p></section>`;
   }
 
   Game.stressSystem = Object.freeze({

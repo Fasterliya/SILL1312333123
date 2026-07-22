@@ -159,7 +159,8 @@
     state.education.durationMonths = Math.max(0, Number(state.education.durationMonths) || 0);
     state.education.graduated ??= false;
     state.career.jobId ??= null;
-    if (state.career.jobId === 'subscriber') state.career.jobId = 'beautyblog';
+    if (state.career.jobId === 'subscriber') state.career.jobId = 'fashionblog';
+    if (state.career.jobId === 'beautyblog' || state.career.jobId === 'styleblog') state.career.jobId = 'fashionblog';
     const currentJob = C.jobs.find((item) => item.id === state.career.jobId);
     if (currentJob) {
       state.career.job = currentJob.name;

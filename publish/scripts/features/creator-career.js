@@ -3,11 +3,10 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
-  const ids = new Set(['vtuber', 'beautyblog', 'styleblog', 'portraitblog', 'welfare', 'coser']);
+  const ids = new Set(['fashionblog', 'portraitblog']);
   const labels = {
-    vtuber: '虚拟主播频道', beautyblog: '美妆频道',
-    styleblog: '穿搭频道', portraitblog: '影像频道',
-    welfare: '福利频道', coser: 'Coser作品频道',
+    fashionblog: '时尚频道',
+    portraitblog: '影像频道',
   };
 
   function isCreator(state) {
@@ -41,11 +40,8 @@
 
   function titleQuality(state, title) {
     const topics = {
-      vtuber: ['直播', '挑战', '游戏', '歌回', '杂谈'],
-      beautyblog: ['妆容', '测评', '教程', '护肤', '平价'],
-      styleblog: ['穿搭', '通勤', '显高', '约会', '换季'],
+      fashionblog: ['妆容', '穿搭', '测评', '教程', '通勤', '显高', '护肤', '换季', '平价', '约会'],
       portraitblog: ['摄影', '构图', '写真', '街拍', '幕后'],
-      welfare: ['写真', '福利', '限定', '日常', '互动'], coser: ['漫展', '返图', '角色', '妆造', '舞台'],
     }[state.career.jobId] || [];
     const keyword = topics.some((word) => title.includes(word)) ? 18 : 0;
     const length = title.length >= 8 && title.length <= 24 ? 12 : 3;
@@ -76,21 +72,6 @@
     state.career.performance = U.clamp(state.career.performance + 7, 0, 100);
     state.career.exp += 6;
     return { ok: true, message: `发布完成：${Game.creatorEconomy.compact(views)}播放，新增${Game.creatorEconomy.compact(gained)}粉丝，收入${Game.view.money(income)}` };
-  }
-
-  function livestream(state) {
-    if (state.career.jobId !== 'vtuber') return { ok: false, message: '只有虚拟主播可以开启频道直播' };
-    const creator = ensure(state);
-    if (creator.lastLiveMonth === state.totalMonths) return { ok: false, message: '本月已经完成过频道直播' };
-    creator.lastLiveMonth = state.totalMonths;
-    const viewers = Math.max(20, Math.round(80 + creator.followers * 0.08 + state.stats.魅力 * 4));
-    const income = Game.creatorEconomy.livestreamIncome(viewers, creator.followers, creator.brandTrust);
-    creator.followers += Math.max(3, Math.round(viewers * 0.08 * appeal(state) * style(state)));
-    creator.totalViews += viewers;
-    state.money += income;
-    state.stats.心情 = U.clamp(state.stats.心情 + 4, 0, 100);
-    state.career.burnout = U.clamp(state.career.burnout + 8, 0, 100);
-    return { ok: true, message: `直播峰值${Game.creatorEconomy.compact(viewers)}人，获得${Game.view.money(income)}` };
   }
 
   function sponsor(state) {
@@ -134,9 +115,12 @@
     creator.lastPrivateMonth = state.totalMonths;
     creator.scandalRisk = U.clamp(creator.scandalRisk + 10, 0, 100);
     creator.brandTrust = U.clamp(creator.brandTrust - 3, 0, 100);
-    /* Delegate to hookup system for multi-stage encounter */
-    const playerRole = (state.career.jobId === 'welfare' || state.gender === '女') ? 'provider' : 'client';
-    const result = Game.hookupSystem.start(state, null, playerRole);
+    var playerRole = (state.career.jobId === 'welfare' || state.gender === '女') ? 'provider' : 'client';
+    var sponsor = isWelfare ? generateSponsor(state) : null;
+    var result = Game.hookupSystem.start(state, sponsor, playerRole);
+    if (result.ok && isWelfare && sponsor) {
+      result._welfareSponsorId = sponsor.id;
+    }
     if (result.ok) {
       Game.view.showToast(`${label}开始`, 'good');
     }
@@ -177,8 +161,7 @@
 
   function render(state) {
     const creator = ensure(state);
-    const rank = state.career.jobId === 'coser' ? Game.specialCareerRanks?.render(state) || '' : '';
-    return `${rank}<section class="creator-card"><header><div><span>${labels[state.career.jobId]}</span>
+    return `<section class="creator-card"><header><div><span>${labels[state.career.jobId]}</span>
       <strong>${Game.creatorEconomy.compact(creator.followers)} 粉丝</strong></div><b>${Game.creatorEconomy.compact(creator.totalViews)} 播放</b></header>
       <div class="creator-metrics"><span>品牌信任 <b>${Math.round(creator.brandTrust)}</b></span>
       <span>公开风险 <b>${Math.round(creator.scandalRisk)}</b></span>
@@ -187,14 +170,13 @@
       <label class="creator-title"><span>本期标题</span><input data-creator-title maxlength="40"
       placeholder="输入视频标题"></label><div class="creator-actions">
       <button data-creator-action="publish">发布视频</button>
-      ${state.career.jobId === 'vtuber' ? '<button data-creator-action="live">开启直播</button>' : ''}
       <button data-creator-action="community">经营社群</button>
       ${Game.creatorGrowthActions.buttons()}
       <button data-creator-action="sponsor">承接广告</button>
-      ${state.career.jobId === 'coser' ? '' : `<button data-creator-action="private">${state.career.jobId === 'welfare' ? '金主约会' : '约炮'}</button>`}</div></section>`;
+      <button data-creator-action="private">约炮</button></div></section>`;
   }
 
   Game.creatorCareer = Object.freeze({
-    isCreator, ensure, onJobChange, publish, livestream, sponsor, privateDeal, hookup, generateSponsor, community, monthly, render,
+    isCreator, ensure, onJobChange, publish, sponsor, privateDeal, hookup, generateSponsor, community, monthly, render,
   });
 }(window));

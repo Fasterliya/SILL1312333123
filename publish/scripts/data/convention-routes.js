@@ -17,6 +17,10 @@
           'stage', { mood: 2, score: 2, total: 3, result: '舞台灯光亮起，主持人正在召集参与者。' }),
         option('zone-market', '先逛同人摊位', '购买作品、寻找创作者，也可能结识来逛摊的 Coser。',
           'market', { intelligence: 1, score: 2, total: 3, result: '你走进了画册、徽章与手作摊位之间。' }),
+        option('zone-contest', '报名参加Cosplay大赛', '缴纳报名费，在舞台上一决高下。',
+          'contest-prelim', { cost: 80, score: 3, total: 5, enterContest: true,
+            requires: { cosplay: true },
+            result: '你缴纳了报名费，正式签入Cosplay大赛。' }),
       ],
     },
     stage: {
@@ -103,6 +107,42 @@
         option('coser-goodbye', '礼貌道别，把相遇留在今天', '轻量收尾，不改变长期关系。',
           '', { mood: 3, score: 3, affection: 2, finish: true,
             result: '你们在散场人流中礼貌道别。' }),
+      ],
+    },
+    'contest-prelim': {
+      step: 2, total: 5, title: 'Cosplay大赛 · 预选赛',
+      text: '',
+      options: [
+        option('contest-perform', '登台展示你的COS造型', '在评委和观众面前完成走秀与定姿。',
+          'contest-result', { score: 6, contest: 'prelim',
+            result: '你在音乐中完成了预选赛的舞台展示。' }),
+      ],
+    },
+    'contest-semi': {
+      step: 3, total: 5, title: 'Cosplay大赛 · 晋级赛',
+      text: '',
+      options: [
+        option('contest-perform', '登台展示你的COS造型', '表现力与角色理解成为本轮关键。',
+          'contest-result', { score: 8, contest: 'semi',
+            result: '你以更成熟的状态完成了晋级赛。' }),
+      ],
+    },
+    'contest-final': {
+      step: 4, total: 5, title: 'Cosplay大赛 · 决赛',
+      text: '',
+      options: [
+        option('contest-perform', '全力展示最终造型', '这是最后的舞台，倾尽全力。',
+          'contest-result', { score: 10, contest: 'final',
+            result: '你在聚光灯下完成了决赛展示。' }),
+      ],
+    },
+    'contest-result': {
+      step: 5, total: 5, title: '比赛结果 · 等待宣布',
+      text: '',
+      options: [
+        option('contest-done', '接受结果，继续逛展', '无论胜负，漫展的体验才刚刚开始。',
+          'entrance', { score: 4, finishContest: true,
+            result: '评委宣布了结果。无论名次如何，这次比赛都让你成长了很多。' }),
       ],
     },
   };

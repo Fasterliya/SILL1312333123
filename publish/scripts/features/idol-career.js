@@ -93,7 +93,7 @@
         { value: 'welfare', label: '福利姬 · 继承30%粉丝 · 金主约会x1.5' },
         { value: 'coser', label: '职业Coser · 继承25%粉丝 · 漫展x1.5' },
         { value: 'vtuber', label: '虚拟主播 · 继承35%粉丝 · 直播x1.3' },
-        { value: 'beautyblog', label: '美妆博主 · 继承20%粉丝 · 品牌x1.3' },
+        { value: 'fashionblog', label: '时尚博主 · 继承25%粉丝 · 品牌x1.3' },
         { value: 'retire', label: '彻底引退 · 无加成' },
       ],
     };
@@ -106,7 +106,7 @@
       welfare: { jobId: 'welfare', name: '福利姬', ratio: 0.3 },
       coser: { jobId: 'coser', name: '职业Coser', ratio: 0.25 },
       vtuber: { jobId: 'vtuber', name: '虚拟主播', ratio: 0.35 },
-      beautyblog: { jobId: 'beautyblog', name: '美妆博主', ratio: 0.2 },
+      fashionblog: { jobId: 'fashionblog', name: '时尚博主', ratio: 0.25 },
       retire: { jobId: null, name: '退役', ratio: 0 },
     };
     const target = transitions[choice];

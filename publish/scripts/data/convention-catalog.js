@@ -33,12 +33,10 @@
     { id: 'creator', name: '创作者' },
   ]);
   const intents = Object.freeze([
-    { id: 'social', name: '结识同好' },
-    { id: 'collect', name: '收集周边' },
-    { id: 'compete', name: '参加比赛' },
-    { id: 'collaborate', name: '拓展合作' },
-    { id: 'research', name: '学习取材' },
-    { id: 'relax', name: '轻松逛展' },
+    { id: 'compete', name: '参加比赛', accent: '以冠军为目标，在舞台上证明自己的实力。' },
+    { id: 'social', name: '拓展人脉', accent: '结识创作者和同好，为合作铺路。' },
+    { id: 'collect', name: '挖掘宝藏', accent: '搜寻绝版周边和限定商品，充实收藏。' },
+    { id: 'showcase', name: '展示自我', accent: '穿着精心准备的Coser装扮,成为全场焦点。' },
   ]);
   const prepStages = Object.freeze([
     {

@@ -4,14 +4,14 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const jobAliases = Object.freeze({
     vtuber: 'vtuber',
-    beautyblog: 'beautyblog',
-    styleblog: 'styleblog',
+    fashionblog: 'fashionblog',
     portraitblog: 'portraitblog',
     welfare: 'welfare',
     coser: 'coser',
     虚拟主播: 'vtuber',
-    美妆博主: 'beautyblog',
-    穿搭博主: 'styleblog',
+    美妆博主: 'fashionblog',
+    穿搭博主: 'fashionblog',
+    时尚博主: 'fashionblog',
     写真博主: 'portraitblog',
     福利姬: 'welfare',
     职业Coser: 'coser',
@@ -20,8 +20,7 @@
   });
   const tuning = Object.freeze({
     vtuber: { cute: 1.15, sexy: 0.55, fashion: 0.75, cosplay: 1.35 },
-    beautyblog: { cute: 0.85, sexy: 0.7, fashion: 1.15, cosplay: 0.75 },
-    styleblog: { cute: 0.9, sexy: 0.8, fashion: 1.35, cosplay: 0.75 },
+    fashionblog: { cute: 0.88, sexy: 0.75, fashion: 1.25, cosplay: 0.75 },
     portraitblog: { cute: 0.95, sexy: 1.15, fashion: 0.95, cosplay: 1 },
     welfare: { cute: 1, sexy: 1.4, fashion: 0.7, cosplay: 0.9 },
     coser: { cute: 1.25, sexy: 0.65, fashion: 0.9, cosplay: 1.45 },

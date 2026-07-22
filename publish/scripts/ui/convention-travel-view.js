@@ -45,6 +45,44 @@
       <div><dt>本届项目</dt><dd>${career.actions} 项</dd></div></dl></section>`;
   }
 
+  function contestView(model) {
+    var c = model.contest;
+    if (!c) return '';
+    var parts = [];
+    if (c.placed != null) {
+      var placedText = c.placed === 1 ? '冠军' : c.placed === 2 ? '亚军'
+        : c.placed <= 4 ? '四强' : '参赛完成';
+      parts.push(`<section class="convention-contest-result">
+        <strong>${placedText}</strong>
+        <small>Cosplay大赛 · ${c.mishaps > 0 ? '翻车' + c.mishaps + '次' : '无事故'}</small></section>`);
+    }
+    if (c.allRounds && c.allRounds.length) {
+      parts.push(`<section class="convention-contest-bracket">`);
+      c.allRounds.forEach(function (round) {
+        parts.push(`<div class="convention-contest-round">
+          <header class="${round.won ? 'win' : 'lose'}"><strong>${escape(round.name)}</strong>
+            <small>${round.won ? '晋级' : '淘汰'}</small></header>
+          <div class="convention-contest-score">
+            <span class="${round.player >= round.opponent ? 'player-won' : 'player-lost'}">${escape(round.opponentName)}
+              · ${escape(round.opponentCostume)}<br>得分 ${round.opponent}</span>
+            <b>VS</b>
+            <span>你<br>得分 <b class="${round.player >= round.opponent ? 'player-won' : ''}">${round.player}</b></span>
+          </div>
+          <p class="convention-contest-narrative${round.narrative.indexOf('事故') > -1 || round.narrative.indexOf('滑脱') > -1 || round.narrative.indexOf('摔') > -1 ? ' mishap' : ''}">${escape(round.narrative)}</p></div>`);
+      });
+      parts.push('</section>');
+    }
+    if (c.active && c.info) {
+      parts.push(`<section class="convention-contest-status">
+        <header><div><span>Cosplay大赛</span>
+          <strong>${escape(c.info.name)}</strong></div>
+          <b>第${c.info.step}/${c.info.total}轮</b></header>
+        <p class="convention-contest-narrative">${escape(c.info.description)}</p>
+        <p>对手: ${escape(c.info.opponentName)} · ${escape(c.info.opponentCharacter)} · 预评 ${c.info.opponentScore}分</p></section>`);
+    }
+    return parts.join('');
+  }
+
   function render(state, ts) {
     const model = Game.conventionTravel.model(state, ts);
     if (!model) {
@@ -57,6 +95,7 @@
       <div class="convention-context"><span>${escape(model.themeName)}</span>
       <span>${escape(model.roleName)}</span><span>${escape(model.intentName)}</span></div>
       ${model.arrangement ? `<p class="convention-arrangement"><b>现场安排</b>${escape(model.arrangement)}</p>` : ''}
+      ${contestView(model)}
       <p class="convention-scene">${escape(model.text)}</p>
       <p class="convention-feedback"><b>上一步</b>${escape(model.feedback)}</p>
       <div class="journey-progress"><i style="width:${Math.max(0, (model.step - 1) * 100 / model.total)}%"></i></div>

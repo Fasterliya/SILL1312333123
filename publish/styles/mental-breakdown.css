@@ -1,0 +1,42 @@
+.mental-breakdown-panel {
+  padding: 14px;
+  border: 1px solid #ccc3b3;
+  border-left: 4px solid #b88a35;
+  border-radius: 6px;
+  background: #fffaf0;
+  margin: 12px 0;
+}
+
+.mental-buff-list {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.mental-buff {
+  padding: 7px 10px;
+  border-left: 3px solid #b88a35;
+  background: #fff8e8;
+  font-size: 10px;
+  color: #6b4f1a;
+  line-height: 1.4;
+}
+
+.mental-buff span {
+  display: block;
+  margin-top: 2px;
+  color: #8a7340;
+  font-size: 9px;
+}
+
+.mental-buff.negative {
+  border-left-color: #9a5961;
+  background: #f8eaea;
+  color: #6b3030;
+}
+
+@media (max-width: 420px) {
+  .mental-breakdown-panel {
+    padding: 10px;
+  }
+}

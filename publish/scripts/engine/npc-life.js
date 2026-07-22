@@ -26,57 +26,131 @@
     Game.femaleYouthStyle.apply(person, person.gender, age);
   }
 
+  function schoolQualityFor(person, city) {
+    const tier = person.educationStage === 'high' || person.educationName?.includes('实验')
+      || person.educationName?.includes('示范') ? 72 : person.educationName?.includes('职业')
+      ? 55 : person.educationName?.includes('培训') ? 40 : 62;
+    return U.clamp(tier + U.between(-4, 4), 30, 90);
+  }
+
+  function accumulateYear(state, person, age, city) {
+    if (age < 6 || age > 18) return;
+    if (person.droppedOut || person.educationStage === 'dropout') return;
+    const currentYear = Number(state.year);
+    if (person._lastEducationYear === currentYear) return;
+    person._lastEducationYear = currentYear;
+    person._educationAccumulated = (person._educationAccumulated || 0) + 1;
+    const learningCheck = Game.learningAttribute.checkValue(
+      Game.characterAttributes.personValue(person, '学识'),
+    );
+    const habit = Number(person.studyHabit) || 50;
+    const upbringing = Number(person.upbringing?.education ?? 20);
+    const quality = schoolQualityFor(person, city);
+    const variation = U.between(-4, 4) + U.between(-3, 3);
+    const yearly = learningCheck * 0.22 + (habit / 100) * 8 + upbringing * 0.12
+      + quality * 0.10 + variation;
+    person.educationProgress = U.clamp(
+      (person.educationProgress || 0) + yearly, 0, 400,
+    );
+  }
+
+  function educationPath(person, age) {
+    const progress = Number(person.educationProgress) || 0;
+    const wealth = Number(person.upbringing?.wealthFamily ?? 30);
+    const wealthBoost = wealth >= 70 ? 12 : wealth >= 45 ? 6 : 0;
+    const adjustedProgress = progress + wealthBoost;
+    const learningCheck = Game.learningAttribute.checkValue(
+      Game.characterAttributes.personValue(person, '学识'),
+    );
+    if (adjustedProgress >= 260 || (learningCheck >= 35 && adjustedProgress >= 220)) {
+      return { track: 'elite', label: '精英学术' };
+    }
+    if (adjustedProgress >= 170) {
+      return { track: 'academic', label: '普通学术' };
+    }
+    if (adjustedProgress >= 90) {
+      return { track: 'vocational', label: '职业路径' };
+    }
+    return { track: 'early_work', label: '早就业' };
+  }
+
+  function assignHighSchool(person, city, path) {
+    if (path.track === 'elite') {
+      if (Math.random() < 0.6) {
+        person.educationName = `${city}第一中学`;
+        person.educationLevel = 1;
+        return;
+      }
+    }
+    if (path.track === 'elite' || path.track === 'academic') {
+      person.educationName = `${city}实验中学`;
+      person.educationLevel = 1;
+      return;
+    }
+    if (path.track === 'vocational') {
+      person.educationName = `${city}现代服务职业高中`;
+      person.educationLevel = 1;
+      return;
+    }
+    person.educationName = `${city}职业技能培训中心`;
+    person.educationLevel = 0;
+  }
+
+  function assignUniversity(person, city, path) {
+    if (path.track === 'elite') {
+      const top = C.universities.slice(0, 5);
+      person.educationName = U.random(top).name;
+      person.educationLevel = 3;
+    } else if (path.track === 'academic') {
+      const mid = C.universities.slice(5, 11);
+      person.educationName = U.random(mid).name;
+      person.educationLevel = 3;
+    } else if (path.track === 'vocational') {
+      person.educationName = `${city}职业技术学院`;
+      person.educationLevel = 2;
+    } else {
+      person.educationName = person.academicScore >= 23
+        ? '高中毕业后直接就业'
+        : '技能培训后进入社会';
+      person.educationStage = 'workforce';
+      person.educationLevel = person.academicScore >= 23 ? 1 : 0;
+    }
+  }
+
   function education(state, person, age) {
     const [stage] = schoolStage(age);
     Game.educationSystem.ensurePerson(person, age);
     const city = person.currentCity || person.metCity || state.location.city || state.hometown.city;
     if (person.droppedOut) return;
     if (person.school === state.education.school && !['家中', '已毕业'].includes(person.school)) {
+      accumulateYear(state, person, age, city);
       if (Game.npcEducationPaths.maybeDropout(state, person, age, city)) return;
       person.educationStage = state.education.schoolStage;
       person.educationName = person.school;
       return;
     }
     if (age >= 18 && age < 22 && person.educationStage === 'workforce') return;
-    const rebalance = person.educationBalanceVersion !== 2
+
+    accumulateYear(state, person, age, city);
+    if (Game.npcEducationPaths.maybeDropout(state, person, age, city)) return;
+
+    const rebalance = person.educationBalanceVersion !== 3
       && ['high', 'university'].includes(stage);
     if (person.educationStage === stage && person.educationName && !rebalance) return;
-    const variation = U.between(-6, 6) + U.between(-6, 6);
-    const learning = Game.learningAttribute.checkValue(person.academicAbility);
-    const upbringing = Number(person.upbringing?.education ?? 20);
-    const score = U.clamp(10 + learning * 0.6 + person.studyHabit * 0.27
-      + upbringing * 0.13 + variation, 0, 100);
-    person.academicScore = Math.round(score);
-    person.educationBalanceVersion = 2;
-    if (Game.npcEducationPaths.maybeDropout(state, person, age, city)) return;
+
+    const path = educationPath(person, age);
+    person.educationTrack = path.track;
+    person.academicScore = Math.round(U.clamp(person.educationProgress / 4, 0, 100));
+    person.educationBalanceVersion = 3;
     person.educationStage = stage;
+
     if (stage === 'home') person.educationName = '家庭照护';
     else if (stage === 'kindergarten') person.educationName = `${city}向日葵幼儿园`;
     else if (stage === 'primary') person.educationName = `${city}启明小学`;
     else if (stage === 'middle') person.educationName = `${city}新城初级中学`;
-    else if (stage === 'high') {
-      if (score >= 56) person.educationName = `${city}实验中学`;
-      else if (score >= 40) person.educationName = `${city}新区高级中学`;
-      else if (score >= 25) person.educationName = `${city}现代服务职业高中`;
-      else person.educationName = `${city}职业技能培训中心`;
-      person.educationLevel = score >= 25 ? 1 : 0;
-    }
-    else if (stage === 'university') {
-      if (score >= 74) {
-        person.educationName = U.random(C.universities.slice(0, 5)).name;
-        person.educationLevel = 3;
-      } else if (score >= 56) {
-        person.educationName = U.random(C.universities.slice(5, 11)).name;
-        person.educationLevel = 3;
-      } else if (score >= 37) {
-        person.educationName = `${city}职业技术学院`;
-        person.educationLevel = 2;
-      } else {
-        person.educationName = score >= 23 ? '高中毕业后直接就业' : '技能培训后进入社会';
-        person.educationStage = 'workforce';
-        person.educationLevel = score >= 23 ? 1 : 0;
-      }
-    } else {
+    else if (stage === 'high') assignHighSchool(person, city, path);
+    else if (stage === 'university') assignUniversity(person, city, path);
+    else {
       if (person.educationLevel >= 2 && !person.educationName.endsWith('毕业')) {
         person.educationName += '毕业';
       }

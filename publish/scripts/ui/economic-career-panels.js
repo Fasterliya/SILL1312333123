@@ -11,7 +11,7 @@
   }
 
   function supports(state) {
-    return ['prostitute', 'welfare', 'blackmarket'].includes(state.career.jobId);
+    return ['prostitute', 'blackmarket'].includes(state.career.jobId);
   }
 
   function appointments(state) {

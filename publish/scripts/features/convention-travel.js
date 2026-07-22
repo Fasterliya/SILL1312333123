@@ -98,6 +98,31 @@
   }
 
   function options(state, ts) {
+    var isContest = /^contest-/.test(ts.node);
+    if (isContest && !ts.contest) return [];
+    if (isContest) {
+      let roundMap = { 'contest-prelim': 0, 'contest-semi': 1, 'contest-final': 2 };
+      let roundIdx = roundMap[ts.node];
+      let info = Game.conventionContest.roundInfo(ts, roundIdx);
+      let routeNode = Game.conventionRoutes.get(ts.node);
+      let baseOpts = (routeNode?.options || []).map(function (opt) {
+        var enriched = { ...opt };
+        if (opt.effect && opt.effect.contest && info) {
+          enriched.hint = '对手: ' + info.opponentName
+            + ' · ' + info.opponentCharacter
+            + ' · 预估得分 ' + info.opponentScore;
+          enriched.label = opt.label + '（第' + info.step + '/' + info.total + '轮）';
+        }
+        return enriched;
+      });
+      if (ts.node === 'contest-result') {
+        baseOpts[0].label = ts.contest.placed === 1 ? '冠军！继续逛展'
+          : ts.contest.placed === 2 ? '亚军，继续逛展' : '比赛结束，继续逛展';
+      }
+      return baseOpts.map(function (item) {
+        return { ...item, blocked: requirementFailure(state, ts, item) };
+      });
+    }
     const node = Game.conventionRoutes.get(ts.node);
     const baseSource = ts.node === 'coser-select' ? rosterOptions(state, ts) : (node?.options || []);
     const source = Game.conventionParticipant?.options(state, ts, baseSource) || baseSource;
@@ -123,6 +148,77 @@
       state.cityLife.reputation = U.clamp((state.cityLife.reputation || 0) + effect.reputation, 0, 100);
     }
     if (effect.selectId) ts.selectedCoserId = effect.selectId;
+    if (effect.enterContest) {
+      Game.conventionContest.initContest(state, ts);
+      if (effect.coserWardrobe) {
+        var profile = identityProfile(state);
+        var cosplayName = profile.cosplay;
+        if (cosplayName && cosplayName !== '无') {
+          Game.coserCareer?.addCosplayToInventory(state, cosplayName);
+        }
+      }
+    }
+    if (effect.coserGuest) {
+      ts.score += 1;
+      state.stats.心情 = U.clamp((state.stats.心情 || 0) + 5, 0, 100);
+    }
+    if (effect.vtuberBooth) {
+      var vData = state.vtuber || {};
+      var boothViewers = Math.max(40, Math.round(80 + (state.creator||{}).followers * 0.04 + (state.stats.魅力||50) * 3));
+      var boothIncome = Math.round(boothViewers * 1.0 * (1.2 + ((state.creator||{}).brandTrust||45)/70));
+      state.money += boothIncome;
+      vData.totalSuperchat = (vData.totalSuperchat||0) + Math.round(boothIncome * 0.15);
+      effect.result += ' 同接' + boothViewers + '人，收入' + Game.view.money(boothIncome);
+    }
+    if (effect.welfarePhoto) {
+      var wData = state.welfare || {};
+      var photoIncome = Math.round((wData.subscriberCount||0) * 6 + (state.stats.魅力||50) * 30);
+      state.money += photoIncome;
+      var creator = state.creator || {};
+      creator.scandalRisk = U.clamp((creator.scandalRisk||0) + 15, 0, 100);
+      effect.result += ' 收入' + Game.view.money(photoIncome) + '，丑闻+15';
+    }
+    if (effect.welfarePatron) {
+      var wData2 = state.welfare || {};
+      var activeClients = (wData2.regularClients||[]).filter(function(c){return state.totalMonths-(c.lastMonth||0)<=3;});
+      if (activeClients.length) {
+        var client = activeClients[0];
+        client.affection = U.clamp((client.affection||40)+12,0,100);
+        client.monthlyAllowance = Math.round((client.monthlyAllowance||2000)*1.5);
+        var patron = U.person('金主','',U.between(30,50),'男',state.totalMonths);
+        patron.id = client.id; patron.wealth = (client.wealth||500000);
+        state.worldPeople.push(patron);
+        Game.encounterSystem?.init(state, patron, 'hookup', 'provider');
+        Game._refresh();
+        Game.encounterSystem?.showOverlay(state);
+        effect.result += ' 金主好感+12，月供×1.5';
+      }
+    }
+    if (effect.welfareSell) {
+      var wData3 = state.welfare || {};
+      var sellIncome = Math.round(((state.creator||{}).followers||0)*0.3 + (wData3.subscriberCount||0)*2);
+      state.money += sellIncome;
+      effect.result += ' 收入' + Game.view.money(sellIncome);
+    }
+    if (effect.contest) {
+      var roundMap = { prelim: 0, semi: 1, final: 2 };
+      var roundIdx = roundMap[effect.contest];
+      var performed = Game.conventionContest.perform(state, ts, roundIdx);
+      if (performed && performed.result) {
+        var c = ts.contest;
+        var r = performed.result;
+        var opp = c.opponents[roundIdx];
+        ts.feedback = r.mishap
+          ? (effect.result + ' ' + r.narrative)
+          : `你的得分 ${r.playerScore} vs ${opp.name}(${opp._opponent.costume.character}) ${r.opponentScore}。${r.narrative}`;
+        ts.score += (r.outcome === 'win_big' ? 5 : r.outcome === 'win_close' ? 3 : 1);
+      }
+      return;
+    }
+    if (effect.finishContest) {
+      Game.conventionContest.settle(state, ts);
+      effect.result = ts.feedback;
+    }
     const person = effect.meetCoser ? (selectedPerson(state, ts) || chooseFallbackCoser(state, ts)) : selectedPerson(state, ts);
     if (person && effect.affection) {
       person.affection = U.clamp(person.affection + effect.affection, 0, 100);
@@ -130,7 +226,7 @@
     }
     if (person && effect.contact) Game.people.addContact(state, person);
     if (effect.total) ts.total = effect.total;
-    ts.score += effect.score || 0;
+    if (!effect.contest) ts.score += effect.score || 0;
     Game.conventionCoserCareer?.applyChoice(state, ts, effect);
     ts.feedback = effect.result || '你继续探索漫展。';
   }
@@ -154,11 +250,15 @@
     });
     state.travel.localHistory = state.travel.localHistory.slice(0, 20);
     const summary = `从${ts.hostCity}返程，${rating}，评分${ts.score}${relation}${careerText}。`;
+    var reward = Game.conventionParticipant?.intentReward(state, ts);
+    var rewardSummary = reward ? ' ' + reward.bonus : '';
     Game.conventionCalendar?.finishAttendance(state, ts.editionId, {
-      score: ts.score, outcome: `${rating}${relation}${careerText}`,
+      score: ts.score, outcome: `${rating}${relation}${careerText}${rewardSummary}`,
     });
     state.travel.activeStage = null;
-    Game.lifeDirector.addLog(state, '漫展归来', summary, 'milestone');
+    Game.conventionRisk?.checkHealthAfterConvention(state, ts);
+    Game.conventionRisk?.rollStalking?.(state, ts);
+    Game.lifeDirector.addLog(state, '漫展归来', summary + rewardSummary, 'milestone');
     return { ok: true, finished: true, message: `${ts.placeName}完成：${summary}` };
   }
 
@@ -168,28 +268,47 @@
     const option = options(state, ts).find((item) => item.id === choiceId);
     if (!option) return { ok: false, message: '这个漫展选项已经失效' };
     if (option.blocked) return { ok: false, message: option.blocked };
+    if (!/^contest-/.test(ts.node)) {
+      Game.conventionRisk?.roll(state, ts);
+    }
     const resolved = Game.conventionParticipant?.adjust(state, ts, option) || option;
     applyEffect(state, ts, resolved);
     ts.path.push(option.id);
     if (resolved.effect?.finish) return complete(state, ts);
-    ts.node = resolved.next;
+    ts.node = resolved.next || 'entrance';
     return { ok: true, message: ts.feedback };
   }
   function model(state, ts) {
     Game.conventionCoserRoster?.normalize(state, ts);
-    const node = Game.conventionRoutes.get(ts.node);
-    if (!node && ts.node !== 'coser-select') return null;
+    var node = Game.conventionRoutes.get(ts.node);
+    if (!node && ts.node !== 'coser-select' && !/^contest-/.test(ts.node)) return null;
     const role = Game.conventionCatalog.roles.find((item) => item.id === ts.role)?.name || '游客';
-    const intent = Game.conventionCatalog.intents.find((item) => item.id === ts.intent)?.name || '结识同好';
+    const intent = Game.conventionCatalog.intents.find((item) => item.id === ts.intent)?.name || '拓展人脉';
+    var contestModel = Game.conventionContest?.model(state, ts) || null;
+    var nodeTitle = node?.title || '';
+    var nodeText = node?.text || '';
+    if (/^contest-/.test(ts.node) && contestModel && contestModel.info) {
+      nodeTitle = contestModel.info.name;
+      nodeText = contestModel.info.description
+        + '\n对手: ' + contestModel.info.opponentName
+        + ' · ' + contestModel.info.opponentCharacter
+        + ' · 预评 ' + contestModel.info.opponentScore + '分';
+    }
+    if (ts.node === 'contest-result' && contestModel) {
+      nodeTitle = contestModel.placed === 1 ? '冠军！'
+        : contestModel.placed === 2 ? '亚军' : '比赛结束';
+      var lastResult = contestModel.allRounds[contestModel.allRounds.length - 1];
+      nodeText = lastResult ? lastResult.narrative : '评委宣布了结果。';
+    }
     return {
       node: ts.node,
-      title: node?.title || 'COS 摄影区 · 选择想认识的人',
-      text: node?.text || '三名 Coser 穿着不同作品的角色服装，选择一位开始交流。',
+      title: nodeTitle, text: nodeText,
       step: ts.path.length + 1, total: ts.total || node?.total || 4,
       feedback: ts.feedback, score: ts.score,
       eventName: ts.placeName, themeName: ts.themeName,
       roleName: role, intentName: intent, arrangement: ts.arrangement || '',
       career: Game.conventionCoserCareer?.model(state, ts) || null,
+      contest: contestModel,
       options: options(state, ts),
       people: ts.coserIds.map((id) => Game.people.find(state, id)).filter(Boolean),
       selectedId: ts.selectedCoserId,

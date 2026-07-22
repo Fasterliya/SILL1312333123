@@ -20,6 +20,8 @@
       soldToJapan: false,
       orderCharacter: '',
       orderSeries: '',
+      originalName: '',
+      captureAge: null,
     };
     var c = state.cradle;
     c.imprisoned = !!c.imprisoned;
@@ -35,6 +37,8 @@
     c.soldToJapan = !!c.soldToJapan;
     c.orderCharacter = typeof c.orderCharacter === 'string' ? c.orderCharacter : '';
     c.orderSeries = typeof c.orderSeries === 'string' ? c.orderSeries : '';
+    c.originalName = typeof c.originalName === 'string' ? c.originalName : '';
+    c.captureAge = Number.isFinite(c.captureAge) ? c.captureAge : null;
     if (c.soldToJapan && c.imprisoned) c.imprisoned = false;
     return c;
   }
@@ -70,6 +74,8 @@
     c.imprisonedMonth = state.totalMonths;
     c.city = state.location.city;
     c.inmateId = 'CR-' + state.totalMonths + '-' + Math.random().toString(36).slice(2, 6);
+    c.originalName = state.name;
+    c.captureAge = age;
     c.mental = 100;
     c.reformProgress = 0;
     c.dailyLog = [];
@@ -110,6 +116,29 @@
     c.reformType = 'cosplay';
   }
 
+  function applyJapaneseIdentity(state, c) {
+    if (state.profile.nameCulture === '日本') return false;
+    var formerName = c.originalName || state.name;
+    var changedName = Game.nameSystem.makeName('', '女', 'ja-JP');
+    state.profile.birthName = state.profile.birthName || formerName;
+    state.profile.cradleFormerName = formerName;
+    state.profile.nameHistory = Array.isArray(state.profile.nameHistory)
+      ? state.profile.nameHistory : [];
+    if (!state.profile.nameHistory.some(function (item) {
+      return item.from === formerName && item.to === changedName;
+    })) {
+      state.profile.nameHistory.push({
+        from: formerName,
+        to: changedName,
+        country: '日本',
+        reason: '摇篮身份改造',
+      });
+    }
+    state.name = changedName;
+    state.profile.nameCulture = '日本';
+    return true;
+  }
+
   function monthly(state) {
     var c = ensure(state);
     if (c.imprisoned) {
@@ -147,12 +176,8 @@
     }
     c.dailyLog = c.dailyLog.slice(0, 20);
 
-    if (c.reformType === 'japanese' && c.reformProgress >= 60) {
-      if (!state.profile.nameCulture || state.profile.nameCulture !== '日本') {
-        var names = Game.nameSystem.surnames('ja-JP');
-        var given = Game.nameSystem.makeName('', '女', 'ja-JP');
-        state.name = names[Math.floor(Math.random() * names.length)] + given.replace(names.join('').replace(/[^\u4e00-\u9fff]/g,''), '');
-        state.profile.nameCulture = '日本';
+    if (c.reformProgress >= 60) {
+      if (applyJapaneseIdentity(state, c)) {
         c.dailyLog.unshift('改造第' + (state.totalMonths - c.imprisonedMonth) + '个月——你已经不记得自己的华夏名字了。现在你叫' + state.name + '。');
       }
     }
@@ -168,6 +193,7 @@
   }
 
   function sellToJapan(state, c) {
+    applyJapaneseIdentity(state, c);
     var jpCities = [
       { city: '东京', province: '东京都', country: '日本', tier: 1, cost: 0 },
       { city: '大阪', province: '大阪府', country: '日本', tier: 1, cost: 0 },
@@ -188,10 +214,7 @@
     state.career.performance = 20;
     state.career.jobStartMonth = state.totalMonths;
 
-    state.nameCulture = state.nameCulture || '日本';
-    if (!state.nameCulture || state.nameCulture !== '日本') {
-      state.name = Game.nameSystem.makeName('', '女', 'ja-JP');
-    }
+    state.nameCulture = '日本';
 
     Game.lifeDirector.addLog(state, '卖到日本', '你在' + (state.totalMonths - c.imprisonedMonth) + '个月的改造后被卖到了日本' + target.city + '。你已经完全变成了' + (c.reformType === 'cosplay' ? ('「' + c.orderCharacter + '」') : '一个日本少女') + '。但你还记得那栋灰色建筑的走廊——那是你失去一切的地方。', 'milestone');
     state.timeSpeed = 1;

@@ -23,20 +23,95 @@
   font-size: 16px;
 }
 
-.cradle-network-summary span,
-.cradle-task-meta,
-.cradle-task small {
+.cradle-network-summary span {
   color: var(--ui-muted);
   font-size: 9px;
+}
+
+.cradle-filter-nav {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.cradle-filter-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.cradle-filter-nav button {
+  min-width: max-content;
+  min-height: 44px;
+  padding: 0 11px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-paper);
+  color: var(--ui-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.cradle-filter-nav button.active {
+  border-color: #a8453a;
+  background: #f8ece8;
+  color: #8b322a;
+}
+
+.cradle-directory {
+  display: grid;
+  gap: 8px;
+}
+
+.cradle-task-group {
+  border-top: 1px solid var(--ui-line);
+}
+
+.cradle-task-group > summary {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cradle-task-group > summary::-webkit-details-marker,
+.cradle-task > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cradle-task-group > summary span,
+.cradle-task-group > summary b,
+.cradle-task-group > summary small {
+  display: block;
+}
+
+.cradle-task-group > summary b {
+  color: var(--ui-ink);
+  font-size: 12px;
+}
+
+.cradle-task-group > summary small {
+  margin-top: 2px;
+  color: var(--ui-muted);
+  font-size: 9px;
+}
+
+.cradle-task-group > summary > strong {
+  color: #a8453a;
+  font-size: 10px;
 }
 
 .cradle-task-list {
   display: grid;
   gap: 7px;
+  padding-bottom: 8px;
 }
 
 .cradle-task {
-  padding: 10px;
   border: 1px solid var(--ui-line);
   border-left: 4px solid #a8453a;
   border-radius: 6px;
@@ -45,49 +120,154 @@
 
 .cradle-task.done {
   border-left-color: #315f58;
-  opacity: .78;
 }
 
-.cradle-task header,
-.cradle-task-progress {
+.cradle-task > summary {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 36px;
+  min-height: 76px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cradle-task-portrait {
+  display: grid;
+  width: 54px;
+  height: 60px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  background: var(--ui-soft);
+  color: var(--ui-ink);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.cradle-task-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cradle-task-heading,
+.cradle-task-heading b,
+.cradle-task-heading small,
+.cradle-task-heading em {
+  display: block;
+  min-width: 0;
+}
+
+.cradle-task-heading b {
+  overflow-wrap: anywhere;
+  color: var(--ui-ink);
+  font-size: 12px;
+}
+
+.cradle-task-heading small {
+  margin-top: 2px;
+  color: #8b322a;
+  font-size: 9px;
+}
+
+.cradle-task-heading em {
+  margin-top: 4px;
+  color: var(--ui-muted);
+  font-size: 9px;
+  font-style: normal;
+}
+
+.cradle-task > summary > strong {
+  color: #a8453a;
+  font-size: 11px;
+  text-align: right;
+}
+
+.cradle-task-body {
+  padding: 0 9px 10px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.cradle-task-code {
+  margin: 8px 0;
+  color: var(--ui-muted);
+  font-size: 9px;
+}
+
+.cradle-anime-order {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 7px;
+  border-left: 3px solid #315f58;
+  background: var(--ui-soft);
+}
+
+.cradle-anime-order b,
+.cradle-anime-order span {
+  font-size: 9px;
+}
+
+.cradle-anime-order span {
+  color: var(--ui-muted);
+  text-align: right;
+}
+
+.cradle-reform-row {
+  margin-top: 7px;
+}
+
+.cradle-reform-row header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.cradle-task header span,
-.cradle-task header b {
+.cradle-reform-row header span,
+.cradle-reform-row header b {
   font-size: 9px;
 }
 
-.cradle-task header b {
-  color: #a8453a;
+.cradle-reform-row header b {
+  color: var(--ui-muted);
 }
 
-.cradle-task.done header b {
-  color: #315f58;
-}
-
-.cradle-task h3 {
-  margin: 5px 0 2px;
-  font-size: 12px;
-  letter-spacing: 0;
-}
-
-.cradle-task-progress {
-  margin-top: 7px;
-}
-
-.cradle-task-progress progress {
-  flex: 1;
-  min-width: 0;
+.cradle-reform-row > i {
+  display: block;
   height: 7px;
+  margin-top: 4px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #e5e1d8;
 }
 
-.cradle-task-progress strong {
-  flex: 0 0 36px;
-  color: var(--ui-ink);
+.cradle-reform-row > i span {
+  display: block;
+  height: 100%;
+}
+
+.cradle-reform-row > i .body {
+  background: #a8453a;
+}
+
+.cradle-reform-row > i .mind {
+  background: #315f58;
+}
+
+.cradle-file-button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border: 1px solid #315f58;
+  border-radius: 6px;
+  background: #edf3ef;
+  color: #315f58;
   font-size: 10px;
-  text-align: right;
+  font-weight: 750;
 }

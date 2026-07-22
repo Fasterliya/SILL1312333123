@@ -100,6 +100,10 @@
       ['体重', `${Number(person.weight || 0).toFixed(1)} kg`],
       ['成长身高', `${Number(person.maxHeight || 0).toFixed(1)} cm`],
       ['性格', person.personality], ['特质', person.trait], ['状态', person.status],
+      ...(person.cradleTaskId ? [
+        ['身体改造', `${person.cradleBodyProgress}% · ${Game.cradleNetworkCharacters.bodyStage(person.cradleBodyProgress)}`],
+        ['意识改造', `${person.cradleMindProgress}% · ${Game.cradleNetworkCharacters.mindStage(person.cradleMindProgress)}`],
+      ] : []),
     ];
     const attributes = [
       ['健康状态', Game.healthModel.npcStatus(state, person)],

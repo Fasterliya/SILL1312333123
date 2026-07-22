@@ -80,6 +80,11 @@
     elements.profileFacts.innerHTML = [
       ['年龄', `${U.age(state)}岁${Game.timeSystem.ageMonths(state) % 12}月`], ['身高', `${p.height.toFixed(1)} cm`],
       ['体重', `${p.weight.toFixed(1)} kg`], ['成长身高', `${Number(p.maxHeight).toFixed(1)} cm`],
+      ...(p.cradleFormerName ? [['曾用名', p.cradleFormerName]] : []),
+      ...(Number.isFinite(p.cradleBodyProgress) ? [
+        ['身体改造', `${p.cradleBodyProgress}%`],
+        ['意识改造', `${p.cradleMindProgress}%`],
+      ] : []),
       ['COS服', p.cosplay], ['发色', value(p, 'hairColor')],
       ['发型', value(p, 'hairstyle')], ['瞳色', p.eyeColor], ['气质', p.temperament],
       ...(identity.gender === '女' && state.romance.married

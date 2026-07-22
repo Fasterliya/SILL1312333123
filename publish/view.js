@@ -132,7 +132,7 @@
     el.quickStudyPanel.innerHTML = quickStudy;
     el.quickStudyPanel.hidden = !quickStudy;
     el.eventList.innerHTML = logCards(state);
-    el.familyList.innerHTML = familyCards(state);
+    if (!Game.familyDashboard) el.familyList.innerHTML = familyCards(state);
     el.classmatesList.innerHTML = Game.social.renderSchool(state);
     el.phoneList.innerHTML = Game.social.renderPhone(state);
     el.matchmakingList.innerHTML = Game.matchmaking.render(state);

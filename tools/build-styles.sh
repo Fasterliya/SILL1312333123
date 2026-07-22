@@ -36,6 +36,7 @@ combine character-tools.css \
   "$SOURCE/property-quick.css"
 combine feature-cards.css \
   "$SOURCE/character-cards.css" \
+  "$SOURCE/family-book.css" \
   "$SOURCE/household.css" \
   "$SOURCE/creator.css"
 

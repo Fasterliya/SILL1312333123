@@ -45,6 +45,7 @@
     Game.lifeResumeSync?.monthly(state);
     Game.specialCareerRanks?.sync(state);
     Game.supernaturalSpecter?.monthly(state);
+    Game.specterPregnancy?.monthly(state);
     Game.specterHostRecovery?.monthly(state);
     Game.familyEvents?.monthly(state);
     Game.magicalGirlSystem?.monthly(state);

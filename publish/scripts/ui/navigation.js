@@ -89,8 +89,10 @@
       cosplay: 'COS服', hairColor: '发色', temperament: '气质', bodyType: '身材', hairstyle: '发型',
       'clothing.top': '身穿', 'clothing.socks': '袜子', 'clothing.shoes': '鞋',
     };
+    const genderLabel = person.specterPossessed && person.gender === '女'
+      && person.specterOriginalGender === '男' ? '女（前男性）' : person.gender;
     const identity = [
-      ['关系', person.relation], ['年龄', `${U.personAge(state, person)}岁`], ['性别', person.gender],
+      ['关系', person.relation], ['年龄', `${U.personAge(state, person)}岁`], ['性别', genderLabel],
       ['曾用名', [...new Set([person.birthName, ...(person.nameHistory || []).map((item) => item.from)]
         .filter((name) => name && name !== person.name))].join('、') || '无'],
       ['文化偏好', person.culturePreference || '无特别倾向'],

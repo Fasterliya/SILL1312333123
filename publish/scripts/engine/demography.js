@@ -44,6 +44,12 @@
     return state.family.filter((person) => ['儿子', '女儿'].includes(person.relation)).length;
   }
   function womanAge(state, woman) {
+    if (woman?.specterPossessed && woman.gender === '女'
+      && Number.isFinite(woman.specterPossessedAtAge)) {
+      const elapsed = Math.max(0, state.totalMonths
+        - (Number(woman.specterPossessedAtMonth) || state.totalMonths));
+      return woman.specterPossessedAtAge + Math.floor(elapsed / 12);
+    }
     return woman === state.profile ? Game.content.age(state) : Game.content.personAge(state, woman);
   }
   function childCount(state, woman) {

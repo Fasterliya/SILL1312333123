@@ -156,6 +156,7 @@
     if (feeding.progress < 100) return;
     victim.status = '失踪';
     victim.deceasedAt = state.totalMonths;
+    victim.specterPrey = null;
     victim.specterConsumedBy = specter.hostId;
     specter.victims.push(victim.id);
     specter.feeding = null;

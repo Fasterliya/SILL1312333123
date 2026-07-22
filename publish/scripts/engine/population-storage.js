@@ -8,7 +8,7 @@
       || person.portraitUrl || person.portraitGallery?.length || person.familyMaterialized
       || (state.travel?.activeIds || []).includes(person.id)
       || person.fashion?.temporaryCosplay
-      || person.specterPossessed || person.specterPrey
+      || person.specterPossessed || person.specterPrey || person.specterPurifiedAtMonth
       || person.secretParentage || state.relationshipSecrets?.records?.some((record) => (
         record.participants?.includes(person.id)
       ));

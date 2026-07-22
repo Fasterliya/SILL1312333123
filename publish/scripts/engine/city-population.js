@@ -146,6 +146,7 @@
     state.worldPeople = state.worldPeople.filter((person) => (
       !person.populationResident || person.currentCity === activeCity || person.phoneUnlocked
       || person.interactions > 0 || person.portraitUrl || person.familyMaterialized
+      || person.specterPurifiedAtMonth
     ));
   }
   function linkWorkplaces(state, city) {

@@ -171,15 +171,15 @@
 
   const age = (state) => Math.max(0, Math.floor((state.totalMonths - Game.hunterMode.identity(state).birthMonth) / 12));
   const stage = (years) => C.stages.find((item) => years <= item.max) || C.stages.at(-1);
-
   function personAge(state, item) {
+    if (item.specterPossessed && Number.isFinite(item.specterPhysicalAge))
+      return Math.max(0, Math.floor(item.specterPhysicalAge));
     const birthMonth = Number.isFinite(item.birthMonth)
       ? item.birthMonth : (['儿子', '女儿'].includes(item.relation) ? item.bornAt : -(item.baseAge || 0) * 12);
     const referenceMonth = Number.isFinite(item.deceasedAt)
       ? Math.min(state.totalMonths, item.deceasedAt) : state.totalMonths;
     return Math.max(0, Math.floor((referenceMonth - birthMonth) / 12));
   }
-
   function gradeLabel(state) {
     const years = age(state);
     if (state.education.schoolStage === 'workforce') return '职业起步';

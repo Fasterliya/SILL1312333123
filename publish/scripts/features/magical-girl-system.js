@@ -195,17 +195,9 @@
 
     if (specter) {
       if (purified) {
-        specters.splice(specterIdx, 1);
-        var hostPurified = Game.people.find(state, specter.hostId);
-        if (hostPurified) {
-          hostPurified.specterPossessed = false;
-          hostPurified.status = '健康';
-          hostPurified.deceasedAt = null;
-        }
-        Game.lifeDirector.addLog(state, '幽诡净化', '奇迹般地，你净化了寄生在' + mission.hostName + '体内的' + specter.type + '。宿主恢复了意识，但对发生的一切毫无记忆。', 'milestone');
-        mg.kills += 1;
-        mg.soulGem = Math.min(100, mg.soulGem + 10);
-        mg.magicPower = Math.min(100, mg.magicPower + 10);
+        Game.specterEcology.purify(state, specter, {
+          name: state.name, player: true, consumeMagic: false,
+        }, '净化结界');
       } else {
         if (state.supernatural.combat && state.supernatural.combat.active) {
           mg.activeMission = null;

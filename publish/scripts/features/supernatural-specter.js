@@ -386,9 +386,6 @@
 
     if (c.specterHp <= 0) {
       c.log.push('幽诡在你最后一击下发出了非人的惨叫，躯体崩塌成黑烟消散。');
-      if (Game.magicalGirlCore && Game.magicalGirlCore.isMagicalGirl(state)) {
-        Game.magicalGirlCore.onKill(state);
-      }
       return endCombat(state, true);
     }
 
@@ -429,12 +426,22 @@
       var specter = state.supernatural.specters[idx];
       var host = hostPerson(state, specter);
       var hostName = host ? host.name : '某个被寄生的人';
-      Game.lifeDirector.addLog(state, '幽诡击杀', '你成功击杀了寄生于' + hostName + '身上的' + specter.type + '。宿主的躯体也随之崩解，无法挽回。', 'milestone');
-      if (host) {
-        host.status = '死亡';
-        host.deceasedAt = state.totalMonths;
+      var magical = Game.magicalGirlCore?.isMagicalGirl(state);
+      if (magical && Game.specterEcology) {
+        Game.specterEcology.purify(state, specter, {
+          name: state.name, player: true, consumeMagic: false,
+        }, '正面决战');
+      } else {
+        Game.specterEcology?.clearFeeding(state, specter);
+        Game.lifeDirector.addLog(state, '幽诡击杀', '你成功击杀了寄生于' + hostName + '身上的' + specter.type + '。宿主的躯体也随之崩解，无法挽回。', 'milestone');
+        if (host) {
+          host.specterPossessed = false;
+          host.specterDestroyedAtMonth = state.totalMonths;
+          host.status = '死亡';
+          host.deceasedAt = state.totalMonths;
+        }
+        state.supernatural.specters.splice(idx, 1);
       }
-      state.supernatural.specters.splice(idx, 1);
       state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + 10);
     } else if (!killed) {
       state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + U.between(5, 10));
@@ -496,6 +503,7 @@
         }
         continue;
       }
+      Game.specterHostRecovery?.advance(state, host, specter);
 
       if (specter.stage === '掠食') {
         corruptFamilyInRedLight(state, specter);

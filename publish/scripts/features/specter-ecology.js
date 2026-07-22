@@ -4,7 +4,6 @@
   var Game = root.LifeGame = root.LifeGame || {};
   var U = Game.content;
   var MAX_SPECTERS = 12;
-
   function ageAtMonth(state, person, month) {
     var child = ['儿子', '女儿', '养子', '养女'].includes(person.relation);
     var birthMonth = Number.isFinite(person.birthMonth)
@@ -12,7 +11,6 @@
         ? person.bornAt : -(Number(person.baseAge) || 0) * 12);
     return Math.max(0, Math.floor((month - birthMonth) / 12));
   }
-
   function recordPossession(state, person, specter) {
     var month = Number.isFinite(specter.possessedAtMonth)
       ? specter.possessedAtMonth : state.totalMonths;
@@ -30,8 +28,8 @@
     person.specterPossessedAtMonth = month;
     person.specterPossessedAtAge = age;
     person.specterSourceHostId = specter.parentHostId || '';
+    Game.specterHostRecovery?.begin(state, person, specter);
   }
-
   function ensureSpecter(state, specter) {
     var host = Game.people?.find(state, specter.hostId);
     if (!host) return;
@@ -40,7 +38,6 @@
     }
     recordPossession(state, host, specter);
   }
-
   function localCandidates(state, specter, exclusions) {
     var host = Game.people.find(state, specter.hostId);
     var city = host?.currentCity || state.location.city;
@@ -51,13 +48,11 @@
         && !person.deceasedAt && !person.specterPossessed && !person.skinCaptured;
     });
   }
-
   function localSpecters(state) {
     return (state.supernatural?.specters || []).filter(function (specter) {
       return Game.people.find(state, specter.hostId)?.currentCity === state.location.city;
     });
   }
-
   function protectors(state, specter) {
     var host = Game.people.find(state, specter.hostId);
     var city = host?.currentCity || state.location.city;
@@ -74,30 +69,38 @@
     }
     return result;
   }
-
+  function clearFeeding(state, specter) {
+    var victim = specter.feeding && Game.people.find(state, specter.feeding.victimId);
+    if (victim) victim.specterPrey = null;
+    specter.feeding = null;
+  }
   function purify(state, specter, guardian, reason) {
     var index = state.supernatural.specters.indexOf(specter);
     if (index < 0) return false;
     var host = Game.people.find(state, specter.hostId);
+    clearFeeding(state, specter);
     state.supernatural.specters.splice(index, 1);
     if (host) {
-      host.specterPossessed = false;
-      host.specterPurifiedAtMonth = state.totalMonths;
-      if (host.status !== '已故' && host.status !== '死亡') {
+      if (Game.specterHostRecovery) Game.specterHostRecovery.recover(state, host, specter);
+      else {
+        host.specterPossessed = false;
+        host.specterPurifiedAtMonth = state.totalMonths;
         host.status = '健康';
         host.deceasedAt = null;
       }
     }
     if (guardian?.player) {
-      state.magicalGirl.magicPower = Math.max(0, state.magicalGirl.magicPower - 6);
+      if (guardian.consumeMagic !== false) {
+        state.magicalGirl.magicPower = Math.max(0, state.magicalGirl.magicPower - 6);
+      }
       Game.magicalGirlCore?.onKill(state);
     }
     Game.lifeDirector.addLog(state, '魔法少女狩猎',
       (guardian?.name || '一位魔法少女') + '在' + reason + '中净化了寄生于'
-      + (host?.name || '未知宿主') + '体内的' + specter.type + '，宿主幸存下来。', 'milestone');
+      + (host?.name || '未知宿主') + '体内的' + specter.type
+      + '。宿主失去了全部记忆，以16岁少女的身份回到当地高中重新生活。', 'milestone');
     return true;
   }
-
   function intercept(state, specter, victim) {
     var guards = protectors(state, specter);
     if (!guards.length) return false;
@@ -117,7 +120,6 @@
       guardian.name + '打断了幽诡对' + victim.name + '的吞噬，幽诡负伤逃走。', 'good');
     return true;
   }
-
   function spread(state, specter, consumedId) {
     if (state.supernatural.specters.length >= MAX_SPECTERS) return;
     if (state.totalMonths - specter.lastSplitMonth < 6) return;
@@ -135,7 +137,6 @@
       '幽诡吞噬完猎物后发生分裂，新的个体寄生了' + target.name
       + '。城市中的幽诡数量正在增加。', 'danger');
   }
-
   function feed(state, specter) {
     ensureSpecter(state, specter);
     if (specter.stage !== '掠食' || state.totalMonths - specter.lastFeedMonth < 1) return;
@@ -164,7 +165,6 @@
       victim.name + '被幽诡完全吞噬，原有生命迹象已经消失。', 'danger');
     spread(state, specter, victim.id);
   }
-
   function monthlyProtection(state) {
     var specters = state.supernatural?.specters || [];
     if (!specters.length || state.supernatural.combat?.active
@@ -192,6 +192,8 @@
     ensureSpecter: ensureSpecter,
     recordPossession: recordPossession,
     localSpecters: localSpecters,
+    clearFeeding: clearFeeding,
+    purify: purify,
     feed: feed,
     monthlyProtection: monthlyProtection,
   });

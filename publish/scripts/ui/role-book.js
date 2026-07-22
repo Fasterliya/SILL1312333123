@@ -66,8 +66,10 @@
     const place = person.currentCity || person.careerCity || person.homeCity || '去向未明';
     const possessedAge = Number.isFinite(person.specterPossessedAtAge)
       ? `${person.specterPossessedAtAge}岁时被寄生` : '';
+    const physicalAge = person.specterPossessed
+      ? `生理年龄${Game.content.personAge(state, person)}岁` : '';
     const special = person.specterPossessed
-      ? ['幽诡寄生', possessedAge].filter(Boolean).join(' · ')
+      ? ['幽诡寄生', possessedAge, physicalAge].filter(Boolean).join(' · ')
       : (cradle ? '摇篮收容中' : '');
     const status = person.isPlayerRecord ? '当前囚禁档案'
       : (person.status === '已故' ? '已故 · 纪念档案'

@@ -4,7 +4,6 @@
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
   const careerIds = new Set(['coser', 'welfare']);
-  const careerNames = new Set(['职业Coser', '福利姬']);
   const feminineCostume = /裙|女仆|巫女|洋装|旗袍|振袖|百褶|连衣|水手服|长袜|过膝袜/;
   const feminineTop = /裙|女仆|巫女|洋装|旗袍|振袖|连衣|小香|町娘|毕业袴/;
   const masculineStyle = /男性|男式|燕尾服|狩衣|背头|寸头|西装长裤|直筒裤|工装裤|机车裤|休闲裤|商务袜/;
@@ -99,10 +98,7 @@
     if (person.gender !== '男' || !isFeminineCostume(costume)) return false;
     person.fashion ||= {};
     person.fashion.crossplay = true;
-    const age = U.personAge(state, person);
-    if (age < 18 || !careerNames.has(person.job)) return true;
-    const roll = hash(`${person.id}:${costume.name}:convention-crossplay`) % 100;
-    if (roll < Math.max(35, chance(person, 'coser'))) activate(state, person, 'coser');
+    if (U.personAge(state, person) >= 18) activate(state, person, 'coser');
     return true;
   }
 

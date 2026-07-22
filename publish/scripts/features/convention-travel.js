@@ -1,6 +1,5 @@
 (function initConventionTravel(root) {
   'use strict';
-
   const Game = root.LifeGame = root.LifeGame || {};
   const U = Game.content;
   function identityProfile(state) {
@@ -10,7 +9,8 @@
     return ts.selectedCoserId ? Game.people.find(state, ts.selectedCoserId) : null;
   }
   function createCoser(state, costume, ts) {
-    const age = Math.max(12, U.age(state) + U.between(-3, 4));
+    const age = Math.random() < 0.48 ? U.between(18, 23)
+      : (Math.random() < 0.7 ? U.between(24, 29) : U.between(30, 38));
     const person = U.person('漫展相识', '', age, null, state.totalMonths);
     Game.worldCulture.applyPerson(person, ts.hostCountry);
     U.setUniqueName(state, person, Game.worldCulture.profile(ts.hostCountry).locale);
@@ -23,7 +23,7 @@
     person.fashion = person.fashion && typeof person.fashion === 'object' ? person.fashion : {};
     person.fashion.cosplayInterest = U.between(78, 100);
     person.fashion.favoriteSeries = costume.series;
-    Game.npcFemboyCareer?.considerConvention(state, person, costume);
+    Game.conventionCoserRoster?.prepare(state, person, costume);
     state.travel.encounters.push(person);
     return person;
   }
@@ -175,8 +175,8 @@
     ts.node = resolved.next;
     return { ok: true, message: ts.feedback };
   }
-
   function model(state, ts) {
+    Game.conventionCoserRoster?.normalize(state, ts);
     const node = Game.conventionRoutes.get(ts.node);
     if (!node && ts.node !== 'coser-select') return null;
     const role = Game.conventionCatalog.roles.find((item) => item.id === ts.role)?.name || '游客';

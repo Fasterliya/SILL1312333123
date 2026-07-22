@@ -28,6 +28,12 @@
       shoes: ['玛丽珍鞋', '便士乐福鞋', '高帮帆布鞋'],
     },
   });
+  const maleCoserLook = Object.freeze({
+    tops: ['文艺穿搭', '品质日常', '校园休闲', '运动穿搭'],
+    hair: ['清爽短发', '日式短碎发', '高束马尾', '狼尾短发'],
+    socks: ['船袜', '白色中筒袜', '运动袜'],
+    shoes: ['高帮帆布鞋', '低帮板鞋', '白色运动鞋'],
+  });
 
   function role(person) {
     const job = String(person.job || '');
@@ -62,6 +68,21 @@
     });
     data.history = data.history.slice(-8);
     Game.npcFemboyCareer?.markOutfit(state, person);
+  }
+
+  function changeMaleCoserLook(state, person, data) {
+    if (state.totalMonths < data.nextChangeMonth) return;
+    person.clothing ||= {};
+    person.clothing.top = U.random(maleCoserLook.tops);
+    person.clothing.socks = U.random(maleCoserLook.socks);
+    person.clothing.shoes = U.random(maleCoserLook.shoes);
+    person.hairstyle = U.random(maleCoserLook.hair);
+    data.nextChangeMonth = state.totalMonths + U.between(2, 4);
+    data.history.push({
+      month: state.totalMonths, top: person.clothing.top, socks: person.clothing.socks,
+      shoes: person.clothing.shoes, hairstyle: person.hairstyle,
+    });
+    data.history = data.history.slice(-8);
   }
 
   function finishSurgery(state, person, data) {
@@ -109,9 +130,14 @@
     const kind = role(person);
     const age = U.personAge(state, person);
     const feminineCareer = Game.npcFemboyCareer?.active(person);
-    if (!kind || (person.gender !== '女' && !feminineCareer)
+    const standardMaleCoser = kind === 'coser' && person.gender === '男' && !feminineCareer;
+    if (!kind || (person.gender !== '女' && !feminineCareer && !standardMaleCoser)
       || age < 18 || person.status !== '健康') return;
     const data = ensure(person, state.totalMonths);
+    if (standardMaleCoser) {
+      changeMaleCoserLook(state, person, data);
+      return;
+    }
     finishSurgery(state, person, data);
     changeLook(state, person, kind, data);
     scheduleSurgery(state, person, data);
@@ -121,8 +147,16 @@
     const kind = role(person);
     const feminineCareer = Game.npcFemboyCareer?.active(person);
     if (!kind || U.personAge(state, person) < 18
-      || (person.gender !== '女' && !feminineCareer)) return [];
+      || (kind !== 'coser' && person.gender !== '女' && !feminineCareer)) return [];
     const data = ensure(person, state.totalMonths);
+    if (kind === 'coser' && person.gender === '男' && !feminineCareer) {
+      return [
+        ['职业造型', '角色假发 / 舞台妆面 / 服装还原'],
+        ['当前企划', `${person.cosplay || '综合主题COS'} · 保持原角色体态`],
+        ['换装计划', `${Math.max(0, data.nextChangeMonth - state.totalMonths)}个月后更新`],
+        ['造型维护', '按参展周期更新 · 不安排女性化医美'],
+      ];
+    }
     const pending = data.pending;
     const proc = pending ? Game.plasticSurgery.get(pending.procedureId) : null;
     const recovery = pending ? Math.max(0, pending.completeMonth - state.totalMonths) : 0;

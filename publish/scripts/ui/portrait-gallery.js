@@ -23,9 +23,7 @@
   }
 
   function targetFor(key) {
-    const state = api.getState();
-    if (key === 'player') return Game.hunterMode.identity(state).profile;
-    return Game.people.find(state, key);
+    return Game.portraitTargets.find(api.getState(), key);
   }
 
   function entries(target) {

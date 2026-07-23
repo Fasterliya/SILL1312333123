@@ -1,14 +1,11 @@
 (function initInteractionRouter(root) {
   'use strict';
-
   const Game = root.LifeGame = root.LifeGame || {};
   let api = null;
-
   function finish(result) {
     if (!result) return;
     api.finish(result);
   }
-
   function handleNavigation(event) {
     const module = event.target.closest('[data-open-module]');
     if (module) return Game.navigation.openModule(module.dataset.openModule, module.dataset.moduleTitle), true;
@@ -21,7 +18,6 @@
     if (avatar) return Game.navigation.openCharacter(avatar.dataset.characterId), true;
     return false;
   }
-
   function handlePortrait(event) {
     const button = event.target.closest('[data-npc-generate]');
     if (!button) return false;
@@ -30,7 +26,6 @@
     Game.portraitSystem.generateNpc(button.dataset.npcGenerate, custom);
     return true;
   }
-
   function handleRelations(event, state) {
     const style = event.target.closest('[data-parenting-style]');
     if (style) return finish(Game.parenting.setStyle(state, style.dataset.parentingStyle, style.dataset.parentingChild || null)), true;
@@ -70,7 +65,6 @@
     }
     return false;
   }
-
   function handleCareer(event, state) {
     const workplace = event.target.closest('[data-workplace-action]');
     if (workplace) return finish(Game.workplace.act(state, workplace.dataset.workplaceAction)), true;
@@ -110,7 +104,6 @@
     }
     return false;
   }
-
   function handleLifeSystems(event, state) {
     const transfer = event.target.closest('[data-civic-transfer]');
     if (transfer) return finish(Game.civicSystem.transfer(state, transfer.dataset.civicTransfer)), true;
@@ -188,7 +181,7 @@
     if (Game.cradleInstitution?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.cosplaySuitEvolution?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.aiCharacterChat?.handleClick?.(event)) { Game._save?.(); return; }
-    if (Game.adoptionSystem?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.adoptionView?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.saveManager.handleClick(event)) return;
     if (Game.roleBook.handleClick(event)) return;
     if (Game.appearance.handleClick(event)) return;

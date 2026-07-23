@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="./styles/social-market.css">
   <link rel="stylesheet" href="./styles/character-tools.css">
   <link rel="stylesheet" href="./styles/feature-cards.css">
+  <link rel="stylesheet" href="./styles/character-roster.css">
   <link rel="stylesheet" href="./styles/time-controls.css">
   <link rel="stylesheet" href="./styles/npc-events.css">
   <link rel="stylesheet" href="./styles/task-center.css">
@@ -111,6 +112,7 @@
   <script src="./scripts/ui/draw-settings.js" defer></script>
   <script src="./storage.js" defer></script>
   <script src="./scripts/ui/save-manager.js" defer></script>
+  <script src="./scripts/ui/portrait-targets.js" defer></script>
   <script src="./scripts/ui/portrait-gallery.js" defer></script>
   <script src="./scripts/ui/portrait-intent.js" defer></script>
   <script src="./scripts/ui/portrait-age-prompt.js" defer></script>
@@ -220,6 +222,7 @@
   <script src="./scripts/features/cradle-network-view.js" defer></script>
   <script src="./scripts/features/family-events.js" defer></script>
   <script src="./scripts/features/adoption-system.js" defer></script>
+  <script src="./scripts/features/adoption-view.js" defer></script>
   <script src="./scripts/features/rape-encounter.js" defer></script>
   <script src="./scripts/features/tax-system.js" defer></script>
   <script src="./scripts/features/bank-system.js" defer></script>
@@ -410,8 +413,8 @@
       <h2 id="moduleTitle">子菜单</h2>
     </header>
     <div class="screen-scroll" id="moduleContent">
-      <div class="module-view" id="roleBookSubpage"><section class="panel">
-        <div class="panel-title"><h2>人物册</h2><span>城市与人生关系</span></div>
+      <div class="module-view" id="roleBookSubpage"><section class="character-roster-page">
+        <div class="panel-title character-roster-page-title"><h2>人物册</h2><span>立绘、信息与关系互动</span></div>
         <div id="roleBookPanel"></div>
       </section></div>
       <div class="module-view" id="roleArchive">
@@ -446,8 +449,8 @@
         <div class="panel-title"><h2>皮物列表</h2><span>人生角色与立绘档案</span></div>
         <div id="possessedList"></div>
       </section></div>
-      <div class="module-view" id="orphanageSubpage"><section class="panel">
-        <div class="panel-title"><h2>城市福利院</h2><span>收养无家孩童</span></div>
+      <div class="module-view" id="orphanageSubpage"><section class="character-roster-page">
+        <div class="panel-title character-roster-page-title"><h2>城市福利院</h2><span>候选档案、立绘与收养手续</span></div>
         <div id="orphanageList"></div>
       </section></div>
       <div class="module-view" id="familySubpage"><section class="family-page">

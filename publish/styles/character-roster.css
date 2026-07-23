@@ -1,0 +1,425 @@
+.character-roster-page {
+  min-height: 100%;
+}
+
+.character-roster-page-title {
+  padding: 2px 2px 10px;
+}
+
+.character-roster-shell {
+  display: grid;
+  gap: 10px;
+}
+
+.roster-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid #d8d5ca;
+  border-bottom: 1px solid #d8d5ca;
+  background: #eef1eb;
+}
+
+.roster-overview > div {
+  min-width: 0;
+  padding: 10px 8px;
+  border-right: 1px solid #d8d5ca;
+  text-align: center;
+}
+
+.roster-overview > div:nth-child(3) {
+  border-right: 0;
+}
+
+.roster-overview strong,
+.roster-overview span {
+  display: block;
+}
+
+.roster-overview strong {
+  color: #315f58;
+  font: 700 18px/1.2 serif;
+}
+
+.roster-overview span {
+  margin-top: 3px;
+  color: #737a75;
+  font-size: 9px;
+}
+
+.roster-overview p {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 8px 10px;
+  border-top: 1px solid #d8d5ca;
+  color: #66706b;
+  font-size: 9px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.orphanage-overview {
+  background: #f3efe4;
+}
+
+.orphanage-overview strong {
+  color: #8a6320;
+}
+
+.character-roster-list {
+  display: grid;
+  gap: 9px;
+}
+
+.character-roster-card {
+  min-width: 0;
+  padding: 11px;
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  border: 1px solid #dcd9cf;
+  border-radius: 7px;
+  background: #fffdf7;
+  box-shadow: 0 4px 14px rgba(39, 52, 48, 0.05);
+}
+
+.character-roster-card.deceased {
+  background: #f1f0eb;
+  filter: saturate(0.55);
+}
+
+.character-roster-card.is-drawing {
+  border-color: #b8a66f;
+}
+
+.character-roster-portrait {
+  position: relative;
+  width: 82px;
+  height: 114px;
+  min-width: 82px;
+  min-height: 114px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid #d3b665;
+  border-radius: 6px;
+  background: #eee3c8;
+  color: #315f58;
+  font: 700 24px/1 serif;
+  box-shadow: 0 3px 10px rgba(44, 55, 51, 0.12);
+}
+
+.character-roster-portrait img,
+.character-roster-portrait .deceased-avatar {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.character-roster-portrait img {
+  object-fit: cover;
+  object-position: 50% 20%;
+}
+
+.character-roster-portrait .deceased-avatar img {
+  height: 100%;
+}
+
+.character-roster-portrait .deceased-avatar i {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+}
+
+.roster-portrait-pending {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  left: 4px;
+  padding: 5px 3px;
+  background: rgba(38, 59, 55, 0.88);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.character-roster-info {
+  min-width: 0;
+}
+
+.character-roster-info > header {
+  min-height: 34px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.character-roster-info > header > div {
+  min-width: 0;
+}
+
+.character-roster-info > header strong {
+  max-width: 100%;
+  color: #263b37;
+  font: 700 16px/1.25 serif;
+  overflow-wrap: anywhere;
+}
+
+.character-roster-info > header span {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 5px;
+  border: 1px solid #d8b45a;
+  border-radius: 3px;
+  color: #805e18;
+  font-size: 9px;
+  vertical-align: 2px;
+}
+
+.roster-file-button {
+  min-width: 48px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid #c8d4d0;
+  border-radius: 4px;
+  background: #edf3ef;
+  color: #315f58;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.character-roster-tags,
+.character-roster-alerts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.character-roster-tags {
+  margin-top: 3px;
+}
+
+.character-roster-tags span,
+.character-roster-alerts span {
+  padding: 3px 5px;
+  border-radius: 3px;
+  font-size: 8px;
+  line-height: 1.2;
+}
+
+.character-roster-tags span {
+  border: 1px solid #d8ddd8;
+  background: #f2f3ee;
+  color: #58635e;
+}
+
+.character-roster-alerts {
+  margin-top: 6px;
+}
+
+.character-roster-alerts span {
+  border: 1px solid #d7b5ad;
+  background: #fbefec;
+  color: #9b4036;
+}
+
+.character-roster-meta {
+  margin: 6px 0 3px;
+  color: #555f5a;
+  font-size: 10px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.character-roster-status,
+.character-roster-error {
+  display: block;
+  margin-top: 3px;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.character-roster-status {
+  color: #838984;
+}
+
+.character-roster-error {
+  color: #a04439;
+}
+
+.character-roster-affection {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+}
+
+.character-roster-affection span {
+  color: #7b817d;
+  font-size: 9px;
+}
+
+.character-roster-affection progress,
+.roster-stat progress {
+  width: 100%;
+  overflow: hidden;
+  border: 0;
+  background: #e4e1d8;
+  appearance: none;
+}
+
+.character-roster-affection progress {
+  height: 5px;
+}
+
+.character-roster-affection progress::-webkit-progress-bar,
+.roster-stat progress::-webkit-progress-bar {
+  background: #e4e1d8;
+}
+
+.character-roster-affection progress::-webkit-progress-value {
+  background: #bd3d33;
+}
+
+.character-roster-affection progress::-moz-progress-bar {
+  background: #bd3d33;
+}
+
+.character-roster-actions {
+  margin-top: 8px;
+  border-top: 1px dashed #ddd8ca;
+}
+
+.character-roster-actions summary {
+  position: relative;
+  min-height: 44px;
+  padding-right: 24px;
+  display: flex;
+  align-items: center;
+  color: #315f58;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.character-roster-actions summary::after {
+  content: "+";
+  position: absolute;
+  right: 4px;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.character-roster-actions[open] summary::after {
+  content: "−";
+}
+
+.character-roster-actions > div {
+  padding-bottom: 2px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.character-roster-actions button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px;
+  border: 1px solid #c9d5d1;
+  border-radius: 4px;
+  background: #edf3ef;
+  color: #315f58;
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.character-roster-actions .roster-chat-action {
+  border-color: #315f58;
+  background: #315f58;
+  color: #fff;
+}
+
+.character-roster-actions .roster-primary-action {
+  grid-column: 1 / -1;
+  border-color: #a04439;
+  background: #a04439;
+  color: #fff;
+}
+
+.orphan-roster-card {
+  grid-template-columns: 92px minmax(0, 1fr);
+}
+
+.orphan-roster-card .character-roster-portrait {
+  width: 92px;
+  height: 128px;
+  min-width: 92px;
+  min-height: 128px;
+}
+
+.orphan-stat-grid {
+  margin-top: 8px;
+  display: grid;
+  gap: 5px;
+}
+
+.roster-stat {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 22px;
+  gap: 6px;
+  align-items: center;
+  color: #747b76;
+  font-size: 8px;
+}
+
+.roster-stat progress {
+  height: 4px;
+}
+
+.roster-stat progress::-webkit-progress-value {
+  background: #7b947b;
+}
+
+.roster-stat progress::-moz-progress-bar {
+  background: #7b947b;
+}
+
+.roster-stat strong {
+  color: #4e5b56;
+  font-size: 8px;
+  text-align: right;
+}
+
+@media (max-width: 380px) {
+  .character-roster-card,
+  .orphan-roster-card {
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 9px;
+    padding: 9px;
+  }
+
+  .character-roster-portrait,
+  .orphan-roster-card .character-roster-portrait {
+    width: 70px;
+    height: 98px;
+    min-width: 70px;
+    min-height: 98px;
+  }
+
+  .character-roster-info > header strong {
+    font-size: 14px;
+  }
+
+  .character-roster-actions > div {
+    grid-template-columns: 1fr;
+  }
+
+  .character-roster-actions .roster-primary-action {
+    grid-column: auto;
+  }
+}

@@ -25,7 +25,7 @@
     Game.cradleView?.render(state);
     Game.cosplaySuitEvolution?.renderCompulsion(state);
     Game.familyDashboard?.render(state);
-    Game.adoptionSystem?.renderOrphanage(state);
+    Game.adoptionView?.render(state);
     Game.lifeLoop.render(state);
     Game.actions.renderDecision();
   }

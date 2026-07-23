@@ -29,26 +29,15 @@
   }
 
   function findTarget(key) {
-    const state = api.getState();
-    if (key === 'player') return Game.hunterMode.identity(state).profile;
-    return Game.people.find(state, key);
+    return Game.portraitTargets.find(api.getState(), key);
   }
 
   function description(state, target, key, custom, model) {
     return Game.portraitPrompt.build(state, target, key, custom, model);
   }
 
-  async function retryDraw(input) {
-    const retryable = new Set(['RATE_LIMITED', 'NETWORK_ERROR', 'TIMEOUT', 'DRAW_TIMEOUT', 'CREATE_TASK_FAILED', 'INTERNAL_ERROR', 'SERVICE_UNAVAILABLE']);
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      try {
-        return await Game.sdkAdapter.drawGenerate(input);
-      } catch (err) {
-        if (!retryable.has(err?.code) || !err?.retryable || attempt === 1) throw err;
-        await new Promise((resolve) => root.setTimeout(resolve, 1200 * (attempt + 1)));
-      }
-    }
-    return null;
+  async function requestDraw(input) {
+    return Game.sdkAdapter.drawGenerate(input);
   }
 
   function guidance(err) {
@@ -68,8 +57,8 @@
 
   async function generate(key, rawCustom) {
     if (drawing.has(key)) return;
-    if (drawing.size >= 2) {
-      Game.view.showToast('已有两张立绘正在生成，请稍候', 'warning');
+    if (drawing.size >= 1) {
+      Game.view.showToast('已有立绘正在生成，请等待完成后再试', 'warning');
       return;
     }
     const target = findTarget(key);
@@ -78,7 +67,9 @@
       Game.view.showToast('已故角色的纪念立绘不能重新生成', 'warning');
       return;
     }
-    if (key !== 'player') Game.npcLife.syncGrowth(api.getState(), target);
+    if (key !== 'player' && !Game.portraitTargets.isOrphanKey(key)) {
+      Game.npcLife.syncGrowth(api.getState(), target);
+    }
     const custom = Game.portraitPrompt.clean(
       String(rawCustom || '').replace(/[\u0000-\u001f]/g, ' ')
     ).slice(0, 120);
@@ -93,7 +84,7 @@
       const model = Game.drawSettings.selected(state);
       const years = key === 'player' ? Game.content.age(state) : Game.content.personAge(state, target);
       const ageNegative = Game.portraitAgePrompt.negative(years, target.portraitAgeStage);
-      const result = await retryDraw({
+      const result = await requestDraw({
         prompt: description(state, target, key, custom, model),
         dimension: '2:3',
         model,
@@ -175,8 +166,11 @@
     latest.forEach((value, key) => latest.set(key, value + 1));
     drawing.clear();
   }
+  function status(key) {
+    return { drawing: drawing.has(key), error: errors.get(key) || '' };
+  }
 
   Game.portraitSystem = Object.freeze({
-    configure, renderPlayer, npcHtml, avatar, generatePlayer, generateNpc, cancelAll, description,
+    configure, renderPlayer, npcHtml, avatar, generatePlayer, generateNpc, cancelAll, description, status,
   });
 }(window));

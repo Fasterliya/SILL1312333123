@@ -114,7 +114,12 @@
     const action = actions[type];
     if (!action) return { ok: false, message: '当前阶段没有全日制学习安排' };
     if (item.lastStudyMonth === state.totalMonths) return { ok: false, message: '本月已经完成学习安排' };
-    Game.economy.spend(state, action[0]);
+    var cost = action[0];
+    if (cost > 0 && state.education.schoolStage === 'university') {
+      state.familyWealth = Math.max(0, (Number(state.familyWealth) || 0) - cost);
+    } else {
+      Game.economy.spend(state, cost);
+    }
     item.preparation = clamp(item.preparation + action[1]);
     item.discipline = clamp(item.discipline + action[2]);
     item.examTechnique = clamp(item.examTechnique + action[3]);

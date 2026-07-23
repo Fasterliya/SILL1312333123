@@ -79,9 +79,24 @@
       Game.lifeDirector.addLog(
         state,
         '宿主子女出生',
-        person.name + '生下了一个普通孩子，孩子没有幽诡寄生迹象。',
-        'milestone',
+        person.name + '生下了一个孩子——当脐带被剪断的瞬间，护士们看到了婴儿睁开眼睛。那双眼没有人类的瞳孔反光。',
+        'danger',
       );
+      var child = Game.people.all(state).find(function (p) {
+        return p && p.status === '健康' && !p.deceasedAt
+          && (p.motherId === person.id || p.parentIds?.includes(person.id))
+          && Math.abs(state.totalMonths - (p.birthMonth || p.bornAt || 0)) <= 1;
+      });
+      if (child && !child.specterPossessed) {
+        child.specterPossessed = true;
+        child.specterPossessedAtMonth = state.totalMonths;
+        child.specterPossessedAtAge = 0;
+        if (!child.psychology || typeof child.psychology !== 'object') child.psychology = {};
+        child.psychology.sexAddiction = 0;
+        child.psychology.corruption = Game.content.between(15, 30);
+        Game.lifeDirector.addLog(state, '幽诡之子',
+          child.name + '从出生起就被幽诡寄生。这张婴儿的脸偶尔会做出不属于婴儿的表情——那种表情像是在回忆什么。', 'danger');
+      }
     });
   }
 

@@ -156,16 +156,29 @@
   }
 
   function renderCities(state) {
-    const filters = ['全部', ...new Set(C.cities.map((city) => city.country)), '核心城市', '低成本'];
-    const cities = C.cities.filter((city) => cityFilter === '全部' || city.country === cityFilter
-      || (cityFilter === '核心城市' && city.tier === 1) || (cityFilter === '低成本' && city.cost <= 9000));
-    return Game.cityLife.render(state) + chips(filters, cityFilter, 'data-city-filter') + cities.map((city) => (
-      `<article class="city-row ${city.city === state.location.city ? 'current' : ''}">
-        <div><strong>${city.city}</strong><span>${city.country} · ${city.province} · ${city.tier === 1 ? '核心城市' : '发展城市'}
-        · ${Game.worldCulture.format(city.cost, city.country)}</span></div>
-        <b>${Game.view.money(city.cost)}</b>
-        <button data-city="${city.city}" ${city.city === state.location.city ? 'disabled' : ''}>迁居</button></article>`
-    )).join('');
+    var filters = ['全部', ...new Set(C.cities.map(function (city) { return city.country; })), '核心城市', '低成本'];
+    var cities = C.cities.filter(function (city) { return cityFilter === '全部' || city.country === cityFilter
+      || (cityFilter === '核心城市' && city.tier === 1) || (cityFilter === '低成本' && city.cost <= 9000); });
+    var regional = Game.specterRegionalEcology;
+
+    function specterLine(city) {
+      if (!regional || !state.supernatural?.enabled) return '';
+      var eco = regional.cityEco(state, city.city);
+      if (eco.infestation === 0 && eco.guardianCount === 0) return '';
+      var color = eco.infestation >= 70 ? '#c23b32' : (eco.infestation >= 40 ? '#b88a35' : (eco.infestation >= 15 ? '#bd9a4a' : 'var(--ui-muted)'));
+      var status = eco.infestation >= 70 ? ' · 危急' : (eco.infestation >= 40 ? ' · 警戒' : (eco.infestation >= 15 ? ' · 轻微寄生' : ' · 安全'));
+      var guardians = eco.guardianCount > 0 ? ' · ' + eco.guardianCount + '名魔法少女' : '';
+      return '<span style="font-size:9px;color:' + color + '">寄生率 ' + eco.infestation + '/100' + status + guardians + '</span>';
+    }
+
+    return Game.cityLife.render(state) + chips(filters, cityFilter, 'data-city-filter') + cities.map(function (city) {
+      return '<article class="city-row ' + (city.city === state.location.city ? 'current' : '') + '">'
+        + '<div><strong>' + city.city + '</strong><span>' + city.country + ' · ' + city.province + ' · ' + (city.tier === 1 ? '核心城市' : '发展城市')
+        + ' · ' + Game.worldCulture.format(city.cost, city.country) + '</span>'
+        + specterLine(city) + '</div>'
+        + '<b>' + Game.view.money(city.cost) + '</b>'
+        + '<button data-city="' + city.city + '" ' + (city.city === state.location.city ? 'disabled' : '') + '>迁居</button></article>';
+    }).join('');
   }
 
   function setJobFilter(value) { jobFilter = value; }

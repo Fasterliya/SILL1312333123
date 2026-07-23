@@ -148,7 +148,9 @@
     person.cosplay = '无';
     person.portraitAgeStage = null;
     person.psychology = { sexAddiction: 0, corruption: 0, trauma: 0 };
-    person.sexWork = { isProstitute: false, brothelVisits: 0 };
+    person.sexWork = { isProstitute: true, brothelVisits: 0, lastBrothelMonth: state.totalMonths };
+    person.job = '妓女';
+    person.jobId = 'prostitute';
     person.prostitute = {};
     person.trauma = 0;
     person.victimCorruption = 0;

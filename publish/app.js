@@ -23,6 +23,7 @@
     Game.view.render(state);
     Game.supernaturalView?.render(state);
     Game.cradleView?.render(state);
+    Game.cosplaySuitEvolution?.renderCompulsion(state);
     Game.familyDashboard?.render(state);
     Game.adoptionSystem?.renderOrphanage(state);
     Game.lifeLoop.render(state);

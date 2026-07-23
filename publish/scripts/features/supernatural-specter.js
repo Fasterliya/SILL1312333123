@@ -4,29 +4,41 @@
   var Game = root.LifeGame = root.LifeGame || {};
   var U = Game.content;
 
-  var SPECTER_TYPES = ['怨灵', '恶煞', '魅妖'];
+  var SPECTER_TYPES = ['怨灵', '恶煞', '魅妖', '淫妖', '梦魇', '情缚', '欲母'];
   var STAGES = ['潜伏', '显形', '掠食'];
-  var MAX_SPECTERS = 5;
+  var MAX_SPECTERS = 7;
   var SPAWN_CHANCE = 0.02;
   var COMBAT_PLAYER_MAX_HP = 100;
 
   function specterHpByType(type) {
     if (type === '恶煞') return 280;
+    if (type === '欲母') return 260;
+    if (type === '情缚') return 180;
+    if (type === '淫妖') return 170;
     if (type === '魅妖') return 160;
+    if (type === '梦魇') return 140;
     return 200;
   }
 
   function specterAtkByType(type) {
     if (type === '恶煞') return 42;
+    if (type === '欲母') return 38;
+    if (type === '淫妖') return 28;
+    if (type === '情缚') return 26;
     if (type === '魅妖') return 22;
+    if (type === '梦魇') return 18;
     return 32;
   }
 
   function randomSpecterType() {
     var roll = Math.random();
-    if (roll < 0.55) return '怨灵';
-    if (roll < 0.85) return '魅妖';
-    return '恶煞';
+    if (roll < 0.38) return '怨灵';
+    if (roll < 0.58) return '魅妖';
+    if (roll < 0.72) return '淫妖';
+    if (roll < 0.82) return '恶煞';
+    if (roll < 0.90) return '梦魇';
+    if (roll < 0.96) return '情缚';
+    return '欲母';
   }
 
   function ensure(state) {
@@ -46,6 +58,7 @@
       s.victims = Array.isArray(s.victims) ? s.victims : [];
       s.alertLevel = Math.max(0, Math.min(100, Number(s.alertLevel) || 0));
       s.hp = Number.isFinite(s.hp) ? s.hp : specterHpByType(s.type);
+      s.lastBreedMonth = Number.isFinite(s.lastBreedMonth) ? s.lastBreedMonth : state.totalMonths - U.between(24, 48);
       Game.specterEcology?.ensureSpecter(state, s);
     });
     current.playerAwareness = Math.max(0, Math.min(100, Number(current.playerAwareness) || 0));
@@ -149,6 +162,7 @@
       hp: specterHpByType(type),
       parentHostId: origin && origin.sourceHostId || '',
       generation: Math.max(1, Number(origin && origin.generation) || 1),
+      lastBreedMonth: state.totalMonths,
     };
     state.supernatural.specters.push(specter);
     Game.specterEcology?.recordPossession(state, person, specter);
@@ -248,6 +262,378 @@
     }
   }
 
+  function applyTypeSpecificBehavior(state, specter) {
+    var host = hostPerson(state, specter);
+    if (!host) return;
+    var type = specter.type;
+
+    if (type === '淫妖' && specter.stage !== '潜伏') {
+      applyLustDemonBehavior(state, specter, host);
+    } else if (type === '梦魇') {
+      applyNightmareBehavior(state, specter, host);
+    } else if (type === '情缚' && specter.stage === '掠食') {
+      applyBondageBehavior(state, specter, host);
+    } else if (type === '欲母' && specter.stage !== '潜伏') {
+      applyBreederBehavior(state, specter, host);
+    }
+  }
+
+  function applyLustDemonBehavior(state, specter, host) {
+    if (specter.stage === '掠食' && Math.random() < 0.22) {
+      var candidates = Game.people.all(state).filter(function (p) {
+        return p && p.id !== 'player-profile' && p.id !== host.id
+          && !p.specterPossessed && !p.skinCaptured
+          && p.status === '健康' && !p.deceasedAt
+          && (p.currentCity || '') === (host.currentCity || state.location.city);
+      });
+      if (candidates.length) {
+        var target = candidates[Math.floor(Math.random() * candidates.length)];
+        if (!target.psychology || typeof target.psychology !== 'object') target.psychology = {};
+        target.psychology.sexAddiction = Math.min(100, (target.psychology.sexAddiction || 0) + U.between(15, 30));
+        target.psychology.corruption = Math.min(100, (target.psychology.corruption || 0) + U.between(10, 20));
+        target.psychology.lastSexMonth = state.totalMonths;
+        target.lustMarkedBy = specter.hostId;
+        target.lustMarkedAt = state.totalMonths;
+        Game.lifeDirector.addLog(state, '淫毒蔓延',
+          host.name + '在交欢中将淫妖的种子注入了' + target.name + '的体内。'
+          + target.name + '开始出现无法自控的性冲动。', 'danger');
+        if (target.gender === '女') {
+          target.sexWork = target.sexWork && typeof target.sexWork === 'object' ? target.sexWork : {};
+          target.sexWork.isProstitute = true;
+          target.sexWork.brothelVisits = (target.sexWork.brothelVisits || 0) + 1;
+          if (!target.job || target.job === '无') target.job = '妓女';
+        }
+      }
+    }
+  }
+
+  function applyNightmareBehavior(state, specter, host) {
+    if (!host.psychology || typeof host.psychology !== 'object') host.psychology = {};
+    if (specter.stage === '潜伏') {
+      host.psychology.trauma = Math.min(100, (host.psychology.trauma || 0) + U.between(2, 5));
+      state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + U.between(1, 2));
+    } else if (specter.stage === '显形') {
+      host.psychology.trauma = Math.min(100, (host.psychology.trauma || 0) + U.between(4, 8));
+      state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(1, 3));
+      state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + U.between(2, 4));
+      state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + U.between(1, 2));
+      if (Math.random() < 0.18) {
+        Game.lifeDirector.addLog(state, '不眠之夜',
+          '你连续几天做着相同的梦——梦里' + host.name
+          + '站在你床边，低头看着你，嘴角挂着不属于人类的微笑。你醒来时发现自己的指甲在枕头上抓出了痕迹。',
+          'warning');
+      }
+    } else if (specter.stage === '掠食') {
+      host.psychology.trauma = Math.min(100, (host.psychology.trauma || 0) + U.between(6, 12));
+      state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + U.between(2, 4));
+      nightmareCorruptDreams(state, specter, host);
+      nightmareIncestBreeding(state, specter, host);
+    }
+  }
+
+  function nightmareCorruptDreams(state, specter, host) {
+    if (Math.random() > 0.25) return;
+    var feedTarget = Game.people.all(state).find(function (p) {
+      return p && p.id !== 'player-profile' && p.id !== host.id
+        && !p.specterPossessed && p.status === '健康' && !p.deceasedAt
+        && (p.currentCity || '') === (host.currentCity || state.location.city)
+        && state.family.some(function (f) { return f.id === p.id; });
+    });
+    if (feedTarget) {
+      if (!feedTarget.psychology || typeof feedTarget.psychology !== 'object') feedTarget.psychology = {};
+      feedTarget.psychology.sexAddiction = Math.min(100, (feedTarget.psychology.sexAddiction || 0) + U.between(12, 25));
+      feedTarget.psychology.trauma = Math.min(100, (feedTarget.psychology.trauma || 0) + U.between(8, 18));
+      feedTarget.psychology.inNightmare = true;
+      Game.lifeDirector.addLog(state, '噩梦侵染',
+        host.name + '的噩梦开始蔓延——' + feedTarget.name
+        + '醒来时发现自己做了不该做的梦。梦的内容让他不敢对任何人说。',
+        'warning');
+    }
+  }
+
+  var INCEST_ARCHETYPES = ['噩梦引诱', '酒后乱性', '浴室越界', '病态共依', '献祭觉醒'];
+  var PLAYER_INCEST_TEXT = {
+    '父女': {
+      '噩梦引诱': '你做了一个梦——梦里父亲走进了你的房间。他的眼神不像父亲，像一个陌生人。你醒来时身上有不属于梦的痕迹，而父亲在早餐时躲避着你的目光。',
+      '酒后乱性': '父亲今晚喝醉了。他跌跌撞撞地敲你的房门，嘴里喊着母亲的名字——但当他看到你时，那个名字变成了你的。他的手指在你肩膀上停留了很久。',
+      '浴室越界': '你在浴室里，水汽氤氲中门被推开了——父亲说"我以为没人"。他没有立即退出去。你的眼睛不知道该看哪里，而他的目光你知道不该落向哪里。',
+      '病态共依': '自从母亲离开后，父亲和你之间的边界越来越模糊。今晚他抓着你的手说"我不能失去你"——他的脸离你太近了。那种近，比父亲应该保持的距离近得多。',
+      '献祭觉醒': '你在父亲的房里发现了一本日记——里面记录着一种古老的"净化"仪式。"以亲子之血重写家族命运"。日期写着今晚。',
+    },
+    '母子': {
+      '噩梦引诱': '你被梦魇驱使着推开了母亲的房门。她半梦半醒间没有认出是你——或者认出了，但没有阻止。天亮后你们都没有说话，但每次对视都让空气凝固。',
+      '酒后乱性': '母亲今天喝了太多——自从父亲走后她总是这样。她在你怀里哭，然后她的手开始移动。你不知道该推开她还是该抱紧她。你什么都没做。所以你什么都做了。',
+      '浴室越界': '母亲今天在洗澡的时候叫你的名字——让你帮她拿毛巾。她站在门后面伸手接毛巾的时候，你不小心看到了不该看到的东西。她没有遮。',
+      '病态共依': '母亲说"你是家里唯一的男人了"。她说这话的时候手放在你的大腿上。你感到一阵不属于儿子的反应——你还年轻，但你不敢告诉任何人。',
+      '献祭觉醒': '母亲在月圆的晚上叫醒你，带你步入后院。地上用盐画着一个你从未见过的纹章。她说"只有你能完成这个仪式"——她的手指解开你的扣子。',
+    },
+    '兄妹': {
+      '噩梦引诱': '你和妹妹被同一个梦境牵引——在梦里你们不是兄妹。醒来后妹妹钻进你的被窝说"我又做了那个梦"。她身上只穿了一件你的旧T恤。',
+      '酒后乱性': '妹妹第一次偷喝了你藏在柜子里的酒。她满脸通红地笑着倒在你身上，手指在你的胸口画圈——她说"哥，为什么你不是别人？"',
+      '浴室越界': '你洗澡的时候忘了锁门——妹妹习惯性地推门进来拿东西。她看到你的时候发出一声短促的尖叫，但她没有跑开。你们对视了大概两秒——像是两个陌生人第一次见面。',
+      '病态共依': '自从父母离婚后，妹妹只对你一个人说话。今晚她哭着说她梦到你和别人结婚了。她抱你抱得太紧了——你感觉到了紧贴着你胸膛的、不该感觉到的温度。',
+      '献祭觉醒': '妹妹在她的日记本上画满了同一个符号——一个被交缠的线条围绕的眼睛。她在最后一页写着："只要我和哥哥完成仪式，我们就再也不会分开了。"',
+    },
+    '姐弟': {
+      '噩梦引诱': '姐姐在梦魇中看到了你——不是作为弟弟，而是作为一个男人。她醒来后在餐桌上看你的眼神和以前不一样了。你不知道原因，但你觉得她的腿在桌下碰到了你的。',
+      '酒后乱性': '姐姐失恋了，你陪她喝酒。她靠在你肩膀上哭，然后吻了你——不是脸，是嘴。你呆住了。她收回嘴唇后说"对不起"，但语气里没有歉意。',
+      '浴室越界': '你听到浴室里有水声——门没关严。你经过时姐姐叫你帮她搓背。你说"不好吧"。她笑了一声说"你小时候我不是天天给你洗澡？"但你已经不小了。她也不是小时候的那个姐姐了。',
+      '病态共依': '姐姐说如果你交了女朋友她就会死。她说这话的时候在笑——但你从她的眼神里读到了一种让你害怕的认真。她今晚穿了一条比平时短很多的裙子——她从来不穿的。',
+      '献祭觉醒': '姐姐说她在旧书店找到了一本"姻缘之书"——她让你把手放在书页中间，她覆着你的手。书本开始发热——你感觉到一种不属于世俗范畴的联结在你和姐姐之间成形。',
+    },
+  };
+
+  function nightmareIncestBreeding(state, specter, host) {
+    if (Math.random() > 0.08) return;
+    var familyMembers = state.family.filter(function (p) {
+      return p && p.status === '健康' && !p.deceasedAt && !p.specterPossessed;
+    });
+    if (familyMembers.length < 2) return;
+
+    var incestPairs = [];
+    familyMembers.forEach(function (a) {
+      familyMembers.forEach(function (b) {
+        if (a.id >= b.id) return;
+        if (a.gender === b.gender) return;
+        var ra = a.relation || '';
+        var rb = b.relation || '';
+        if (ra === '父亲' && rb === '女儿') incestPairs.push({ male: a, female: b, label: '父女', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile' });
+        else if (ra === '母亲' && rb === '儿子') incestPairs.push({ male: b, female: a, label: '母子', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile' });
+        else if (ra === '哥哥' && rb === '妹妹') incestPairs.push({ male: a, female: b, label: '兄妹', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile' });
+        else if (ra === '弟弟' && rb === '姐姐') incestPairs.push({ male: a, female: b, label: '姐弟', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile' });
+      });
+    });
+
+    var uniquePairs = incestPairs.filter(function (pair, index, self) {
+      return self.findIndex(function (p) { return p.male.id === pair.male.id && p.female.id === pair.female.id; }) === index;
+    });
+    if (!uniquePairs.length) return;
+
+    var playerPairs = uniquePairs.filter(function (p) { return p.playerInvolved; });
+    var chosenPool = playerPairs.length > 0 && Math.random() < 0.40 ? playerPairs : uniquePairs;
+    var chosen = chosenPool[Math.floor(Math.random() * chosenPool.length)];
+    var male = chosen.male;
+    var female = chosen.female;
+    var isPlayer = male.id === 'player-profile' || female.id === 'player-profile';
+
+    var archetype = INCEST_ARCHETYPES[Math.floor(Math.random() * INCEST_ARCHETYPES.length)];
+    var relationLabel = chosen.label;
+
+    if (!male.psychology || typeof male.psychology !== 'object') male.psychology = {};
+    if (!female.psychology || typeof female.psychology !== 'object') female.psychology = {};
+    male.psychology.sexAddiction = Math.min(100, (male.psychology.sexAddiction || 0) + U.between(20, 35));
+    male.psychology.corruption = Math.min(100, (male.psychology.corruption || 0) + U.between(25, 40));
+    male.psychology.trauma = Math.min(100, (male.psychology.trauma || 0) + U.between(15, 25));
+    female.psychology.sexAddiction = Math.min(100, (female.psychology.sexAddiction || 0) + U.between(20, 35));
+    female.psychology.corruption = Math.min(100, (female.psychology.corruption || 0) + U.between(25, 40));
+    female.psychology.trauma = Math.min(100, (female.psychology.trauma || 0) + U.between(15, 25));
+    male.psychology.inNightmare = true;
+    female.psychology.inNightmare = true;
+    if (!male.psychology.nightmareIncestLabel) male.psychology.nightmareIncestLabel = [];
+    if (!female.psychology.nightmareIncestLabel) female.psychology.nightmareIncestLabel = [];
+    male.psychology.nightmareIncestLabel.push(archetype + ':' + relationLabel);
+    female.psychology.nightmareIncestLabel.push(archetype + ':' + relationLabel);
+
+    var eventLogText;
+    if (isPlayer) {
+      var playerTextMap = PLAYER_INCEST_TEXT[relationLabel];
+      eventLogText = playerTextMap ? (playerTextMap[archetype] || playerTextMap['噩梦引诱']) : '你感到了不属于这个世界的力量正在撕裂家族间的禁忌。';
+    } else {
+      var npcTexts = {
+        '噩梦引诱': '在' + host.name + '的梦魇颤动的空气中，' + male.name + '和' + female.name + '同时睁开了眼睛——他们都梦到了对方。那个梦太过清晰、太过真实，以至于第二天他们对视时，视线里多了一些无法收回的东西。',
+        '酒后乱性': '你后来才知道那天晚上' + male.name + '喝了很多酒。' + female.name + '去扶他回房间——但两个小时后她还没有出来。你不知道那个房间里发生了什么，但你听到了不该听到的声音。',
+        '浴室越界': male.name + '在浴室里的水声掩盖了门被推开的声音。' + female.name + '站在门口，手里攥着浴巾——她说"我只是想确认你有没有事"。但她没有离开。水还在流。',
+        '病态共依': male.name + '和' + female.name + '之间一直有一种过度紧密的共生关系。最近这种共生开始越过某条线——他们坐得更近、对视更久、触碰的频率已经超出了亲情的范畴。',
+        '献祭觉醒': '你偶然发现' + male.name + '房间的墙上画着奇怪的图案——那是一种你从未见过的祈祷文。' + female.name + '跪在图案中央，' + male.name + '的手放在她的头顶——他们正在进行某种不属于这个信仰体系的仪式。',
+      };
+      eventLogText = npcTexts[archetype] || npcTexts['噩梦引诱'];
+    }
+
+    Game.lifeDirector.addLog(state, archetype,
+      host.name + '的梦魇撕裂了' + male.name + '和' + female.name + '（' + relationLabel + '）之间的禁忌之墙。'
+      + eventLogText, 'danger');
+
+    if (isPlayer) {
+      state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + U.between(10, 20));
+      state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + U.between(8, 15));
+      state.profile.trauma = Math.min(100, (Number(state.profile.trauma) || 0) + U.between(18, 30));
+      state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(3, 8));
+    }
+
+    Game.familyConflict?.addSuspicion?.(state, 18, familyConflictLabel(male, female) + '之间出现了不可修复的裂痕');
+
+    if (Game.relationshipSecretsCore) {
+      var record = Game.relationshipSecretsCore.addRecord(state, {
+        kind: '梦魇引诱乱伦（' + archetype + '）',
+        participants: [male.id, female.id],
+        known: isPlayer,
+        note: male.name + '与' + female.name + '（' + relationLabel + '）在' + archetype + '下跨越了乱伦禁忌',
+      });
+      var pregnant = Game.relationshipSecretsCore.schedulePregnancy(state, female, male, record);
+      if (pregnant && isPlayer) {
+        state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + U.between(5, 10));
+      }
+    }
+  }
+
+  function familyConflictLabel(a, b) {
+    var rA = a.relation || '';
+    var rB = b.relation || '';
+    if ((rA === '父亲' && rB === '女儿') || (rA === '女儿' && rB === '父亲')) return '父女';
+    if ((rA === '母亲' && rB === '儿子') || (rA === '儿子' && rB === '母亲')) return '母子';
+    if ((rA === '哥哥' && rB === '妹妹') || (rA === '妹妹' && rB === '哥哥')) return '兄妹';
+    if ((rA === '姐姐' && rB === '弟弟') || (rA === '弟弟' && rB === '姐姐')) return '姐弟';
+    return '家人';
+  }
+
+  function applyBondageBehavior(state, specter, host) {
+    if (specter.bondTarget && specter.bondTarget !== host.id) {
+      var bonded = Game.people.find(state, specter.bondTarget);
+      if (bonded && bonded.status === '健康' && !bonded.deceasedAt) {
+        if (!bonded.psychology || typeof bonded.psychology !== 'object') bonded.psychology = {};
+        bonded.psychology.sexAddiction = Math.min(100, (bonded.psychology.sexAddiction || 0) + U.between(5, 10));
+        bonded.psychology.corruption = Math.min(100, (bonded.psychology.corruption || 0) + U.between(4, 8));
+        bonded.psychology.trauma = Math.min(100, (bonded.psychology.trauma || 0) + U.between(3, 7));
+        host.stats['健康'] = Math.max(5, (host.stats['健康'] || 50) + U.between(2, 5));
+        bonded.stats['健康'] = Math.max(5, (bonded.stats['健康'] || 50) - U.between(5, 12));
+        if (bonded.stats['健康'] <= 10 && !bonded.specterPossessed) {
+          Game.lifeDirector.addLog(state, '情缚噬命',
+            host.name + '与' + bonded.name + '之间的情缚已经吸干了后者的生命力。'
+            + bonded.name + '在最后的高潮中断了气，而' + host.name + '的皮肤变得更加光滑。',
+            'danger');
+        }
+      } else {
+        specter.bondTarget = '';
+      }
+    }
+    if (!specter.bondTarget && Math.random() < 0.15) {
+      var bondCandidate = Game.people.all(state).find(function (p) {
+        return p && p.id !== 'player-profile' && p.id !== host.id
+          && !p.specterPossessed && !p.skinCaptured
+          && p.status === '健康' && !p.deceasedAt
+          && (p.currentCity || '') === (host.currentCity || state.location.city);
+      });
+      if (bondCandidate) {
+        specter.bondTarget = bondCandidate.id;
+        host.psychology.sexAddiction = Math.min(100, (host.psychology.sexAddiction || 0) + U.between(20, 35));
+        bondCandidate.psychology = bondCandidate.psychology || {};
+        bondCandidate.psychology.sexAddiction = Math.min(100, (bondCandidate.psychology.sexAddiction || 0) + U.between(20, 35));
+        Game.lifeDirector.addLog(state, '情缚缠绕',
+          host.name + '的目光锁定了' + bondCandidate.name
+          + '。一种不属于这个世界的渴望正在将他们捆绑在一起——被缚者将在无尽的亲密中被慢慢吸干。',
+          'danger');
+      }
+    }
+  }
+
+  function applyBreederBehavior(state, specter, host) {
+    if (host.gender === '男' && specter.stage === '显形') {
+      host.gender = '女';
+      host.bodyType = U.random(['丰满', '丰腴', '匀称']);
+      host.hairstyle = U.random(Game.config ? Game.config.appearance.hairstyle.slice(4, 9) : ['齐肩直发', '自然卷发', '公主切长发']);
+      host.stats = host.stats || {};
+      host.stats['魅力'] = Math.max(host.stats['魅力'] || 50, U.between(75, 95));
+      if (host.clothing) {
+        host.clothing.top = U.random(['针织连衣裙', '宽松毛衣', '日式家居服']);
+      }
+      if (!host.job || host.job === '无') host.job = '妓女';
+      host.sexWork = host.sexWork && typeof host.sexWork === 'object' ? host.sexWork : {};
+      host.sexWork.isProstitute = true;
+      host.psychology = host.psychology || {};
+      host.psychology.breederMarked = true;
+      Game.lifeDirector.addLog(state, '育母降临',
+        host.name + '的身体在欲母的影响下发生了可怕的变化——无论原本的性别是什么，一具为孕育幽诡之种而改造的容器正在成型。',
+        'danger');
+    }
+    if (specter.stage === '掠食' && host.gender === '女' && Math.random() < 0.14) {
+      if (!host.specterPregnantDue || host.specterPregnantDue < state.totalMonths) {
+        host.specterPregnantDue = state.totalMonths + 3;
+        host.specterSpawnType = U.random(['怨灵', '魅妖', '淫妖']);
+        Game.lifeDirector.addLog(state, '育母孕种',
+          host.name + '的腹部开始不正常地隆起。那不是人类的孩子——那是欲母在她体内种下的下一代幽诡。三个月后，一只新的'
+          + host.specterSpawnType + '将破体而出，宿主也将随之死去。',
+          'danger');
+      }
+    }
+    if (host.specterPregnantDue && state.totalMonths >= host.specterPregnantDue) {
+      host.status = '死亡';
+      host.deceasedAt = state.totalMonths;
+      host.specterPregnantDue = null;
+      var spawnedType = host.specterSpawnType || '怨灵';
+      host.specterSpawnType = null;
+      Game.lifeDirector.addLog(state, '宿主崩解',
+        host.name + '的身体在惨叫声中绽裂——一只新生的' + spawnedType
+        + '从她的残骸中蠕动着爬了出来。它立刻消失在夜色中，寻找着下一个宿主。',
+        'danger');
+      if (state.supernatural.specters.length < MAX_SPECTERS) {
+        var spawnCandidates = validHostCandidates(state);
+        if (spawnCandidates.length) {
+          var spawnTarget = spawnCandidates[Math.floor(Math.random() * spawnCandidates.length)];
+          spawnTarget.specterPossessed = true;
+          var newSpecter = {
+            hostId: spawnTarget.id,
+            type: spawnedType,
+            monthsActive: 0,
+            stage: '潜伏',
+            exposed: false,
+            lastFeedMonth: state.totalMonths,
+            lastBreedMonth: state.totalMonths,
+            victims: [],
+            alertLevel: 0,
+            hp: specterHpByType(spawnedType),
+            generation: Math.max(1, Number(specter.generation) || 1) + 1,
+          };
+          state.supernatural.specters.push(newSpecter);
+          Game.specterEcology?.recordPossession(state, spawnTarget, newSpecter);
+        }
+      }
+    }
+  }
+
+  function tryBreedSpecter(state, specter, host) {
+    if (specter.stage === '潜伏') return;
+    var breedInterval = specter.type === '欲母' ? 18 : 36;
+    var monthsSince = state.totalMonths - (specter.lastBreedMonth || state.totalMonths - breedInterval);
+    if (monthsSince < breedInterval) return;
+    var chance = specter.stage === '掠食' ? 0.20 : 0.08;
+    if (Math.random() > chance) return;
+    specter.lastBreedMonth = state.totalMonths;
+    if (state.supernatural.specters.length >= MAX_SPECTERS) return;
+    var candidates = validHostCandidates(state);
+    if (!candidates.length) return;
+    var target = candidates[Math.floor(Math.random() * candidates.length)];
+    if (!target) return;
+    target.specterPossessed = true;
+    target.specterPossessedAtMonth = state.totalMonths;
+    var childType = specter.type === '欲母' ? randomSpecterType() : specter.type;
+    var childSpecter = {
+      hostId: target.id,
+      type: childType,
+      monthsActive: 0,
+      stage: '潜伏',
+      exposed: false,
+      lastFeedMonth: state.totalMonths,
+      lastBreedMonth: state.totalMonths,
+      victims: [],
+      alertLevel: 0,
+      hp: specterHpByType(childType),
+      parentHostId: specter.hostId,
+      generation: Math.max(1, Number(specter.generation) || 1) + 1,
+      bredFrom: host.id,
+    };
+    state.supernatural.specters.push(childSpecter);
+    Game.specterEcology?.recordPossession(state, target, childSpecter);
+    if (!target.psychology || typeof target.psychology !== 'object') target.psychology = {};
+    target.psychology.sexAddiction = Game.content.between(50, 75);
+    target.psychology.corruption = Game.content.between(40, 60);
+    target.sexWork = target.sexWork && typeof target.sexWork === 'object' ? target.sexWork : {};
+    target.sexWork.isProstitute = true;
+    if (!target.job || target.job === '无') target.job = '妓女';
+    Game.lifeDirector.addLog(state, '幽诡繁殖',
+      host.name + '身上的' + specter.type + '在宿主身体中产下了新的幽诡之种，寄生了' + target.name + '。',
+      'danger');
+  }
+
   function corruptFamilyInRedLight(state, specter) {
     if (specter.stage !== '掠食') return;
     if (Math.random() > 0.18) return;
@@ -332,6 +718,65 @@
       text: function (name) { return '你收到' + name + '家人的聚餐邀请。在推门进去的瞬间，你看到了此生最不该看到的画面——一家人围坐在桌边，每个人的脸都是' + name + '。'; },
       effect: { trauma: 25, awareness: 30, hp: 0 },
     },
+    /* ===== 淫妖专属 ===== */
+    {
+      name: '体液之触', requireExposed: false, specterType: '淫妖',
+      text: function (name) { return '你在公交车上被人群挤到了' + name + '身边。你感觉到有什么温热的东西滴在了你的大腿上——不是水，它在你皮肤上蠕动。'; },
+      effect: { trauma: 11, awareness: 12, hp: 0 },
+    },
+    {
+      name: '媚香', requireExposed: false, specterType: '淫妖',
+      text: function (name) { return '你闻到了一股甜腻的花香，源头是' + name + '。你的身体开始发烫，呼吸变得急促——你意识到这是一种不属于人类的荷尔蒙。你咬破嘴唇强迫自己保持清醒。'; },
+      effect: { trauma: 8, awareness: 10, hp: 0 },
+    },
+    {
+      name: '淫梦中的手', requireExposed: true, specterType: '淫妖',
+      text: function (name) { return '你做了一个梦——梦里' + name + '的双手在你身上游走，而你在梦中无法拒绝。你尖叫着醒来，发现被子上有不属于你的湿痕。'; },
+      effect: { trauma: 15, awareness: 14, hp: 0 },
+    },
+    /* ===== 梦魇专属 ===== */
+    {
+      name: '鬼压床', requireExposed: false, specterType: '梦魇',
+      text: function (name) { return '你清醒地躺在床上，但身体完全不能动。你看到一个黑影——轮廓很像' + name + '——正从天花板倒垂下来，脸离你越来越近。它的头发扫过你的嘴唇。'; },
+      effect: { trauma: 10, awareness: 10, hp: 0 },
+    },
+    {
+      name: '梦中交合', requireExposed: true, specterType: '梦魇',
+      text: function (name) { return '你在梦中与一个看不清面孔的人交合。醒来时你记得那个梦的每一个细节——包括那个人的手指、嘴唇、和在你耳边说的那声属于' + name + '的低语。你分不清是梦还是真的发生过。'; },
+      effect: { trauma: 14, awareness: 15, hp: 0 },
+    },
+    {
+      name: '无眠之夜', requireExposed: false, specterType: '梦魇',
+      text: function (name) { return '连续三天你无法入睡。每当你闭上眼睛，' + name + '的脸就会出现在你脑海中最私密的幻想里。你害怕睡着——不是因为噩梦，而是因为你知道你在梦里会自愿回应它。'; },
+      effect: { trauma: 12, awareness: 12, hp: 0 },
+    },
+    /* ===== 情缚专属 ===== */
+    {
+      name: '被凝视的脖子', requireExposed: false, specterType: '情缚',
+      text: function (name) { return '你感到后颈一阵发麻。回头时' + name + '正盯着你的脖子看——那眼神不像猎人看猎物，更像情人看情人的咽喉。你下意识地用手遮住了脖子，但那股灼热感仍然留在皮肤上。'; },
+      effect: { trauma: 9, awareness: 10, hp: 0 },
+    },
+    {
+      name: '无法割断的红线', requireExposed: true, specterType: '情缚',
+      text: function (name) { return name + '走到你面前，把那根不存在于肉眼可见世界的红线的一端塞进了你的掌心——尽管你没有握住任何东西，但你感觉到了：有什么正在紧紧地、无法挣脱地缠绕着你的无名指。'; },
+      effect: { trauma: 13, awareness: 15, hp: 0 },
+    },
+    /* ===== 欲母专属 ===== */
+    {
+      name: '隆起的谎言', requireExposed: false, specterType: '欲母',
+      text: function (name) { return name + '的腹部不正常地隆起着，但她对你微笑的时候，那个弧度看上去甚至像一种邀请——她走过来的时候，你发现自己的手不由自主地伸向了她的肚子。你猛地缩回手，指尖已经碰到了那层紧绷的皮肤。'; },
+      effect: { trauma: 11, awareness: 12, hp: 0 },
+    },
+    {
+      name: '奶水的香气', requireExposed: true, specterType: '欲母',
+      text: function (name) { return '房间里弥漫着一股甜腥的奶香。' + name + '半敞着衣襟坐在角落，怀里抱着什么——起初你以为是个婴儿，走近了才发现那是一个蜷缩着的人形大小的肉茧。它正在蠕动。'; },
+      effect: { trauma: 18, awareness: 18, hp: 0 },
+    },
+    {
+      name: '欲母之诱', requireExposed: false, specterType: '欲母',
+      text: function (name) { return name + '拉着你坐下，温柔地说起"孩子"的事情。她的声音里有一种不属于人类的母性，让你的身体产生了违背意志的反应——你的子宫/腹部在隐隐作痛，仿佛正在回应她的邀请。'; },
+      effect: { trauma: 14, awareness: 14, hp: 0 },
+    },
   ];
 
   function triggerAttackEvent(state, specter) {
@@ -341,6 +786,7 @@
 
     var available = ATTACK_EVENTS.filter(function (ev) {
       if (ev.requireExposed && !specter.exposed) return false;
+      if (ev.specterType && ev.specterType !== specter.type) return false;
       return true;
     });
     if (!available.length) return;
@@ -503,6 +949,7 @@
       specter.monthsActive += 1;
       advanceStage(specter);
       applyHostSexBehavior(state, specter);
+      applyTypeSpecificBehavior(state, specter);
 
       var host = hostPerson(state, specter);
       if (!host || host.status === '死亡' || host.status === '失踪') {
@@ -518,6 +965,8 @@
         corruptFamilyInRedLight(state, specter);
         feedOnVictim(state, specter);
       }
+
+      tryBreedSpecter(state, specter, host);
     }
 
     if (state.totalMonths >= 72 && supernatural.specters.length === 0) {

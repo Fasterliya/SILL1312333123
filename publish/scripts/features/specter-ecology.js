@@ -132,8 +132,9 @@
     if (child === false) return;
     specter.splitCount += 1;
     specter.lastSplitMonth = state.totalMonths;
-    Game.lifeDirector.addLog(state, '寄生扩散',
-      '幽诡吞噬完猎物后发生分裂，新的个体寄生了' + target.name
+    var spreadLabel = specter.type === '淫妖' ? '淫毒扩散' : (specter.type === '欲母' ? '育母产种' : '寄生扩散');
+    Game.lifeDirector.addLog(state, spreadLabel,
+      specter.type + '吞噬完猎物后发生分裂，新的个体寄生了' + target.name
       + '。城市中的幽诡数量正在增加。', 'danger');
   }
   function feed(state, specter) {
@@ -160,9 +161,25 @@
     victim.specterConsumedBy = specter.hostId;
     specter.victims.push(victim.id);
     specter.feeding = null;
+    typeSpecialFeedLog(state, specter, victim);
     Game.lifeDirector.addLog(state, '幽诡吞噬',
       victim.name + '被幽诡完全吞噬，原有生命迹象已经消失。', 'danger');
     spread(state, specter, victim.id);
+  }
+  function typeSpecialFeedLog(state, specter, victim) {
+    if (specter.type === '淫妖') {
+      Game.lifeDirector.addLog(state, '淫妖吞噬',
+        victim.name + '在极致的快感中被淫妖吸干了生命精华。' + victim.name + '的脸上凝固着高潮时的表情——痛苦和欢愉的界限已经消失了。', 'danger');
+    } else if (specter.type === '梦魇') {
+      Game.lifeDirector.addLog(state, '梦魇吞噬',
+        victim.name + '再也没有醒来。她在梦中死于一场她不敢描述的噩梦——梦的主人叫' + (Game.people.find(state, specter.hostId)?.name || '未知') + '。', 'danger');
+    } else if (specter.type === '情缚') {
+      Game.lifeDirector.addLog(state, '情缚吞噬',
+        victim.name + '与宿主的身体在交合中融为了一体——字面意义上。两具纠缠的躯体正在缓慢地合拢，边缘变得模糊，就像蜡像在高温下融化。', 'danger');
+    } else if (specter.type === '欲母') {
+      Game.lifeDirector.addLog(state, '欲母吞噬',
+        victim.name + '的身体被欲母的触须包裹成茧。茧中传出了吮吸的声音，持续了整整一夜。第二天茧裂开时，里面已经什么都不剩了。', 'danger');
+    }
   }
   function monthlyProtection(state) {
     var specters = state.supernatural?.specters || [];

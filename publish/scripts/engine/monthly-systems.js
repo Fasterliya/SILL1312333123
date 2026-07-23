@@ -51,6 +51,8 @@
     Game.magicalGirlSystem?.monthly(state);
     Game.cradleInstitution?.monthly(state);
     Game.cradleNetwork?.monthly(state);
+    Game.cosplaySuitEvolution?.monthly(state);
+    Game.specterRegionalEcology?.monthly(state);
     Game.lifeEvents.maybeTrigger(state);
   }
 

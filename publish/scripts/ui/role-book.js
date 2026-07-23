@@ -154,16 +154,24 @@
     const inJapan = state.location.country === '日本';
     if (filter === 'overseas-cn' && !inJapan) filter = 'city';
     const filters = [
-      ['city', '当前城市'], ['specter-local', '本地幽诡'], ['cradle-local', '本地摇篮'],
-      ['school', '同窗校友'], ['work', '同事'], ['contact', '可联系'], ['all', '全部人物'],
+      ['place', 'city', '当前城市'], ['special', 'specter-local', '本地幽诡'],
+      ['special', 'cradle-local', '本地摇篮'], ['relation', 'school', '同窗校友'],
+      ['relation', 'work', '同事'], ['relation', 'contact', '可联系'],
+      ['scope', 'all', '全部人物'],
     ];
-    if (inJapan) filters.splice(1, 0, ['overseas-cn', '华侨']);
+    if (inJapan) filters.splice(1, 0, ['place', 'overseas-cn', '华侨']);
     const source = peopleFor(state);
     const people = source.slice(0, 100);
+    const activeLabel = filters.find((item) => item[1] === filter)?.[2] || '当前城市';
+    const groups = [['place', '地点'], ['relation', '关系'], ['special', '特殊'], ['scope', '范围']];
     host.innerHTML = `<div class="character-roster-shell">${overview(state, people)}
-      <nav class="filter-chips">${filters.map(([id, label]) => (
-        `<button class="${filter === id ? 'active' : ''}" data-role-filter="${id}">${label}</button>`
-      )).join('')}</nav><div class="character-roster-list">${people.length
+      <nav class="roster-filter-panel" aria-label="人物筛选">
+        <header><strong>人物筛选</strong><span>当前：${activeLabel} · ${people.length}人</span></header>
+        <div>${groups.map(([group, label]) => `<section><span>${label}</span><div>${filters
+          .filter((item) => item[0] === group).map(([, id, text]) => (
+            `<button class="${filter === id ? 'active' : ''}" data-role-filter="${id}"
+              aria-pressed="${filter === id}">${text}</button>`)).join('')}</div></section>`).join('')}</div>
+      </nav><div class="character-roster-list">${people.length
       ? people.map((person) => card(state, person)).join('')
       : '<p class="empty-state">当前分类还没有人物。</p>'}</div></div>`;
   }

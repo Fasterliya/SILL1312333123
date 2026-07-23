@@ -4,9 +4,7 @@
   const U = Game.content;
   const el = {};
   let api = null;
-  let activeCharacterId = null;
-  let detailMode = '';
-  let characterHistory = [];
+  let activeCharacterId = null; let detailMode = ''; let characterHistory = [];
   function escape(value) {
     return String(value ?? '').replace(/[&<>"']/g, (char) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -32,11 +30,12 @@
     el.moduleContent.scrollTop = 0;
   }
   function clearDetail() {
+    const closingMode = detailMode;
     el.detailScreen.hidden = true;
     el.detailContent.innerHTML = '';
-    activeCharacterId = null;
-    detailMode = '';
-    characterHistory = [];
+    el.detailScreen.removeAttribute('data-mode');
+    activeCharacterId = null; detailMode = ''; characterHistory = [];
+    if (closingMode === 'aichat') Game.aiCharacterChat?.onDetailClosed?.();
   }
   function closeModule() {
     clearDetail();
@@ -48,6 +47,7 @@
     if (detailMode !== 'character') characterHistory = [];
     el.detailTitle.textContent = title;
     el.detailContent.innerHTML = html || '';
+    el.detailScreen.dataset.mode = detailMode;
     el.detailScreen.hidden = false;
     el.detailContent.scrollTop = 0;
   }
@@ -171,7 +171,7 @@
       ${Game.plasticSurgery.renderNpcPortraitStages(state, person)}</div></details>
       <details class="interaction-menu detail-interactions"><summary>互动选项</summary>
       <div class="interaction-options">${detailActions(state, person)}
-      <button type="button" class="ai-chat-btn" data-npc-chat="${escape(person.id)}" style="display:flex;align-items:center;gap:6px;min-height:44px;padding:8px 12px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-paper);font-size:10px;font-weight:700;width:100%">💬 AI自由对话</button>
+      <button type="button" class="ai-chat-btn" data-npc-chat="${escape(person.id)}"><span class="ai-chat-entry-icon" aria-hidden="true">AI</span><span><strong>自由对话</strong><small>${escape(person.relation || '熟人')} · 好感 ${Math.round(person.affection || 0)}</small></span><b aria-hidden="true">›</b></button>
       </div></details>`;
   }
   function openCharacter(id) {

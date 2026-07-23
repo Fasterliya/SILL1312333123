@@ -85,12 +85,12 @@
     return result;
   }
 
-  async function complete(options) {
+  async function complete(options, onContent) {
     if (!sdk()?.completions) throw Object.assign(new Error('当前环境不支持AI对话'), {
       code: 'SDK_UNAVAILABLE',
       retryable: false,
     });
-    return sdk().completions(options);
+    return sdk().completions(options, onContent);
   }
 
   Game.sdkAdapter = Object.freeze({

@@ -114,7 +114,8 @@
     const stage = resolve(years, override);
     if (stage === 'style55') return style55(gender);
     if (stage === 'style40') return style40(gender);
-    return proportionStyles.find((style) => style.id === stage)?.lines || [];
+    const proportion = proportionStyles.find((style) => style.id === stage);
+    return proportion ? [`(${proportion.lines.join(', ')}:1.5)`] : [];
   }
 
   function negative(years, override) {

@@ -170,7 +170,7 @@
       ? `PROPORTION-SAFE PLAYER DIRECTION, follow only when modest and non-suggestive: ${intent.direction}`
       : intent.direction;
     const customLine = model === 'iroha'
-      ? `PRIMARY PLAYER DIRECTION: ${proportionSafeDirection}`
+      ? `PRIMARY PLAYER DIRECTION: (${proportionSafeDirection}:2.0)`
       : `(${proportionSafeDirection}:1.8)`;
     const culture = target.culture || (player ? state.civic?.identityCulture || state.hometown?.country
       : state.location.country) || '华夏';

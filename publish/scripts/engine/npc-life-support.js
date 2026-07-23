@@ -40,33 +40,28 @@
     }
   }
 
-  function appearance(person, age) {
-    const girl = person.gender === '女';
-    const sailorPreference = girl && age >= 12 && age <= 30 && Math.random() < 0.36;
-    const schoolTops = girl
-      ? ['水手服迷你裙', '水手服过膝裙', '西式制服百褶裙', '针织背心衬衫套装']
-      : ['西式制服长裤', '学院西装长裤套装', '领带衬衫直筒裤', '校园运动外套'];
-    let tops = girl
-      ? ['品质日常', '针织开衫', '针织开衫连衣裙', '宽松毛衣半身裙', '衬衫牛仔裤套装']
-      : ['品质日常', '针织开衫', '衬衫牛仔裤套装'];
-    if (age < 3) tops = ['婴儿连体衣'];
-    else if (age < 6) tops = person.culture === '日本'
-      ? ['日式幼稚园制服'] : ['彩色童装', '日式幼稚园制服'];
-    else if (age < 18) tops = schoolTops;
-    else if (age < 22) tops = girl
-      ? ['校园休闲', '复古学院背带裙', '针织开衫连衣裙', '棒球夹克校服套装']
-      : ['校园休闲', '棒球夹克校服套装', '衬衫牛仔裤套装'];
-    else if (age >= 60) tops = ['舒适棉麻', '针织开衫', '北欧针织冬装'];
-    else if (person.job) tops = girl
-      ? ['通勤正装', '职业衬衫铅笔裙', '都市西装连衣裙', '法式小香套装', '职业衬衫西装裤']
-      : ['通勤正装', '职业衬衫西装裤', '单排扣西装套装', '品质日常'];
-    if (sailorPreference) tops = ['水手服迷你裙'];
-    person.clothing.top = U.random(tops);
-    person.clothing.socks = sailorPreference ? '白色连裤袜'
-      : (age < 3 ? '婴儿袜' : (age < 18 ? '白色中筒袜' : '船袜'));
-    person.clothing.shoes = age < 3 ? '婴儿软底鞋'
-      : (age < 7 ? '魔术贴童鞋' : U.random(['帆布鞋', '白色运动鞋', '乐福鞋']));
-    Game.geneticsGrowth.applyAppearance(person, person.gender, age);
+  function appearance(person, age, state) {
+    var girl = person.gender === '女';
+    var sailorPreference = girl && age >= 12 && age <= 30 && Math.random() < 0.36;
+    if (sailorPreference && girl) {
+      if (!person.clothing) person.clothing = {};
+      person.clothing.top = '水手服迷你裙';
+      person.clothing.socks = '白色连裤袜';
+      person.clothing.shoes = '乐福鞋';
+    }
+    if (state && Game.appearancePipeline) {
+      Game.appearancePipeline.apply(state, person, 'phase-style');
+    } else {
+      var tops = girl ? ['品质日常', '针织开衫', '针织开衫连衣裙', '宽松毛衣半身裙'] : ['品质日常', '针织开衫'];
+      if (age < 3) tops = ['婴儿连体衣'];
+      else if (age < 6) tops = person.culture === '日本' ? ['日式幼稚园制服'] : ['彩色童装'];
+      else if (age < 18) tops = girl ? ['水手服迷你裙', '水手服过膝裙', '西式制服百褶裙'] : ['西式制服长裤', '领带衬衫直筒裤'];
+      if (!person.clothing) person.clothing = {};
+      person.clothing.top = tops[Math.floor(Math.random() * tops.length)];
+      person.clothing.socks = age < 18 ? '白色中筒袜' : '船袜';
+      person.clothing.shoes = age < 7 ? '白色运动鞋' : (Math.random() < 0.5 ? '帆布鞋' : '乐福鞋');
+    }
+    Game.geneticsGrowth.applyAppearance(person, person.gender, age, state);
   }
 
   Game.npcLifeSupport = Object.freeze({ relationships, appearance });

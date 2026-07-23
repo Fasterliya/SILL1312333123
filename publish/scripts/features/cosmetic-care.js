@@ -38,6 +38,10 @@
     if (!proc) return { ok: false, message: '无效的手术选项' };
     if (U.age(state) < 18) return { ok: false, message: '医疗美容仅对成年角色开放' };
     if (proc.hymenOnly && state.gender !== '女') return { ok: false, message: '此手术仅限女性' };
+    var profile = state.profile;
+    if (proc.heightDelta > 0 && profile && profile.bodyFrame && profile.bodyFrame.indexOf('娇小') >= 0) {
+      return { ok: false, message: '娇小骨架天生无法通过手术增高' };
+    }
     const care = ensurePlayer(state);
     if (care.pending) return { ok: false, message: `${care.pending.name}仍在恢复中` };
     const cooldown = Math.max(0, care.cooldownUntil - state.totalMonths);

@@ -30,9 +30,9 @@
     return (gender === '女' ? female : male)[tendency] || (gender === '女' ? '齐肩直发' : '清爽短发');
   }
 
-  function applyAppearance(target, gender, age) {
+  function applyAppearance(target, gender, age, state) {
     Game.genetics.ensure(target, gender, `${target.id || target.name}-appearance`, true);
-    const genes = target.genetics.expressed;
+    var genes = target.genetics.expressed;
     target.eyeColor = genes.eyeColor;
     target.faceShape = target.cosmeticFaceShape || genes.faceShape;
     target.featureProportions = target.cosmeticFeatureProportions || genes.featureProportions;
@@ -43,19 +43,23 @@
     target.freckles = genes.freckles;
     target.distinctiveFeature = target.cosmeticDistinctiveFeature || genes.distinctiveFeature;
     target.maxHeight = Number(target.adultHeight) || genes.maxHeight;
+    if (genes.bodyFrame && genes.bodyFrame.indexOf('娇小') >= 0) {
+      target.maxHeight = Math.min(target.maxHeight, 155);
+    }
     target.temperament = age < 3 ? '懵懂' : (age < 7 ? '童真' : genes.temperament);
     target.bodyType = target.adultBodyType && age >= 18
       ? target.adultBodyType : bodyType(gender, age, genes.bodyFrame, genes.developmentTendency);
     target.hairstyle = hairstyle(gender, age, genes.hairStyleTendency);
     target.hairColor = age >= 72 ? '银灰' : (age >= 60 ? '黑灰' : genes.hairColor);
+    if (state) Game.portraitStageRules?.apply(target, state);
   }
 
   function progress(age, development) {
-    const ranges = {
+    var ranges = {
       早发育: [10.5, 16.5], 晚发育: [13, 19.5], 渐进发育: [11, 19.5], 均衡发育: [12, 18],
     };
-    const [start, end] = ranges[development] || ranges.均衡发育;
-    return Math.max(0, Math.min(1, (age - start) / (end - start)));
+    var pair = ranges[development] || ranges.均衡发育;
+    return Math.max(0, Math.min(1, (age - pair[0]) / (pair[1] - pair[0])));
   }
 
   function updateGrowth(target, gender, age, syncAppearance) {
@@ -63,18 +67,22 @@
     else {
       Game.genetics.ensure(target, gender, `${target.id || target.name}-growth`, true);
       target.maxHeight = Number(target.adultHeight) || target.genetics.expressed.maxHeight;
+      var genes = target.genetics.expressed;
+      if (genes && genes.bodyFrame && genes.bodyFrame.indexOf('娇小') >= 0) {
+        target.maxHeight = Math.min(target.maxHeight, 155);
+      }
     }
-    let height;
+    var height;
     if (age < 1) height = 50 + age * 25;
     else if (age < 3) height = 75 + (age - 1) * 10;
     else if (age < 6) height = 95 + (age - 3) * 7;
     else if (age < 12) height = 116 + (age - 6) * 5.7;
     else height = 150 + (target.maxHeight - 150) * progress(age, target.developmentTendency);
-    const bodyOffset = {
+    var bodyOffset = {
       幼小: -1.5, 小胸: -0.8, 丰满: 2.6, 匀称: 0,
       娇小纤细: -1.2, 清瘦: -1.2, 健壮: 1.8,
     }[target.bodyType] || 0;
-    const weight = age < 2 ? 3.4 + age * 6
+    var weight = age < 2 ? 3.4 + age * 6
       : (14.8 + Math.min(7, age * 0.35) + bodyOffset) * (height / 100) ** 2;
     target.height = Math.round(height * 10) / 10;
     target.weight = Math.max(3.2, Math.round(weight * 10) / 10);

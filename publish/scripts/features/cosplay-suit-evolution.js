@@ -66,10 +66,12 @@
         state.profile.height = heightByLevel(c.cosplayLevel);
         state.profile.bodyType = c.cosplayLevel >= 4 ? '凝胶少萝' : (c.cosplayLevel >= 3 ? '精致少女' : '纤细柔软');
       }
+      Game.portraitStageRules?.apply(state.profile, state);
     }
 
     if (c.cosplayEssence >= ESSENCE_PER_LEVEL && c.cosplayLevel < MAX_LEVEL) {
       levelUp(state, c);
+      Game.portraitStageRules?.apply(state.profile, state);
     }
   }
 

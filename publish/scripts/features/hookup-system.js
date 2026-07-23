@@ -13,7 +13,7 @@
       partner.clothing.shoes = U.random(['乐福鞋', '帆布鞋']);
       partner.hairstyle = U.random(['双马尾', '公主切长发', '齐肩直发', '日式姬发式']);
       partner.bodyType = U.random(['娇小纤细', '小胸']);
-      partner.temperament = U.random(['青涩', '明快', '灵动']);
+      partner.temperament = U.random(['青涩', '可爱', '元气']);
     } else if (style === 'cosplay') {
       const items = Game.cosplayCatalog?.items
         ? Game.cosplayCatalog.items.filter((c) => c.name !== '无' && U.personAge(state, partner) >= c.minAge && U.personAge(state, partner) <= c.maxAge)
@@ -189,6 +189,7 @@
         const result = choose(state, choiceBtn.dataset.hookupChoice);
         Game._refresh();
         if (result.startEncounter && result.partner) {
+          Game.appearancePipeline?.apply(state, result.partner, 'encounter');
           Game.encounterSystem.init(state, result.partner, 'hookup', result.playerRole);
           Game._refresh();
           Game.encounterSystem.showOverlay(state);

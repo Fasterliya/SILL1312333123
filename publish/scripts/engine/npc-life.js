@@ -251,9 +251,8 @@
     person.lastLifeUpdateAge = age;
     career(state, person, age);
     Game.npcLifeSupport.relationships(state, person, age);
-    if (person.gender !== '女' || age < 18 || firstUpdate || person.femaleYouthStyleStage) {
-      Game.npcLifeSupport.appearance(person, age);
-    }
+    Game.npcLifeSupport.appearance(person, age, state);
+    if (firstUpdate) Game.appearancePipeline?.apply(state, person, 'npc-init');
     Game.npcCulturalStyle.update(state, person, age);
     syncGrowth(state, person);
   }

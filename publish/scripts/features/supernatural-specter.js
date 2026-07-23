@@ -140,6 +140,7 @@
   function possessTarget(state, person, origin) {
     if (!person) return false;
     person.specterPossessed = true;
+    person.portraitAgeStage = 'stage1';
     person.specterOrigin = '';
     person.specterOriginalGender = person.gender;
     person.specterOriginalBodyType = person.bodyType;
@@ -236,28 +237,17 @@
     if (specter.stage === '显形' && specter.monthsActive >= 5) {
       host.gender = '女';
       host.bodyType = U.random(['小胸', '丰满', '匀称', '娇小纤细']);
-      host.hairstyle = U.random(Game.config ? Game.config.appearance.hairstyle.slice(4, 9) : ['齐肩直发', '自然卷发', '层次碎发']);
       host.stats = host.stats || {};
       host.stats['魅力'] = Math.max(host.stats['魅力'] || 50, U.between(70, 90));
-      if (host.clothing) {
-        host.clothing.top = U.random(Game.config ? Game.config.appearance.top.slice(4, 10) : ['通勤正装', '文艺穿搭', '品质日常']);
-        host.clothing.socks = U.random(['白色连裤袜', '黑色连裤袜', '船袜']);
-        host.clothing.shoes = U.random(['乐福鞋', '白色运动鞋']);
-      }
       if (!host.job || host.job === '无') host.job = '妓女';
       host.sexWork.brothelVisits = (host.sexWork.brothelVisits || 0) + 1;
       host.sexWork.lastBrothelMonth = 0;
-      if (host.temperament) host.temperament = U.random(Game.config ? Game.config.appearance.temperament.slice(4) : ['清冷', '文雅', '灵动']);
+      Game.appearancePipeline?.apply(state, host, 'specter');
     }
     if (specter.stage === '掠食') {
       host.stats = host.stats || {};
       host.stats['魅力'] = Math.min(100, (host.stats['魅力'] || 50) + U.between(3, 8));
       host.bodyType = U.random(['丰满', '匀称', '娇小纤细']);
-      if (host.clothing) {
-        host.clothing.top = U.random(Game.config ? Game.config.appearance.top.slice(6, 12) : ['品质日常', '针织开衫', '工装外套', '轻便羽绒服']);
-        host.clothing.socks = U.random(['黑色连裤袜', '白色连裤袜']);
-        host.clothing.shoes = U.random(['乐福鞋', '皮鞋']);
-      }
       if (!host.job || host.job === '无') host.job = '妓女';
     }
   }
@@ -557,17 +547,14 @@
     if (host.gender === '男' && specter.stage === '显形') {
       host.gender = '女';
       host.bodyType = U.random(['丰满', '丰腴', '匀称']);
-      host.hairstyle = U.random(Game.config ? Game.config.appearance.hairstyle.slice(4, 9) : ['齐肩直发', '自然卷发', '公主切长发']);
       host.stats = host.stats || {};
       host.stats['魅力'] = Math.max(host.stats['魅力'] || 50, U.between(75, 95));
-      if (host.clothing) {
-        host.clothing.top = U.random(['针织连衣裙', '宽松毛衣', '日式家居服']);
-      }
       if (!host.job || host.job === '无') host.job = '妓女';
       host.sexWork = host.sexWork && typeof host.sexWork === 'object' ? host.sexWork : {};
       host.sexWork.isProstitute = true;
       host.psychology = host.psychology || {};
       host.psychology.breederMarked = true;
+      Game.appearancePipeline?.apply(state, host, 'specter');
       Game.lifeDirector.addLog(state, '育母降临',
         host.name + '的身体在欲母的影响下发生了可怕的变化——无论原本的性别是什么，一具为孕育幽诡之种而改造的容器正在成型。',
         'danger');

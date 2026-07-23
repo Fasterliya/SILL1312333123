@@ -32,7 +32,7 @@
     const interest = Number(person.fashion?.cosplayInterest) || 0;
     const charm = Number(person.stats?.魅力) || 50;
     const slim = ['清瘦', '娇小纤细', '匀称'].includes(person.bodyType) ? 10 : 0;
-    const soft = ['青涩', '灵动', '明快', '文雅'].includes(person.temperament) ? 9 : 0;
+    var soft = ['青涩', '元气', '可爱', '病弱'].includes(person.temperament) ? 9 : 0;
     const base = id === 'welfare' ? 10 + charm * 0.24 : 7 + interest * 0.34;
     return U.clamp(Math.round(base + slim + soft), 8, id === 'welfare' ? 58 : 62);
   }

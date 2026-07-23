@@ -19,31 +19,44 @@
   }
 
   function styleTop(state) {
-    const p = Game.hunterMode.identity(state).profile;
-    if (['热血', '外向'].includes(p.personality) || p.trait === '勇敢') return '运动穿搭';
-    if (p.temperament === '文雅' || ['浪漫', '敏感'].includes(p.trait)) return '文艺穿搭';
+    var p = Game.hunterMode.identity(state).profile;
+    if (['热血', '外向'].includes(p.personality) || p.trait === '勇敢') return '校园休闲';
+    if (p.temperament === '清冷' || ['浪漫', '敏感'].includes(p.trait)) return '文艺穿搭';
     if (p.personality === '理性' || ['务实', '自律'].includes(p.trait)) return '通勤正装';
     return U.age(state) < 24 ? '校园休闲' : '品质日常';
   }
 
   function phaseStyle(state, phase) {
-    const identity = Game.hunterMode.identity(state);
-    const p = identity.profile;
-    const styles = [
-      ['婴儿连体衣', '婴儿袜', '婴儿软底鞋'],
-      ['日式幼稚园制服', '短袜', '魔术贴童鞋'],
-      ['简洁校服', '白色中筒袜', '白色运动鞋'],
-      ['简洁校服', '白色中筒袜', '帆布鞋'],
-      [styleTop(state), '船袜', '白色运动鞋'],
-      [styleTop(state), '黑色商务袜', '皮鞋'],
-      ['品质日常', '船袜', '乐福鞋'],
-      ['舒适棉麻', '羊毛袜', '舒适布鞋'],
-    ];
-    let values = styles[phase];
-    if (identity.gender === '女' && [3, 4].includes(phase) && Math.random() < 0.34) {
-      values = ['水手服迷你裙', '白色连裤袜', '乐福鞋'];
+    var identity = Game.hunterMode.identity(state);
+    var p = identity.profile;
+    if (Game.stylePreference && !p._styleLocked) {
+      Game.stylePreference.assignPlayer(state);
+      var outfit = Game.stylePreference.pickOutfit(p, state);
+      if (identity.gender === '女' && [3, 4].includes(phase) && Math.random() < 0.34) {
+        outfit = { top: '水手服迷你裙', socks: '白色连裤袜', shoes: '乐福鞋' };
+      }
+      if (!p.clothing) p.clothing = {};
+      p.clothing.top = outfit.top || '品质日常';
+      p.clothing.socks = outfit.socks || '船袜';
+      p.clothing.shoes = outfit.shoes || '白色运动鞋';
+      if (outfit.hair) p.hairstyle = outfit.hair;
+    } else {
+      var styles = [
+        ['婴儿连体衣', '短袜', '白色运动鞋'],
+        ['日式幼稚园制服', '短袜', '白色运动鞋'],
+        ['简洁校服', '白色中筒袜', '白色运动鞋'],
+        ['简洁校服', '白色中筒袜', '帆布鞋'],
+        [styleTop(state), '船袜', '白色运动鞋'],
+        [styleTop(state), '黑色商务袜', '乐福鞋'],
+        ['品质日常', '船袜', '乐福鞋'],
+        ['针织开衫', '船袜', '舒适布鞋'],
+      ];
+      var values = styles[phase];
+      if (identity.gender === '女' && [3, 4].includes(phase) && Math.random() < 0.34) {
+        values = ['水手服迷你裙', '白色连裤袜', '乐福鞋'];
+      }
+      p.clothing = { top: values[0], socks: values[1], shoes: values[2] };
     }
-    p.clothing = { top: values[0], socks: values[1], shoes: values[2] };
     p.styleStage = phase;
   }
 
@@ -53,7 +66,7 @@
     const age = Math.floor(years);
     const phase = agePhase(age);
     const phaseChanged = identity.profile.styleStage !== phase;
-    if (phaseChanged) Game.geneticsGrowth.applyAppearance(identity.profile, identity.gender, years);
+    if (phaseChanged) Game.geneticsGrowth.applyAppearance(identity.profile, identity.gender, years, state);
     Game.geneticsGrowth.updateGrowth(identity.profile, identity.gender, years, false);
     if (phaseChanged) phaseStyle(state, phase);
     Game.femaleYouthStyle.apply(identity.profile, identity.gender, age);

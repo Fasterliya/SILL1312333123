@@ -185,10 +185,43 @@
   function detectIntent(msg) {
     return SEX_KEYWORDS.some(function (k) { return msg.indexOf(k) >= 0; }) ? 'sex' : 'chat';
   }
+  function encounterAcceptChance(person) {
+    if (person.specterPossessed) return 0.92;
+    var sa = person.psychology?.sexAddiction || 0;
+    var co = person.psychology?.corruption || 0;
+    var af = person.affection || 0;
+    if (sa > 80) return 0.90;
+    if (co > 70) return 0.85;
+    if (af >= 80 && sa > 40) return 0.80;
+    if (af >= 70 && sa > 30) return 0.65;
+    if (af >= 50 && sa > 50) return 0.55;
+    if (sa > 60 || co > 50) return 0.40;
+    return 0.15;
+  }
+
   function startEncounter(person, state) {
     if (!Game.encounterSystem) return;
+    var roll = Math.random();
+    var chance = encounterAcceptChance(person);
+    if (roll > chance) {
+      var rejectMsgs = [
+        '「不要……」' + person.name + '轻轻推开了你。',
+        '「现在……不合适。」' + person.name + '避开了你的视线。',
+        '「你把我当什么人了？」' + person.name + '的脸色沉了下来。',
+        person.name + '沉默了很久，然后摇了摇头。',
+        '「下次吧。」' + person.name + '说完就转过了身。',
+        person.name + '没有回答。那种安静本身就足够让人明白。',
+      ];
+      var msg = rejectMsgs[Math.floor(Math.random() * rejectMsgs.length)];
+      Game.view.showToast(msg, 'warning');
+      chatHistories[person.id].push({ role: 'assistant', content: msg });
+      if (Game._refresh) Game._refresh();
+      return false;
+    }
     Game.encounterSystem.init(state, person, 'hookup', person.gender === '女' ? 'client' : 'provider');
-    Game._refresh(); Game.encounterSystem.showOverlay(state); Game.view.showToast('交欢开始 — ' + person.name, 'good');
+    Game._refresh(); Game.encounterSystem.showOverlay(state);
+    Game.view.showToast('交欢开始 — ' + person.name, 'good');
+    return true;
   }
 
   /* ===== UI ===== */
@@ -198,44 +231,87 @@
       return m.role === 'assistant' || (m.role === 'user' && !(m.content.indexOf('【系统指令】') >= 0));
     });
     var canEnc = canStartEncounter(person, state);
+    var avatarChar = escape((person.name || '?').slice(-1));
 
-    return '<div id="aiChatPanel" style="display:flex;flex-direction:column;height:100%;max-height:70vh">'
-      + '<header style="padding:8px 10px;border-bottom:1px solid var(--ui-line);display:flex;justify-content:space-between;align-items:center">'
-      + '<span style="font-weight:700;font-size:11px">💬 ' + (person.name || '') + ' · ' + (person.relation || '') + '</span>'
-      + '<button type="button" data-ai-chat-close style="border:none;background:none;font-size:14px;cursor:pointer">✕</button></header>'
-      + '<div id="aiChatMessages" style="flex:1;overflow-y:auto;padding:10px;font-size:10px;line-height:1.6">'
-      + display.map(function (m) {
-        return renderBubble(m);
-      }).join('')
-      + '</div>'
-      + '<div id="aiChatPhotoPrompt" style="display:none;padding:6px 8px;border-top:1px solid var(--ui-line);background:var(--ui-soft)">'
-      + '<input id="aiChatPhotoInput" type="text" placeholder="描述你想要的照片：姿势、表情、场景……" style="width:100%;padding:5px 8px;border:1px solid var(--ui-line);border-radius:4px;font-size:9px" maxlength="150">'
-      + '<div style="display:flex;gap:6px;margin-top:4px"><button type="button" id="aiChatPhotoGo" style="flex:1;padding:5px;border:none;border-radius:4px;background:var(--ui-green,#315f58);color:#fff;font-size:10px;font-weight:700">开始生成（约30-60秒）</button>'
-      + '<button type="button" id="aiChatPhotoCancel" style="padding:5px 10px;border:1px solid var(--ui-line);border-radius:4px;background:var(--ui-paper);font-size:10px">取消</button></div></div>'
-      + '<div style="padding:8px;border-top:1px solid var(--ui-line);display:flex;gap:6px">'
-      + '<input id="aiChatInput" type="text" placeholder="输入消息..." style="flex:1;padding:6px 8px;border:1px solid var(--ui-line);border-radius:4px;font-size:10px" maxlength="200">'
-      + '<button type="button" id="aiChatSend" style="padding:6px 10px;border:none;border-radius:4px;background:var(--ui-green,#315f58);color:#fff;font-size:10px;font-weight:700;white-space:nowrap">发送</button>'
-      + '<button type="button" id="aiChatPhotoBtn" style="padding:6px 8px;border:none;border-radius:4px;background:#4a80c4;color:#fff;font-size:9px;font-weight:700;white-space:nowrap">📷生图</button>'
-      + (canEnc ? '<button type="button" id="aiChatEncounter" style="padding:6px 8px;border:none;border-radius:4px;background:#c44d7a;color:#fff;font-size:9px;font-weight:700;white-space:nowrap">❤</button>' : '')
+    var html = '<div id="aiChatPanel" class="ai-chat-panel" style="display:flex;flex-direction:column;height:100%;max-height:70vh;background:#ede8e0">';
+
+    /* header */
+    html += '<header style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-bottom:1px solid #ddd;flex-shrink:0">'
+      + '<div class="ai-chat-avatar" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6b8fb4,#4a6d8c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0">' + avatarChar + '</div>'
+      + '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escape(person.name || '') + '</div>'
+      + '<div style="font-size:9px;color:#999">' + escape(person.relation || '') + ' · ' + (person.specterPossessed ? '<span style="color:#c44d7a">幽诡寄生</span>' : '在线') + '</div></div>'
+      + '<button type="button" data-ai-chat-close style="width:28px;height:28px;border:none;border-radius:50%;background:#eee;color:#666;font-size:13px;cursor:pointer;flex-shrink:0;line-height:1">✕</button>'
+      + '</header>';
+
+    /* messages */
+    html += '<div id="aiChatMessages" style="flex:1;overflow-y:auto;padding:12px 10px;font-size:10px;line-height:1.6;background:url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="30" cy="30" r="1" fill="%23ddd" opacity="0.3"/></svg>\') repeat">';
+    if (!display.length) {
+      html += '<div style="text-align:center;color:#aaa;padding:40px 20px;font-size:10px">'
+        + '<div style="font-size:28px;margin-bottom:8px">💬</div>'
+        + '<p style="margin:0">这是你和 ' + escape(person.name) + ' 的对话开始</p>'
+        + '<p style="margin:4px 0 0;font-size:9px">随便说点什么吧</p></div>';
+    } else {
+      html += display.map(function (m) { return renderBubble(m); }).join('');
+    }
+    html += '</div>';
+
+    /* photo prompt */
+    html += '<div id="aiChatPhotoPrompt" style="display:none;padding:10px 12px;background:#f7f5f0;border-top:1px solid #e0dcd5">'
+      + '<textarea id="aiChatPhotoInput" placeholder="描述你想要对方发的照片——姿势、表情、场景…&#10;例如：坐在窗边回头微笑，阳光洒在头发上" '
+      + 'style="display:block;width:100%;min-height:56px;padding:10px 12px;border:1px solid #d5cfc7;border-radius:8px;font-size:11px;line-height:1.6;resize:vertical;text-align:center;background:#fff;color:#333;outline:none;box-sizing:border-box" '
+      + 'maxlength="150" rows="2"></textarea>'
+      + '<div style="display:flex;gap:8px;margin-top:8px">'
+      + '<button type="button" id="aiChatPhotoGo" style="flex:1;padding:8px;border:none;border-radius:8px;background:linear-gradient(135deg,#4a80c4,#3a6ab0);color:#fff;font-size:11px;font-weight:700;cursor:pointer">✨ 开始生成（约30-60秒）</button>'
+      + '<button type="button" id="aiChatPhotoCancel" style="padding:8px 14px;border:1px solid #d5cfc7;border-radius:8px;background:#fff;font-size:11px;color:#666;cursor:pointer">取消</button>'
       + '</div></div>';
+
+    /* input bar + tools — at bottom */
+    html += '<div style="padding:8px 10px;background:#fff;border-top:1px solid #ddd;flex-shrink:0">'
+      + '<div style="display:flex;gap:6px">'
+      + '<input id="aiChatInput" type="text" placeholder="说点什么…" style="flex:1;padding:6px 12px;border:1px solid #d5cfc7;border-radius:18px;font-size:10px;background:#f5f3ed;color:#333;outline:none" maxlength="200">'
+      + '<button type="button" id="aiChatSend" style="padding:6px 12px;border:none;border-radius:18px;background:linear-gradient(135deg,#60a080,#42805e);color:#fff;font-size:10px;font-weight:700;white-space:nowrap;cursor:pointer;min-width:44px">发送</button>'
+      + '</div>'
+      + '<details id="aiChatTools" style="font-size:9px;margin-top:4px">'
+      + '<summary style="padding:2px 4px;color:#aaa;cursor:pointer;user-select:none;font-size:8px">⚙ 更多</summary>'
+      + '<div style="display:flex;gap:6px;padding:4px 0 0">'
+      + '<button type="button" id="aiChatPhotoBtn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px;border:1px solid #c8d6e5;border-radius:6px;background:#eef3f9;color:#4a6d8c;font-size:9px;font-weight:700;cursor:pointer">📷 让对方发照片</button>';
+    if (canEnc) {
+      html += '<button type="button" id="aiChatEncounter" style="flex:1;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px;border:1px solid #e8c4d2;border-radius:6px;background:#fdf2f6;color:#c44d7a;font-size:9px;font-weight:700;cursor:pointer">❤ 请求交欢</button>';
+    } else {
+      html += '<button type="button" disabled style="flex:1;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px;border:1px solid #e8e4df;border-radius:6px;background:#f9f8f5;color:#ccc;font-size:9px;font-weight:700;cursor:not-allowed">🔒 关系不足</button>';
+    }
+    html += '</div></details></div>';
+
+    html += '</div>';
+    return html;
   }
 
   function renderBubble(m) {
     var isUser = m.role === 'user';
     var isImage = m.image && m.image.length > 0;
     var content = (m.content || '').replace(/</g, '&lt;');
-    var html = '<div style="margin:6px 0;text-align:' + (isUser ? 'right' : 'left') + '">';
+    var timeStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+    var html = '<div style="display:flex;align-items:flex-start;gap:6px;margin:8px 0;flex-direction:' + (isUser ? 'row-reverse' : 'row') + '">';
+
+    if (!isUser) {
+      html += '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#b0c4de,#8fa8c8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">' + escape((m._name || '?').slice(-1)) + '</div>';
+    }
+
+    html += '<div style="max-width:75%;display:flex;flex-direction:column;align-items:' + (isUser ? 'flex-end' : 'flex-start') + '">';
+
     if (isImage) {
-      html += '<div style="display:inline-block;max-width:75%;border-radius:10px;overflow:hidden;cursor:pointer" data-ai-photo-view="' + (m.image || '') + '">'
+      html += '<div style="border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.12);max-width:220px" data-ai-photo-view="' + (m.image || '') + '">'
         + '<img src="' + (m.image || '') + '" style="width:100%;display:block" loading="lazy" onerror="this.style.display=\'none\'">'
         + '</div>';
     }
     if (content) {
-      html += '<span style="display:inline-block;max-width:80%;padding:6px 10px;border-radius:8px;margin-top:' + (isImage ? '4px' : '0') + ';'
-        + (isUser ? 'background:var(--ui-green,#315f58);color:#fff' : 'background:var(--ui-soft,#e5e4da);color:var(--ui-ink)')
-        + '">' + content + '</span>';
+      html += '<div style="display:inline-block;max-width:100%;padding:7px 10px;border-radius:' + (isUser ? '12px 12px 4px 12px' : '12px 12px 12px 4px') + ';margin-top:' + (isImage ? '4px' : '0') + ';'
+        + (isUser ? 'background:linear-gradient(135deg,#92c7a0,#6cb882);color:#fff' : 'background:#fff;color:#333;box-shadow:0 1px 2px rgba(0,0,0,0.06)')
+        + ';font-size:10px;line-height:1.55;word-break:break-word">' + content + '</div>';
     }
-    html += '</div>';
+    html += '<span style="font-size:8px;color:#bbb;margin-top:2px;padding:0 4px">' + timeStr + '</span>';
+    html += '</div></div>';
     return html;
   }
 
@@ -258,7 +334,11 @@
     var msg = input.value.trim(); if (!msg) return;
     var person = Game.people.find(chatState, activePersonId); if (!person) return;
 
-    if (detectIntent(msg) === 'sex' && canStartEncounter(person, chatState)) { input.value = ''; closeChat(); startEncounter(person, chatState); return; }
+    if (detectIntent(msg) === 'sex' && canStartEncounter(person, chatState)) {
+      input.value = '';
+      if (startEncounter(person, chatState)) closeChat();
+      return;
+    }
 
     input.value = ''; input.disabled = true;
     var sb = document.getElementById('aiChatSend'); if (sb) { sb.disabled = true; sb.textContent = '...'; }
@@ -272,25 +352,40 @@
     });
   }
 
+  function escape(str) { return String(str || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
   function appendUserBubble(msg) {
     var msgs = document.getElementById('aiChatMessages'); if (!msgs) return;
-    msgs.innerHTML += '<div style="margin:6px 0;text-align:right"><span style="display:inline-block;max-width:80%;padding:6px 10px;border-radius:8px;background:var(--ui-green,#315f58);color:#fff">' + msg.replace(/</g, '&lt;') + '</span></div>';
+    var timeStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    msgs.innerHTML += '<div style="display:flex;align-items:flex-start;gap:6px;margin:8px 0;flex-direction:row-reverse">'
+      + '<div style="max-width:75%;display:flex;flex-direction:column;align-items:flex-end">'
+      + '<div style="display:inline-block;padding:7px 10px;border-radius:12px 12px 4px 12px;background:linear-gradient(135deg,#92c7a0,#6cb882);color:#fff;font-size:10px;line-height:1.55;word-break:break-word">' + msg.replace(/</g, '&lt;') + '</div>'
+      + '<span style="font-size:8px;color:#bbb;margin-top:2px;padding:0 4px">' + timeStr + '</span>'
+      + '</div></div>';
     msgs.scrollTop = msgs.scrollHeight;
   }
 
   function showThinking(name) {
     var msgs = document.getElementById('aiChatMessages'); if (!msgs) return null;
     var el = document.createElement('div'); el.id = 'aiThinking';
-    el.style.cssText = 'margin:6px 0;text-align:left;color:var(--ui-muted);font-size:9px;font-style:italic';
-    el.textContent = name + '正在输入...'; msgs.appendChild(el); msgs.scrollTop = msgs.scrollHeight;
+    el.style.cssText = 'display:flex;align-items:flex-start;gap:6px;margin:8px 0';
+    el.innerHTML = '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#b0c4de,#8fa8c8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0"></div><div style="padding:7px 10px;border-radius:12px 12px 12px 4px;background:#fff;color:#999;font-size:9px;font-style:italic">' + escape(name) + ' 正在输入...</div>';
+    msgs.appendChild(el); msgs.scrollTop = msgs.scrollHeight;
     return el;
   }
 
   function updateReplyBubble(content) {
     var msgs = document.getElementById('aiChatMessages'); if (!msgs) return;
     var rp = document.getElementById('aiReplyPending');
-    if (!rp) { rp = document.createElement('div'); rp.id = 'aiReplyPending'; rp.style.cssText = 'margin:6px 0;text-align:left'; msgs.appendChild(rp); }
-    rp.innerHTML = '<span style="display:inline-block;max-width:80%;padding:6px 10px;border-radius:8px;background:var(--ui-soft,#e5e4da);color:var(--ui-ink)">' + content.replace(/</g, '&lt;') + '</span>';
+    var timeStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    if (!rp) {
+      rp = document.createElement('div'); rp.id = 'aiReplyPending';
+      rp.style.cssText = 'display:flex;align-items:flex-start;gap:6px;margin:8px 0;flex-direction:row';
+      rp.innerHTML = '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#b0c4de,#8fa8c8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0"></div><div style="max-width:75%;display:flex;flex-direction:column;align-items:flex-start"><div class="ai-reply-text" style="display:inline-block;padding:7px 10px;border-radius:12px 12px 12px 4px;background:#fff;color:#333;box-shadow:0 1px 2px rgba(0,0,0,0.06);font-size:10px;line-height:1.55;word-break:break-word"></div><span style="font-size:8px;color:#bbb;margin-top:2px;padding:0 4px">' + timeStr + '</span></div>';
+      msgs.appendChild(rp);
+    }
+    var textEl = rp.querySelector('.ai-reply-text');
+    if (textEl) textEl.textContent = content;
     msgs.scrollTop = msgs.scrollHeight;
   }
 
@@ -301,7 +396,8 @@
   /* ===== Photo UI Actions ===== */
   function showPhotoPrompt() {
     var panel = document.getElementById('aiChatPhotoPrompt'); if (panel) panel.style.display = 'block';
-    var input = document.getElementById('aiChatPhotoInput'); if (input) { input.value = ''; setTimeout(function () { input.focus(); }, 50); }
+    var input = document.getElementById('aiChatPhotoInput'); if (input) { input.value = ''; setTimeout(function () { input.focus(); }, 80); }
+    var tools = document.getElementById('aiChatTools'); if (tools) tools.open = false;
   }
   function hidePhotoPrompt() {
     var panel = document.getElementById('aiChatPhotoPrompt'); if (panel) panel.style.display = 'none';
@@ -357,7 +453,7 @@
     if (!activePersonId || !chatState) return;
     var person = Game.people.find(chatState, activePersonId);
     if (!person || !canStartEncounter(person, chatState)) return;
-    closeChat(); startEncounter(person, chatState);
+    if (startEncounter(person, chatState)) closeChat();
   }
 
   function closeChat() { activePersonId = null; chatState = null; var ds = document.getElementById('detailScreen'); if (ds) ds.hidden = true; }
@@ -379,5 +475,6 @@
     personaPrompt: personaPrompt, chat: chat, openChat: openChat, closeChat: closeChat,
     handleClick: handleClick, renderChat: renderChat, generatePhoto: generatePhoto,
     canStartEncounter: canStartEncounter, startEncounter: startEncounter,
+    encounterAcceptChance: encounterAcceptChance,
   });
 }(window));

@@ -60,24 +60,28 @@
   }
 
   function stageSelector(profile, years, actionPrefix, title) {
-    const manual = Game.portraitAgePrompt.valid(profile.portraitAgeStage)
+    var manual = Game.portraitAgePrompt.valid(profile.portraitAgeStage)
       ? profile.portraitAgeStage : null;
-    const automatic = Game.portraitAgePrompt.automatic(years);
-    const activeName = Game.portraitAgePrompt.options.find(
-      (item) => item.id === (manual || automatic),
+    var automatic = Game.portraitAgePrompt.automatic(years);
+    var activeName = Game.portraitAgePrompt.options.find(
+      function (item) { return item.id === (manual || automatic); }
     )?.label || '默认成人风格';
-    const stages = Game.portraitAgePrompt.options.map((item) => {
-      const selected = manual === item.id;
-      const suggested = !manual && automatic === item.id;
-      return `<button class="portrait-stage-btn ${selected ? 'active' : (suggested ? 'automatic' : '')}"
-        data-surgery="${actionPrefix}${item.id}" aria-pressed="${selected}">
-        <strong>${item.label}</strong><small>${item.detail}</small>
-        <b>${selected ? '已锁定' : (suggested ? '自动' : '免费')}</b></button>`;
+    var options = Game.portraitAgePrompt.options.map(function (item) {
+      var selected = manual === item.id;
+      var suggested = !manual && automatic === item.id;
+      var val = actionPrefix + item.id;
+      return '<option value="' + val + '"' + (selected ? ' selected' : '') + '>'
+        + item.label + ' · ' + item.detail + (selected ? ' [锁定]' : (suggested ? ' [自动]' : '')) + '</option>';
     }).join('');
-    return `<section class="portrait-stage-picker"><header><div><strong>${title}</strong>
-      <small>当前：${manual ? '手动锁定' : '自动跟随'} · ${activeName}</small></div><b>免费</b></header>
-      <div class="portrait-stage-grid">${stages}</div>
-      <p>手动选择后不再随年龄自动变化；重新生成该角色立绘后生效。</p></section>`;
+
+    var onchangeFn = 'var s=Game._getState?Game._getState():null;if(s){var r=Game.plasticSurgery.perform(s,this.value);Game.view.showToast(r.message,r.ok?\'good\':\'warning\');if(Game._refresh)Game._refresh();if(Game._save)Game._save();}';
+
+    return '<div class="portrait-stage-inline" style="display:flex;align-items:center;gap:6px;padding:4px 0">'
+      + '<label style="font-size:10px;color:var(--ui-muted);white-space:nowrap">' + title + '：</label>'
+      + '<select onchange="' + onchangeFn + '" style="flex:1;padding:4px 6px;border:1px solid var(--ui-line);border-radius:4px;font-size:9px;background:var(--ui-paper);color:var(--ui-ink)">'
+      + options + '</select>'
+      + '<span style="font-size:8px;color:var(--ui-muted)">手动后不随年龄变</span>'
+      + '</div>';
   }
 
   function renderNpcPortraitStages(state, person) {

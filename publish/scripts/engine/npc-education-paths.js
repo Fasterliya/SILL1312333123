@@ -48,7 +48,7 @@
     const education = Number(person.educationLevel) || 0;
     const young = age >= 18 && age <= 28;
     const petite = ['娇小纤细', '小胸'].includes(person.bodyType || '');
-    const cute = ['青涩', '灵动', '明快'].includes(person.temperament || '');
+    var cute = ['青涩', '元气', '可爱'].includes(person.temperament || '');
     const cosplay = (person.fashion?.cosplayInterest || 0) > 40;
     if (person.gender === '男' && Game.npcFemboyCareer?.allowsJob(person, job, age)) {
       return job.id === 'coser' ? 190 : 165;

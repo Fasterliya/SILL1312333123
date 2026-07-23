@@ -110,9 +110,17 @@
     const label = labels[activeField];
     const targetId = activeTargetId;
     if (Game.profile.editTarget(activeField, option.dataset.styleValue, targetId)) {
-      if (targetId) Game.navigation.openCharacter(targetId);
-      else Game.navigation.closeDetail();
-      Game.view.showToast(`${label}已更换`, 'good');
+      Game.view.showToast(label + '已更换', 'good');
+      if (targetId) {
+        Game.navigation.openCharacter(targetId);
+        setTimeout(function () {
+          var editor = document.querySelector('.npc-editor');
+          if (editor) editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 200);
+      } else {
+        Game.navigation.closeDetail();
+      }
+      if (Game._save) Game._save();
     }
     activeField = '';
     activeTargetId = '';

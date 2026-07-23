@@ -174,7 +174,7 @@
         parentIds: [state.profile.id, partner?.id].filter(Boolean),
       });
       if (partner) Game.genetics.inheritInto(child, child.gender, state.profile, partner, `child-${child.id}`);
-      Game.geneticsGrowth.applyAppearance(child, child.gender, 0);
+      Game.geneticsGrowth.applyAppearance(child, child.gender, 0, state);
       Game.npcLife.syncGrowth(state, child);
       state.family.push(child);
       children.push(child);

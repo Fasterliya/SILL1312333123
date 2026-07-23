@@ -21,7 +21,7 @@
     woman.clothing.shoes = U.random(['帆布鞋', '乐福鞋', '白色运动鞋']);
     woman.hairstyle = U.random(['双马尾', '公主切长发', '日式姬发式', '齐肩直发', '自然层次发']);
     woman.bodyType = U.random(['娇小纤细', '小胸', '匀称']);
-    woman.temperament = U.random(['青涩', '明快', '清冷', '灵动']);
+    woman.temperament = U.random(['青涩', '可爱', '清冷', '元气']);
   }
 
   /* ---- check for acquaintances ---- */
@@ -257,7 +257,7 @@
         const result = choose(state, choiceBtn.dataset.brothelChoice);
         Game._refresh();
         if (result.startEncounter && result.partner) {
-          /* Launch encounter overlay */
+          Game.appearancePipeline?.apply(state, result.partner, 'encounter');
           Game.encounterSystem.init(state, result.partner, 'brothel', 'client');
           Game._refresh();
           Game.encounterSystem.showOverlay(state);

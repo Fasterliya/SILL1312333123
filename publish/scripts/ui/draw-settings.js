@@ -3,8 +3,8 @@
 
   const Game = root.LifeGame = root.LifeGame || {};
   const fallback = Object.freeze([
-    Object.freeze({ id: 'anime', displayName: 'Anime', description: '标准动漫立绘模型', isDefault: true }),
-    Object.freeze({ id: 'iroha', displayName: 'Iroha', description: '细腻二次元立绘模型', isDefault: false }),
+    Object.freeze({ id: 'iroha', displayName: 'Iroha', description: '细腻二次元立绘模型', isDefault: true }),
+    Object.freeze({ id: 'anime', displayName: 'Anime', description: '标准动漫立绘模型', isDefault: false }),
   ]);
   let models = fallback.slice();
   let status = 'idle';
@@ -30,7 +30,7 @@
   }
 
   function selected(state) {
-    return state?.settings?.drawModel || 'anime';
+    return state?.settings?.drawModel || 'iroha';
   }
 
   function current(state) {
@@ -96,7 +96,7 @@
       status = 'error';
       errorText = '模型列表暂不可用，已显示基础模型';
       const state = api?.getState();
-      if (ensureSelection(state, 'anime')) api.save();
+      if (ensureSelection(state, 'iroha')) api.save();
       render(state);
       return models;
     }).finally(() => {

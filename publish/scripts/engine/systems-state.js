@@ -97,7 +97,7 @@
     state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
     if (typeof state.settings.drawModel !== 'string'
       || !/^[A-Za-z0-9._:-]{1,64}$/.test(state.settings.drawModel)) {
-      state.settings.drawModel = 'anime';
+      state.settings.drawModel = 'iroha';
     }
     state.playerBornAt = Number.isFinite(state.playerBornAt) ? state.playerBornAt : 0;
     state.generation = Math.max(1, Math.floor(Number(state.generation) || 1));

@@ -161,7 +161,7 @@
       matchmaking: { candidates: [] },
       travel: { activeId: null, activeIds: [], encounters: [], journey: null, history: [], localHistory: [] },
       specialModes: { skinHunter: false, activeSkinId: null, possessed: [] },
-      settings: { drawModel: 'anime' },
+      settings: { drawModel: 'iroha' },
       routine: { actionMonth: 0, fatigue: 0, actions: { study: 0, sport: 0, social: 0, rest: 0 } },
       pendingDecision: null,
       gameOver: false,

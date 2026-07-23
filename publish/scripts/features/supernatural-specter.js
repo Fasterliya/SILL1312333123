@@ -381,6 +381,20 @@
       '病态共依': '姐姐说如果你交了女朋友她就会死。她说这话的时候在笑——但你从她的眼神里读到了一种让你害怕的认真。她今晚穿了一条比平时短很多的裙子——她从来不穿的。',
       '献祭觉醒': '姐姐说她在旧书店找到了一本"姻缘之书"——她让你把手放在书页中间，她覆着你的手。书本开始发热——你感觉到一种不属于世俗范畴的联结在你和姐姐之间成形。',
     },
+    '父（女体化）+子': {
+      '噩梦引诱': '你在梦里看到了父亲——不是记忆中那个中年男人的样子，而是他现在那具女性的、年轻的身体。他站在你面前，用父亲的声音叫你的名字，但嘴唇涂着不属于他的口红。你醒来时身下已经湿了一片。',
+      '酒后乱性': '你父亲——现在顶着女性身体的他——今晚喝多了。他靠在你怀里，你感觉到了那具不属于父亲的身体轮廓。他抬头看你的眼神让你分不清——他是醉了，还是清醒？他是你的父亲，还是一个陌生的女人？',
+      '浴室越界': '你在浴室里，水声遮住了门把转动的声音。父亲推门进来——他用那具女性的身体靠在门框上，用父亲的口吻说"小时候都是我帮你洗的"。但这次不一样——因为他的手和你的手都到了不该到的地方。',
+      '病态共依': '父亲被寄生后变得越来越依赖你——身体上的变化让他开始用不同于父亲的方式靠近你。今晚他说"对不起"——然后做了比任何他需要道歉的事都更过分的事。你觉得恶心。但你也觉得——某种东西在下面隐隐地同意了。',
+      '献祭觉醒': '父亲说他找到了完成女性化的最终仪式。他把你的手放在他新长出的乳房上——用父亲的声音说"帮帮我"。你感受到的不是父亲的体温——是那具女性身体里不属于人世的、蠕动的、饥渴的东西。',
+    },
+    '兄（女体化）+弟': {
+      '噩梦引诱': '你在梦里看到了哥哥现在的样子——女性化的身体，柔软的线条，但脸还是哥哥的脸。梦里的他没有说话，只是看着你。醒来时你的身体已经做出了不该有的反应。你在卫生间里待了很久。',
+      '酒后乱性': '哥哥今晚喝醉了——现在"她"的身体软软地倒在你身上。你感觉到那具被幽诡改造过的身体贴着你——不是哥哥的身体，是一个女人的。但她开口叫的是你的小名。你把她推开的时候手指不小心碰到了她胸前不该有的柔软。',
+      '浴室越界': '你听到浴室里的水声停了。哥哥用毛巾裹着身体出来——毛巾太小了，遮不住那些被强行塞进他身体里的曲线。他看到了你的表情。"别那样看我，"他说，"我也不想变成这样的。"但他说这话的时候没有往后退。',
+      '病态共依': '哥哥女性化后变得比以前更粘你了。她说你是唯一一个"还把她当家人"的人——但你自己都不确定你是不是还把她当家人。她靠近的时候你的呼吸会变快。她注意到了。她没有拉开距离。',
+      '献祭觉醒': '哥哥/弟弟说幽诡告诉她有一个方法可以让你共享她的身体——"我们把界限打破，以后就是一个人了"。她把你的手放在自己新生的身体上，那个纹章开始发光。你的手掌感觉到的不只是体温——还有某种正在把你吸进她体内的引力。',
+    },
   };
 
   function nightmareIncestBreeding(state, specter, host) {
@@ -394,13 +408,19 @@
     familyMembers.forEach(function (a) {
       familyMembers.forEach(function (b) {
         if (a.id >= b.id) return;
-        if (a.gender === b.gender) return;
         var ra = a.relation || '';
         var rb = b.relation || '';
-        if (ra === '父亲' && rb === '女儿') incestPairs.push({ male: a, female: b, label: '父女', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile' });
-        else if (ra === '母亲' && rb === '儿子') incestPairs.push({ male: b, female: a, label: '母子', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile' });
-        else if (ra === '哥哥' && rb === '妹妹') incestPairs.push({ male: a, female: b, label: '兄妹', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile' });
-        else if (ra === '弟弟' && rb === '姐姐') incestPairs.push({ male: a, female: b, label: '姐弟', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile' });
+        var aIsFem = a.gender === '女' && a.specterOriginalGender === '男';
+        var bIsFem = b.gender === '女' && b.specterOriginalGender === '男';
+        if (a.gender === b.gender) {
+          if (!aIsFem && !bIsFem) return;
+        }
+        if (ra === '父亲' && rb === '女儿') incestPairs.push({ male: a, female: b, label: '父女', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile', feminized: aIsFem });
+        else if (ra === '父亲' && rb === '儿子' && aIsFem) incestPairs.push({ male: b, female: a, label: '父（女体化）+子', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile', feminized: true });
+        else if (ra === '母亲' && rb === '儿子') incestPairs.push({ male: b, female: a, label: '母子', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile', feminized: false });
+        else if (ra === '哥哥' && rb === '妹妹') incestPairs.push({ male: a, female: b, label: '兄妹', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile', feminized: bIsFem });
+        else if (ra === '弟弟' && rb === '姐姐') incestPairs.push({ male: a, female: b, label: '姐弟', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile', feminized: aIsFem });
+        else if (ra === '弟弟' && rb === '哥哥' && aIsFem) incestPairs.push({ male: b, female: a, label: '兄（女体化）+弟', playerInvolved: a.id === 'player-profile' || b.id === 'player-profile', feminized: true });
       });
     });
 
@@ -439,14 +459,7 @@
       var playerTextMap = PLAYER_INCEST_TEXT[relationLabel];
       eventLogText = playerTextMap ? (playerTextMap[archetype] || playerTextMap['噩梦引诱']) : '你感到了不属于这个世界的力量正在撕裂家族间的禁忌。';
     } else {
-      var npcTexts = {
-        '噩梦引诱': '在' + host.name + '的梦魇颤动的空气中，' + male.name + '和' + female.name + '同时睁开了眼睛——他们都梦到了对方。那个梦太过清晰、太过真实，以至于第二天他们对视时，视线里多了一些无法收回的东西。',
-        '酒后乱性': '你后来才知道那天晚上' + male.name + '喝了很多酒。' + female.name + '去扶他回房间——但两个小时后她还没有出来。你不知道那个房间里发生了什么，但你听到了不该听到的声音。',
-        '浴室越界': male.name + '在浴室里的水声掩盖了门被推开的声音。' + female.name + '站在门口，手里攥着浴巾——她说"我只是想确认你有没有事"。但她没有离开。水还在流。',
-        '病态共依': male.name + '和' + female.name + '之间一直有一种过度紧密的共生关系。最近这种共生开始越过某条线——他们坐得更近、对视更久、触碰的频率已经超出了亲情的范畴。',
-        '献祭觉醒': '你偶然发现' + male.name + '房间的墙上画着奇怪的图案——那是一种你从未见过的祈祷文。' + female.name + '跪在图案中央，' + male.name + '的手放在她的头顶——他们正在进行某种不属于这个信仰体系的仪式。',
-      };
-      eventLogText = npcTexts[archetype] || npcTexts['噩梦引诱'];
+      eventLogText = npcIncestText(archetype, relationLabel, male.name, female.name, host.name, chosen.feminized);
     }
 
     Game.lifeDirector.addLog(state, archetype,
@@ -458,6 +471,20 @@
       state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + U.between(8, 15));
       state.profile.trauma = Math.min(100, (Number(state.profile.trauma) || 0) + U.between(18, 30));
       state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(3, 8));
+      state.supernatural._lastIncestFamily = { maleId: male.id, femaleId: female.id, label: relationLabel, archetype: archetype };
+      if (!state.pendingDecision) {
+        var otherPerson = male.id === 'player-profile' ? female : male;
+        state.pendingDecision = {
+          type: 'nightmare_incest',
+          title: archetype,
+          text: host.name + '的梦魇正在撕裂你和' + otherPerson.name + '（' + relationLabel + '）之间的禁忌。' + eventLogText + '\n\n你的身体正在做出反应——你分不清这反应是来自你自己，还是来自那股不属于这个世界的力量。',
+          options: [
+            { value: 'resist', label: '咬破嘴唇 · 用疼痛抵抗' },
+            { value: 'submit', label: '放弃抵抗 · 沉入梦魇' },
+          ],
+        };
+        state.timeSpeed = 0;
+      }
     }
 
     Game.familyConflict?.addSuspicion?.(state, 18, familyConflictLabel(male, female) + '之间出现了不可修复的裂痕');
@@ -632,6 +659,53 @@
     Game.lifeDirector.addLog(state, '幽诡繁殖',
       host.name + '身上的' + specter.type + '在宿主身体中产下了新的幽诡之种，寄生了' + target.name + '。',
       'danger');
+  }
+
+  function npcIncestText(archetype, label, maleName, femaleName, hostName, feminized) {
+    var isFem = label.indexOf('女体化') >= 0 || feminized;
+    if (isFem) {
+      var femTexts = {
+        '噩梦引诱': maleName + '在梦魇中看到了' + femaleName + '——那个曾经是他父亲/哥哥的人，如今顶着一具女性的身体站在他面前。梦境里没有父子/兄弟的界限。醒来后两人对视，' + femaleName + '的脸是红的。',
+        '酒后乱性': maleName + '和' + femaleName + '都喝了很多。' + femaleName + '——曾经被称为父亲/哥哥的人——如今的身体让' + maleName + '无法移开视线。酒劲上来后，有人主动了。没人记得是谁先开始的。',
+        '浴室越界': '浴室的雾气中，' + femaleName + '——那个曾经的男性家人——现在的身体曲线在水汽中若隐若现。' + maleName + '在门口站了很久才敲了门。里面传来的女声说"进来"。',
+        '病态共依': femaleName + '自从变成女性后，越来越依赖' + maleName + '——那种依赖渐渐越过了亲情的边界。' + maleName + '发现自己无法拒绝这个曾经是父亲/哥哥的人的任何请求。任何请求。',
+        '献祭觉醒': femaleName + '在地下室找到了一个古老的仪式——用亲子/兄弟的血缘之力来完成"女性化"的最终阶段。仪式需要' + maleName + '的参与——不是作为儿子/弟弟，而是作为配偶。',
+      };
+      return femTexts[archetype] || femTexts['噩梦引诱'];
+    }
+    var texts = {
+      '父女': {
+        '噩梦引诱': maleName + '在梦魇的驱使下走进了女儿' + femaleName + '的房间。第二天早上，' + femaleName + '醒来时发现自己身上有不明痕迹——她记得那些梦的内容，但她不敢告诉任何人。',
+        '酒后乱性': maleName + '今晚喝醉了，他的眼神不像父亲——像在看一个女人。' + femaleName + '扶他回房间的时候，他的手指在她手腕上停留得太久了。',
+        '浴室越界': femaleName + '洗澡时浴室门被推开了——父亲' + maleName + '说他"不知道有人在里面"。但他没有立即退出去。' + femaleName + '用浴巾遮住了身体。他的目光没有离开。',
+        '病态共依': '自从母亲离开后，' + maleName + '和' + femaleName + '之间的距离越来越近。他叫她"小公主"，而她发现自己在挑睡衣的时候开始考虑——父亲今天会不会看到。',
+        '献祭觉醒': maleName + '在书房里翻出了一本写满拉丁文的旧书。书上说"以亲子之血重写血脉"。他叫来了' + femaleName + '——他唯一的孩子。',
+      },
+      '母子': {
+        '噩梦引诱': femaleName + '在睡梦中被梦魇操纵着推开了儿子' + maleName + '的房门。' + maleName + '在半梦半醒间分不清现实与噩梦的界限——当他彻底清醒时，一切已经太晚了。',
+        '酒后乱性': femaleName + '借着酒劲对' + maleName + '说了很多不该说的话——关于孤独、关于她从丈夫那里得不到的东西。她的眼泪滴在' + maleName + '的手背上。他擦掉了。然后一切都变了。',
+        '浴室越界': femaleName + '让' + maleName + '帮她拿毛巾——她说自己忘了带。' + maleName + '递过去的时候，她没有完全躲在门后面。他看到了——看到了不该看到的东西。她没有遮。',
+        '病态共依': femaleName + '失去了丈夫后把全部情感都转移到了' + maleName + '身上。她说"你是家里唯一的男人"——然后她的手指开始解开他的扣子。',
+        '献祭觉醒': femaleName + '在月圆之夜叫醒' + maleName + '。后院的地上画着盐线构成的纹章。"只有你能完成这个仪式，"她说，"我的儿子。我的伴侣。"',
+      },
+      '兄妹': {
+        '噩梦引诱': maleName + '和' + femaleName + '在同一夜被同一个梦境召唤——梦中的他们不受任何禁忌的约束。醒来后的对视里多了一些此前从未有过的、沉甸甸的东西。',
+        '酒后乱性': femaleName + '第一次偷喝了' + maleName + '的酒。她满脸通红地靠在他身上，手指在他胸口画圈。"为什么你不是别人？"——但她的语气听起来并不遗憾。',
+        '浴室越界': maleName + '洗澡时' + femaleName + '推门进来拿东西。她发出了短促的尖叫但没有跑开。他们对视了两秒。' + maleName + '第一个移开了视线——因为他感觉到了身体的反应。',
+        '病态共依': '父母离婚后' + femaleName + '只和' + maleName + '说话。今晚她哭着说她梦到了哥哥和别人结婚了。她抱得太紧了。他感觉到了。',
+        '献祭觉醒': femaleName + '的日记本上画满了同一个符号——被交缠的线条围绕的眼睛。最后一页写着：必须和哥哥完成仪式。',
+      },
+      '姐弟': {
+        '噩梦引诱': maleName + '醒来时发现姐姐' + femaleName + '正蜷缩在床的另一边发抖。两个人都没有说话，因为他们都记得那个梦。那个他们同时参与的、不能提的梦。',
+        '酒后乱性': femaleName + '失恋了。' + maleName + '陪她喝酒。她靠在他肩膀上哭，然后吻了他——不是脸颊，是嘴唇。她说"对不起"，但语气里没有歉意。',
+        '浴室越界': maleName + '经过浴室时' + femaleName + '叫他帮忙搓背。他说这不太好吧。她笑了一声说你小时候我不是天天给你洗——但他们都长大了。',
+        '病态共依': femaleName + '说如果' + maleName + '交了女朋友她就会死。她说这话的时候在笑，眼神却很认真。今晚她穿了一条比以前短很多的裙子。',
+        '献祭觉醒': femaleName + '在旧书店找到了一本姻缘之书。她让' + maleName + '把手放在书页中间，自己覆着他的手。书本开始发热——一种不属于世俗范畴的联结在他们之间成形。',
+      },
+    };
+    var relTexts = texts[label];
+    if (!relTexts) return maleName + '和' + femaleName + '在' + hostName + '的梦魇中跨越了本不该被跨越的界线。';
+    return relTexts[archetype] || relTexts['噩梦引诱'];
   }
 
   function corruptFamilyInRedLight(state, specter) {

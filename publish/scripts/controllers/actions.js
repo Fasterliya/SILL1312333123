@@ -57,6 +57,41 @@
       if (genResult.ok) done();
       return;
     }
+    if (decision.type === 'nightmare_incest') {
+      var incestFamily = current.supernatural._lastIncestFamily;
+      var theOther = incestFamily ? (Game.people.find(current, incestFamily.maleId === 'player-profile' ? incestFamily.femaleId : incestFamily.maleId)) : null;
+      var oName = theOther ? theOther.name : '那个人';
+      if (value === 'resist') {
+        current.supernatural.spiritCorruption = Math.min(100, current.supernatural.spiritCorruption + U.between(5, 10));
+        current.profile.trauma = Math.min(100, (Number(current.profile.trauma) || 0) + U.between(10, 18));
+        current.stats['健康'] = Math.max(5, current.stats['健康'] - U.between(3, 7));
+        Game.lifeDirector.addLog(current, '抵抗梦魇', '你咬破了自己的嘴唇。血的味道让你短暂地清醒——你推开了' + oName + '。梦魇的触手从你的意识中抽离，留下了一阵深入骨髓的寒意。你赢了——但你不确定下次还能不能赢。', 'warning');
+      } else {
+        current.supernatural.spiritCorruption = Math.min(100, current.supernatural.spiritCorruption + U.between(15, 25));
+        current.profile.trauma = Math.min(100, (Number(current.profile.trauma) || 0) + U.between(5, 10));
+        if (Game.relationshipSecretsCore && incestFamily) {
+          var record = Game.relationshipSecretsCore.addRecord(current, {
+            kind: '梦魇乱伦（玩家卷入）',
+            participants: [incestFamily.maleId, incestFamily.femaleId],
+            known: true,
+            note: '玩家与' + oName + '（' + (incestFamily.label || '') + '）在梦魇中跨越了乱伦禁忌',
+          });
+          var playerPerson = Game.people.find(current, 'player-profile');
+          if (playerPerson && incestFamily.femaleId === 'player-profile') {
+            Game.relationshipSecretsCore.schedulePregnancy(current, playerPerson, theOther, record);
+          } else if (theOther && incestFamily.femaleId === theOther.id) {
+            var playerMale = Game.people.find(current, 'player-profile');
+            Game.relationshipSecretsCore.schedulePregnancy(current, theOther, playerMale || theOther, record);
+          }
+        }
+        Game.lifeDirector.addLog(current, '沉入梦魇', '你放弃了抵抗。' + oName + '的身体和你的身体在梦魇的潮水中纠缠在一起——你分不清是谁的呼吸、谁的体温、谁的愧疚。当意识恢复时，一切都已发生。你看着' + oName + '，你们的目光交汇——然后同时移开了。', 'danger');
+      }
+      current.pendingDecision = null;
+      current.timeSpeed = 1;
+      current.supernatural._lastIncestFamily = null;
+      Game.view.showToast(value === 'resist' ? '你用疼痛守住了一线清醒。' : '你在梦魇中沉沦了。', value === 'resist' ? 'good' : 'warning');
+      return done();
+    }
     if (['lifeEvent', 'succession'].includes(decision.type)) {
       const system = decision.type === 'lifeEvent' ? Game.lifeEvents : Game.legacySystem;
       const result = system.resolve(current, value);

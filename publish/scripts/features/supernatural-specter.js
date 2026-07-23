@@ -7,7 +7,7 @@
   var SPECTER_TYPES = ['怨灵', '恶煞', '魅妖', '淫妖', '梦魇', '情缚', '欲母'];
   var STAGES = ['潜伏', '显形', '掠食'];
   var MAX_SPECTERS = 7;
-  var SPAWN_CHANCE = 0.02;
+  var SPAWN_CHANCE = 0.05;
   var COMBAT_PLAYER_MAX_HP = 100;
 
   function specterHpByType(type) {
@@ -44,7 +44,7 @@
   function ensure(state) {
     var current = state.supernatural;
     if (!current || typeof current !== 'object') {
-      state.supernatural = { enabled: true, specters: [], playerAwareness: 0, spiritCorruption: 0, lastAttackMonth: -12, combat: { active: false, specterIndex: -1, specterHp: 0, playerHp: COMBAT_PLAYER_MAX_HP, playerMaxHp: COMBAT_PLAYER_MAX_HP, round: 0, log: [] } };
+      state.supernatural = { enabled: true, specters: [], playerAwareness: 0, spiritCorruption: 0, specterKills: 0, specterDefeats: 0, lastAttackMonth: -12, combat: { active: false, specterIndex: -1, specterHp: 0, playerHp: COMBAT_PLAYER_MAX_HP, playerMaxHp: COMBAT_PLAYER_MAX_HP, round: 0, log: [] } };
       return;
     }
     current.enabled = current.enabled !== false;
@@ -187,8 +187,8 @@
       supernatural.spawnDryMonths = Number.isFinite(supernatural.spawnDryMonths)
         ? Math.max(0, supernatural.spawnDryMonths + 1) : fallback + 1;
     } else supernatural.spawnDryMonths = 0;
-    var chance = count ? 0.008
-      : Math.min(0.16, SPAWN_CHANCE + supernatural.spawnDryMonths * 0.004);
+    var chance = count ? 0.02
+      : Math.min(0.25, SPAWN_CHANCE + supernatural.spawnDryMonths * 0.006);
     var persistent = !count && state.totalMonths >= 72;
     if (!persistent && Math.random() > chance) return;
     var candidates = validHostCandidates(state);
@@ -279,7 +279,7 @@
   }
 
   function applyLustDemonBehavior(state, specter, host) {
-    if (specter.stage === '掠食' && Math.random() < 0.22) {
+    if (specter.stage === '掠食' && Math.random() < 0.35) {
       var candidates = Game.people.all(state).filter(function (p) {
         return p && p.id !== 'player-profile' && p.id !== host.id
           && !p.specterPossessed && !p.skinCaptured
@@ -317,7 +317,7 @@
       state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(1, 3));
       state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + U.between(2, 4));
       state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + U.between(1, 2));
-      if (Math.random() < 0.18) {
+      if (Math.random() < 0.30) {
         Game.lifeDirector.addLog(state, '不眠之夜',
           '你连续几天做着相同的梦——梦里' + host.name
           + '站在你床边，低头看着你，嘴角挂着不属于人类的微笑。你醒来时发现自己的指甲在枕头上抓出了痕迹。',
@@ -332,7 +332,7 @@
   }
 
   function nightmareCorruptDreams(state, specter, host) {
-    if (Math.random() > 0.25) return;
+    if (Math.random() > 0.35) return;
     var feedTarget = Game.people.all(state).find(function (p) {
       return p && p.id !== 'player-profile' && p.id !== host.id
         && !p.specterPossessed && p.status === '健康' && !p.deceasedAt
@@ -384,7 +384,7 @@
   };
 
   function nightmareIncestBreeding(state, specter, host) {
-    if (Math.random() > 0.08) return;
+    if (Math.random() > 0.15) return;
     var familyMembers = state.family.filter(function (p) {
       return p && p.status === '健康' && !p.deceasedAt && !p.specterPossessed;
     });
@@ -506,7 +506,7 @@
         specter.bondTarget = '';
       }
     }
-    if (!specter.bondTarget && Math.random() < 0.15) {
+    if (!specter.bondTarget && Math.random() < 0.25) {
       var bondCandidate = Game.people.all(state).find(function (p) {
         return p && p.id !== 'player-profile' && p.id !== host.id
           && !p.specterPossessed && !p.skinCaptured
@@ -545,7 +545,7 @@
         host.name + '的身体在欲母的影响下发生了可怕的变化——无论原本的性别是什么，一具为孕育幽诡之种而改造的容器正在成型。',
         'danger');
     }
-    if (specter.stage === '掠食' && host.gender === '女' && Math.random() < 0.14) {
+    if (specter.stage === '掠食' && host.gender === '女' && Math.random() < 0.22) {
       if (!host.specterPregnantDue || host.specterPregnantDue < state.totalMonths) {
         host.specterPregnantDue = state.totalMonths + 3;
         host.specterSpawnType = U.random(['怨灵', '魅妖', '淫妖']);
@@ -595,7 +595,7 @@
     var breedInterval = specter.type === '欲母' ? 18 : 36;
     var monthsSince = state.totalMonths - (specter.lastBreedMonth || state.totalMonths - breedInterval);
     if (monthsSince < breedInterval) return;
-    var chance = specter.stage === '掠食' ? 0.20 : 0.08;
+    var chance = specter.stage === '掠食' ? 0.30 : 0.15;
     if (Math.random() > chance) return;
     specter.lastBreedMonth = state.totalMonths;
     if (state.supernatural.specters.length >= MAX_SPECTERS) return;
@@ -636,7 +636,7 @@
 
   function corruptFamilyInRedLight(state, specter) {
     if (specter.stage !== '掠食') return;
-    if (Math.random() > 0.18) return;
+    if (Math.random() > 0.28) return;
     var host = hostPerson(state, specter);
     if (!host) return;
 
@@ -898,7 +898,9 @@
         state.supernatural.specters.splice(idx, 1);
       }
       state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + 10);
+      state.supernatural.specterKills = (Number(state.supernatural.specterKills) || 0) + 1;
     } else if (!killed) {
+      state.supernatural.specterDefeats = (Number(state.supernatural.specterDefeats) || 0) + 1;
       state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + U.between(5, 10));
       if (c.playerHp <= 0) {
         Game.lifeDirector.addLog(state, '重伤', '你在幽诡面前几乎丧命。醒来后，你发现自己倒在街头，衣服被冷汗浸透。', 'danger');
@@ -987,7 +989,7 @@
     if (Game.npcInitiative && supernatural.specters.length > 0) {
       var exposedSpecters = supernatural.specters.filter(function (s) { return s.exposed || supernatural.playerAwareness >= 60; });
       for (var j = 0; j < exposedSpecters.length; j++) {
-        if (Math.random() < 0.12) {
+        if (Math.random() < 0.25) {
           triggerAttackEvent(state, exposedSpecters[j]);
         }
       }

@@ -4,10 +4,13 @@
   const Game = root.LifeGame = root.LifeGame || {};
 
   function playerSnapshot(state) {
-    const criminal = state.criminal || {};
-    const surgery = state.health?.cosmeticProcedures || [];
-    const underground = state.undergroundIdol || {};
-    const idol = state.idol || {};
+    var criminal = state.criminal || {};
+    var surgery = state.health?.cosmeticProcedures || [];
+    var underground = state.undergroundIdol || {};
+    var idol = state.idol || {};
+    var supernatural = state.supernatural || {};
+    var cradle = state.cradle || {};
+    var mg = state.magicalGirl || {};
     return {
       job: state.career?.job || '',
       jobId: state.career?.jobId || '',
@@ -21,6 +24,20 @@
       undergroundFall: underground.fellTo || '',
       idolActive: Boolean(idol.active),
       idolStage: idol.stage || '',
+      awareness: Number(supernatural.playerAwareness) || 0,
+      spiritCorruption: Number(supernatural.spiritCorruption) || 0,
+      specterKills: Number(supernatural.specterKills) || 0,
+      specterDefeats: Number(supernatural.specterDefeats) || 0,
+      cradleImprisoned: Boolean(cradle.imprisoned),
+      cradleSold: Boolean(cradle.soldToJapan || cradle.underPatron),
+      cradleEscaped: Boolean(cradle.patronPhase === 'escaped' || cradle.patronPhase === 'fugitive'),
+      cradleReturned: Boolean(cradle.patronPhase === 'free'),
+      patronChildren: Number(cradle.childrenWithPatron) || 0,
+      cosplayBonded: Number(cradle.cosplayBonded) || 0,
+      cosplayLevel: Number(cradle.cosplayLevel) || 0,
+      magicalGirlActive: Boolean(mg.active),
+      magicalGirlStage: mg.stage || '',
+      magicalGirlKills: Number(mg.kills) || 0,
     };
   }
 
@@ -163,6 +180,64 @@
     }
     if (next.idolStage !== previous.idolStage && next.idolStage === 'retired') {
       Game.lifeResume.recordEvent(state, profile, '偶像退役', '结束正规偶像生涯');
+    }
+
+    if (next.awareness >= 40 && previous.awareness < 40) {
+      Game.lifeResume.recordEvent(state, profile, '幽诡感知', '开始察觉到城市中潜伏的超自然存在');
+    }
+    if (next.awareness >= 70 && previous.awareness < 70) {
+      Game.lifeResume.recordEvent(state, profile, '幽诡洞察', '对幽诡的存在有了清晰的认知，生活不再与从前相同');
+    }
+    if (next.spiritCorruption >= 50 && previous.spiritCorruption < 50) {
+      Game.lifeResume.recordEvent(state, profile, '灵魂侵蚀', '精神正在被幽诡的力量逐渐侵蚀');
+    }
+    if (next.specterKills > previous.specterKills) {
+      Game.lifeResume.recordEvent(state, profile, '幽诡猎杀', '亲手击杀了一只幽诡（累计' + next.specterKills + '只）');
+    }
+    if (next.specterDefeats > previous.specterDefeats) {
+      Game.lifeResume.recordEvent(state, profile, '败于幽诡', '在幽诡面前倒下，侥幸生还');
+    }
+    if (next.cradleImprisoned && !previous.cradleImprisoned) {
+      Game.lifeResume.recordEvent(state, profile, '被囚摇篮', '被送入摇篮改造机构，人生轨迹被强行扭转');
+    }
+    if (!next.cradleImprisoned && previous.cradleImprisoned && !next.cradleSold) {
+      Game.lifeResume.recordEvent(state, profile, '逃离摇篮', '从摇篮改造机构成功越狱');
+    }
+    if (next.cradleSold && !previous.cradleSold) {
+      Game.lifeResume.recordEvent(state, profile, '被卖日本', '改造完成后被贩卖至日本，落入金主手中');
+    }
+    if (next.cradleEscaped && !previous.cradleEscaped) {
+      Game.lifeResume.recordEvent(state, profile, '逃离金主', '从金主宅邸中逃出，以逃亡者身份在日本流浪');
+    }
+    if (next.cradleReturned && !previous.cradleReturned) {
+      Game.lifeResume.recordEvent(state, profile, '偷渡回国', '历经千辛万苦从日本偷渡回到了华夏');
+    }
+    if (next.patronChildren > previous.patronChildren) {
+      Game.lifeResume.recordEvent(state, profile, '金主之子', '为金主生下了第' + next.patronChildren + '个孩子，被立即抱走');
+    }
+    if (next.cosplayBonded >= 1 && previous.cosplayBonded < 1) {
+      Game.lifeResume.recordEvent(state, profile, 'Cos服黏合', '幻梦Cos服开始与身体结合，无法脱下');
+    }
+    if (next.cosplayBonded >= 3 && previous.cosplayBonded < 3) {
+      Game.lifeResume.recordEvent(state, profile, 'Cos服融合', 'Cos服与身体完全融合，身份被角色覆写');
+    }
+    if (next.cosplayLevel >= 1 && previous.cosplayLevel < 1) {
+      Game.lifeResume.recordEvent(state, profile, 'Cos服觉醒', 'Cos服内部的纤维开始搏动，产生了自己的欲望');
+    }
+    if (next.cosplayLevel >= 5 && previous.cosplayLevel < 5) {
+      Game.lifeResume.recordEvent(state, profile, 'Cos服完型', '身体彻底变成了幻梦Cos服的终极作品——一具活的少萝容器');
+    }
+    if (next.magicalGirlActive && !previous.magicalGirlActive) {
+      Game.lifeResume.recordEvent(state, profile, '魔法少女契约', '与使魔签订契约，成为魔法少女');
+    }
+    if (next.magicalGirlStage !== previous.magicalGirlStage && next.magicalGirlStage === '觉醒') {
+      Game.lifeResume.recordEvent(state, profile, '魔法少女觉醒', '经历鏖战后灵魂宝石彻底觉醒');
+    }
+    if (next.magicalGirlStage !== previous.magicalGirlStage && next.magicalGirlStage === '终焉') {
+      Game.lifeResume.recordEvent(state, profile, '魔法少女终焉', '猎杀数达到终焉级别，灵魂宝石承载重负');
+    }
+    if (next.magicalGirlKills > previous.magicalGirlKills && next.magicalGirlKills % 5 === 0) {
+      Game.lifeResume.recordEvent(state, profile, '猎杀里程碑', '以魔法少女身份累计猎杀' + next.magicalGirlKills + '只幽诡');
     }
   }
 

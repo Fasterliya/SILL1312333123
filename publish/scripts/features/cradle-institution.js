@@ -116,7 +116,7 @@
     var culture = state.location ? state.location.country : '华夏';
     if (culture !== '华夏') return false;
 
-    var risk = 0;
+    var risk = 1;
     var father = state.family.find(function (p) { return p.relation === '父亲'; });
     var mother = state.family.find(function (p) { return p.relation === '母亲'; });
     var parentAffection = Math.min(

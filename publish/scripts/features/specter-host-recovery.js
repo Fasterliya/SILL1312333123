@@ -77,12 +77,14 @@
     person.trust = 0;
     person.conflict = 0;
     person.schoolHistory = [];
-    person.lifeResume = [{
+    var oldResume = Array.isArray(person.lifeResume) ? person.lifeResume.slice(-60) : [];
+    oldResume.push({
       age: TARGET_AGE,
-      event: '重新开始',
-      detail: '净化后失去全部记忆，进入' + school + '重新生活',
+      event: '净化重生',
+      detail: '被魔法少女净化后失去全部记忆，以16岁身份进入' + school + '重新生活。过去的人生经历虽已遗忘，但这份档案记录着她曾经存在过的痕迹。',
       month: state.totalMonths,
-    }];
+    });
+    person.lifeResume = oldResume;
     person._resumeSnapshot = null;
     person.hookupHistory = [];
     person.cosmeticProcedures = [];

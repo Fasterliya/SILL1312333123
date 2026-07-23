@@ -170,7 +170,9 @@
       <small>COS 与独立穿搭</small></summary><div class="profile-editor">${editor}
       ${Game.plasticSurgery.renderNpcPortraitStages(state, person)}</div></details>
       <details class="interaction-menu detail-interactions"><summary>互动选项</summary>
-      <div class="interaction-options">${detailActions(state, person)}</div></details>`;
+      <div class="interaction-options">${detailActions(state, person)}
+      <button type="button" class="ai-chat-btn" data-npc-chat="${escape(person.id)}" style="display:flex;align-items:center;gap:6px;min-height:44px;padding:8px 12px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-paper);font-size:10px;font-weight:700;width:100%">💬 AI自由对话</button>
+      </div></details>`;
   }
   function openCharacter(id) {
     const state = api.getState();

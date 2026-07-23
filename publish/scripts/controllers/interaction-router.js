@@ -187,6 +187,7 @@
     if (Game.magicalGirlSystem?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.cradleInstitution?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.cosplaySuitEvolution?.handleClick?.(event)) { Game._save?.(); return; }
+    if (Game.aiCharacterChat?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.adoptionSystem?.handleClick?.(event)) { Game._save?.(); return; }
     if (Game.saveManager.handleClick(event)) return;
     if (Game.roleBook.handleClick(event)) return;

@@ -141,7 +141,7 @@
     if (state.psychology && typeof state.psychology === 'object') {
       state.psychology.sexAddiction = Math.max(0, (state.psychology.sexAddiction || 0) - U.between(3, 8));
     }
-    state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(2, 6));
+    state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(2, 6));
     state.supernatural.spiritCorruption = Math.min(100, (state.supernatural?.spiritCorruption || 0) + U.between(2, 5));
 
     var resistTexts = [

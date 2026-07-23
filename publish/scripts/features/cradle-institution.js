@@ -293,7 +293,7 @@
     var roll = Math.random();
     if (roll < 0.35) {
       c.mental = Math.max(0, c.mental - U.between(5, 10));
-      state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(2, 5));
+      state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(2, 5));
       c.dailyLog.unshift('电击惩罚——你因为拒绝用日语回答问题被绑在电椅上。');
     } else if (roll < 0.60) {
       c.dailyLog.unshift('语言测试——看守用日语向你提问。你的回答让他们勉强满意。');
@@ -474,7 +474,7 @@
         c.pregnancyDueMonth = 0;
         c.childrenWithPatron += 1;
         c.patronPregnancyCooldown = 4;
-        state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(10, 20));
+        state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(10, 20));
         state.profile.trauma = Math.min(100, (Number(state.profile.trauma) || 0) + U.between(10, 18));
         c.patronMonthlyLog.unshift('你生下了一个孩子。' + c.patronName + '只看了一眼婴儿的性别，就让佣人抱走了。你没有机会抱一抱自己的孩子。');
         Game.lifeDirector.addLog(state, '金主的孩子', '你在' + c.patronName + '的宅邸中生下了第' + c.childrenWithPatron + '个孩子。孩子被立即抱走，你甚至没能听到他的第一声啼哭。', 'warning');
@@ -484,7 +484,7 @@
           c.patronMonthlyLog.unshift(c.patronName + '注意到了你微微隆起的腹部。他的表情十分满意——这正是他买下你的目的之一。');
         }
         if (pregMonth === 8) {
-          state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(3, 6));
+          state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(3, 6));
         }
       }
     } else if (c.patronPregnancyCooldown <= 0 && Math.random() < 0.22 && state.totalMonths - (c.pregnancyDueMonth || c.imprisonedMonth) >= 4) {
@@ -521,7 +521,7 @@
     }
 
     if (c.patronAbuse >= 80 && state.stats['健康'] <= 20 && Math.random() < 0.10) {
-      state.stats['健康'] = Math.max(1, state.stats['健康'] - U.between(15, 25));
+      state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(15, 25));
       Game.lifeDirector.addLog(state, '命悬一线', c.patronName + '今晚差点杀了你。你躺在血泊中，意识模糊，听到远处传来救护车的声音——也许是邻居报了警。', 'danger');
     }
   }
@@ -573,7 +573,7 @@
           c.underPatron = false;
           c.patronPhase = 'escaped';
           state.profile.trauma = Math.min(100, (Number(state.profile.trauma) || 0) + U.between(15, 25));
-          state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(8, 15));
+          state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(8, 15));
           state.career.job = '无';
           state.career.jobId = '';
           state.career.salary = 0;
@@ -586,7 +586,7 @@
         c.patronAbuse = Math.min(100, c.patronAbuse + U.between(10, 20));
         c.patronAffection = Math.max(0, c.patronAffection - U.between(10, 20));
         c.patronMonthlyLog.unshift('你试图逃跑，但在翻墙时被守卫发现了。' + c.patronName + '亲自审问了你。他不打你——只是说"下次我会把你关在地下室里"。你信了。');
-        state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(5, 10));
+        state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(5, 10));
         return { ok: false, message: '逃跑失败。金主的监视变得更加严密了。' };
       default:
         return { ok: false, message: '未知行动' };
@@ -638,7 +638,7 @@
         if (!state.money) state.money = 0;
         var earned = U.between(3000, 8000);
         state.money += earned;
-        state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(2, 5));
+        state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(2, 5));
         c.patronMonthlyLog.unshift('你在风俗店和中餐馆做了一天黑工。现金到手了，但身体在发出抗议。');
         return { ok: true, message: '赚了' + earned + '日元。勉强维持生存。' };
       case 'fug-hide':

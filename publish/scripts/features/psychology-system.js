@@ -267,13 +267,16 @@
         np.trauma = U.clamp(np.trauma - 1, 0, 100);
       }
 
-      /* NPC suicide check */
-      if (np.trauma >= 80 && Math.random() < 0.08 && !state.pendingDecision) {
-        state.pendingDecision = {
-          type: 'psychology', subtype: 'suicideCall', npcId: npc.id,
-        };
-        Game.lifeDirector.addLog(state, '求救信号',
-          `${npc.name}给你打来一个电话，声音异常平静。"只是想最后听听你的声音……"`, 'normal');
+      /* 高创伤NPC不再自杀，而是变得极易被幽诡寄生 */
+      if (np.trauma >= 80 && Math.random() < 0.12 && !state.pendingDecision) {
+        npc.status = '健康';
+        npc.specterVulnerable = true;
+        Game.lifeDirector.addLog(state, '精神崩溃边缘',
+          npc.name + '的精神创伤已经深到几乎无法承载自我。她的眼神空洞，像是在邀请什么东西来取代她。', 'danger');
+      }
+
+      if (npc.specterVulnerable && np.trauma < 80) {
+        np.trauma = Math.min(100, np.trauma + U.between(2, 5));
       }
 
       /* NPC sex addiction -> become prostitute */
@@ -343,44 +346,45 @@
     if (choiceId === 'save') {
       if (Math.random() < 0.60) {
         np.trauma = U.clamp(np.trauma - 30, 0, 100);
-        Game.lifeDirector.addLog(state, '挽救生命',
-          `你赶到${name}的住处，砸开门将她从死亡边缘拉了回来。她抱着你哭了很久很久。`, 'milestone');
+        Game.lifeDirector.addLog(state, '挽救',
+          '你赶到' + name + '身边，将她从崩溃的边缘拉了回来。她抱着你哭了很久很久。', 'milestone');
         state.pendingDecision = null;
-        return { ok: true, message: `你救了${name}。她的创伤减轻了。` };
+        return { ok: true, message: '你救了' + name + '。她的创伤减轻了。' };
       }
-      /* save failed */
-      npc.status = '已故';
-      Game.lifeDirector.addLog(state, '无力回天',
-        `你赶到${name}的住处，但已经太晚了。她就那样安静地躺着，像睡着了一样。`, 'milestone');
-      addGuilt(state, 30);
+      np.trauma = U.clamp(np.trauma + 10, 0, 100);
+      npc.specterVulnerable = true;
+      Game.lifeDirector.addLog(state, '精神失守',
+        '你赶到' + name + '的住处，但她已经把自己锁在了房间里。她的眼睛是空的——像是灵魂已经离开，留下了一具等待被占据的空壳。', 'danger');
+      addGuilt(state, 20);
       state.pendingDecision = null;
-      return { ok: true, message: `${name}已经离开了人世。愧疚感涌上心头。` };
+      return { ok: true, message: name + '的精神防线彻底崩溃，她变得极易被幽诡寄生。' };
     }
 
     if (choiceId === 'family') {
       if (Math.random() < 0.40) {
         np.trauma = U.clamp(np.trauma - 20, 0, 100);
         Game.lifeDirector.addLog(state, '家人介入',
-          `你联系了${name}的家人。他们及时赶到，阻止了悲剧的发生。`, 'good');
+          '你联系了' + name + '的家人。他们及时赶到将她从深渊边缘拉了回来。', 'good');
         state.pendingDecision = null;
-        return { ok: true, message: `${name}的家人及时介入，她的创伤有所缓解。` };
+        return { ok: true, message: name + '的家人及时介入，她的创伤有所缓解。' };
       }
-      /* family intervention failed */
-      npc.status = '已故';
+      np.trauma = U.clamp(np.trauma + 8, 0, 100);
+      npc.specterVulnerable = true;
       Game.lifeDirector.addLog(state, '迟来的消息',
-        `你联系了${name}的家人，但他们赶到时已经太晚。一个生命就这样消逝了。`, 'milestone');
-      addGuilt(state, 20);
+        '你联系了' + name + '的家人，但他们赶到时发现她蜷缩在角落，对着墙壁用不属于自己的声音低语。', 'danger');
+      addGuilt(state, 15);
       state.pendingDecision = null;
-      return { ok: true, message: `${name}的家人没能及时赶到。你感到一阵深深的无力感。` };
+      return { ok: true, message: name + '的精神已经不再完全属于她自己了。' };
     }
 
     if (choiceId === 'ignore') {
-      npc.status = '已故';
-      Game.lifeDirector.addLog(state, '沉默的代价',
-        `你没有理会那个电话。几天后，${name}的死讯传来。那个平静的声音成了她最后的告别。`, 'milestone');
-      addGuilt(state, 40);
+      np.trauma = Math.min(100, np.trauma + 15);
+      npc.specterVulnerable = true;
+      Game.lifeDirector.addLog(state, '被遗弃的灵魂',
+        '你没有理会那个电话。几天后，你在街角看到了' + name + '——她独自站着，对着空气说话，声音是一个你不认识的音色。', 'danger');
+      addGuilt(state, 30);
       state.pendingDecision = null;
-      return { ok: true, message: `你选择了忽略。${name}离开了，沉重的愧疚压在你心头。` };
+      return { ok: true, message: '你选择了忽略。' + name + '的精神崩溃了，她的身体变成了一具等待被占据的空壳。' };
     }
 
     return { ok: false, message: '无效的选择' };

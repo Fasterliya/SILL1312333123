@@ -106,6 +106,15 @@
     });
   }
 
+  function hostTraumaScore(p) {
+    var t = (p.psychology && p.psychology.trauma) ? p.psychology.trauma : (p.trauma || 0);
+    if (t >= 80) return 10;
+    if (t >= 60) return 6;
+    if (t >= 40) return 3;
+    if (t >= 20) return 1;
+    return 0;
+  }
+
   function selectHostTarget(state, candidates) {
     if (!candidates.length) return null;
 
@@ -114,25 +123,43 @@
     });
     var spouseInFamily = familyPool.filter(function (p) { return state.romance && p.id === state.romance.partnerId; });
     var rankedFamily = spouseInFamily.concat(familyPool.filter(function (p) { return !spouseInFamily.includes(p); }));
-    rankedFamily.sort(function (a, b) { return (b.affection || 0) - (a.affection || 0); });
+    rankedFamily.sort(function (a, b) {
+      var ta = hostTraumaScore(a); var tb = hostTraumaScore(b);
+      if (ta !== tb) return tb - ta;
+      return (b.affection || 0) - (a.affection || 0);
+    });
 
     var contactPool = candidates.filter(function (p) {
       return state.contacts.some(function (c) { return c.id === p.id; }) && !familyPool.includes(p);
     });
+    contactPool.sort(function (a, b) { return hostTraumaScore(b) - hostTraumaScore(a); });
+
     var specialPool = candidates.filter(function (p) { return p.specialCharacter; });
+    specialPool.sort(function (a, b) { return hostTraumaScore(b) - hostTraumaScore(a); });
+
     var citizenPool = candidates.filter(function (p) {
       return !rankedFamily.includes(p) && !contactPool.includes(p) && !specialPool.includes(p);
     });
+    citizenPool.sort(function (a, b) { return hostTraumaScore(b) - hostTraumaScore(a); });
 
+    var anyHighTrauma = candidates.some(function (p) { return hostTraumaScore(p) >= 6; });
     var roll = Math.random();
     var pool;
-    if (roll < 0.45 && rankedFamily.length) pool = rankedFamily;
-    else if (roll < 0.75 && contactPool.length) pool = contactPool;
-    else if (roll < 0.90 && specialPool.length) pool = specialPool;
-    else if (citizenPool.length) pool = citizenPool;
-    else if (rankedFamily.length) pool = rankedFamily;
-    else if (contactPool.length) pool = contactPool;
-    else pool = candidates;
+    if (anyHighTrauma) {
+      if (roll < 0.55 && rankedFamily.length) pool = rankedFamily;
+      else if (roll < 0.80 && contactPool.length) pool = contactPool;
+      else if (roll < 0.92 && specialPool.length) pool = specialPool;
+      else if (citizenPool.length) pool = citizenPool;
+      else pool = rankedFamily.length ? rankedFamily : (contactPool.length ? contactPool : candidates);
+    } else {
+      if (roll < 0.45 && rankedFamily.length) pool = rankedFamily;
+      else if (roll < 0.75 && contactPool.length) pool = contactPool;
+      else if (roll < 0.90 && specialPool.length) pool = specialPool;
+      else if (citizenPool.length) pool = citizenPool;
+      else if (rankedFamily.length) pool = rankedFamily;
+      else if (contactPool.length) pool = contactPool;
+      else pool = candidates;
+    }
 
     return pool[0] || null;
   }
@@ -304,7 +331,7 @@
       state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + U.between(1, 2));
     } else if (specter.stage === '显形') {
       host.psychology.trauma = Math.min(100, (host.psychology.trauma || 0) + U.between(4, 8));
-      state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(1, 3));
+      state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(1, 3));
       state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + U.between(2, 4));
       state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + U.between(1, 2));
       if (Math.random() < 0.30) {
@@ -460,7 +487,7 @@
       state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + U.between(10, 20));
       state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + U.between(8, 15));
       state.profile.trauma = Math.min(100, (Number(state.profile.trauma) || 0) + U.between(18, 30));
-      state.stats['健康'] = Math.max(5, state.stats['健康'] - U.between(3, 8));
+      state.stats['健康'] = Math.max(10, state.stats['健康'] - U.between(3, 8));
       state.supernatural._lastIncestFamily = { maleId: male.id, femaleId: female.id, label: relationLabel, archetype: archetype };
       if (!state.pendingDecision) {
         var otherPerson = male.id === 'player-profile' ? female : male;
@@ -511,8 +538,8 @@
         bonded.psychology.sexAddiction = Math.min(100, (bonded.psychology.sexAddiction || 0) + U.between(5, 10));
         bonded.psychology.corruption = Math.min(100, (bonded.psychology.corruption || 0) + U.between(4, 8));
         bonded.psychology.trauma = Math.min(100, (bonded.psychology.trauma || 0) + U.between(3, 7));
-        host.stats['健康'] = Math.max(5, (host.stats['健康'] || 50) + U.between(2, 5));
-        bonded.stats['健康'] = Math.max(5, (bonded.stats['健康'] || 50) - U.between(5, 12));
+        host.stats['健康'] = Math.max(10, (host.stats['健康'] || 50) + U.between(2, 5));
+        bonded.stats['健康'] = Math.max(10, (bonded.stats['健康'] || 50) - U.between(5, 12));
         if (bonded.stats['健康'] <= 10 && !bonded.specterPossessed) {
           Game.lifeDirector.addLog(state, '情缚噬命',
             host.name + '与' + bonded.name + '之间的情缚已经吸干了后者的生命力。'
@@ -606,10 +633,15 @@
 
   function tryBreedSpecter(state, specter, host) {
     if (specter.stage === '潜伏') return;
+    var hostTrauma = (host.psychology && host.psychology.trauma) ? host.psychology.trauma : (host.trauma || 0);
     var breedInterval = specter.type === '欲母' ? 18 : 36;
+    var traumaMult = 1;
+    if (hostTrauma >= 80) { breedInterval = 3; traumaMult = 4; }
+    else if (hostTrauma >= 60) { breedInterval = 6; traumaMult = 2.5; }
+    else if (hostTrauma >= 40) { breedInterval = 12; traumaMult = 1.8; }
     var monthsSince = state.totalMonths - (specter.lastBreedMonth || state.totalMonths - breedInterval);
     if (monthsSince < breedInterval) return;
-    var chance = specter.stage === '掠食' ? 0.30 : 0.15;
+    var chance = (specter.stage === '掠食' ? 0.30 : 0.15) * traumaMult;
     if (Math.random() > chance) return;
     specter.lastBreedMonth = state.totalMonths;
     if (state.supernatural.specters.length >= MAX_SPECTERS) return;
@@ -643,8 +675,9 @@
     target.sexWork = target.sexWork && typeof target.sexWork === 'object' ? target.sexWork : {};
     target.sexWork.isProstitute = true;
     if (!target.job || target.job === '无') target.job = '妓女';
-    Game.lifeDirector.addLog(state, '幽诡繁殖',
-      host.name + '身上的' + specter.type + '在宿主身体中产下了新的幽诡之种，寄生了' + target.name + '。',
+    Game.lifeDirector.addLog(state, hostTrauma >= 60 ? '创伤繁殖' : '幽诡繁殖',
+      host.name + '身上的' + specter.type + '在宿主' + (hostTrauma >= 60 ? '崩溃的精神裂隙' : '身体') + '中产下了新的幽诡之种，寄生了' + target.name + '。'
+      + (hostTrauma >= 80 ? '宿主的创伤已经深到让幽诡几乎不受限制地增殖。' : ''),
       'danger');
   }
 
@@ -864,7 +897,7 @@
     Game.lifeDirector.addLog(state, event.name, event.text(host.name), 'danger');
     state.supernatural.spiritCorruption = Math.min(100, state.supernatural.spiritCorruption + Math.floor((event.effect.trauma || 0) / 2));
     state.supernatural.playerAwareness = Math.min(100, state.supernatural.playerAwareness + (event.effect.awareness || 0));
-    state.stats['健康'] = Math.max(5, state.stats['健康'] - Math.floor((event.effect.trauma || 0) / 5));
+    state.stats['健康'] = Math.max(10, state.stats['健康'] - Math.floor((event.effect.trauma || 0) / 5));
     specter.exposed = true;
   }
 

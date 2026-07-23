@@ -6,10 +6,14 @@
   const U = Game.content;
 
   function addLog(state, title, text, tone) {
-    const entry = U.log(title, Game.legacyMood.cleanText(text), tone, state.totalMonths);
-    Object.assign(entry, { generation: state.generation, ageMonth: state.totalMonths - state.playerBornAt });
-    state.logs.unshift(entry);
-    state.logs = state.logs.slice(0, 60);
+    if (Game.eventBus) {
+      Game.eventBus.log(state, { title: title, text: Game.legacyMood ? Game.legacyMood.cleanText(text) : text, tone: tone || 'normal' });
+    } else {
+      var entry = U.log(title, Game.legacyMood.cleanText(text), tone, state.totalMonths);
+      Object.assign(entry, { generation: state.generation, ageMonth: state.totalMonths - state.playerBornAt });
+      state.logs.unshift(entry);
+      state.logs = state.logs.slice(0, 60);
+    }
   }
 
   function subjects(state) {
